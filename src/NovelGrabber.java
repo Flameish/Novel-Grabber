@@ -157,37 +157,6 @@ public class NovelGrabber {
 		websiteSelection2.setBounds(133, 66, 296, 30);
 		singleChapterPane.add(websiteSelection2);
 		
-		//Single Chapter
-		getChapterBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(chapterURL.getText().isEmpty() == true) {
-					appendText("URL field is empty.");
-					chapterURL.requestFocusInWindow();
-				}
-				else if(chapterURL.getText().isEmpty() == false) {
-					try {
-						progressBar.setStringPainted(true);
-						fetchChapters.saveChapter(chapterURL.getText(), (websiteSelection2.getSelectedItem().toString()).toLowerCase());
-					}
-					catch(IllegalArgumentException err) {
-						appendText("Error: Not a URL.");
-					}
-					catch(FileNotFoundException err) {
-						appendText("FileNotFoundException");
-					}
-					catch(NullPointerException err) {
-						appendText("Error: Wrong host or URL input.");
-					}
-					catch(IOException err) {
-						appendText("Error: Something went wrong.");
-					}
-					finally {
-						progressBar.setStringPainted(false);
-						progressBar.setValue(0);
-					}
-				}
-			}
-		});
 		//All Chapters
 		getAllChaptersBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -227,7 +196,37 @@ public class NovelGrabber {
 				getAllChaptersBtn.setEnabled(true);
 			}
 		});
-		
+		//Single Chapter
+		getChapterBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(chapterURL.getText().isEmpty() == true) {
+					appendText("URL field is empty.");
+					chapterURL.requestFocusInWindow();
+				}
+				else if(chapterURL.getText().isEmpty() == false) {
+					try {
+						progressBar.setStringPainted(true);
+						fetchChapters.saveChapter(chapterURL.getText(), (websiteSelection2.getSelectedItem().toString()).toLowerCase());
+					}
+					catch(IllegalArgumentException err) {
+						appendText("Error: Not a URL.");
+					}
+					catch(FileNotFoundException err) {
+						appendText("FileNotFoundException");
+					}
+					catch(NullPointerException err) {
+						appendText("Error: Wrong host or URL input.");
+					}
+					catch(IOException err) {
+						appendText("Error: Something went wrong.");
+					}
+					finally {
+						progressBar.setStringPainted(false);
+						progressBar.setValue(0);
+					}
+				}
+			}
+		});
 		
 	}
 	public static void appendText(String log) {
