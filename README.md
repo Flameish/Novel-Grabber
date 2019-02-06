@@ -14,6 +14,10 @@ With Novel Grabber you can download single chapters or complete novels from vari
 
 * You can also enter a link to a specific chapter at the bottom.
 
+## Currently not working
+* [Coiling Dragon](https://www.wuxiaworld.com/novel/coiling-dragon-preview) - different ToC structure
+* [Desolate Era](https://www.wuxiaworld.com/novel/desolate-era) - different ToC structure
+
 ## Requirements
 * [Java](https://www.java.com/en/) needs to be installed.
 
