@@ -1,10 +1,10 @@
 # Novel-Grabber
-With Novel Grabber you can download single chapters or complete novels from your favorite web/lightnovel sites
+With Novel Grabber you can download single chapters or complete novels from various web/lightnovel sites
 
 ## Currently supported sites
 * [Wuxiaworld](https://wuxiaworld.com/)
 * [Royalroad](https://royalroad.com/)
-* [Gravitytales](https://gravitytales.com/)
+* [Gravitytales](https://gravitytales.com/) <br>
 more to come
 
 ## How to use
