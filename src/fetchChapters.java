@@ -70,10 +70,8 @@ public class fetchChapters {
 		String fileName = chapterNumber + "-" + doc.title().replaceAll("[^\\w]+", "-") + ".txt";
 		Element content = doc.select(contentID).first();
 		Elements p = content.select(chapterID);
-		
 	    File dir = new File(saveLocation);
 	    if (!dir.exists()) dir.mkdirs();
-	    
 		try(PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
 			for (Element x : p) {
 				out.println(x.text() + NL);
