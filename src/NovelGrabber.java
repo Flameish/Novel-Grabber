@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
@@ -17,6 +18,9 @@ import javax.swing.JButton;
 import java.awt.Color;
 import javax.swing.JPanel;
 
+/*
+ *  Window display and handling
+ */
 public class NovelGrabber {
 
 	private JFrame frmNovelGrabber;
@@ -26,7 +30,6 @@ public class NovelGrabber {
 	private JComboBox websiteSelection2;
 	private static JTextArea logArea;
 	private static JProgressBar progressBar;
-	private static JButton getAllChaptersBtn;
 	private JTextField chapterURL;
 	public static final String NL = System.getProperty("line.separator");
 	private static String[] websites = {"Wuxiaworld","Royalroad","Gravitytales"};
@@ -81,12 +84,12 @@ public class NovelGrabber {
 		progressBar.setMaximum(100);
 		progressBar.setString("");
 		
-		getAllChaptersBtn = new JButton("Grab chapters");
+		JButton getAllChaptersBtn = new JButton("Grab chapters");
 		getAllChaptersBtn.setBounds(439, 312, 113, 31);
 		allChapterPane.add(getAllChaptersBtn);
 		
 		chapterListURL = new JTextField();
-		chapterListURL.setBounds(158, 19, 394, 30);
+		chapterListURL.setBounds(152, 19, 400, 30);
 		allChapterPane.add(chapterListURL);
 		chapterListURL.setToolTipText("https://novelwebsite.com/novel/name");
 		chapterListURL.setColumns(10);
@@ -97,20 +100,20 @@ public class NovelGrabber {
 		allChapterPane.add(lblNovelChapterList);
 		lblNovelChapterList.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		
-		JLabel lblDestinationDirectory = new JLabel("Save directory path:");
+		JLabel lblDestinationDirectory = new JLabel("Save directory:");
 		lblDestinationDirectory.setBounds(10, 91, 116, 30);
 		allChapterPane.add(lblDestinationDirectory);
 		lblDestinationDirectory.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		
 		destinationFolder = new JTextField();
-		destinationFolder.setBounds(158, 91, 394, 30);
+		destinationFolder.setBounds(152, 92, 304, 30);
 		allChapterPane.add(destinationFolder);
 		destinationFolder.setToolTipText("C:\\Users\\YourName\\somefolder\\novels");
 		destinationFolder.setColumns(10);
 		
 		
 		websiteSelection1 = new JComboBox(websites);
-		websiteSelection1.setBounds(158, 55, 394, 30);
+		websiteSelection1.setBounds(152, 55, 400, 30);
 		allChapterPane.add(websiteSelection1);
 		
 		JLabel lblNewLabel = new JLabel("Host website:");
@@ -118,9 +121,27 @@ public class NovelGrabber {
 		allChapterPane.add(lblNewLabel);
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));	
 		
+		JButton btnNewButton = new JButton("Browse...");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			    JFileChooser chooser = new JFileChooser();
+			    chooser.setCurrentDirectory(new java.io.File("."));
+			    chooser.setDialogTitle("Choose destination directory");
+			    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			    chooser.setAcceptAllFileFilterUsed(false);
+
+			    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			      destinationFolder.setText(chooser.getSelectedFile().toString());
+			    }
+			}
+			
+		});
+		btnNewButton.setBounds(466, 91, 86, 32);
+		allChapterPane.add(btnNewButton);
+		
 		logArea = new JTextArea();
 		logArea.setEditable(false);
-		logArea.setBounds(20, 114, 4, 22);
+		logArea.setBounds(-22, 11, 235, 41);
 		allChapterPane.add(logArea);
 		
 		JScrollPane scrollPane = new JScrollPane(logArea);
@@ -172,7 +193,7 @@ public class NovelGrabber {
 				else if((destinationFolder.getText().isEmpty() == false) && (chapterListURL.getText().isEmpty() == false)) {
 					try {
 						progressBar.setStringPainted(true);
-						fetchChapters.getChapterList(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase());
+						fetchChapters.getChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase());
 					}
 					catch(IllegalArgumentException err) {
 						appendText("Error: Must supply a valid URL");

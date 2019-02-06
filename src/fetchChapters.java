@@ -7,33 +7,41 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 
+/*
+ * Chapter download handling
+ */
 public class fetchChapters {
 	public static final String NL = System.getProperty("line.separator");
-	public static void getChapterList(String url, String saveLocation, String host) throws IllegalArgumentException, FileNotFoundException, IOException  {
+	
+	/**
+	 * Opens novel's table of contents page, 
+	 * retrieves chapter links and processes them with saveChapters()
+	 */
+	public static void getChapterLinks(String url, String saveLocation, String host) throws IllegalArgumentException, FileNotFoundException, IOException  {
 		String domain = host;
-		String contentID = "";
-		String chapterSelect = "";
+		String chapterLinkContainer = "";
+		String chapterLinkSelecter = "";
 		int chapterNumber = 0;
 		int chapterAmount = 0;
 		switch (domain) {
 			case "wuxiaworld":
-				contentID = "#accordion";
-				chapterSelect = ".chapter-item";
+				chapterLinkContainer = "#accordion";
+				chapterLinkSelecter = ".chapter-item";
 				break;
 			case "royalroad":
-				contentID = ".table";
-				chapterSelect = "td";
+				chapterLinkContainer = ".table";
+				chapterLinkSelecter = "td";
 				break;
 			case "gravitytales":
-				contentID = ".table";
-				chapterSelect = "td";
+				chapterLinkContainer = ".table";
+				chapterLinkSelecter = "td";
 				url = url + "/chapters";
 				break;
 		}
 		NovelGrabber.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
-		Element content = doc.select(contentID).first();
-		Elements chapterItem = content.select(chapterSelect);
+		Element content = doc.select(chapterLinkContainer).first();
+		Elements chapterItem = content.select(chapterLinkSelecter);
 		Elements links = chapterItem.select("a[href]");
 		for (Element chapterLink : links) {
 			chapterAmount++;
@@ -45,31 +53,34 @@ public class fetchChapters {
 		}
 		NovelGrabber.appendText("Finished! A total of " + chapterNumber + " chapters grabbed.");
 	}
+	/**
+	 * Opens chapter link and tries to save it's content at provided destination directory
+	 */
 	public static void saveChapters(String url, String saveLocation, String host, int chapterNumber) throws IllegalArgumentException, FileNotFoundException, IOException {
-		String domain = host;
-		String contentID = "";
-		String chapterID = "";
-		switch (domain) {
+		String domainName = host;
+		String chapterContainer = "";
+		String sentenceSelecter = "";
+		switch (domainName) {
 			case "wuxiaworld":
 				host = "https://www.wuxiaworld.com";
-				contentID = ".fr-view";
-				chapterID = "p";
+				chapterContainer = ".fr-view";
+				sentenceSelecter = "p";
 				break;
 			case "royalroad":
 				host = "https://www.royalroad.com";
-				contentID = ".chapter-content";
-				chapterID = "p";
+				chapterContainer = ".chapter-content";
+				sentenceSelecter = "p";
 				break;
 			case "gravitytales":
 				host = "";
-				contentID = ".fr-view";
-				chapterID = "p";
+				chapterContainer = ".fr-view";
+				sentenceSelecter = "p";
 				break;
 		}
 		Document doc = Jsoup.connect(host + url).get();
 		String fileName = chapterNumber + "-" + doc.title().replaceAll("[^\\w]+", "-") + ".txt";
-		Element content = doc.select(contentID).first();
-		Elements p = content.select(chapterID);
+		Element content = doc.select(chapterContainer).first();
+		Elements p = content.select(sentenceSelecter);
 		File dir = new File(saveLocation);
 		if (!dir.exists()) dir.mkdirs();
 		try(PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
@@ -80,29 +91,32 @@ public class fetchChapters {
 		NovelGrabber.appendText(fileName + " saved.");
 		NovelGrabber.updateProgress(1);
 	}
+	/**
+	 * Opens chapter link and tries to save it's content in current directory
+	 */
 	public static void saveChapter(String url, String host) throws IllegalArgumentException, FileNotFoundException, IOException {
-		String domain = host;
-		String contentID = "";
-		String chapterID = "";
-		switch (domain) {
+		String domainName = host;
+		String chapterContainer = "";
+		String sentenceSelecter = "";
+		switch (domainName) {
 			case "wuxiaworld":
-				contentID = ".fr-view";
-				chapterID = "p";
+				chapterContainer = ".fr-view";
+				sentenceSelecter = "p";
 				break;
 			case "royalroad":
-				contentID = ".chapter-content";
-				chapterID = "p";
+				chapterContainer = ".chapter-content";
+				sentenceSelecter = "p";
 				break;
 			case "gravitytales":
-				contentID = ".fr-view";
-				chapterID = "p";
+				chapterContainer = ".fr-view";
+				sentenceSelecter = "p";
 				break;
 		}
 		NovelGrabber.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
 		String fileName = doc.title().replaceAll("[^\\w]+", "-") + ".txt";
-		Element content = doc.select(contentID).first();
-		Elements p = content.select(chapterID);
+		Element content = doc.select(chapterContainer).first();
+		Elements p = content.select(sentenceSelecter);
 		try(PrintStream out = new PrintStream(fileName)) {
 			for (Element x : p) {
 				out.println(x.text() + NL );
