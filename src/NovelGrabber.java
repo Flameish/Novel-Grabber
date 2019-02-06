@@ -176,12 +176,15 @@ public class NovelGrabber {
 					}
 					catch(IllegalArgumentException err) {
 						appendText("Error: Must supply a valid URL");
+						appendText(err.toString());
 					}
 					catch(FileNotFoundException err) {
 						appendText("Error: Could not access save directory.");
+						appendText(err.toString());
 					}
 					catch(NullPointerException err) {
 						appendText("Error: Wrong host or URL input." + NL + "Could not detect key variables.");
+						appendText(err.toString());
 					}
 					catch(IOException err) {
 						appendText(err.toString());
@@ -208,12 +211,15 @@ public class NovelGrabber {
 					}
 					catch(IllegalArgumentException err) {
 						appendText("Error: Not a URL.");
+						appendText(err.toString());
 					}
 					catch(FileNotFoundException err) {
 						appendText("FileNotFoundException");
+						appendText(err.toString());
 					}
 					catch(NullPointerException err) {
 						appendText("Error: Wrong host or URL input.");
+						appendText(err.toString());
 					}
 					catch(IOException err) {
 						appendText(err.toString());

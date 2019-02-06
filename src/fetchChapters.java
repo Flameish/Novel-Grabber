@@ -2,6 +2,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -70,8 +72,10 @@ public class fetchChapters {
 		Element content = doc.select(contentID).first();
 		Elements p = content.select(chapterID);
 		
-		//create folder if it doesnt exists missing
-		try(PrintStream out = new PrintStream(saveLocation + "\\" + fileName)) {
+	    File dir = new File(saveLocation);
+	    if (!dir.exists()) dir.mkdirs();
+	    
+		try(PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
 			for (Element x : p) {
 				out.println(x.text() + NL);
 			}
