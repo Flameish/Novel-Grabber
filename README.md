@@ -22,4 +22,4 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * [Java](https://www.java.com/en/) needs to be installed.
 
 ## Credits
-* Novel Grabber was build in java with [jsoup](https://www.jsoup.org/)
+Novel Grabber was build in java with [jsoup](https://www.jsoup.org/)
