@@ -26,11 +26,10 @@ public class NovelGrabber {
 	private JComboBox websiteSelection2;
 	private static JTextArea logArea;
 	private static JProgressBar progressBar;
-	private static String[] websites = {"Wuxiaworld","Royalroad","Gravitytales"};
 	private static JButton getAllChaptersBtn;
 	private JTextField chapterURL;
 	public static final String NL = System.getProperty("line.separator");
-
+	private static String[] websites = {"Wuxiaworld","Royalroad","Gravitytales"};
 	/**
 	 * Launch the application.
 	 */
