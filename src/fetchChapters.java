@@ -61,7 +61,7 @@ public class fetchChapters {
 				break;
 			case "gravitytales":
 				host = "";
-				contentID = ".innerContent";
+				contentID = ".fr-view";
 				chapterID = "p";
 				break;
 		}
@@ -93,7 +93,7 @@ public class fetchChapters {
 				chapterID = "p";
 				break;
 			case "gravitytales":
-				contentID = ".innerContent";
+				contentID = ".fr-view";
 				chapterID = "p";
 				break;
 		}
