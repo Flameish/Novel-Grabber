@@ -1,9 +1,10 @@
-# Novel-Grabber
-Novel Grabber is a tool to download chapters from popular webnovel sites.
+<h2Novel-Grabber</h2>
+<hr>
+With Novel Grabber you can download single chapters or complete novels from your favorite web/lightnovel sites.
+<h3>Supported Sites</h3>
+<hr>
+Wuxiaworld <br>
+Royalroad <br>
+Gravitytales <br>
 
-# Supported Sites
-Wuxiaworld
-Royalroad
-Gravitytales
-
-# How to use
+<h3> How to use</h3>
