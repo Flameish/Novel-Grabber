@@ -176,11 +176,9 @@ public class NovelGrabber {
 					}
 					catch(IllegalArgumentException err) {
 						appendText("Error: Must supply a valid URL");
-						appendText(err.toString());
 					}
 					catch(FileNotFoundException err) {
 						appendText("Error: Could not access save directory.");
-						appendText(err.toString());
 					}
 					catch(NullPointerException err) {
 						appendText("Error: Wrong host or URL input." + NL + "Could not detect key variables.");
@@ -218,7 +216,7 @@ public class NovelGrabber {
 						appendText("Error: Wrong host or URL input.");
 					}
 					catch(IOException err) {
-						appendText("Error: Something went wrong.");
+						appendText(err.toString());
 					}
 					finally {
 						progressBar.setStringPainted(false);
@@ -234,7 +232,7 @@ public class NovelGrabber {
 		logArea.update(logArea.getGraphics());
 	}
 	public static void updateProgress(int i) {
-		progressBar.setValue(progressBar.getValue()+i);
+		progressBar.setValue(progressBar.getValue() + i);
 		if(progressBar.getValue() < progressBar.getMaximum()) {
 		progressBar.setString((progressBar.getValue() + i) + " / " + progressBar.getMaximum());
 		}
