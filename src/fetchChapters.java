@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 /*
  * Chapter download handling
@@ -15,9 +16,9 @@ public class fetchChapters {
 	
 	/**
 	 * Opens novel's table of contents page, 
-	 * retrieves chapter links and processes them with saveChapters()
+	 * retrieves chapter all links and processes them with saveChapters()
 	 */
-	public static void getChapterLinks(String url, String saveLocation, String host) throws IllegalArgumentException, FileNotFoundException, IOException  {
+	public static void getAllChapterLinks(String url, String saveLocation, String host) throws IllegalArgumentException, FileNotFoundException, IOException  {
 		String domain = host;
 		String chapterLinkContainer = "";
 		String chapterLinkSelecter = "";
@@ -52,6 +53,52 @@ public class fetchChapters {
 			saveChapters(chapterLink.attr("href"), saveLocation, host, chapterNumber);
 		}
 		NovelGrabber.appendText("Finished! A total of " + chapterNumber + " chapters grabbed.");
+	}
+	/**
+	 * Opens novel's table of contents page, 
+	 * retrieves chapter links from selected chapter range and processes them with saveChapters()
+	 */
+	public static void getChapterRangeLinks(String url, String saveLocation, String host, int firstChapter, int lastChapter) throws IllegalArgumentException, FileNotFoundException, IOException  {
+		String domain = host;
+		String chapterLinkContainer = "";
+		String chapterLinkSelecter = "";
+		ArrayList<String> chapters = new ArrayList<String>();
+		int chapterNumber = 0;
+		switch (domain) {
+			case "wuxiaworld":
+				chapterLinkContainer = "#accordion";
+				chapterLinkSelecter = ".chapter-item";
+				break;
+			case "royalroad":
+				chapterLinkContainer = ".table";
+				chapterLinkSelecter = "td";
+				break;
+			case "gravitytales":
+				chapterLinkContainer = ".table";
+				chapterLinkSelecter = "td";
+				url = url + "/chapters";
+				break;
+		}
+		NovelGrabber.appendText("Connecting...");
+		Document doc = Jsoup.connect(url).get();
+		Element content = doc.select(chapterLinkContainer).first();
+		Elements chapterItem = content.select(chapterLinkSelecter);
+		Elements links = chapterItem.select("a[href]");
+		for (Element chapterLink : links) {
+			chapters.add(chapterLink.attr("href"));
+		}
+		if(lastChapter > chapters.size()) {
+			NovelGrabber.appendText("Novel does not have that many chapters.");
+			return;
+		}
+		else {
+		NovelGrabber.setMaxProgress((lastChapter-firstChapter)+1);
+		for (int i = firstChapter-1; i <= lastChapter-1; i++) {
+			chapterNumber++;
+			saveChapters(chapters.get(i), saveLocation, host, chapterNumber);
+		}
+		NovelGrabber.appendText("Finished! A total of " + chapterNumber + " chapters grabbed.");
+		}
 	}
 	/**
 	 * Opens chapter link and tries to save it's content at provided destination directory

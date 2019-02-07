@@ -17,6 +17,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import java.awt.Color;
 import javax.swing.JPanel;
+import javax.swing.JCheckBox;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 /*
  *  Window display and handling
@@ -33,6 +36,8 @@ public class NovelGrabber {
 	private JTextField chapterURL;
 	public static final String NL = System.getProperty("line.separator");
 	private static String[] websites = {"Wuxiaworld","Royalroad","Gravitytales"};
+	private JTextField firstChapter;
+	private JTextField lastChapter;
 	/**
 	 * Launch the application.
 	 */
@@ -71,7 +76,7 @@ public class NovelGrabber {
 		
 		JPanel allChapterPane = new JPanel();
 		allChapterPane.setBounds(10, 11, 562, 354);
-		allChapterPane.setBorder(BorderFactory.createTitledBorder("Get all chapters"));
+		allChapterPane.setBorder(BorderFactory.createTitledBorder("Get multiple chapters"));
 		frmNovelGrabber.getContentPane().add(allChapterPane);
 		allChapterPane.setLayout(null);
 		
@@ -98,12 +103,12 @@ public class NovelGrabber {
 		lblNovelChapterList.setLabelFor(chapterListURL);
 		lblNovelChapterList.setBounds(10, 19, 132, 30);
 		allChapterPane.add(lblNovelChapterList);
-		lblNovelChapterList.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		lblNovelChapterList.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		JLabel lblDestinationDirectory = new JLabel("Save directory:");
 		lblDestinationDirectory.setBounds(10, 91, 116, 30);
 		allChapterPane.add(lblDestinationDirectory);
-		lblDestinationDirectory.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		lblDestinationDirectory.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		destinationFolder = new JTextField();
 		destinationFolder.setBounds(152, 92, 304, 30);
@@ -119,7 +124,7 @@ public class NovelGrabber {
 		JLabel lblNewLabel = new JLabel("Host website:");
 		lblNewLabel.setBounds(10, 55, 86, 30);
 		allChapterPane.add(lblNewLabel);
-		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));	
+		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));	
 		
 		JButton btnNewButton = new JButton("Browse...");
 		btnNewButton.addActionListener(new ActionListener() {
@@ -146,8 +151,49 @@ public class NovelGrabber {
 		
 		JScrollPane scrollPane = new JScrollPane(logArea);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); 
-		scrollPane.setBounds(10, 147, 542, 155);
+		scrollPane.setBounds(10, 196, 542, 106);
 		allChapterPane.add(scrollPane);
+		
+		JPanel chapterSelect = new JPanel();
+		chapterSelect.setBounds(10, 132, 542, 53);
+		chapterSelect.setBorder(BorderFactory.createTitledBorder("Select chapters to download"));
+		allChapterPane.add(chapterSelect);
+		chapterSelect.setLayout(null);
+		
+		firstChapter = new JTextField();
+		firstChapter.setBounds(315, 18, 86, 20);
+		chapterSelect.add(firstChapter);
+		firstChapter.setColumns(10);
+		
+		JLabel lblTo = new JLabel("-");
+		lblTo.setBounds(406, 17, 7, 22);
+		chapterSelect.add(lblTo);
+		lblTo.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		
+		lastChapter = new JTextField();
+		lastChapter.setBounds(418, 18, 86, 20);
+		chapterSelect.add(lastChapter);
+		lastChapter.setColumns(10);
+		
+		JLabel lblChapter = new JLabel("Chapter range:");
+		lblChapter.setBounds(219, 13, 86, 30);
+		chapterSelect.add(lblChapter);
+		
+		JCheckBox chapterAllCheckBox = new JCheckBox("All");
+		chapterAllCheckBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
+				if(chapterAllCheckBox.isSelected() == true) {
+					firstChapter.setEnabled(false);
+					lastChapter.setEnabled(false);
+				}
+				if(chapterAllCheckBox.isSelected() == false) {
+					firstChapter.setEnabled(true);
+					lastChapter.setEnabled(true);
+				}
+			}
+		});
+		chapterAllCheckBox.setBounds(101, 20, 48, 23);
+		chapterSelect.add(chapterAllCheckBox);
 		
 		JPanel singleChapterPane = new JPanel();
 		singleChapterPane.setBounds(10, 376, 562, 120);
@@ -167,10 +213,10 @@ public class NovelGrabber {
 		JLabel lblchapterURL = new JLabel("Chapter URL:");
 		lblchapterURL.setBounds(10, 24, 113, 30);
 		singleChapterPane.add(lblchapterURL);
-		lblchapterURL.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		lblchapterURL.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		JLabel label = new JLabel("Host website:");
-		label.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		label.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		label.setBounds(10, 66, 86, 30);
 		singleChapterPane.add(label);
 		
@@ -182,6 +228,7 @@ public class NovelGrabber {
 		getAllChaptersBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				getAllChaptersBtn.setEnabled(false);
+				//input validation
 				if(chapterListURL.getText().isEmpty() == true) {
 					appendText("URL field is empty.");
 					chapterListURL.requestFocusInWindow();
@@ -190,11 +237,38 @@ public class NovelGrabber {
 					appendText("Save directory field is empty.");
 					destinationFolder.requestFocusInWindow();
 				}
+				else if((chapterAllCheckBox.isSelected() == false) && (firstChapter.getText().isEmpty() == true || lastChapter.getText().isEmpty() == true)) {
+					appendText("No chapter range defined.");
+				}
+				else if((firstChapter.getText().isEmpty() == false || lastChapter.getText().isEmpty() == false) && (!firstChapter.getText().matches("\\d+") || !lastChapter.getText().matches("\\d+"))) {
+					appendText("Chapter range must contain numbers.");
+
+				}
+				else if((Integer.parseInt(firstChapter.getText()) < 1) || (Integer.parseInt(lastChapter.getText()) < 1)) {
+					appendText("Chapter numbers can't be lower than 1");
+				}
+				else if(Integer.parseInt(lastChapter.getText()) < Integer.parseInt(firstChapter.getText())) {
+					appendText("Last chapter can't be lower than first chapter.");
+				}
+				//grabbing chapter calls
 				else if((destinationFolder.getText().isEmpty() == false) && (chapterListURL.getText().isEmpty() == false)) {
 					try {
 						progressBar.setStringPainted(true);
-						fetchChapters.getChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase());
+						//grabbing all chapters
+						if(chapterAllCheckBox.isSelected() == true) {
+							fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase());
+						}
+						//grabbing chapters from selected range
+						if((chapterAllCheckBox.isSelected() == false) && (firstChapter.getText().isEmpty() == false || lastChapter.getText().isEmpty() == false)) {
+							fetchChapters.getChapterRangeLinks(chapterListURL.getText(), 
+									destinationFolder.getText(), 
+									(websiteSelection1.getSelectedItem().toString()).toLowerCase(),
+									Integer.parseInt(firstChapter.getText()),
+									Integer.parseInt(lastChapter.getText()));
+						}
+						
 					}
+					//exception handling
 					catch(IllegalArgumentException err) {
 						appendText("Error: Must supply a valid URL");
 						appendText(err.toString());
