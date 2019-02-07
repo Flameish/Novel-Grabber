@@ -12,9 +12,7 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * Pick the corresponding host
 * Choose your save directory
 * Select the desired chapter range 
-
 ![alt text](https://i.imgur.com/lwWfKej.jpg) <br>
-
 * You can also enter a link to a specific chapter at the bottom.
 
 ## Currently not working
