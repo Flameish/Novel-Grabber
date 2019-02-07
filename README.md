@@ -14,7 +14,7 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * Select the desired chapter range 
 
 Example: <br><br>
-![alt text](https://i.imgur.com/51JBD0W.jpg) <br>
+![alt text](https://i.imgur.com/lwWfKej.jpg) <br>
 
 * You can also enter a link to a specific chapter at the bottom.
 
