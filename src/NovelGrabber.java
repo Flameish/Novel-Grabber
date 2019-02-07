@@ -101,12 +101,12 @@ public class NovelGrabber {
 		
 		JLabel lblNovelChapterList = new JLabel("Table of Contents URL:");
 		lblNovelChapterList.setLabelFor(chapterListURL);
-		lblNovelChapterList.setBounds(10, 19, 132, 30);
+		lblNovelChapterList.setBounds(20, 19, 116, 30);
 		allChapterPane.add(lblNovelChapterList);
 		lblNovelChapterList.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		JLabel lblDestinationDirectory = new JLabel("Save directory:");
-		lblDestinationDirectory.setBounds(10, 91, 116, 30);
+		lblDestinationDirectory.setBounds(20, 92, 103, 30);
 		allChapterPane.add(lblDestinationDirectory);
 		lblDestinationDirectory.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
@@ -122,7 +122,7 @@ public class NovelGrabber {
 		allChapterPane.add(websiteSelection1);
 		
 		JLabel lblNewLabel = new JLabel("Host website:");
-		lblNewLabel.setBounds(10, 55, 86, 30);
+		lblNewLabel.setBounds(20, 55, 86, 30);
 		allChapterPane.add(lblNewLabel);
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));	
 		
