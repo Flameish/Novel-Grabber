@@ -39,7 +39,7 @@ public class NovelGrabber {
 	private JTextField firstChapter;
 	private JTextField lastChapter;
 	/**
-	 * Launch the application.
+	 * Launch the application
 	 */
 	public static void main(String[] args) throws IOException {
 		EventQueue.invokeLater(new Runnable() {
@@ -158,28 +158,9 @@ public class NovelGrabber {
 		chapterSelect.setBounds(10, 132, 542, 53);
 		chapterSelect.setBorder(BorderFactory.createTitledBorder("Select chapters to download"));
 		allChapterPane.add(chapterSelect);
-		chapterSelect.setLayout(null);
-		
-		firstChapter = new JTextField();
-		firstChapter.setBounds(315, 18, 86, 20);
-		chapterSelect.add(firstChapter);
-		firstChapter.setColumns(10);
-		
-		JLabel lblTo = new JLabel("-");
-		lblTo.setBounds(406, 17, 7, 22);
-		chapterSelect.add(lblTo);
-		lblTo.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		
-		lastChapter = new JTextField();
-		lastChapter.setBounds(418, 18, 86, 20);
-		chapterSelect.add(lastChapter);
-		lastChapter.setColumns(10);
-		
-		JLabel lblChapter = new JLabel("Chapter range:");
-		lblChapter.setBounds(219, 13, 86, 30);
-		chapterSelect.add(lblChapter);
 		
 		JCheckBox chapterAllCheckBox = new JCheckBox("All");
+		chapterAllCheckBox.setBounds(81, 19, 37, 23);
 		chapterAllCheckBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				if(chapterAllCheckBox.isSelected() == true) {
@@ -192,8 +173,27 @@ public class NovelGrabber {
 				}
 			}
 		});
-		chapterAllCheckBox.setBounds(101, 20, 48, 23);
+		
+		JLabel lblChapter = new JLabel("Chapter range:");
+		lblChapter.setBounds(174, 23, 74, 14);
+		
+		firstChapter = new JTextField();
+		firstChapter.setBounds(258, 20, 86, 20);
+		firstChapter.setColumns(10);
+		
+		JLabel lblTo = new JLabel("-");
+		lblTo.setBounds(354, 18, 6, 20);
+		lblTo.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		
+		lastChapter = new JTextField();
+		lastChapter.setBounds(370, 20, 86, 20);
+		lastChapter.setColumns(10);
+		chapterSelect.setLayout(null);
 		chapterSelect.add(chapterAllCheckBox);
+		chapterSelect.add(lblChapter);
+		chapterSelect.add(firstChapter);
+		chapterSelect.add(lblTo);
+		chapterSelect.add(lastChapter);
 		
 		JPanel singleChapterPane = new JPanel();
 		singleChapterPane.setBounds(10, 376, 562, 120);
