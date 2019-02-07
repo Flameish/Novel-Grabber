@@ -237,17 +237,16 @@ public class NovelGrabber {
 					appendText("Save directory field is empty.");
 					destinationFolder.requestFocusInWindow();
 				}
-				else if((chapterAllCheckBox.isSelected() == false) && (firstChapter.getText().isEmpty() == true || lastChapter.getText().isEmpty() == true)) {
+				else if((chapterAllCheckBox.isSelected() == false) && ((firstChapter.getText().isEmpty() == true) || (lastChapter.getText().isEmpty() == true))) {
 					appendText("No chapter range defined.");
 				}
-				else if((firstChapter.getText().isEmpty() == false || lastChapter.getText().isEmpty() == false) && (!firstChapter.getText().matches("\\d+") || !lastChapter.getText().matches("\\d+"))) {
+				else if((chapterAllCheckBox.isSelected() == false) && (!firstChapter.getText().matches("\\d+") || !lastChapter.getText().matches("\\d+"))) {
 					appendText("Chapter range must contain numbers.");
-
 				}
-				else if((Integer.parseInt(firstChapter.getText()) < 1) || (Integer.parseInt(lastChapter.getText()) < 1)) {
+				else if((chapterAllCheckBox.isSelected() == false) && ((Integer.parseInt(firstChapter.getText()) < 1) || (Integer.parseInt(lastChapter.getText()) < 1))) {
 					appendText("Chapter numbers can't be lower than 1");
 				}
-				else if(Integer.parseInt(lastChapter.getText()) < Integer.parseInt(firstChapter.getText())) {
+				else if((chapterAllCheckBox.isSelected() == false) && (Integer.parseInt(lastChapter.getText()) < Integer.parseInt(firstChapter.getText()))) {
 					appendText("Last chapter can't be lower than first chapter.");
 				}
 				//grabbing chapter calls
