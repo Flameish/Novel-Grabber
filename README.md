@@ -8,7 +8,7 @@ With Novel Grabber you can download single chapters or complete novels from vari
 
 ## How to use
 * Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/raw/master/NovelGrabber.jar)
-* Copy & paste the link to the novel's Table of Contents page
+* Enter the link to the novel's Table of Contents page
 * Pick the corresponding host
 * Choose your save directory
 * Select the desired chapter range 
