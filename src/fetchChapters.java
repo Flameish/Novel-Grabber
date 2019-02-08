@@ -38,6 +38,10 @@ public class fetchChapters {
 				chapterLinkSelecter = "td";
 				url = url + "/chapters";
 				break;
+			case "volarenovels":
+				chapterLinkContainer = ".collapseomatic_content";
+				chapterLinkSelecter = "a";
+				break;
 		}
 		NovelGrabber.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
@@ -78,6 +82,10 @@ public class fetchChapters {
 				chapterLinkSelecter = "td";
 				url = url + "/chapters";
 				break;
+			case "volarenovels":
+				chapterLinkContainer = ".collapseomatic_content";
+				chapterLinkSelecter = "a";
+				break;
 		}
 		NovelGrabber.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
@@ -86,6 +94,7 @@ public class fetchChapters {
 		Elements links = chapterItem.select("a[href]");
 		for (Element chapterLink : links) {
 			chapters.add(chapterLink.attr("href"));
+
 		}
 		if(lastChapter > chapters.size()) {
 			NovelGrabber.appendText("Novel does not have that many chapters.");
@@ -123,6 +132,11 @@ public class fetchChapters {
 				chapterContainer = ".fr-view";
 				sentenceSelecter = "p";
 				break;
+			case "volarenovels":
+				host = "";
+				chapterContainer = ".entry-content";
+				sentenceSelecter = "p";
+				break;
 		}
 		Document doc = Jsoup.connect(host + url).get();
 		String fileName = chapterNumber + "-" + doc.title().replaceAll("[^\\w]+", "-") + ".txt";
@@ -156,6 +170,11 @@ public class fetchChapters {
 				break;
 			case "gravitytales":
 				chapterContainer = ".fr-view";
+				sentenceSelecter = "p";
+				break;
+			case "volarenovels":
+				host = "https://archiveofourown.org";
+				chapterContainer = ".entry-content";
 				sentenceSelecter = "p";
 				break;
 		}

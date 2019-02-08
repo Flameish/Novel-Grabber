@@ -35,7 +35,7 @@ public class NovelGrabber {
 	private static JProgressBar progressBar;
 	private JTextField chapterURL;
 	public static final String NL = System.getProperty("line.separator");
-	private static String[] websites = {"Wuxiaworld","Royalroad","Gravitytales"};
+	private static String[] websites = {"Wuxiaworld","Royalroad","Gravitytales","Volarenovels"};
 	private JTextField firstChapter;
 	private JTextField lastChapter;
 	/**
@@ -158,9 +158,11 @@ public class NovelGrabber {
 		chapterSelect.setBounds(10, 132, 542, 53);
 		chapterSelect.setBorder(BorderFactory.createTitledBorder("Select chapters to download"));
 		allChapterPane.add(chapterSelect);
+		chapterSelect.setLayout(null);
 		
 		JCheckBox chapterAllCheckBox = new JCheckBox("All");
-		chapterAllCheckBox.setBounds(81, 19, 37, 23);
+		chapterAllCheckBox.setBounds(106, 17, 62, 23);
+		chapterSelect.add(chapterAllCheckBox);
 		chapterAllCheckBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				if(chapterAllCheckBox.isSelected() == true) {
@@ -175,23 +177,27 @@ public class NovelGrabber {
 		});
 		
 		JLabel lblChapter = new JLabel("Chapter range:");
-		lblChapter.setBounds(174, 23, 74, 14);
+		lblChapter.setBounds(212, 21, 113, 14);
+		chapterSelect.add(lblChapter);
 		
 		firstChapter = new JTextField();
-		firstChapter.setBounds(258, 20, 86, 20);
+		firstChapter.setBounds(327, 18, 60, 20);
 		firstChapter.setColumns(10);
+		firstChapter.setHorizontalAlignment(JTextField.CENTER);
+		chapterSelect.add(firstChapter);
 		
 		JLabel lblTo = new JLabel("-");
-		lblTo.setBounds(354, 18, 6, 20);
+		lblTo.setBounds(398, 16, 6, 20);
 		lblTo.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		
 		lastChapter = new JTextField();
-		lastChapter.setBounds(370, 20, 86, 20);
+		lastChapter.setBounds(415, 18, 60, 20);
 		lastChapter.setColumns(10);
-		chapterSelect.setLayout(null);
-		chapterSelect.add(chapterAllCheckBox);
-		chapterSelect.add(lblChapter);
-		chapterSelect.add(firstChapter);
+		lastChapter.setHorizontalAlignment(JTextField.CENTER);
+		
+
+
+
 		chapterSelect.add(lblTo);
 		chapterSelect.add(lastChapter);
 		
