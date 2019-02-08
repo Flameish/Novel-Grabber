@@ -5,6 +5,7 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * [Wuxiaworld](https://wuxiaworld.com/)
 * [Royalroad](https://royalroad.com/)
 * [Gravitytales](https://gravitytales.com/)
+* [Volarenovels](https://volarenovels.com/)
 
 ## How to use
 * Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/raw/master/NovelGrabber.jar)
