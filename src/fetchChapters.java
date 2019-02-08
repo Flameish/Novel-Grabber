@@ -39,8 +39,8 @@ public class fetchChapters {
 				url = url + "/chapters";
 				break;
 			case "volarenovels":
-				chapterLinkContainer = ".collapseomatic_content";
-				chapterLinkSelecter = "a";
+				chapterLinkContainer = ".entry-content";
+				chapterLinkSelecter = "a[href^="+url+"]";
 				break;
 		}
 		NovelGrabber.appendText("Connecting...");
@@ -83,8 +83,8 @@ public class fetchChapters {
 				url = url + "/chapters";
 				break;
 			case "volarenovels":
-				chapterLinkContainer = ".collapseomatic_content";
-				chapterLinkSelecter = "a";
+				chapterLinkContainer = ".entry-content";
+				chapterLinkSelecter = "a[href^="+url+"]";
 				break;
 		}
 		NovelGrabber.appendText("Connecting...");
