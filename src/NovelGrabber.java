@@ -29,13 +29,15 @@ public class NovelGrabber {
 	private JFrame frmNovelGrabber;
 	private JTextField chapterListURL;
 	private JTextField destinationFolder;
-	private JComboBox websiteSelection1;
-	private JComboBox websiteSelection2;
+	private JComboBox<String> websiteSelection1;
+	private JComboBox<String> websiteSelection2;
+	private JComboBox<String> fileTypeComboBox;
 	private static JTextArea logArea;
 	private static JProgressBar progressBar;
 	private JTextField chapterURL;
 	public static final String NL = System.getProperty("line.separator");
 	private static String[] websites = {"Wuxiaworld","Royalroad","Gravitytales","Volarenovels"};
+	private static String[] fileTypes = {"HTML","TXT"};
 	private JTextField firstChapter;
 	private JTextField lastChapter;
 	/**
@@ -70,18 +72,18 @@ public class NovelGrabber {
 		frmNovelGrabber = new JFrame();
 		frmNovelGrabber.setResizable(false);
 		frmNovelGrabber.setTitle("Novel Grabber - 0.01");
-		frmNovelGrabber.setBounds(100, 100, 588, 536);
+		frmNovelGrabber.setBounds(100, 100, 588, 563);
 		frmNovelGrabber.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmNovelGrabber.getContentPane().setLayout(null);
 		
 		JPanel allChapterPane = new JPanel();
-		allChapterPane.setBounds(10, 11, 562, 354);
+		allChapterPane.setBounds(10, 11, 562, 381);
 		allChapterPane.setBorder(BorderFactory.createTitledBorder("Get multiple chapters"));
 		frmNovelGrabber.getContentPane().add(allChapterPane);
 		allChapterPane.setLayout(null);
 		
 		progressBar = new JProgressBar();
-		progressBar.setBounds(10, 313, 419, 30);
+		progressBar.setBounds(10, 340, 419, 30);
 		allChapterPane.add(progressBar);
 		progressBar.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		progressBar.setForeground(new Color(0, 128, 128));
@@ -90,39 +92,40 @@ public class NovelGrabber {
 		progressBar.setString("");
 		
 		JButton getAllChaptersBtn = new JButton("Grab chapters");
-		getAllChaptersBtn.setBounds(439, 312, 113, 31);
+		getAllChaptersBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		getAllChaptersBtn.setBounds(439, 339, 113, 31);
 		allChapterPane.add(getAllChaptersBtn);
 		
 		chapterListURL = new JTextField();
-		chapterListURL.setBounds(152, 19, 400, 30);
+		chapterListURL.setBounds(152, 19, 400, 25);
 		allChapterPane.add(chapterListURL);
 		chapterListURL.setToolTipText("https://novelwebsite.com/novel/name");
 		chapterListURL.setColumns(10);
 		
 		JLabel lblNovelChapterList = new JLabel("Table of Contents URL:");
 		lblNovelChapterList.setLabelFor(chapterListURL);
-		lblNovelChapterList.setBounds(20, 19, 116, 30);
+		lblNovelChapterList.setBounds(20, 19, 116, 25);
 		allChapterPane.add(lblNovelChapterList);
 		lblNovelChapterList.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		JLabel lblDestinationDirectory = new JLabel("Save directory:");
-		lblDestinationDirectory.setBounds(20, 92, 103, 30);
+		lblDestinationDirectory.setBounds(20, 80, 103, 25);
 		allChapterPane.add(lblDestinationDirectory);
 		lblDestinationDirectory.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		destinationFolder = new JTextField();
-		destinationFolder.setBounds(152, 92, 304, 30);
+		destinationFolder.setBounds(152, 80, 304, 25);
 		allChapterPane.add(destinationFolder);
 		destinationFolder.setToolTipText("C:\\Users\\YourName\\somefolder\\novels");
 		destinationFolder.setColumns(10);
 		
 		
 		websiteSelection1 = new JComboBox(websites);
-		websiteSelection1.setBounds(152, 55, 400, 30);
+		websiteSelection1.setBounds(152, 49, 400, 25);
 		allChapterPane.add(websiteSelection1);
 		
 		JLabel lblNewLabel = new JLabel("Host website:");
-		lblNewLabel.setBounds(20, 55, 86, 30);
+		lblNewLabel.setBounds(20, 49, 86, 25);
 		allChapterPane.add(lblNewLabel);
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));	
 		
@@ -141,7 +144,7 @@ public class NovelGrabber {
 			}
 			
 		});
-		btnNewButton.setBounds(466, 91, 86, 32);
+		btnNewButton.setBounds(466, 79, 86, 27);
 		allChapterPane.add(btnNewButton);
 		
 		logArea = new JTextArea();
@@ -151,17 +154,17 @@ public class NovelGrabber {
 		
 		JScrollPane scrollPane = new JScrollPane(logArea);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); 
-		scrollPane.setBounds(10, 196, 542, 106);
+		scrollPane.setBounds(10, 223, 542, 111);
 		allChapterPane.add(scrollPane);
 		
 		JPanel chapterSelect = new JPanel();
-		chapterSelect.setBounds(10, 132, 542, 53);
+		chapterSelect.setBounds(10, 109, 542, 45);
 		chapterSelect.setBorder(BorderFactory.createTitledBorder("Select chapters to download"));
 		allChapterPane.add(chapterSelect);
 		chapterSelect.setLayout(null);
 		
 		JCheckBox chapterAllCheckBox = new JCheckBox("All");
-		chapterAllCheckBox.setBounds(106, 17, 62, 23);
+		chapterAllCheckBox.setBounds(101, 12, 62, 23);
 		chapterSelect.add(chapterAllCheckBox);
 		chapterAllCheckBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
@@ -177,37 +180,54 @@ public class NovelGrabber {
 		});
 		
 		JLabel lblChapter = new JLabel("Chapter range:");
-		lblChapter.setBounds(212, 21, 113, 14);
+		lblChapter.setBounds(210, 16, 113, 14);
 		chapterSelect.add(lblChapter);
 		
 		firstChapter = new JTextField();
-		firstChapter.setBounds(327, 18, 60, 20);
+		firstChapter.setBounds(325, 13, 60, 20);
 		firstChapter.setColumns(10);
 		firstChapter.setHorizontalAlignment(JTextField.CENTER);
 		chapterSelect.add(firstChapter);
 		
 		JLabel lblTo = new JLabel("-");
-		lblTo.setBounds(398, 16, 6, 20);
+		lblTo.setBounds(396, 11, 6, 20);
 		lblTo.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		chapterSelect.add(lblTo);
 		
 		lastChapter = new JTextField();
-		lastChapter.setBounds(415, 18, 60, 20);
+		lastChapter.setBounds(413, 13, 60, 20);
 		lastChapter.setColumns(10);
 		lastChapter.setHorizontalAlignment(JTextField.CENTER);
-		
-
-
-
-		chapterSelect.add(lblTo);
 		chapterSelect.add(lastChapter);
 		
+		JPanel optionSelect = new JPanel();
+		optionSelect.setBounds(10, 165, 542, 45);
+		optionSelect.setBorder(BorderFactory.createTitledBorder("Option select"));
+		allChapterPane.add(optionSelect);
+		optionSelect.setLayout(null);
+		
+		JCheckBox createTocCheckBox = new JCheckBox("Create ToC");
+		createTocCheckBox.setBounds(6, 15, 81, 23);
+		optionSelect.add(createTocCheckBox);
+		createTocCheckBox.setToolTipText("Will create a \"Table of Contents\" file which can be used to convert all chapter files into a single epub file in calibre.");
+		
+		fileTypeComboBox = new JComboBox(fileTypes);
+		fileTypeComboBox.setBounds(230, 16, 66, 20);
+		optionSelect.add(fileTypeComboBox);
+		
+		JLabel fileTypeLabel = new JLabel("File type:");
+		fileTypeLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		fileTypeLabel.setBounds(148, 14, 81, 25);
+		optionSelect.add(fileTypeLabel);
+		
 		JPanel singleChapterPane = new JPanel();
-		singleChapterPane.setBounds(10, 376, 562, 120);
+		singleChapterPane.setBounds(10, 403, 562, 120);
 		singleChapterPane.setBorder(BorderFactory.createTitledBorder("Get single chapter"));
 		frmNovelGrabber.getContentPane().add(singleChapterPane);
 		singleChapterPane.setLayout(null);
 		
 		JButton getChapterBtn = new JButton("Grab chapter");
+		getChapterBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		getChapterBtn.setBounds(439, 65, 113, 32);
 		singleChapterPane.add(getChapterBtn);
 		
@@ -239,6 +259,9 @@ public class NovelGrabber {
 					appendText("URL field is empty.");
 					chapterListURL.requestFocusInWindow();
 				}
+				else if((fileTypeComboBox.getSelectedItem().toString() == "TXT") && (createTocCheckBox.isSelected() == true)) {
+					appendText("Cannot create a Table of Contents file with .txt file type.");
+				}
 				else if(destinationFolder.getText().isEmpty() == true) {
 					appendText("Save directory field is empty.");
 					destinationFolder.requestFocusInWindow();
@@ -261,15 +284,39 @@ public class NovelGrabber {
 						progressBar.setStringPainted(true);
 						//grabbing all chapters
 						if(chapterAllCheckBox.isSelected() == true) {
-							fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase());
+							if(fileTypeComboBox.getSelectedItem().toString() == "TXT") {
+								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase(), ".txt");	
+							}
+							else {
+								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase(), ".html");
+							}
+							if(createTocCheckBox.isSelected() == true) {
+							fetchChapters.createToc(destinationFolder.getText());
+							}
+							fetchChapters.chapterFileNames.clear();
 						}
 						//grabbing chapters from selected range
 						if((chapterAllCheckBox.isSelected() == false) && (firstChapter.getText().isEmpty() == false || lastChapter.getText().isEmpty() == false)) {
-							fetchChapters.getChapterRangeLinks(chapterListURL.getText(), 
-									destinationFolder.getText(), 
-									(websiteSelection1.getSelectedItem().toString()).toLowerCase(),
-									Integer.parseInt(firstChapter.getText()),
-									Integer.parseInt(lastChapter.getText()));
+							if(fileTypeComboBox.getSelectedItem().toString() == "TXT") {
+								fetchChapters.getChapterRangeLinks(chapterListURL.getText(), 
+										destinationFolder.getText(), 
+										(websiteSelection1.getSelectedItem().toString()).toLowerCase(),
+										Integer.parseInt(firstChapter.getText()),
+										Integer.parseInt(lastChapter.getText()),
+										".txt");
+							}
+							else {
+								fetchChapters.getChapterRangeLinks(chapterListURL.getText(), 
+										destinationFolder.getText(), 
+										(websiteSelection1.getSelectedItem().toString()).toLowerCase(),
+										Integer.parseInt(firstChapter.getText()),
+										Integer.parseInt(lastChapter.getText()),
+										".html");
+							}
+							if(createTocCheckBox.isSelected() == true) {
+							fetchChapters.createToc(destinationFolder.getText());
+							}	
+							fetchChapters.chapterFileNames.clear();
 						}
 						
 					}
