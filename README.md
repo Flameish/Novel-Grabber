@@ -13,7 +13,10 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * Pick the corresponding host
 * Choose your save directory
 * Select the desired chapter range 
-![alt text](https://i.imgur.com/lwWfKej.jpg) <br>
+
+Optional:
+* "Create ToC" will create a Table of Contents file with links to all downloaded chapters. This file can be used in [Calibre](https://calibre-ebook.com/) to convert the chapters into a single epub file.
+![alt text](https://i.imgur.com/RJrQV0G.jpg) <br>
 * You can also enter a link to a specific chapter at the bottom.
 
 ## Currently not working
