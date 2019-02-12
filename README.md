@@ -23,7 +23,7 @@ Optional:
 ## Currently not working
 * [Coiling Dragon](https://www.wuxiaworld.com/novel/coiling-dragon-preview) - Official epub available
 
-## Currently not working
+## Disclaimer
 Downloaded chapters/files are for private use only.
 
 ## Requirements
