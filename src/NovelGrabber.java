@@ -22,7 +22,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
 /*
- *  Window display and handling
+ *  Window display and handling.
  */
 public class NovelGrabber {
 

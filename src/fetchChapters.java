@@ -17,7 +17,7 @@ public class fetchChapters {
 	public static List<String> chapterFileNames = new ArrayList<String>(); 
 	/**
 	 * Opens novel's table of contents page, 
-	 * retrieves chapter all links and processes them with saveChapters()
+	 * retrieves chapter all links and processes them with saveChapters().
 	 */
 	public static void getAllChapterLinks(String url, String saveLocation, String host, String fileType) throws IllegalArgumentException, FileNotFoundException, IOException  {
 		String domain = host;
