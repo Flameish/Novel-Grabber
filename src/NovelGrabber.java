@@ -86,13 +86,13 @@ public class NovelGrabber {
 		frmNovelGrabber.getContentPane().setLayout(null);
 		
 		JPanel allChapterPane = new JPanel();
-		allChapterPane.setBounds(10, 11, 562, 381);
+		allChapterPane.setBounds(10, 11, 562, 407);
 		allChapterPane.setBorder(BorderFactory.createTitledBorder("Get multiple chapters"));
 		frmNovelGrabber.getContentPane().add(allChapterPane);
 		allChapterPane.setLayout(null);
 		
 		progressBar = new JProgressBar();
-		progressBar.setBounds(10, 340, 419, 30);
+		progressBar.setBounds(10, 366, 419, 30);
 		allChapterPane.add(progressBar);
 		progressBar.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		progressBar.setForeground(new Color(0, 128, 128));
@@ -102,7 +102,7 @@ public class NovelGrabber {
 		
 		JButton getAllChaptersBtn = new JButton("Grab chapters");
 		getAllChaptersBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		getAllChaptersBtn.setBounds(439, 339, 113, 31);
+		getAllChaptersBtn.setBounds(439, 365, 113, 31);
 		allChapterPane.add(getAllChaptersBtn);
 		
 		chapterListURL = new JTextField();
@@ -164,7 +164,7 @@ public class NovelGrabber {
 		
 		JScrollPane scrollPane = new JScrollPane(logArea);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); 
-		scrollPane.setBounds(10, 223, 542, 111);
+		scrollPane.setBounds(10, 221, 542, 134);
 		allChapterPane.add(scrollPane);
 		
 		JPanel chapterSelect = new JPanel();
@@ -211,7 +211,7 @@ public class NovelGrabber {
 		chapterSelect.add(lastChapter);
 		
 		JPanel optionSelect = new JPanel();
-		optionSelect.setBounds(10, 165, 542, 45);
+		optionSelect.setBounds(10, 165, 542, 51);
 		optionSelect.setBorder(BorderFactory.createTitledBorder("Option select"));
 		allChapterPane.add(optionSelect);
 		optionSelect.setLayout(null);
@@ -239,33 +239,33 @@ public class NovelGrabber {
 		optionSelect.add(chapterNumerationCheckBox);
 		
 		JPanel singleChapterPane = new JPanel();
-		singleChapterPane.setBounds(10, 403, 562, 120);
+		singleChapterPane.setBounds(10, 418, 562, 105);
 		singleChapterPane.setBorder(BorderFactory.createTitledBorder("Get single chapter"));
 		frmNovelGrabber.getContentPane().add(singleChapterPane);
 		singleChapterPane.setLayout(null);
 		
 		JButton getChapterBtn = new JButton("Grab chapter");
 		getChapterBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		getChapterBtn.setBounds(439, 65, 113, 32);
+		getChapterBtn.setBounds(439, 65, 113, 27);
 		singleChapterPane.add(getChapterBtn);
 		
 		chapterURL = new JTextField();
-		chapterURL.setBounds(133, 25, 419, 30);
+		chapterURL.setBounds(133, 25, 419, 25);
 		singleChapterPane.add(chapterURL);
 		chapterURL.setColumns(10);
 		
 		JLabel lblchapterURL = new JLabel("Chapter URL:");
-		lblchapterURL.setBounds(10, 24, 113, 30);
+		lblchapterURL.setBounds(10, 24, 113, 25);
 		singleChapterPane.add(lblchapterURL);
 		lblchapterURL.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		JLabel label = new JLabel("Host website:");
 		label.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		label.setBounds(10, 66, 86, 30);
+		label.setBounds(10, 66, 86, 25);
 		singleChapterPane.add(label);
 		
 		websiteSelection2 = new JComboBox(websites);
-		websiteSelection2.setBounds(133, 66, 296, 30);
+		websiteSelection2.setBounds(133, 66, 296, 25);
 		singleChapterPane.add(websiteSelection2);
 
 		//All Chapters

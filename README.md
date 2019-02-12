@@ -21,7 +21,7 @@ Optional:
 * You can also enter a link to a specific chapter at the bottom.
 
 ## Currently not working
-* [Coiling Dragon](https://www.wuxiaworld.com/novel/coiling-dragon-preview) - Official epib available
+* [Coiling Dragon](https://www.wuxiaworld.com/novel/coiling-dragon-preview) - Official epub available
 
 ## Requirements
 * [Java](https://www.java.com/en/) needs to be installed.
