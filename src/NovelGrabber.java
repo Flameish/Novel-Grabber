@@ -36,7 +36,7 @@ public class NovelGrabber {
 	private static JProgressBar progressBar;
 	private JTextField chapterURL;
 	public static final String NL = System.getProperty("line.separator");
-	private static String[] websites = {"Wuxiaworld","Royalroad","Gravitytales","Volarenovels"};
+	private static String[] websites = {"Wuxiaworld","Royal Road","Gravity Tales","Volare Novels"};
 	private static String[] fileTypes = {"HTML","TXT"};
 	private JTextField firstChapter;
 	private JTextField lastChapter;
@@ -285,10 +285,10 @@ public class NovelGrabber {
 						//grabbing all chapters
 						if(chapterAllCheckBox.isSelected() == true) {
 							if(fileTypeComboBox.getSelectedItem().toString() == "TXT") {
-								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase(), ".txt");	
+								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""), ".txt");	
 							}
 							else {
-								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase(), ".html");
+								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""), ".html");
 							}
 							if(createTocCheckBox.isSelected() == true) {
 							fetchChapters.createToc(destinationFolder.getText());
@@ -300,7 +300,7 @@ public class NovelGrabber {
 							if(fileTypeComboBox.getSelectedItem().toString() == "TXT") {
 								fetchChapters.getChapterRangeLinks(chapterListURL.getText(), 
 										destinationFolder.getText(), 
-										(websiteSelection1.getSelectedItem().toString()).toLowerCase(),
+										(websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""),
 										Integer.parseInt(firstChapter.getText()),
 										Integer.parseInt(lastChapter.getText()),
 										".txt");
@@ -308,7 +308,7 @@ public class NovelGrabber {
 							else {
 								fetchChapters.getChapterRangeLinks(chapterListURL.getText(), 
 										destinationFolder.getText(), 
-										(websiteSelection1.getSelectedItem().toString()).toLowerCase(),
+										(websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""),
 										Integer.parseInt(firstChapter.getText()),
 										Integer.parseInt(lastChapter.getText()),
 										".html");
@@ -354,7 +354,7 @@ public class NovelGrabber {
 				else if(chapterURL.getText().isEmpty() == false) {
 					try {
 						progressBar.setStringPainted(true);
-						fetchChapters.saveChapter(chapterURL.getText(), (websiteSelection2.getSelectedItem().toString()).toLowerCase());
+						fetchChapters.saveChapter(chapterURL.getText(), (websiteSelection2.getSelectedItem().toString()).toLowerCase().replace(" ", ""));
 					}
 					catch(IllegalArgumentException err) {
 						appendText("Error: Not a URL.");

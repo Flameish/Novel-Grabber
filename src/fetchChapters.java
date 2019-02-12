@@ -91,7 +91,7 @@ public class fetchChapters {
 		}
 		NovelGrabber.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
-		novelName = (doc.title().replaceAll("[^\\w]+", "-")) + " Table of Contents";
+		novelName = "Table-of-Contents-" + (doc.title().replaceAll("[^\\w]+", "-") + "-Chapter-" + firstChapter + "-" + lastChapter);
 		Element content = doc.select(chapterLinkContainer).first();
 		Elements chapterItem = content.select(chapterLinkSelecter);
 		Elements links = chapterItem.select("a[href]");
@@ -119,30 +119,40 @@ public class fetchChapters {
 		String domainName = host;
 		String chapterContainer = "";
 		String sentenceSelecter = "";
+		String titleReplacement = "";
+		String titleHostName = "";
 		switch (domainName) {
 			case "wuxiaworld":
 				host = "https://www.wuxiaworld.com";
 				chapterContainer = ".fr-view";
 				sentenceSelecter = "p";
+				titleHostName = "-WuxiaWorld";
+				titleReplacement = "";
 				break;
 			case "royalroad":
 				host = "https://www.royalroad.com";
 				chapterContainer = ".chapter-content";
 				sentenceSelecter = "p";
+				titleHostName = "-Royal-Road";
+				titleReplacement = "";
 				break;
 			case "gravitytales":
 				host = "";
 				chapterContainer = ".fr-view";
 				sentenceSelecter = "p";
+				titleHostName = "-Gravity-Tales";
+				titleReplacement = "";
 				break;
 			case "volarenovels":
 				host = "";
 				chapterContainer = ".entry-content";
 				sentenceSelecter = "p";
+				titleHostName = "-volare-novels";
+				titleReplacement = "";
 				break;
 		}
 		Document doc = Jsoup.connect(host + url).get();
-		String fileName = chapterNumber + "-" + doc.title().replaceAll("[^\\w]+", "-") + fileType;
+		String fileName = "Ch-" + chapterNumber + "-" + (doc.title().replaceAll("[^\\w]+", "-").replace(titleHostName, "")) + fileType;
 		Element content = doc.select(chapterContainer).first();
 		Elements p = content.select(sentenceSelecter);
 		File dir = new File(saveLocation);
@@ -156,9 +166,11 @@ public class fetchChapters {
 		}
 		else {
 			try(PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
+				out.print("<!DOCTYPE html>" + NL +"<html lang=\"en\">" + NL + "<head>" + NL + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL +  "<body>" + NL);
 				for (Element x : p) {
 					out.println("<p>" + x.text() + "</p>" + NL);
 				}
+				out.print("</body>" + NL + "</html>");
 			}
 		}
 		chapterFileNames.add(fileName);
@@ -197,9 +209,12 @@ public class fetchChapters {
 		Element content = doc.select(chapterContainer).first();
 		Elements p = content.select(sentenceSelecter);
 		try(PrintStream out = new PrintStream(fileName)) {
+			out.print("<!DOCTYPE html>" + NL +
+					"<html lang=\"en\">" + NL + "<head>" + NL + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL +  "<body>" + NL);
 			for (Element x : p) {
 				out.println("<p>" + x.text() + "</p>" + NL);
 			}
+			out.print("</body>" + NL + "</html>");
 		}
 		NovelGrabber.appendText(fileName + " saved.");
 	}
@@ -207,7 +222,7 @@ public class fetchChapters {
 		String tocFileName = novelName + ".html";
 
 		try(PrintStream out = new PrintStream(saveLocation + File.separator + tocFileName)) {
-			out.print("<html>" + NL + "<body>" + NL + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+			out.print("<!DOCTYPE html>" + NL +"<html lang=\"en\">" + NL + "<head>" + NL + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
 			for (String chapterFileName : chapterFileNames) {
 			        out.print("<a href=\"" + chapterFileName + "\">" + chapterFileName +"</a><br/>" + NL);
 			}
