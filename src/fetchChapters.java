@@ -19,34 +19,40 @@ public class fetchChapters {
 	 * Opens novel's table of contents page, 
 	 * retrieves chapter all links and processes them with saveChapters().
 	 */
-	public static void getAllChapterLinks(String url, String saveLocation, String host, String fileType) throws IllegalArgumentException, FileNotFoundException, IOException  {
+	public static void getAllChapterLinks(String url, String saveLocation, String host, String fileType, boolean chapterNumeration) throws IllegalArgumentException, FileNotFoundException, IOException  {
 		String domain = host;
 		String chapterLinkContainer = "";
 		String chapterLinkSelecter = "";
+		String titleReplacement = "";
+		String titleHostName = "";
 		int chapterNumber = 0;
 		int chapterAmount = 0;
 		switch (domain) {
-			case "wuxiaworld":
-				chapterLinkContainer = "#accordion";
-				chapterLinkSelecter = ".chapter-item";
-				break;
-			case "royalroad":
-				chapterLinkContainer = ".table";
-				chapterLinkSelecter = "td";
-				break;
-			case "gravitytales":
-				chapterLinkContainer = ".table";
-				chapterLinkSelecter = "td";
-				url = url + "/chapters";
-				break;
-			case "volarenovels":
-				chapterLinkContainer = ".entry-content";
-				chapterLinkSelecter = "a[href^="+url+"]";
-				break;
+		case "wuxiaworld":
+			chapterLinkContainer = "#accordion";
+			chapterLinkSelecter = ".chapter-item";
+			titleHostName = "-WuxiaWorld";
+			break;
+		case "royalroad":
+			chapterLinkContainer = ".table";
+			chapterLinkSelecter = "td";
+			titleHostName = "-Royal-Road";
+			break;
+		case "gravitytales":
+			chapterLinkContainer = ".table";
+			chapterLinkSelecter = "td";
+			url = url + "/chapters";
+			titleHostName = "-Gravity-Tales";
+			break;
+		case "volarenovels":
+			chapterLinkContainer = ".entry-content";
+			chapterLinkSelecter = "a[href^="+url+"]";
+			titleHostName = "-volare-novels";
+			break;
 		}
 		NovelGrabber.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
-		novelName = (doc.title().replaceAll("[^\\w]+", "-")) + " Table of Contents";
+		novelName = (doc.title().replaceAll("[^\\w]+", "-").replace(titleHostName, titleReplacement)) + " Table of Contents";
 		Element content = doc.select(chapterLinkContainer).first();
 		Elements chapterItem = content.select(chapterLinkSelecter);
 		Elements links = chapterItem.select("a[href]");
@@ -56,7 +62,7 @@ public class fetchChapters {
 		NovelGrabber.setMaxProgress(chapterAmount);
 		for (Element chapterLink : links) {
 			chapterNumber++;
-			saveChapters(chapterLink.attr("href"), saveLocation, host, chapterNumber, fileType);
+			saveChapters(chapterLink.attr("href"), saveLocation, host, chapterNumber, fileType, chapterNumeration);
 		}
 		NovelGrabber.appendText("Finished! A total of " + chapterNumber + " chapters grabbed.");
 	}
@@ -64,34 +70,40 @@ public class fetchChapters {
 	 * Opens novel's table of contents page, 
 	 * retrieves chapter links from selected chapter range and processes them with saveChapters()
 	 */
-	public static void getChapterRangeLinks(String url, String saveLocation, String host, int firstChapter, int lastChapter, String fileType) throws IllegalArgumentException, FileNotFoundException, IOException  {
+	public static void getChapterRangeLinks(String url, String saveLocation, String host, int firstChapter, int lastChapter, String fileType, boolean chapterNumeration) throws IllegalArgumentException, FileNotFoundException, IOException  {
 		String domain = host;
 		String chapterLinkContainer = "";
 		String chapterLinkSelecter = "";
 		ArrayList<String> chapters = new ArrayList<String>();
+		String titleReplacement = "";
+		String titleHostName = "";
 		int chapterNumber = 0;
 		switch (domain) {
 			case "wuxiaworld":
 				chapterLinkContainer = "#accordion";
 				chapterLinkSelecter = ".chapter-item";
+				titleHostName = "-WuxiaWorld";
 				break;
 			case "royalroad":
 				chapterLinkContainer = ".table";
 				chapterLinkSelecter = "td";
+				titleHostName = "-Royal-Road";
 				break;
 			case "gravitytales":
 				chapterLinkContainer = ".table";
 				chapterLinkSelecter = "td";
 				url = url + "/chapters";
+				titleHostName = "-Gravity-Tales";
 				break;
 			case "volarenovels":
 				chapterLinkContainer = ".entry-content";
 				chapterLinkSelecter = "a[href^="+url+"]";
+				titleHostName = "-volare-novels";
 				break;
 		}
 		NovelGrabber.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
-		novelName = "Table-of-Contents-" + (doc.title().replaceAll("[^\\w]+", "-") + "-Chapter-" + firstChapter + "-" + lastChapter);
+		novelName = "Table-of-Contents-" + (doc.title().replaceAll("[^\\w]+", "-").replace(titleHostName, titleReplacement) + "-Chapter-" + firstChapter + "-" + lastChapter);
 		Element content = doc.select(chapterLinkContainer).first();
 		Elements chapterItem = content.select(chapterLinkSelecter);
 		Elements links = chapterItem.select("a[href]");
@@ -107,7 +119,7 @@ public class fetchChapters {
 		NovelGrabber.setMaxProgress((lastChapter-firstChapter)+1);
 		for (int i = firstChapter-1; i <= lastChapter-1; i++) {
 			chapterNumber++;
-			saveChapters(chapters.get(i), saveLocation, host, chapterNumber, fileType);
+			saveChapters(chapters.get(i), saveLocation, host, chapterNumber, fileType, chapterNumeration);
 		}
 		NovelGrabber.appendText("Finished! A total of " + chapterNumber + " chapters grabbed.");
 		}
@@ -115,44 +127,48 @@ public class fetchChapters {
 	/**
 	 * Opens chapter link and tries to save it's content at provided destination directory
 	 */
-	public static void saveChapters(String url, String saveLocation, String host, int chapterNumber, String fileType) throws IllegalArgumentException, FileNotFoundException, IOException {
+	public static void saveChapters(String url, String saveLocation, String host, int chapterNumber, String fileType, boolean chapterNumeration) throws IllegalArgumentException, FileNotFoundException, IOException {
 		String domainName = host;
 		String chapterContainer = "";
 		String sentenceSelecter = "";
 		String titleReplacement = "";
 		String titleHostName = "";
+		String fileName = "";
 		switch (domainName) {
 			case "wuxiaworld":
 				host = "https://www.wuxiaworld.com";
 				chapterContainer = ".fr-view";
 				sentenceSelecter = "p";
 				titleHostName = "-WuxiaWorld";
-				titleReplacement = "";
 				break;
 			case "royalroad":
 				host = "https://www.royalroad.com";
 				chapterContainer = ".chapter-content";
 				sentenceSelecter = "p";
 				titleHostName = "-Royal-Road";
-				titleReplacement = "";
 				break;
 			case "gravitytales":
 				host = "";
 				chapterContainer = ".fr-view";
 				sentenceSelecter = "p";
 				titleHostName = "-Gravity-Tales";
-				titleReplacement = "";
 				break;
 			case "volarenovels":
 				host = "";
 				chapterContainer = ".entry-content";
 				sentenceSelecter = "p";
 				titleHostName = "-volare-novels";
-				titleReplacement = "";
 				break;
 		}
 		Document doc = Jsoup.connect(host + url).get();
-		String fileName = "Ch-" + chapterNumber + "-" + (doc.title().replaceAll("[^\\w]+", "-").replace(titleHostName, "")) + fileType;
+		//Chapter numeration in filename
+		if(chapterNumeration == false) {
+			fileName = (doc.title().replaceAll("[^\\w]+", "-").replace(titleHostName, titleReplacement)) + fileType;
+		}
+		else {
+			fileName = "Ch-" + chapterNumber + "-" + (doc.title().replaceAll("[^\\w]+", "-").replace(titleHostName, titleReplacement)) + fileType;
+		}
+
 		Element content = doc.select(chapterContainer).first();
 		Elements p = content.select(sentenceSelecter);
 		File dir = new File(saveLocation);
@@ -224,7 +240,7 @@ public class fetchChapters {
 		try(PrintStream out = new PrintStream(saveLocation + File.separator + tocFileName)) {
 			out.print("<!DOCTYPE html>" + NL +"<html lang=\"en\">" + NL + "<head>" + NL + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
 			for (String chapterFileName : chapterFileNames) {
-			        out.print("<a href=\"" + chapterFileName + "\">" + chapterFileName +"</a><br/>" + NL);
+			        out.print("<a href=\"" + chapterFileName + "\">" + chapterFileName.replace(".html", "") +"</a><br/>" + NL);
 			}
 			out.print("</p>" + NL + "</body>" + NL + "</html>" + NL);
 		}

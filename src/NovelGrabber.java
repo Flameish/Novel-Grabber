@@ -1,10 +1,8 @@
 import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import java.awt.Font;
-import javax.swing.JTextField;
-import javax.swing.JProgressBar;
-import javax.swing.UIManager;
+import java.awt.Color;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.FileNotFoundException;
@@ -15,12 +13,15 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import java.awt.Color;
+import javax.swing.ToolTipManager;
+import javax.swing.JTextField;
+import javax.swing.JProgressBar;
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JCheckBox;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
-
 /*
  *  Window display and handling.
  */
@@ -40,6 +41,7 @@ public class NovelGrabber {
 	private static String[] fileTypes = {"HTML","TXT"};
 	private JTextField firstChapter;
 	private JTextField lastChapter;
+
 	/**
 	 * Launch the application
 	 */
@@ -69,6 +71,13 @@ public class NovelGrabber {
 	 */
 
 	private void initialize() {
+		//tooltip style
+	    int dismissDelay = ToolTipManager.sharedInstance().getDismissDelay();
+	    dismissDelay = Integer.MAX_VALUE;
+	    ToolTipManager.sharedInstance().setDismissDelay(dismissDelay);
+	    UIManager.put("ToolTip.background", new ColorUIResource(Color.white));
+		String toolTipStyle = "<html><p width=\"300\">";   
+		
 		frmNovelGrabber = new JFrame();
 		frmNovelGrabber.setResizable(false);
 		frmNovelGrabber.setTitle("Novel Grabber - 0.01");
@@ -99,7 +108,7 @@ public class NovelGrabber {
 		chapterListURL = new JTextField();
 		chapterListURL.setBounds(152, 19, 400, 25);
 		allChapterPane.add(chapterListURL);
-		chapterListURL.setToolTipText("https://novelwebsite.com/novel/name");
+		chapterListURL.setToolTipText("");
 		chapterListURL.setColumns(10);
 		
 		JLabel lblNovelChapterList = new JLabel("Table of Contents URL:");
@@ -116,7 +125,7 @@ public class NovelGrabber {
 		destinationFolder = new JTextField();
 		destinationFolder.setBounds(152, 80, 304, 25);
 		allChapterPane.add(destinationFolder);
-		destinationFolder.setToolTipText("C:\\Users\\YourName\\somefolder\\novels");
+		destinationFolder.setToolTipText("");
 		destinationFolder.setColumns(10);
 		
 		
@@ -130,6 +139,7 @@ public class NovelGrabber {
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));	
 		
 		JButton btnNewButton = new JButton("Browse...");
+		btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 			    JFileChooser chooser = new JFileChooser();
@@ -207,18 +217,26 @@ public class NovelGrabber {
 		optionSelect.setLayout(null);
 		
 		JCheckBox createTocCheckBox = new JCheckBox("Create ToC");
-		createTocCheckBox.setBounds(6, 15, 81, 23);
+		createTocCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		createTocCheckBox.setBounds(153, 15, 81, 23);
 		optionSelect.add(createTocCheckBox);
-		createTocCheckBox.setToolTipText("Will create a \"Table of Contents\" file which can be used to convert all chapter files into a single epub file in calibre.");
-		
+		createTocCheckBox.setToolTipText(toolTipStyle + "Will create a \"Table of Contents\" file which can be used to convert all chapter files into a single epub file in calibre.</p></html>");
+
 		fileTypeComboBox = new JComboBox(fileTypes);
-		fileTypeComboBox.setBounds(230, 16, 66, 20);
+		fileTypeComboBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		fileTypeComboBox.setBounds(77, 16, 66, 20);
 		optionSelect.add(fileTypeComboBox);
 		
-		JLabel fileTypeLabel = new JLabel("File type:");
+		JLabel fileTypeLabel = new JLabel("File output:");
 		fileTypeLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		fileTypeLabel.setBounds(148, 14, 81, 25);
+		fileTypeLabel.setBounds(10, 14, 66, 25);
 		optionSelect.add(fileTypeLabel);
+		
+		JCheckBox chapterNumerationCheckBox = new JCheckBox("Chapter numeration");
+		chapterNumerationCheckBox.setToolTipText(toolTipStyle + "Will add a chapter number infront of the chapter name. Helpful for ordering chapters which don't have a chapter number in their title.</p></html>");
+		chapterNumerationCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		chapterNumerationCheckBox.setBounds(236, 15, 149, 23);
+		optionSelect.add(chapterNumerationCheckBox);
 		
 		JPanel singleChapterPane = new JPanel();
 		singleChapterPane.setBounds(10, 403, 562, 120);
@@ -249,7 +267,7 @@ public class NovelGrabber {
 		websiteSelection2 = new JComboBox(websites);
 		websiteSelection2.setBounds(133, 66, 296, 30);
 		singleChapterPane.add(websiteSelection2);
-		
+
 		//All Chapters
 		getAllChaptersBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -285,10 +303,18 @@ public class NovelGrabber {
 						//grabbing all chapters
 						if(chapterAllCheckBox.isSelected() == true) {
 							if(fileTypeComboBox.getSelectedItem().toString() == "TXT") {
-								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""), ".txt");	
+								fetchChapters.getAllChapterLinks(chapterListURL.getText(), 
+										destinationFolder.getText(), 
+										(websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""), 
+										".txt",
+										chapterNumerationCheckBox.isSelected());	
 							}
 							else {
-								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(), (websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""), ".html");
+								fetchChapters.getAllChapterLinks(chapterListURL.getText(), 
+										destinationFolder.getText(), 
+										(websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""), 
+										".html",
+										chapterNumerationCheckBox.isSelected());
 							}
 							if(createTocCheckBox.isSelected() == true) {
 							fetchChapters.createToc(destinationFolder.getText());
@@ -303,7 +329,8 @@ public class NovelGrabber {
 										(websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""),
 										Integer.parseInt(firstChapter.getText()),
 										Integer.parseInt(lastChapter.getText()),
-										".txt");
+										".txt",
+										chapterNumerationCheckBox.isSelected());
 							}
 							else {
 								fetchChapters.getChapterRangeLinks(chapterListURL.getText(), 
@@ -311,7 +338,8 @@ public class NovelGrabber {
 										(websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""),
 										Integer.parseInt(firstChapter.getText()),
 										Integer.parseInt(lastChapter.getText()),
-										".html");
+										".html",
+										chapterNumerationCheckBox.isSelected());
 							}
 							if(createTocCheckBox.isSelected() == true) {
 							fetchChapters.createToc(destinationFolder.getText());
