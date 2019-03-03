@@ -14,7 +14,8 @@ import java.util.List;
 public class fetchChapters {
 	private static final String NL = System.getProperty("line.separator");
 	private static String novelName = "toc";
-	public static List<String> chapterFileNames = new ArrayList<String>(); 
+	public static List<String> chapterFileNames = new ArrayList<String>();
+	public static List<String> chapterUrl = new ArrayList<String>(); 
 	/**
 	 * Opens novel's table of contents page, 
 	 * retrieves chapter all links and processes them with saveChapters().
@@ -59,7 +60,7 @@ public class fetchChapters {
 		for (Element chapterLink : links) {
 			chapterAmount++;
 		}
-		NovelGrabber.setMaxProgress(chapterAmount);
+		NovelGrabber.setMaxProgress("auto", chapterAmount);
 		for (Element chapterLink : links) {
 			chapterNumber++;
 			saveChapters(chapterLink.attr("href"), saveLocation, host, chapterNumber, fileType, chapterNumeration);
@@ -116,7 +117,7 @@ public class fetchChapters {
 			return;
 		}
 		else {
-		NovelGrabber.setMaxProgress((lastChapter-firstChapter)+1);
+		NovelGrabber.setMaxProgress("auto",(lastChapter-firstChapter)+1);
 		for (int i = firstChapter-1; i <= lastChapter-1; i++) {
 			chapterNumber++;
 			saveChapters(chapters.get(i), saveLocation, host, chapterNumber, fileType, chapterNumeration);
@@ -191,7 +192,7 @@ public class fetchChapters {
 		}
 		chapterFileNames.add(fileName);
 		NovelGrabber.appendText(fileName + " saved.");
-		NovelGrabber.updateProgress(1);
+		NovelGrabber.updateProgress("auto", 1);
 	}
 	/**
 	 * Opens chapter link and tries to save it's content in current directory
@@ -244,5 +245,69 @@ public class fetchChapters {
 			}
 			out.print("</p>" + NL + "</body>" + NL + "</html>" + NL);
 		}
+	}
+	public static void retrieveChapterLinks(String url) throws IllegalArgumentException, FileNotFoundException, IOException  {
+		Document doc = Jsoup.connect(url).get();
+		Elements links = doc.select("a[href]");
+		String domain = url.substring(0, ordinalIndexOf(url,"/",3));
+		String currChapterLink = null;
+		for (Element chapterLink : links) {
+			if(chapterLink.attr("href").startsWith("/")) {
+				currChapterLink = (domain + chapterLink.attr("href"));
+			}
+			else {
+				currChapterLink = chapterLink.attr("href");
+			}
+			if(currChapterLink.startsWith("http") && !chapterLink.text().isEmpty()) {
+				chapterUrl.add(currChapterLink);
+				NovelGrabber.listModelChapterLinks.addElement(chapterLink.text());
+			}
+
+		}
+		System.out.println(chapterUrl);
+	}
+	public static void manSaveChapters(String saveLocation, String fileType, boolean chapterNumeration, String chapterContainer, String sentenceSelecter) 
+			throws IllegalArgumentException, FileNotFoundException, IOException {
+		String fileName = null;
+		int chapterNumber = 0;
+		NovelGrabber.setMaxProgress("manual", chapterUrl.size());
+		for(String chapter : chapterUrl) {
+			chapterNumber++;
+			Document doc = Jsoup.connect(chapter).get();
+			if(chapterNumeration == false) {
+				fileName = doc.title().replaceAll("[^\\w]+", "-") + fileType;
+			}
+			else {
+				fileName = "Ch-" + chapterNumber + "-" + doc.title().replaceAll("[^\\w]+", "-") + fileType;
+			}
+			Element content = doc.select(chapterContainer).first();
+			Elements p = content.select(sentenceSelecter);
+			File dir = new File(saveLocation);
+			if (!dir.exists()) dir.mkdirs();
+			if(fileType == ".txt") {
+				try(PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
+					for (Element x : p) {
+						out.println(x.text()+ NL);
+					}
+				}	
+			}
+			else {
+				try(PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
+					out.print("<!DOCTYPE html>" + NL +"<html lang=\"en\">" + NL + "<head>" + NL + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL +  "<body>" + NL);
+					for (Element x : p) {
+						out.println("<p>" + x.text() + "</p>" + NL);
+					}
+					out.print("</body>" + NL + "</html>");
+				}
+			}
+			chapterFileNames.add(fileName);
+			NovelGrabber.updateProgress("manual",1);
+		}
+	}
+	public static int ordinalIndexOf(String str, String substr, int n) {
+	    int pos = str.indexOf(substr);
+	    while (--n > 0 && pos != -1)
+	        pos = str.indexOf(substr, pos + 1);
+	    return pos;
 	}
 }
