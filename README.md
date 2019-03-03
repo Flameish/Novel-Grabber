@@ -19,6 +19,7 @@ Optional:
 * Choose between multiple file types for the chapters to be saved in. (Note: ToC can only be created from HTML files)
 * Chapter Numeration will add a number in front of the file names to keep them in order if they don't come with one in their names.
 ![alt text](https://i.imgur.com/zCgugtX.jpg) <br>
+
 Alternatively use the manual tab if the novel is not on one of the supported sites(requires a little bit of HTML knowledge):
 * Enter the URL to the novel's Table of Contents page and retrieve all links on the site. Afterwards remove all unwanted links from the selection window. (Note: The chapters should be hosted on the same site or the chapter-text selectors will probably not work)
 * Input the chapter wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. For example a <div> with a class "chapter-text" or id "chapter-content". If you go with a class name use a "." in front of the name (eg: .chapter-text) or a "#" for ids (eg: #chapter-content).
