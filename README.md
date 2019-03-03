@@ -24,7 +24,7 @@ Optional:
 
 Alternatively use the manual tab if your novel is not on one of the supported sites:
 * Enter the URL to the novel's Table of Contents page and retrieve all links on the site. Afterwards remove all unwanted links from the selection window. (Note: The chapters should be hosted on the same site or the chapter-text selectors will probably not work)
-* Input the chapter wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. For example a \<div\> with a class "chapter-text" or id "chapter-content". If you go with a class name use a "." in front of the name (eg: .chapter-text) or a "#" for ids (eg: #chapter-content). You can more complex selector options and information on the offical [jsoup] site(https://jsoup.org/cookbook/extracting-data/selector-syntax).
+* Input the chapter wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. For example a \<div\> with a class "chapter-text" or id "chapter-content". If you go with a class name use a "." in front of the name (eg: .chapter-text) or a "#" for ids (eg: #chapter-content). You can more complex selector options and information on the offical [jsoup site](https://jsoup.org/cookbook/extracting-data/selector-syntax).
 * While you are inspecting the webpage, take a look at the wrapper around each chapter's sentences (if there are any). Most commonly used is "\<p\>". Input "p" if that is the case. <br>
 
 ![alt text](https://i.imgur.com/mIrefvb.jpg)<br>
