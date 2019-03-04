@@ -6,6 +6,8 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * [Royalroad](https://royalroad.com/)
 * [Gravitytales](https://gravitytales.com/)
 * [Volarenovels](https://volarenovels.com/)
+* [Noodletown Translated](https://noodletowntranslated.com/)
+* [BoxNovel](https://boxnovel.com/)
 
 ## How to use
 * Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/raw/master/NovelGrabber.jar)
