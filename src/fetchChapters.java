@@ -6,10 +6,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import javax.swing.JOptionPane;
 
 /*
  * Chapter download handling
@@ -17,6 +20,7 @@ import java.util.List;
 public class fetchChapters {
 	public static boolean error = false;
 	private static final String NL = System.getProperty("line.separator");
+	private static final String textEncoding = "UTF-8";
 	private static String tocFileName = "toc";
 	public static List<String> chapterFileNames = new ArrayList<String>();
 	public static List<String> chapterUrl = new ArrayList<String>();
@@ -33,7 +37,6 @@ public class fetchChapters {
 		ArrayList<String> chaptersNames = new ArrayList<String>();
 		int chapterNumber = 0;
 		int chapterAmount = 0;
-
 		NovelGrabberGUI.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
 		tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(),
@@ -117,31 +120,35 @@ public class fetchChapters {
 		} else {
 			fileName = "Ch-" + chapterNumber + "-" + fileName.replaceAll("[^\\w]+", "-") + fileType;
 		}
-
-		Element content = doc.select(currentNovel.getChapterContainer()).first();
-		Elements p = content.select(currentNovel.getSentenceSelecter());
-		File dir = new File(saveLocation);
-		if (!dir.exists())
-			dir.mkdirs();
-		if (fileType == ".txt") {
-			try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
-				for (Element x : p) {
-					out.println(x.text() + NL);
+		try {
+			Element content = doc.select(currentNovel.getChapterContainer()).first();
+			Elements p = content.select(currentNovel.getSentenceSelecter());
+			File dir = new File(saveLocation);
+			if (!dir.exists())
+				dir.mkdirs();
+			if (fileType == ".txt") {
+				try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+					for (Element x : p) {
+						out.println(x.text() + NL);
+					}
+				}
+			} else {
+				try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+					out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
+							+ "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL);
+					for (Element x : p) {
+						out.print("<p>" + x.text() + "</p>" + NL);
+					}
+					out.print("</body>" + NL + "</html>");
 				}
 			}
-		} else {
-			try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
-				out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
-						+ "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL);
-				for (Element x : p) {
-					out.println("<p>" + x.text() + "</p>" + NL);
-				}
-				out.print("</body>" + NL + "</html>");
-			}
+			chapterFileNames.add(fileName);
+			NovelGrabberGUI.appendText(fileName + " saved.");
+			NovelGrabberGUI.updateProgress("auto", 1);
+		} catch (Exception noSelectors) {
+			NovelGrabberGUI.appendText("Could not detect selectors on: " + url);
 		}
-		chapterFileNames.add(fileName);
-		NovelGrabberGUI.appendText(fileName + " saved.");
-		NovelGrabberGUI.updateProgress("auto", 1);
+
 	}
 
 	/**
@@ -153,32 +160,38 @@ public class fetchChapters {
 		NovelGrabberGUI.appendText("Connecting...");
 		Document doc = Jsoup.connect(url).get();
 		String fileName = doc.title().replaceAll("[^\\w]+", "-") + ".html";
-		Element content = doc.select(currentNovel.getChapterContainer()).first();
-		Elements p = content.select(currentNovel.getSentenceSelecter());
-		try (PrintStream out = new PrintStream(fileName)) {
-			out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL + "<meta charset=\"utf-8\" />"
-					+ NL + "</head>" + NL + "<body>" + NL);
-			for (Element x : p) {
-				out.println("<p>" + x.text() + "</p>" + NL);
+		try {
+			Element content = doc.select(currentNovel.getChapterContainer()).first();
+			Elements p = content.select(currentNovel.getSentenceSelecter());
+			try (PrintStream out = new PrintStream(fileName, textEncoding)) {
+				out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
+						+ "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL);
+				for (Element x : p) {
+					out.print("<p>" + x.text() + "</p>" + NL);
+				}
+				out.print("</body>" + NL + "</html>");
 			}
-			out.print("</body>" + NL + "</html>");
+			NovelGrabberGUI.appendText(fileName + " saved.");
+		} catch (Exception noSelectors) {
+			NovelGrabberGUI.appendText("Could not detect selectors on: " + url);
 		}
-		NovelGrabberGUI.appendText(fileName + " saved.");
 	}
 
-	public static void createToc(String saveLocation) throws FileNotFoundException {
-		String fileName = tocFileName + ".html";
-
-		try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
-			out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL + "<meta charset=\"UTF-8\" />"
-					+ NL + "</head>" + NL + "<body>" + NL + "<h1>Table of Contents</h1>" + NL
-					+ "<p style=\"text-indent:0pt\">" + NL);
-			for (String chapterFileName : chapterFileNames) {
-				out.print("<a href=\"" + chapterFileName + "\">" + chapterFileName.replace(".html", "") + "</a><br/>"
-						+ NL);
+	public static void createToc(String saveLocation) throws FileNotFoundException, UnsupportedEncodingException {
+		if (!chapterFileNames.isEmpty()) {
+			String fileName = tocFileName + ".html";
+			try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+				out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
+						+ "<meta charset=\"UTF-8\" />" + NL + "</head>" + NL + "<body>" + NL
+						+ "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+				for (String chapterFileName : chapterFileNames) {
+					out.print("<a href=\"" + chapterFileName + "\">" + chapterFileName.replace(".html", "")
+							+ "</a><br/>" + NL);
+				}
+				out.print("</p>" + NL + "</body>" + NL + "</html>" + NL);
 			}
-			out.print("</p>" + NL + "</body>" + NL + "</html>" + NL);
 		}
+
 	}
 
 	public static void retrieveChapterLinks(String url)
@@ -197,9 +210,7 @@ public class fetchChapters {
 				chapterUrl.add(currChapterLink);
 				NovelGrabberGUI.listModelChapterLinks.addElement(chapterLink.text());
 			}
-
 		}
-		System.out.println(chapterUrl);
 	}
 
 	public static void manSaveChapters(String saveLocation, String fileType, boolean chapterNumeration,
@@ -237,33 +248,38 @@ public class fetchChapters {
 				}
 
 			}
-			Element content = doc.select(chapterContainer).first();
-			Elements p = content.select(sentenceSelecter);
-			File dir = new File(saveLocation);
-			if (!dir.exists())
-				dir.mkdirs();
-			if (fileType == ".txt") {
-				try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
-					for (Element x : p) {
-						out.println(x.text() + NL);
+			try {
+				Element content = doc.select(chapterContainer).first();
+				Elements p = content.select(sentenceSelecter);
+				File dir = new File(saveLocation);
+				if (!dir.exists())
+					dir.mkdirs();
+				if (fileType == ".txt") {
+					try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+						for (Element x : p) {
+							out.println(x.text() + NL);
+						}
+					}
+				} else {
+					try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+						out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
+								+ "<meta charset=\"UTF-8\" />" + NL + "</head>" + NL + "<body>" + NL);
+						for (Element x : p) {
+							out.print("<p>" + x.text() + "</p>" + NL);
+						}
+						out.print("</body>" + NL + "</html>");
 					}
 				}
-			} else {
-				try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName)) {
-					out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
-							+ "<meta charset=\"UTF-8\" />" + NL + "</head>" + NL + "<body>" + NL);
-					for (Element x : p) {
-						out.println("<p>" + x.text() + "</p>" + NL);
-					}
-					out.print("</body>" + NL + "</html>");
-				}
+				chapterFileNames.add(fileName);
+				NovelGrabberGUI.updateProgress("manual", 1);
+			} catch (Exception noSelectors) {
+				System.out.print("Could not detect selectors on : " + chapter);
 			}
-			chapterFileNames.add(fileName);
-			NovelGrabberGUI.updateProgress("manual", 1);
 		}
 		if (invertOrder == true) {
 			Collections.reverse(chapterUrl);
 		}
+
 	}
 
 	public static int ordinalIndexOf(String str, String substr, int n) {

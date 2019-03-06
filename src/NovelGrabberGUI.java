@@ -32,7 +32,7 @@ import javax.swing.JSeparator;
  *  Window display and handling.
  */
 public class NovelGrabberGUI {
-	private final String versionNumber = "v1.1.0-beta";
+	private final String versionNumber = "v1.1.01";
 	private JFrame frmNovelGrabber;
 	private JTextField chapterListURL;
 	private JTextField destinationFolder;
@@ -46,8 +46,6 @@ public class NovelGrabberGUI {
 	public static final String NL = System.getProperty("line.separator");
 	public static DefaultListModel listModelChapterLinks = new DefaultListModel();
 	public static JList chapterLinkList = new JList(listModelChapterLinks);
-	private static String[] websites = { "Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
-			"Noodletown Translated", "BoxNovel" };
 	private static String[] fileTypes = { "HTML", "TXT" };
 	private JTextField firstChapter;
 	private JTextField lastChapter;
@@ -153,7 +151,7 @@ public class NovelGrabberGUI {
 		destinationFolder.setToolTipText("");
 		destinationFolder.setColumns(10);
 
-		websiteSelection1 = new JComboBox(websites);
+		websiteSelection1 = new JComboBox(Novel.websites);
 		websiteSelection1.setBounds(152, 49, 390, 25);
 		allChapterPane.add(websiteSelection1);
 
@@ -261,13 +259,14 @@ public class NovelGrabberGUI {
 		chapterNumerationCheckBox.setToolTipText(toolTipStyle
 				+ "Will add a chapter number infront of the chapter name. Helpful for ordering chapters which don't have a chapter number in their title.</p></html>");
 		chapterNumerationCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		chapterNumerationCheckBox.setBounds(236, 15, 127, 23);
+		chapterNumerationCheckBox.setBounds(236, 15, 121, 23);
 		optionSelect.add(chapterNumerationCheckBox);
-		
+
 		JCheckBox checkInvertOrder = new JCheckBox("Invert chapter order");
-		checkInvertOrder.setToolTipText("<html><p width=\"300\">Invert  the chapter oder and download the last chapter first. Useful if sites list the highest chapter at the top</p></html>");
+		checkInvertOrder.setToolTipText(
+				"<html><p width=\"300\">Invert  the chapter oder and download the last chapter first. Useful if sites list the highest chapter at the top</p></html>");
 		checkInvertOrder.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		checkInvertOrder.setBounds(365, 15, 139, 23);
+		checkInvertOrder.setBounds(359, 15, 139, 23);
 		optionSelect.add(checkInvertOrder);
 
 		JPanel singleChapterPane = new JPanel();
@@ -296,7 +295,7 @@ public class NovelGrabberGUI {
 		label.setBounds(10, 59, 73, 25);
 		singleChapterPane.add(label);
 
-		websiteSelection2 = new JComboBox(websites);
+		websiteSelection2 = new JComboBox(Novel.websites);
 		websiteSelection2.setBounds(133, 59, 286, 25);
 		singleChapterPane.add(websiteSelection2);
 
@@ -482,20 +481,20 @@ public class NovelGrabberGUI {
 		manChapterNumeration.setToolTipText(
 				"<html><p width=\"300\">Will add a chapter number infront of the chapter name. Helpful for ordering chapters which don't have a chapter number in their title.</p></html>");
 		manChapterNumeration.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		manChapterNumeration.setBounds(236, 15, 126, 23);
+		manChapterNumeration.setBounds(236, 15, 121, 23);
 		panel_2.add(manChapterNumeration);
-		
+
 		JCheckBox manCheckInvertOrder = new JCheckBox("Invert chapter order");
-		manCheckInvertOrder.setToolTipText("<html><p width=\"300\">Invert the chapter order and download the last chapter first. Useful if sites list the highest chapter at the top.</p></html>");
+		manCheckInvertOrder.setToolTipText(
+				"<html><p width=\"300\">Invert the chapter order and download the last chapter first. Useful if sites list the highest chapter at the top.</p></html>");
 		manCheckInvertOrder.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		manCheckInvertOrder.setBounds(364, 15, 139, 23);
+		manCheckInvertOrder.setBounds(359, 15, 139, 23);
 		panel_2.add(manCheckInvertOrder);
 
 		// manual chapter download
 		btnManGrabChapters.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnManGrabChapters.setEnabled(false);
-				System.out.println(manFileType.getSelectedItem().toString());
 				// input validation
 				if (manChapterListURL.getText().isEmpty() == true) {
 					JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
@@ -590,35 +589,26 @@ public class NovelGrabberGUI {
 				getAllChaptersBtn.setEnabled(false);
 				// input validation
 				if (chapterListURL.getText().isEmpty() == true) {
-					JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					showPopup("URL field is empty.", "warning");
 					chapterListURL.requestFocusInWindow();
 				} else if ((fileTypeComboBox.getSelectedItem().toString() == "TXT")
 						&& (createTocCheckBox.isSelected() == true)) {
-					JOptionPane.showMessageDialog(frmNovelGrabber,
-							"Cannot create a Table of Contents file with .txt file type.", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					showPopup("Cannot create a Table of Contents file with .txt file type.", "warning");
 				} else if (destinationFolder.getText().isEmpty() == true) {
-					JOptionPane.showMessageDialog(frmNovelGrabber, "", "Warning", JOptionPane.WARNING_MESSAGE);
-					JOptionPane.showMessageDialog(frmNovelGrabber, "Save directory field is empty.", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					showPopup("Save directory field is empty.", "warning");
 					destinationFolder.requestFocusInWindow();
 				} else if ((chapterAllCheckBox.isSelected() == false)
 						&& ((firstChapter.getText().isEmpty() == true) || (lastChapter.getText().isEmpty() == true))) {
-					JOptionPane.showMessageDialog(frmNovelGrabber, "No chapter range defined.", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					showPopup("No chapter range defined.", "warning");
 				} else if ((chapterAllCheckBox.isSelected() == false)
 						&& (!firstChapter.getText().matches("\\d+") || !lastChapter.getText().matches("\\d+"))) {
-					JOptionPane.showMessageDialog(frmNovelGrabber, "Chapter range must contain numbers.", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					showPopup("Chapter range must contain numbers.", "warning");
 				} else if ((chapterAllCheckBox.isSelected() == false) && ((Integer.parseInt(firstChapter.getText()) < 1)
 						|| (Integer.parseInt(lastChapter.getText()) < 1))) {
-					JOptionPane.showMessageDialog(frmNovelGrabber, "Chapter numbers can't be lower than 1.", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					showPopup("Chapter numbers can't be lower than 1.", "warning");
 				} else if ((chapterAllCheckBox.isSelected() == false)
 						&& (Integer.parseInt(lastChapter.getText()) < Integer.parseInt(firstChapter.getText()))) {
-					JOptionPane.showMessageDialog(frmNovelGrabber, "Last chapter can't be lower than first chapter.",
-							"Warning", JOptionPane.WARNING_MESSAGE);
+					showPopup("Last chapter can't be lower than first chapter.", "warning");
 				}
 				// grabbing chapter calls
 				else if ((destinationFolder.getText().isEmpty() == false)
@@ -630,7 +620,7 @@ public class NovelGrabberGUI {
 							if (fileTypeComboBox.getSelectedItem().toString() == "TXT") {
 								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(),
 										(websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""),
-										".txt", chapterNumerationCheckBox.isSelected(),checkInvertOrder.isSelected());
+										".txt", chapterNumerationCheckBox.isSelected(), checkInvertOrder.isSelected());
 							} else {
 								fetchChapters.getAllChapterLinks(chapterListURL.getText(), destinationFolder.getText(),
 										(websiteSelection1.getSelectedItem().toString()).toLowerCase().replace(" ", ""),
@@ -670,13 +660,13 @@ public class NovelGrabberGUI {
 					}
 					// exception handling
 					catch (IllegalArgumentException err) {
-						JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
+						showPopup(err.toString(), "error");
 					} catch (FileNotFoundException err) {
-						JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
+						showPopup(err.toString(), "error");
 					} catch (NullPointerException err) {
-						JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
+						showPopup(err.toString(), "error");
 					} catch (IOException err) {
-						JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
+						showPopup(err.toString(), "error");
 					} finally {
 						progressBar.setStringPainted(false);
 						progressBar.setValue(0);
@@ -691,6 +681,17 @@ public class NovelGrabberGUI {
 	public static void appendText(String log) {
 		logArea.append(log + NL);
 		logArea.update(logArea.getGraphics());
+	}
+
+	public void showPopup(String errorMsg, String kind) {
+		switch (kind) {
+		case "warning":
+			JOptionPane.showMessageDialog(frmNovelGrabber, errorMsg, "Warning", JOptionPane.WARNING_MESSAGE);
+			break;
+		case "error":
+			JOptionPane.showMessageDialog(frmNovelGrabber, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
+			break;
+		}
 	}
 
 	public static void updateProgress(String progressBarSelect, int i) {
