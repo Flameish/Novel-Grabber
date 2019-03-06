@@ -7,6 +7,9 @@ public class Novel {
 	String host;
 	String chapterContainer;
 	String sentenceSelecter;
+	public static String[] websites = { "Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
+			"Noodletown Translated", "BoxNovel", "Lightnovel Translations", "Fuji Translation",
+			"Exiled Rebels Scanlations", "Rainbow Turtle Translations(Arkmachinetranslations)" };
 
 	public Novel(String domain, String url) {
 		switch (domain) {
@@ -59,7 +62,40 @@ public class Novel {
 			sentenceSelecter = "p";
 			titleHostName = "";
 			break;
+		case "lightnoveltranslations":
+			host = "";
+			chapterLinkContainer = ".entry-content";
+			chapterLinkSelecter = "a[href^=" + url + "]";
+			chapterContainer = ".entry-content";
+			sentenceSelecter = "p";
+			titleHostName = "";
+			break;
+		case "fujitranslation":
+			host = "";
+			chapterLinkContainer = ".entry-content";
+			chapterLinkSelecter = "a[href^=https://fujitranslation]";
+			chapterContainer = ".entry-content";
+			sentenceSelecter = "p";
+			titleHostName = "";
+			break;
+		case "exiledrebelsscanlations":
+			host = "";
+			chapterLinkContainer = ".lcp_catlist";
+			chapterLinkSelecter = "a[href^=https://exiledrebels]";
+			chapterContainer = ".entry-content";
+			sentenceSelecter = "p";
+			titleHostName = "";
+			break;
+		case "rainbowturtletranslations(arkmachinetranslations)":
+			host = "";
+			chapterLinkContainer = ".entry-content";
+			chapterLinkSelecter = "a[href^=https://arkmachinetranslations]";
+			chapterContainer = ".entry-content";
+			sentenceSelecter = "p";
+			titleHostName = "";
+			break;
 		}
+		
 	}
 
 	public String getChapterLinkContainer() {
