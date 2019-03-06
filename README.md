@@ -8,6 +8,10 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * [Volarenovels](https://volarenovels.com/)
 * [Noodletown Translated](https://noodletowntranslated.com/)
 * [BoxNovel](https://boxnovel.com/)
+* [Lightnovel Translations](https://lightnovelstranslations.com/)
+* [Fuji Translation](https://fujitranslation.com/)
+* [Exiled Rebels Scanlations](https://exiledrebelsscanlations.com/)
+* [Rainbow Turtle Translations](https://arkmachinetranslations.wordpress.com/)
 
 ## How to use
 * Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/raw/master/NovelGrabber.jar)
@@ -22,14 +26,14 @@ Optional:
 * Chapter Numeration will add a number in front of the file names to keep them in order if they don't come with one in their names.
 * You can also enter a link to a specific chapter at the bottom. <br>
 
-![alt text](https://i.imgur.com/zCgugtX.jpg) <br>
+![alt text](https://i.imgur.com/3osXqu1.jpg) <br>
 
 Alternatively use the manual tab if your novel is not on one of the supported sites:
 * Enter the URL to the novel's Table of Contents page and retrieve all links on the site. Afterwards remove all unwanted links from the selection window. (Note: The chapters should be hosted on the same site or the chapter-text selectors will probably not work)
 * Input the chapter wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. For example a \<div\> with a class "chapter-text" or id "chapter-content". If you go with a class name use a "." in front of the name (eg: .chapter-text) or a "#" for ids (eg: #chapter-content). You can find more complex selector examples and information on the offical [jsoup site](https://jsoup.org/cookbook/extracting-data/selector-syntax).
 * While you are inspecting the webpage, take a look at the wrapper around each chapter's sentences (if there are any). Most commonly used is "\<p\>". Input "p" if that is the case. <br>
 
-![alt text](https://i.imgur.com/mIrefvb.jpg)<br>
+![alt text](https://i.imgur.com/gphgApb.jpg)<br>
 
 ## Currently not working
 * [Coiling Dragon](https://www.wuxiaworld.com/novel/coiling-dragon-preview) - Official epub available
