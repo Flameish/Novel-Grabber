@@ -21,7 +21,7 @@ public class fetchChapters {
 	public static boolean error = false;
 	private static final String NL = System.getProperty("line.separator");
 	private static final String textEncoding = "UTF-8";
-	private static String tocFileName = "toc";
+	private static String tocFileName = "Table Of Contents";
 	public static List<String> chapterFileNames = new ArrayList<String>();
 	public static List<String> chapterUrl = new ArrayList<String>();
 
@@ -38,7 +38,7 @@ public class fetchChapters {
 		int chapterNumber = 0;
 		int chapterAmount = 0;
 		NovelGrabberGUI.appendText("Connecting...");
-		Document doc = Jsoup.connect(url).get();
+		Document doc = Jsoup.connect(currentNovel.getUrl()).get();
 		tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(),
 				titleReplacement)) + " Table of Contents";
 		Element content = doc.select(currentNovel.getChapterLinkContainer()).first();
@@ -54,7 +54,7 @@ public class fetchChapters {
 		NovelGrabberGUI.setMaxProgress("auto", chapterAmount);
 		for (Element chapterLink : links) {
 			chapterNumber++;
-			saveChapters(chapterLink.attr("href"), saveLocation, host, chapterNumber, fileType, chapterNumeration,
+			saveChapters(chapterLink.attr("abs:href"), saveLocation, host, chapterNumber, fileType, chapterNumeration,
 					chaptersNames.get(chapterNumber - 1));
 		}
 		NovelGrabberGUI.appendText("Finished! A total of " + chapterNumber + " chapter grabbed.");
@@ -74,15 +74,15 @@ public class fetchChapters {
 		String titleReplacement = "";
 		int chapterNumber = 0;
 		NovelGrabberGUI.appendText("Connecting...");
-		Document doc = Jsoup.connect(url).get();
+		Document doc = Jsoup.connect(currentNovel.getUrl()).get();
 		tocFileName = "Table-of-Contents-"
 				+ (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(), titleReplacement)
 						+ "-Chapter-" + firstChapter + "-" + lastChapter);
-		Element content = doc.select(currentNovel.getChapterLinkContainer()).first();
+		Elements content = doc.select(currentNovel.getChapterLinkContainer());
 		Elements chapterItem = content.select(currentNovel.getChapterLinkSelecter());
 		Elements links = chapterItem.select("a[href]");
 		for (Element chapterLink : links) {
-			chapters.add(chapterLink.attr("href"));
+			chapters.add(chapterLink.attr("abs:href"));
 			chaptersNames.add(chapterLink.text());
 
 		}
@@ -113,7 +113,7 @@ public class fetchChapters {
 			boolean chapterNumeration, String fileName)
 			throws IllegalArgumentException, FileNotFoundException, IOException {
 		Novel currentNovel = new Novel(host, url);
-		Document doc = Jsoup.connect(currentNovel.getHost() + url).get();
+		Document doc = Jsoup.connect(url).get();
 		// Chapter numeration in filename
 		if (chapterNumeration == false) {
 			fileName = fileName.replaceAll("[^\\w]+", "-") + fileType;
@@ -177,35 +177,13 @@ public class fetchChapters {
 		}
 	}
 
-	public static void createToc(String saveLocation) throws FileNotFoundException, UnsupportedEncodingException {
-		if (!chapterFileNames.isEmpty()) {
-			String fileName = tocFileName + ".html";
-			try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
-				out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
-						+ "<meta charset=\"UTF-8\" />" + NL + "</head>" + NL + "<body>" + NL
-						+ "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
-				for (String chapterFileName : chapterFileNames) {
-					out.print("<a href=\"" + chapterFileName + "\">" + chapterFileName.replace(".html", "")
-							+ "</a><br/>" + NL);
-				}
-				out.print("</p>" + NL + "</body>" + NL + "</html>" + NL);
-			}
-		}
-
-	}
-
 	public static void retrieveChapterLinks(String url)
 			throws IllegalArgumentException, FileNotFoundException, IOException {
 		Document doc = Jsoup.connect(url).get();
 		Elements links = doc.select("a[href]");
-		String domain = url.substring(0, ordinalIndexOf(url, "/", 3));
 		String currChapterLink = null;
 		for (Element chapterLink : links) {
-			if (chapterLink.attr("href").startsWith("/")) {
-				currChapterLink = (domain + chapterLink.attr("href"));
-			} else {
-				currChapterLink = chapterLink.attr("href");
-			}
+			currChapterLink = chapterLink.attr("abs:href");
 			if (currChapterLink.startsWith("http") && !chapterLink.text().isEmpty()) {
 				chapterUrl.add(currChapterLink);
 				NovelGrabberGUI.listModelChapterLinks.addElement(chapterLink.text());
@@ -279,13 +257,21 @@ public class fetchChapters {
 		if (invertOrder == true) {
 			Collections.reverse(chapterUrl);
 		}
-
 	}
 
-	public static int ordinalIndexOf(String str, String substr, int n) {
-		int pos = str.indexOf(substr);
-		while (--n > 0 && pos != -1)
-			pos = str.indexOf(substr, pos + 1);
-		return pos;
+	public static void createToc(String saveLocation) throws FileNotFoundException, UnsupportedEncodingException {
+		if (!chapterFileNames.isEmpty()) {
+			String fileName = tocFileName + ".html";
+			try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+				out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
+						+ "<meta charset=\"UTF-8\" />" + NL + "</head>" + NL + "<body>" + NL
+						+ "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+				for (String chapterFileName : chapterFileNames) {
+					out.print("<a href=\"" + chapterFileName + "\">" + chapterFileName.replace(".html", "")
+							+ "</a><br/>" + NL);
+				}
+				out.print("</p>" + NL + "</body>" + NL + "</html>" + NL);
+			}
+		}
 	}
 }
