@@ -9,120 +9,128 @@ public class Novel {
 	String sentenceSelecter;
 	public static String[] websites = { "Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
 			"Noodletown Translated", "BoxNovel", "Lightnovel Translations", "Fuji Translation",
-			"Exiled Rebels Scanlations", "Rainbow Turtle Translations(Arkmachinetranslations)" };
+			"Exiled Rebels Scanlations", "Rainbow Turtle Translations(Arkmachinetranslations)"};
 
-	public Novel(String domain, String url) {
+	public Novel(String domain, String urla) {
+		url = urla;
 		switch (domain) {
 		case "wuxiaworld":
-			host = "https://www.wuxiaworld.com";
-			chapterLinkContainer = "#accordion";
-			chapterLinkSelecter = ".chapter-item";
-			chapterContainer = ".fr-view";
-			sentenceSelecter = "p";
-			titleHostName = "-WuxiaWorld";
+			this.host = "https://wuxiaworld.com/";
+			this.chapterLinkContainer = "#accordion";
+			this.chapterLinkSelecter = ".chapter-item";
+			this.chapterContainer = ".fr-view";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "-WuxiaWorld";
 			break;
 		case "royalroad":
-			host = "https://www.royalroad.com";
-			chapterLinkContainer = ".table";
-			chapterLinkSelecter = "td";
-			chapterContainer = ".chapter-content";
-			sentenceSelecter = "p";
-			titleHostName = "-Royal-Road";
+			this.host = "https://www.royalroad.com/";
+			this.chapterLinkContainer = ".table";
+			this.chapterLinkSelecter = "td";
+			this.chapterContainer = ".chapter-content";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "-Royal-Road";
 			break;
 		case "gravitytales":
-			host = "";
-			chapterLinkContainer = ".table";
-			chapterLinkSelecter = "td";
-			chapterContainer = ".fr-view";
-			sentenceSelecter = "p";
-			url = url + "/chapters";
-			titleHostName = "-Gravity-Tales";
+			this.host = "http://gravitytales.com/";
+			this.chapterLinkContainer = ".table";
+			this.chapterLinkSelecter = "td";
+			this.chapterContainer = ".fr-view";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "-Gravity-Tales";
+			url = urla + "/chapters";
 			break;
 		case "volarenovels":
-			host = "";
-			chapterLinkContainer = ".entry-content";
-			chapterLinkSelecter = "a[href^=" + url + "]";
-			chapterContainer = ".entry-content";
-			sentenceSelecter = "p";
-			titleHostName = "-volare-novels";
+			this.host = "https://volarenovels.com/";
+			this.chapterLinkContainer = ".entry-content";
+			this.chapterLinkSelecter = "a[href^=" + urla + "]";
+			this.chapterContainer = ".entry-content";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "-volare-novels";
 			break;
 		case "noodletowntranslated":
-			host = "";
-			chapterLinkContainer = "table";
-			chapterLinkSelecter = "a";
-			chapterContainer = ".post-content";
-			sentenceSelecter = "p";
-			titleHostName = "-Noodletown-Translated";
+			this.host = "https://www.noodletowntranslated.com/";
+			this.chapterLinkContainer = "table";
+			this.chapterLinkSelecter = "a";
+			this.chapterContainer = ".post-content";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "-Noodletown-Translated";
 			break;
 		case "boxnovel":
-			host = "";
-			chapterLinkContainer = ".listing-chapters_wrap";
-			chapterLinkSelecter = "a";
-			chapterContainer = ".cha-words";
-			sentenceSelecter = "p";
-			titleHostName = "";
+			this.host = "https://boxnovel.com/";
+			this.chapterLinkContainer = ".listing-chapters_wrap";
+			this.chapterLinkSelecter = "a";
+			this.chapterContainer = ".cha-words";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "";
 			break;
 		case "lightnoveltranslations":
-			host = "";
-			chapterLinkContainer = ".entry-content";
-			chapterLinkSelecter = "a[href^=" + url + "]";
-			chapterContainer = ".entry-content";
-			sentenceSelecter = "p";
-			titleHostName = "";
+			this.host = "https://lightnovelstranslations.com/";
+			this.chapterLinkContainer = ".entry-content";
+			this.chapterLinkSelecter = "a[href^=" + urla + "]";
+			this.chapterContainer = ".entry-content";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "";
 			break;
 		case "fujitranslation":
-			host = "";
-			chapterLinkContainer = ".entry-content";
-			chapterLinkSelecter = "a[href^=https://fujitranslation]";
-			chapterContainer = ".entry-content";
-			sentenceSelecter = "p";
-			titleHostName = "";
+			this.host = "https://fujitranslation.com/";
+			this.chapterLinkContainer = ".entry-content";
+			this.chapterLinkSelecter = "a[href^=https://fujitranslation]";
+			this.chapterContainer = ".entry-content";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "";
 			break;
 		case "exiledrebelsscanlations":
-			host = "";
-			chapterLinkContainer = ".lcp_catlist";
-			chapterLinkSelecter = "a[href^=https://exiledrebels]";
-			chapterContainer = ".entry-content";
-			sentenceSelecter = "p";
-			titleHostName = "";
+			this.host = "https://exiledrebelsscanlations.com/";
+			this.chapterLinkContainer = ".lcp_catlist";
+			this.chapterLinkSelecter = "a[href^=https://exiledrebels]";
+			this.chapterContainer = ".entry-content";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "";
 			break;
 		case "rainbowturtletranslations(arkmachinetranslations)":
-			host = "";
-			chapterLinkContainer = ".entry-content";
-			chapterLinkSelecter = "a[href^=https://arkmachinetranslations]";
-			chapterContainer = ".entry-content";
-			sentenceSelecter = "p";
-			titleHostName = "";
+			this.host = "https://arkmachinetranslations.wordpress.com/";
+			this.chapterLinkContainer = ".entry-content";
+			this.chapterLinkSelecter = "a[href^=https://arkmachinetranslations]";
+			this.chapterContainer = ".entry-content";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "";
+			break;
+		case "creativenovels":
+			this.host = "https://creativenovels.com/";
+			this.chapterLinkContainer = ".post_box";
+			this.chapterLinkSelecter = "a";
+			this.chapterContainer = ".entry-content";
+			this.sentenceSelecter = "p";
+			this.titleHostName = "";
 			break;
 		}
-		
 	}
 
 	public String getChapterLinkContainer() {
-		return chapterLinkContainer;
+		return this.chapterLinkContainer;
 	}
 
 	public String getChapterLinkSelecter() {
-		return chapterLinkSelecter;
+		return this.chapterLinkSelecter;
 	}
 
 	public String getTitleHostName() {
-		return titleHostName;
+		return this.titleHostName;
 	}
 
 	public String getUrl() {
-		return url;
+		return this.url;
 	}
 
 	public String getHost() {
-		return host;
+		return this.host;
 	}
 
 	public String getChapterContainer() {
-		return chapterContainer;
+		return this.chapterContainer;
 	}
 
 	public String getSentenceSelecter() {
-		return sentenceSelecter;
+		return this.sentenceSelecter;
 	}
 }
