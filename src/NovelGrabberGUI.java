@@ -1,12 +1,17 @@
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
@@ -32,7 +37,7 @@ import javax.swing.JSeparator;
  *  Window display and handling.
  */
 public class NovelGrabberGUI {
-	private final String versionNumber = "v1.1.01";
+	private final String versionNumber = "v1.1.02";
 	private JFrame frmNovelGrabber;
 	private JTextField chapterListURL;
 	private JTextField destinationFolder;
@@ -152,7 +157,7 @@ public class NovelGrabberGUI {
 		destinationFolder.setColumns(10);
 
 		websiteSelection1 = new JComboBox(Novel.websites);
-		websiteSelection1.setBounds(152, 49, 390, 25);
+		websiteSelection1.setBounds(152, 49, 294, 25);
 		allChapterPane.add(websiteSelection1);
 
 		JLabel lblNewLabel = new JLabel("Host website:");
@@ -268,6 +273,22 @@ public class NovelGrabberGUI {
 		checkInvertOrder.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		checkInvertOrder.setBounds(359, 15, 139, 23);
 		optionSelect.add(checkInvertOrder);
+		
+		JButton btnVisitWebsite = new JButton("Visit...");
+		btnVisitWebsite.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					Novel emptyNovel = new Novel(websiteSelection1.getSelectedItem().toString().toLowerCase().replace(" ", ""),"");
+					URI uri = new URI(emptyNovel.getHost());
+					openWebpage(uri);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
+		btnVisitWebsite.setBounds(456, 48, 86, 27);
+		allChapterPane.add(btnVisitWebsite);
 
 		JPanel singleChapterPane = new JPanel();
 		singleChapterPane.setBounds(10, 406, 557, 95);
@@ -726,5 +747,26 @@ public class NovelGrabberGUI {
 			manProgressBar.update(manProgressBar.getGraphics());
 			break;
 		}
+	}
+	public static boolean openWebpage(URI uri) {
+	    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+	    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+	        try {
+	            desktop.browse(uri);
+	            return true;
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    return false;
+	}
+
+	public static boolean openWebpage(URL url) {
+	    try {
+	        return openWebpage(url.toURI());
+	    } catch (URISyntaxException e) {
+	        e.printStackTrace();
+	    }
+	    return false;
 	}
 }
