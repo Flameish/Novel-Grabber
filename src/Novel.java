@@ -14,7 +14,7 @@ public class Novel {
 	public Novel(String domain, String urla) {
 		url = urla;
 		switch (domain) {
-		case "wuxiaworld":
+		case "wuxiaworld": //compared with websites[] (spaces removed + all letters to lowercase)
 			this.host = "https://wuxiaworld.com/";
 			this.chapterLinkContainer = "#accordion";
 			this.chapterLinkSelecter = ".chapter-item";
