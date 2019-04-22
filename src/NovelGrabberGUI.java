@@ -6,8 +6,10 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -24,20 +26,27 @@ import javax.swing.JTextField;
 import javax.swing.JProgressBar;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
+import javax.swing.text.DefaultCaret;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JCheckBox;
 import javax.swing.JTabbedPane;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
+import javax.swing.JPopupMenu;
+import java.awt.Component;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.ListModel;
 
 /*
  *  Window display and handling.
  */
 public class NovelGrabberGUI {
-	private final String versionNumber = "v1.1.02";
+	private final String versionNumber = "v1.2.0";
 	private JFrame frmNovelGrabber;
 	private JTextField chapterListURL;
 	private JTextField destinationFolder;
@@ -45,6 +54,7 @@ public class NovelGrabberGUI {
 	private JComboBox<String> websiteSelection2;
 	private JComboBox<String> fileTypeComboBox;
 	private static JTextArea logArea;
+	private static JTextArea manLogField;
 	private static JProgressBar progressBar;
 	private static JProgressBar manProgressBar;
 	private JTextField chapterURL;
@@ -190,6 +200,45 @@ public class NovelGrabberGUI {
 		allChapterPane.add(logArea);
 
 		JScrollPane scrollPane = new JScrollPane(logArea);
+		
+		JPopupMenu popupMenu = new JPopupMenu();
+		popupMenu.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		addPopup(logArea, popupMenu);
+		
+		JMenuItem saveLogBtn = new JMenuItem("Save log to file");
+		saveLogBtn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		saveLogBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(!logArea.getText().isEmpty()) {
+					String fileName = "log.txt";
+					try (PrintStream out = new PrintStream(destinationFolder.getText() + File.separator + fileName, "UTF-8")) {
+						out.print(logArea.getText());
+					} catch(Exception e) {
+						System.out.println(e);
+					}
+				}
+				else {
+					showPopup("Log is empty","warning");
+				}
+
+			}
+		});
+
+		popupMenu.add(saveLogBtn);
+		
+		JMenuItem mntmClearLog = new JMenuItem("Clear log");
+		mntmClearLog.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		mntmClearLog.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!logArea.getText().isEmpty()) {
+					logArea.setText(null);
+				}
+			}
+		});
+		
+		JSeparator separator_1 = new JSeparator();
+		popupMenu.add(separator_1);
+		popupMenu.add(mntmClearLog);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.setBounds(10, 221, 532, 134);
 		allChapterPane.add(scrollPane);
@@ -341,11 +390,6 @@ public class NovelGrabberGUI {
 		panel.add(manChapterListURL);
 		manChapterListURL.setColumns(10);
 
-		chapterLinkList.setVisibleRowCount(-1);
-		chapterLinkList.setLayoutOrientation(JList.VERTICAL_WRAP);
-		chapterLinkList.setFixedCellWidth(268);
-		panel.add(chapterLinkList);
-
 		JButton removeLinks = new JButton("Remove links");
 		removeLinks.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		removeLinks.setEnabled(false);
@@ -356,15 +400,79 @@ public class NovelGrabberGUI {
 					listModelChapterLinks.removeElementAt(indices[i]);
 					fetchChapters.chapterUrl.remove(indices[i]);
 				}
+				manAppendText(indices.length + " links removed.");
 			}
 		});
 		removeLinks.setBounds(448, 55, 99, 25);
 		panel.add(removeLinks);
-
-		JScrollPane scrollPane_1 = new JScrollPane(chapterLinkList);
-		scrollPane_1.setBounds(10, 86, 537, 187);
-		panel.add(scrollPane_1);
-
+		
+		JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane_1.setBounds(10, 86, 537, 187);
+		panel.add(tabbedPane_1);
+		
+		JPanel manLinkSelect = new JPanel();
+		manLinkSelect.setLayout(null);
+		tabbedPane_1.addTab("Link select", null, manLinkSelect, null);
+		
+				chapterLinkList.setVisibleRowCount(-1);
+				chapterLinkList.setLayoutOrientation(JList.VERTICAL_WRAP);
+				chapterLinkList.setFixedCellWidth(268);
+				panel.add(chapterLinkList);
+				
+						JScrollPane scrollPane_1 = new JScrollPane(chapterLinkList);
+						scrollPane_1.setBounds(0, 0, 532, 159);
+						manLinkSelect.add(scrollPane_1);
+		
+		JPanel manLogArea = new JPanel();
+		manLogArea.setLayout(null);
+		tabbedPane_1.addTab("Log", null, manLogArea, null);
+		
+		manLogField = new JTextArea();
+		manLogField.setBounds(0, 0, 532, 159);
+		manLogArea.add(manLogField);
+		manLogField.setEditable(false);
+		
+		JScrollPane manScrollPane = new JScrollPane(manLogField);
+		
+		JPopupMenu popupMenu_1 = new JPopupMenu();
+		addPopup(manLogField, popupMenu_1);
+		
+		JMenuItem mntmSaveLogTo = new JMenuItem("Save log to file");
+		mntmSaveLogTo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!manLogField.getText().isEmpty()) {
+					String fileName = "manual log.txt";
+					try (PrintStream out = new PrintStream(manDestinationFolder.getText() + File.separator + fileName, "UTF-8")) {
+						out.print(manLogField.getText());
+					} catch(Exception ec) {
+						System.out.println(ec);
+					}
+				}
+				else {
+					showPopup("Log is empty","warning");
+				}
+			}
+		});
+		mntmSaveLogTo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		popupMenu_1.add(mntmSaveLogTo);
+		
+		
+		JSeparator separator_2 = new JSeparator();
+		popupMenu_1.add(separator_2);
+		
+		JMenuItem mntmClearLog_1 = new JMenuItem("Clear log");
+		mntmClearLog_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!manLogField.getText().isEmpty()) {
+					manLogField.setText(null);
+				}
+			}
+		});
+		mntmClearLog_1.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		popupMenu_1.add(mntmClearLog_1);
+		manScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		manScrollPane.setBounds(0, 0, 532, 159);
+		manLogArea.add(manScrollPane);
 		JLabel lblLinkSelect = new JLabel("Select links to be removed:");
 		lblLinkSelect.setBounds(10, 60, 227, 25);
 		panel.add(lblLinkSelect);
@@ -382,7 +490,6 @@ public class NovelGrabberGUI {
 					try {
 						fetchChapters.chapterUrl.clear();
 						listModelChapterLinks.clear();
-						progressBar.setStringPainted(true);
 						fetchChapters.retrieveChapterLinks(manChapterListURL.getText());
 					} catch (IllegalArgumentException err) {
 						JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
@@ -557,7 +664,10 @@ public class NovelGrabberGUI {
 						if (manCreateToc.isSelected() == true) {
 							fetchChapters.createToc(manDestinationFolder.getText());
 						}
+						//clear arrays for next call
 						fetchChapters.chapterFileNames.clear();
+						fetchChapters.failedChapters.clear();
+					//Exception handling 
 					} catch (IllegalArgumentException err) {
 						JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
 					} catch (FileNotFoundException err) {
@@ -650,7 +760,9 @@ public class NovelGrabberGUI {
 							if (createTocCheckBox.isSelected() == true) {
 								fetchChapters.createToc(destinationFolder.getText());
 							}
+							//clear arrays for next call
 							fetchChapters.chapterFileNames.clear();
+							fetchChapters.failedChapters.clear();
 						}
 						// grabbing chapters from selected range
 						if ((chapterAllCheckBox.isSelected() == false) && (firstChapter.getText().isEmpty() == false
@@ -675,7 +787,9 @@ public class NovelGrabberGUI {
 							if (createTocCheckBox.isSelected() == true && fetchChapters.error == false) {
 								fetchChapters.createToc(destinationFolder.getText());
 							}
+							//clear arrays for next call
 							fetchChapters.chapterFileNames.clear();
+							fetchChapters.failedChapters.clear();
 						}
 
 					}
@@ -699,11 +813,16 @@ public class NovelGrabberGUI {
 
 	}
 
-	public static void appendText(String log) {
+	public static void autoAppendText(String log) {
 		logArea.append(log + NL);
 		logArea.update(logArea.getGraphics());
+		logArea.setCaretPosition(logArea.getText().length());
 	}
-
+	public static void manAppendText(String log) {
+		manLogField.append(log + NL);
+		manLogField.update(manLogField.getGraphics());
+		manLogField.setCaretPosition(manLogField.getText().length());
+	}
 	public void showPopup(String errorMsg, String kind) {
 		switch (kind) {
 		case "warning":
@@ -768,5 +887,22 @@ public class NovelGrabberGUI {
 	        e.printStackTrace();
 	    }
 	    return false;
+	}
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
 	}
 }
