@@ -20,7 +20,7 @@ import javax.swing.JOptionPane;
 /*
  * Chapter download handling
  */
-public class fetchChapters  {
+public class fetchChapters {
 	public static boolean error = false;
 	private static final String NL = System.getProperty("line.separator");
 	private static final String textEncoding = "UTF-8";
@@ -30,7 +30,6 @@ public class fetchChapters  {
 	public static List<Integer> failedChapters = new ArrayList<Integer>();
 	public static long startTime;
 	public static long endTime;
-	
 
 	/**
 	 * Opens novel's table of contents page, retrieves chapter all links and
@@ -65,11 +64,12 @@ public class fetchChapters  {
 			saveChapters(chapterLink.attr("abs:href"), saveLocation, host, chapterNumber, fileType, chapterNumeration,
 					chaptersNames.get(chapterNumber - 1));
 		}
-		NovelGrabberGUI.autoAppendText("Finished! " + (chapterNumber-failedChapters.size()) + " of " + chapterNumber + " chapters successfully grabbed.");
-		if(!failedChapters.isEmpty()) {
+		NovelGrabberGUI.autoAppendText("Finished! " + (chapterNumber - failedChapters.size()) + " of " + chapterNumber
+				+ " chapters successfully grabbed.");
+		if (!failedChapters.isEmpty()) {
 			NovelGrabberGUI.autoAppendText("Failed to grab the following chapters:");
 			for (Integer num : failedChapters) {
-				NovelGrabberGUI.autoAppendText("Chapter "+ num);
+				NovelGrabberGUI.autoAppendText("Chapter " + num);
 			}
 		}
 	}
@@ -118,11 +118,12 @@ public class fetchChapters  {
 			}
 			endTime = System.nanoTime();
 			long elapsedTime = TimeUnit.SECONDS.convert((endTime - startTime), TimeUnit.NANOSECONDS);
-			NovelGrabberGUI.autoAppendText("Finished! " + (chapterNumber-failedChapters.size()) + " of " + chapterNumber + " chapters successfully grabbed in " + elapsedTime + " seconds.");
-			if(!failedChapters.isEmpty()) {
+			NovelGrabberGUI.autoAppendText("Finished! " + (chapterNumber - failedChapters.size()) + " of "
+					+ chapterNumber + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+			if (!failedChapters.isEmpty()) {
 				NovelGrabberGUI.autoAppendText("Failed to grab the following chapters:");
 				for (Integer num : failedChapters) {
-					NovelGrabberGUI.autoAppendText("Chapter "+ num);
+					NovelGrabberGUI.autoAppendText("Chapter " + num);
 				}
 			}
 		}
@@ -146,13 +147,14 @@ public class fetchChapters  {
 		try {
 			Element content = doc.select(currentNovel.getChapterContainer()).first();
 			Elements p = content.select(currentNovel.getSentenceSelecter());
-			//Check if sentence selector is empty and skip this chapter if so
+			// Check if sentence selector is empty and skip this chapter if so
 			if (p.isEmpty()) {
-			 NovelGrabberGUI.autoAppendText("[ERROR] Could not detect sentence wrapper for chapter " + chapterNumber + "(" + url + ")");
-			 failedChapters.add(chapterNumber);
-			 return;
+				NovelGrabberGUI.autoAppendText(
+						"[ERROR] Could not detect sentence wrapper for chapter " + chapterNumber + "(" + url + ")");
+				failedChapters.add(chapterNumber);
+				return;
 			}
-			//Create and save contents of chapter in file
+			// Create and save contents of chapter in file
 			File dir = new File(saveLocation);
 			if (!dir.exists())
 				dir.mkdirs();
@@ -222,7 +224,7 @@ public class fetchChapters  {
 				numberOfLinks++;
 			}
 		}
-		if(!chapterUrl.isEmpty()) {
+		if (!chapterUrl.isEmpty()) {
 			NovelGrabberGUI.manAppendText(numberOfLinks + " links retrieved.");
 		}
 
@@ -231,6 +233,7 @@ public class fetchChapters  {
 	public static void manSaveChapters(String saveLocation, String fileType, boolean chapterNumeration,
 			String chapterContainer, String sentenceSelecter, boolean invertOrder)
 			throws IllegalArgumentException, FileNotFoundException, IOException {
+		startTime = System.nanoTime();
 		String fileName = null;
 		int chapterNumber = 0;
 		NovelGrabberGUI.setMaxProgress("manual", chapterUrl.size());
@@ -267,21 +270,23 @@ public class fetchChapters  {
 				Element content = doc.select(chapterContainer).first();
 				Elements p = content.select(sentenceSelecter);
 				if (p.isEmpty()) {
-					 NovelGrabberGUI.manAppendText("[ERROR] Could not detect sentence wrapper for chapter " + chapterNumber + "(" + chapter + ")");
-					 failedChapters.add(chapterNumber);
-					}
-				else {
+					NovelGrabberGUI.manAppendText("[ERROR] Could not detect sentence wrapper for chapter "
+							+ chapterNumber + "(" + chapter + ")");
+					failedChapters.add(chapterNumber);
+				} else {
 					File dir = new File(saveLocation);
 					if (!dir.exists())
 						dir.mkdirs();
 					if (fileType == ".txt") {
-						try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+						try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName,
+								textEncoding)) {
 							for (Element x : p) {
 								out.println(x.text() + NL);
 							}
 						}
 					} else {
-						try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+						try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName,
+								textEncoding)) {
 							out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
 									+ "<meta charset=\"UTF-8\" />" + NL + "</head>" + NL + "<body>" + NL);
 							for (Element x : p) {
@@ -294,23 +299,28 @@ public class fetchChapters  {
 					NovelGrabberGUI.manAppendText(fileName + " saved.");
 					NovelGrabberGUI.updateProgress("manual", 1);
 				}
-				
+
 			} catch (Exception noSelectors) {
-				 NovelGrabberGUI.manAppendText("[ERROR] Could not detect sentence wrapper for chapter " + chapterNumber + "(" + chapter + ")");
-				 failedChapters.add(chapterNumber);
+				NovelGrabberGUI.manAppendText(
+						"[ERROR] Could not detect sentence wrapper for chapter " + chapterNumber + "(" + chapter + ")");
+				failedChapters.add(chapterNumber);
 			}
 		}
-		NovelGrabberGUI.manAppendText("Finished! " + (chapterNumber-failedChapters.size()) + " of " + chapterNumber + " chapters successfully grabbed.");
-		if(!failedChapters.isEmpty()) {
+		endTime = System.nanoTime();
+		long elapsedTime = TimeUnit.SECONDS.convert((endTime - startTime), TimeUnit.NANOSECONDS);
+		NovelGrabberGUI.manAppendText("Finished! " + (chapterNumber - failedChapters.size()) + " of " + chapterNumber
+				+ " chapters successfully grabbed in " + elapsedTime + " seconds.");
+		if (!failedChapters.isEmpty()) {
 			NovelGrabberGUI.manAppendText("Failed to grab the following chapters:");
 			for (Integer num : failedChapters) {
-				NovelGrabberGUI.manAppendText("Chapter "+ num);
+				NovelGrabberGUI.manAppendText("Chapter " + num);
 			}
 		}
 		if (invertOrder == true) {
 			Collections.reverse(chapterUrl);
 		}
 	}
+
 	public static void createToc(String saveLocation) throws FileNotFoundException, UnsupportedEncodingException {
 		if (!chapterFileNames.isEmpty()) {
 			String fileName = tocFileName + ".html";
@@ -324,7 +334,7 @@ public class fetchChapters  {
 				}
 				out.print("</p>" + NL + "</body>" + NL + "</html>" + NL);
 			}
-			NovelGrabberGUI.manAppendText(fileName + "created.");
+			NovelGrabberGUI.manAppendText(fileName + " created.");
 		}
 
 	}
