@@ -13,12 +13,12 @@ public class Novel {
 
 	public Novel(String domain, String urla) {
 		url = urla;
-		switch (domain) {
-		case "wuxiaworld": //compared with websites[] (spaces removed + all letters to lowercase)
+		switch (domain) { //compared with websites[] (spaces removed + all letters to lowercase)
+		case "wuxiaworld": 
 			this.host = "https://wuxiaworld.com/";
 			this.chapterLinkContainer = "#accordion";
 			this.chapterLinkSelecter = ".chapter-item";
-			this.chapterContainer = ".fr-view";
+			this.chapterContainer = ".p-15 .fr-view";
 			this.sentenceSelecter = "p";
 			this.titleHostName = "-WuxiaWorld";
 			break;
