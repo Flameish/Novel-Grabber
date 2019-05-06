@@ -14,7 +14,7 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * [Rainbow Turtle Translations](https://arkmachinetranslations.wordpress.com/)
 
 ## How to use
-* Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/download/v1.2.1/NovelGrabber_v1.2.1.jar)
+* Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/download/v1.3.0/Novel-Grabber.v1.3.0.jar)
 * Enter the link to the novel's Table of Contents page
 * Pick the corresponding host
 * Choose your save directory
