@@ -757,7 +757,7 @@ public class NovelGrabberGUI {
                     manProgressBar.setStringPainted(true);
                     fetchChapters.manSaveChapters();
                     if (manCreateToc.isSelected()) {
-                        fetchChapters.createToc(manSaveLocation.getText());
+                        fetchChapters.createToc(manSaveLocation.getText(), "manual");
                     }
                     // clear arrays for next call
                     fetchChapters.chapterFileNames.clear();
@@ -829,7 +829,7 @@ public class NovelGrabberGUI {
                     progressBar.setStringPainted(true);
                     fetchChapters.getChapterLinks();
                     if (createTocCheckBox.isSelected()) {
-                        fetchChapters.createToc(saveLocation.getText());
+                        fetchChapters.createToc(saveLocation.getText(), "auto");
                     }
                     fetchChapters.chapterFileNames.clear();
                     fetchChapters.failedChapters.clear();

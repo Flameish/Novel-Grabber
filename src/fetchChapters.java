@@ -63,8 +63,14 @@ class fetchChapters {
             Collections.reverse(chapters);
             Collections.reverse(chaptersNames);
         }
-        //Check if "grab all chapter" is selected and grab chapters from specific range if not
-        if (!NovelGrabberGUI.chapterAllCheckBox.isSelected()) {
+        //grab all chapters
+        if (NovelGrabberGUI.chapterAllCheckBox.isSelected()) {
+            for (int i = 0; i <= links.size() - 1; i++) {
+                chapterNumber++;
+                saveChapters(chapters.get(i), chapterNumber, chaptersNames.get(i));
+            }
+            //grab chapters from specific range
+        } else {
             int firstChapter = Integer.parseInt(NovelGrabberGUI.firstChapter.getText());
             int lastChapter = Integer.parseInt(NovelGrabberGUI.lastChapter.getText());
             tocFileName = "Table-of-Contents-"
@@ -79,12 +85,6 @@ class fetchChapters {
                     chapterNumber++;
                     saveChapters(chapters.get(i), chapterNumber, chaptersNames.get(i));
                 }
-            }
-            //grab all chapters
-        } else {
-            for (int i = 0; i <= links.size() - 1; i++) {
-                chapterNumber++;
-                saveChapters(chapters.get(i), chapterNumber, chaptersNames.get(i));
             }
         }
         report(chapterNumber, "auto");
@@ -120,10 +120,13 @@ class fetchChapters {
             throws IllegalArgumentException, IOException {
         Novel currentNovel = new Novel(host, url);
         Document doc = Jsoup.connect(url).get();
-        if (!chapterNumeration) {
-            fileName = fileName.replaceAll("[^\\w]+", "-") + fileType;
-        } else {
+        doc.outputSettings().prettyPrint(false);
+        String logWindow = "auto";
+        doc.outputSettings(new Document.OutputSettings().prettyPrint(false));
+        if (chapterNumeration) {
             fileName = "Ch-" + chapterNumber + "-" + fileName.replaceAll("[^\\w]+", "-") + fileType;
+        } else {
+            fileName = fileName.replaceAll("[^\\w]+", "-") + fileType;
         }
         try {
             Element content = doc.select(currentNovel.getChapterContainer()).first();
@@ -131,7 +134,7 @@ class fetchChapters {
             if (!useSentenceSelector) {
                 Elements p = content.select(currentNovel.getSentenceSelector());
                 if (p.isEmpty()) {
-                    NovelGrabberGUI.appendText("auto",
+                    NovelGrabberGUI.appendText(logWindow,
                             "[ERROR] Could not detect sentence wrapper for chapter " + chapterNumber + "(" + url + ")");
                     failedChapters.add(chapterNumber);
                     return;
@@ -153,11 +156,13 @@ class fetchChapters {
                             out.print(htmlFoot);
                         }
                     }
-                    successfulChapter(fileName, "auto");
+                    successfulChapter(fileName, logWindow);
                 }
 
             } else {
-                String chapterText = content.wholeText();
+                content.select("br").append("\\n");
+                content.select("p").prepend("\\n\\n");
+                String chapterText = content.text().replaceAll("\\\\n", "\n");
                 File dir = new File(saveLocation);
                 if (!dir.exists()) {
                     dir.mkdirs();
@@ -172,7 +177,7 @@ class fetchChapters {
                                 String line = reader.readLine();
                                 while (line != null) {
                                     if (!line.isEmpty()) {
-                                        out.append("<p>").append(line).append("</p>");
+                                        out.append("<p>").append(line).append("</p>" + NL);
                                     }
                                     line = reader.readLine();
                                 }
@@ -183,12 +188,12 @@ class fetchChapters {
                         }
                     }
                 }
-                successfulChapter(fileName, "auto");
+                successfulChapter(fileName, logWindow);
             }
         } catch (Exception noSelectors) {
-            NovelGrabberGUI.appendText("auto", "Could not detect selectors on: " + url);
+            NovelGrabberGUI.appendText(logWindow, "Could not detect selectors on: " + url);
         }
-        sleep("auto");
+        sleep(logWindow);
     }
 
     //Processes a successful chapter
@@ -259,13 +264,14 @@ class fetchChapters {
         String fileName;
         int chapterNumber = 0;
         String logWindow = "manual";
-        NovelGrabberGUI.setMaxProgress("manual", chapterURLs.size());
+        NovelGrabberGUI.setMaxProgress(logWindow, chapterURLs.size());
         if (manCheckInvertOrder) {
             Collections.reverse(chapterURLs);
         }
         for (String chapter : chapterURLs) {
             chapterNumber++;
             Document doc = Jsoup.connect(chapter).get();
+            doc.outputSettings(new Document.OutputSettings().prettyPrint(false));
             fileName = manSetFileName(chapterNumber);
             try {
                 Element content = doc.select(manChapterContainer).first();
@@ -273,7 +279,7 @@ class fetchChapters {
                 if (!manUseSentenceSelector) {
                     Elements p = content.select(manSentenceSelector);
                     if (p.isEmpty()) {
-                        NovelGrabberGUI.appendText("manual", "[ERROR] Could not detect sentence wrapper for chapter "
+                        NovelGrabberGUI.appendText(logWindow, "[ERROR] Could not detect sentence wrapper for chapter "
                                 + chapterNumber + "(" + chapter + ")");
                         failedChapters.add(chapterNumber);
                     } else {
@@ -295,10 +301,12 @@ class fetchChapters {
                                 out.print(htmlFoot);
                             }
                         }
-                        successfulChapter(fileName, "manual");
+                        successfulChapter(fileName, logWindow);
                     }
                 } else { // grab all text function
-                    String chapterText = content.wholeText();
+                    content.select("br").append("\\n");
+                    content.select("p").prepend("\\n\\n");
+                    String chapterText = content.text().replaceAll("\\\\n", "\n");
                     File dir = new File(manSaveLocation);
                     if (!dir.exists())
                         dir.mkdirs();
@@ -322,15 +330,15 @@ class fetchChapters {
                             out.print(htmlFoot);
                         }
                     }
-                    successfulChapter(fileName, "manual");
+                    successfulChapter(fileName, logWindow);
                 }
 
             } catch (Exception noSelectors) {
-                NovelGrabberGUI.appendText("manual",
+                NovelGrabberGUI.appendText(logWindow,
                         "[ERROR] Could not detect sentence wrapper for chapter " + chapterNumber + "(" + chapter + ")");
                 failedChapters.add(chapterNumber);
             }
-            sleep("manual");
+            sleep(logWindow);
         }
         report(chapterNumber, logWindow);
         if (manCheckInvertOrder) {
@@ -383,22 +391,19 @@ class fetchChapters {
     }
 
     //Creates a table of contents file of successfully grabbed chapters
-    static void createToc(String saveLocation) throws FileNotFoundException, UnsupportedEncodingException {
+    static void createToc(String saveLocation, String logWindow) throws FileNotFoundException, UnsupportedEncodingException {
         if (!chapterFileNames.isEmpty()) {
             String fileName = tocFileName + ".html";
             try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
-                out.print("<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
-                        + "<meta charset=\"UTF-8\" />" + NL + "</head>" + NL + "<body>" + NL
-                        + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+                out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
                 for (String chapterFileName : chapterFileNames) {
                     out.print("<a href=\"" + chapterFileName + "\">" + chapterFileName.replace(".html", "")
                             + "</a><br/>" + NL);
                 }
-                out.print("</p>" + NL + "</body>" + NL + "</html>" + NL);
+                out.print("</p>" + NL + htmlFoot);
             }
-            NovelGrabberGUI.appendText("manual", fileName + " created.");
+            NovelGrabberGUI.appendText(logWindow, fileName + " created.");
         }
-
     }
 
     //Sleep for selected wait time
