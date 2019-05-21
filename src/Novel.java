@@ -1,6 +1,9 @@
+/**
+ * Data class 101.
+ */
 public class Novel {
     static String[] websites = {"Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
-            "Noodletown Translated", "BoxNovel", "Lightnovel Translations", "Fuji Translation",
+            "Noodletown Translated", "BoxNovel", "Lightnovel Translations",
             "Exiled Rebels Scanlations", "Rainbow Turtle Translations"};
     private String chapterLinkContainer;
     private String chapterLinkSelecter;
@@ -64,14 +67,6 @@ public class Novel {
                 break;
             case "lightnoveltranslations":
                 this.host = "https://lightnovelstranslations.com/";
-                this.chapterLinkContainer = ".entry-content";
-                this.chapterLinkSelecter = "a[href^=" + urla + "]";
-                this.chapterContainer = ".entry-content";
-                this.sentenceSelecter = "p";
-                this.titleHostName = "";
-                break;
-            case "fujitranslation":
-                this.host = "https://fujitranslation.com/";
                 this.chapterLinkContainer = ".entry-content";
                 this.chapterLinkSelecter = "a[href^=" + urla + "]";
                 this.chapterContainer = ".entry-content";

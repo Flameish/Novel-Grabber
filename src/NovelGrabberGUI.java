@@ -72,8 +72,8 @@ public class NovelGrabberGUI {
         switch (logWindow) {
             case "auto":
                 logArea.append(logMsg + NL);
-                logArea.update(logArea.getGraphics());
                 logArea.setCaretPosition(logArea.getText().length());
+                logArea.update(logArea.getGraphics());
                 break;
             case "manual":
                 manLogField.append(logMsg + NL);
@@ -101,16 +101,16 @@ public class NovelGrabberGUI {
         }
     }
 
-    static void setMaxProgress(String progressBarSelect, int i) {
+    static void setMaxProgress(String progressBarSelect, int progressAmount) {
         switch (progressBarSelect) {
             case "auto":
-                progressBar.setMaximum(i);
-                progressBar.setString("0 / " + i);
+                progressBar.setMaximum(progressAmount);
+                progressBar.setString("0 / " + progressAmount);
                 progressBar.update(progressBar.getGraphics());
                 break;
             case "manual":
-                manProgressBar.setMaximum(i);
-                manProgressBar.setString("0 / " + i);
+                manProgressBar.setMaximum(progressAmount);
+                manProgressBar.setString("0 / " + progressAmount);
                 manProgressBar.update(manProgressBar.getGraphics());
                 break;
         }
@@ -379,7 +379,8 @@ public class NovelGrabberGUI {
         useSentenceSelector = new JCheckBox("Ignore sentence selector");
         useSentenceSelector.setFocusPainted(false);
         useSentenceSelector.setToolTipText(
-                "<html><p width=\"300\">Grabs all text within the chapter container. Useful if chapters use a spreadsheat to display various things such as character stats in a VRMMO novel for example. "
+                "<html><p width=\"300\">Grabs all text within the chapter container. " +
+                        "Useful if chapters use a spreadsheat to display various things such as character stats in a VRMMO novel. "
                         + "Also required for some sites/chapters which do not embed the text in paragraph tags.</p></html>");
         useSentenceSelector.setFont(new Font("Tahoma", Font.PLAIN, 11));
         useSentenceSelector.setBounds(151, 20, 150, 23);
@@ -476,7 +477,7 @@ public class NovelGrabberGUI {
             int[] indices = chapterLinkList.getSelectedIndices();
             for (int i = indices.length - 1; i >= 0; i--) {
                 listModelChapterLinks.removeElementAt(indices[i]);
-                fetchChapters.chapterURLs.remove(indices[i]);
+                manFetchChapters.chapterURLs.remove(indices[i]);
             }
             appendText("manual", indices.length + " links removed.");
         });
@@ -548,7 +549,8 @@ public class NovelGrabberGUI {
         mntmClearLog_1.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         popupMenu_1.add(mntmClearLog_1);
         manScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        manScrollPane.setBounds(0, 0, 532, 219);
+        manScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        manScrollPane.setBounds(0, 0, 532, 180);
         manLogArea.add(manScrollPane);
         JLabel lblLinkSelect = new JLabel("Select links to be removed:");
         lblLinkSelect.setBounds(10, 60, 227, 25);
@@ -565,9 +567,9 @@ public class NovelGrabberGUI {
             }
             if (!manChapterListURL.getText().isEmpty()) {
                 try {
-                    fetchChapters.chapterURLs.clear();
+                    manFetchChapters.chapterURLs.clear();
                     listModelChapterLinks.clear();
-                    fetchChapters.retrieveLinks();
+                    manFetchChapters.retrieveLinks();
                 } catch (NullPointerException | IllegalArgumentException | IOException err) {
                     JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
                 } finally {
@@ -614,8 +616,10 @@ public class NovelGrabberGUI {
 
         manUseSentenceSelector = new JCheckBox("Don't use a sentence selector");
         manUseSentenceSelector.setFocusPainted(false);
-        manUseSentenceSelector
-                .setToolTipText("<html><p width=\"300\">Grab all text from the chapter container.</p></html>");
+        manUseSentenceSelector.setToolTipText(
+                "<html><p width=\"300\">Grabs all text within the chapter container. " +
+                        "Useful if chapters use a spreadsheat to display various things such as character stats in a VRMMO novel. " +
+                        "Also required for some sites/chapters which do not embed the text in paragraph tags.</p></html>");
         manUseSentenceSelector.setFont(new Font("Tahoma", Font.PLAIN, 11));
         manUseSentenceSelector.setBounds(337, 43, 172, 23);
         textSelectPane.add(manUseSentenceSelector);
@@ -755,13 +759,13 @@ public class NovelGrabberGUI {
                     && (!manWaitTime.getText().isEmpty())) {
                 try {
                     manProgressBar.setStringPainted(true);
-                    fetchChapters.manSaveChapters();
+                    manFetchChapters.manSaveChapters();
                     if (manCreateToc.isSelected()) {
-                        fetchChapters.createToc(manSaveLocation.getText(), "manual");
+                        Shared.createToc(manSaveLocation.getText(), "manual");
                     }
                     // clear arrays for next call
-                    fetchChapters.chapterFileNames.clear();
-                    fetchChapters.failedChapters.clear();
+                    Shared.successfulChapterNames.clear();
+                    Shared.failedChapters.clear();
                     // Exception handling
                 } catch (NullPointerException | IllegalArgumentException | IOException err) {
                     JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
@@ -782,7 +786,7 @@ public class NovelGrabberGUI {
             } else if (!singleChapterLink.getText().isEmpty()) {
                 try {
                     progressBar.setStringPainted(true);
-                    fetchChapters.saveSingleChapter();
+                    autoFetchChapters.saveSingleChapter();
                 } catch (NullPointerException | IllegalArgumentException | IOException err) {
                     JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
                 } finally {
@@ -827,12 +831,12 @@ public class NovelGrabberGUI {
                 // grabbing chapter calls
                 try {
                     progressBar.setStringPainted(true);
-                    fetchChapters.getChapterLinks();
+                    autoFetchChapters.getChapterLinks();
                     if (createTocCheckBox.isSelected()) {
-                        fetchChapters.createToc(saveLocation.getText(), "auto");
+                        Shared.createToc(saveLocation.getText(), "auto");
                     }
-                    fetchChapters.chapterFileNames.clear();
-                    fetchChapters.failedChapters.clear();
+                    Shared.successfulChapterNames.clear();
+                    Shared.failedChapters.clear();
                 } catch (NullPointerException | IllegalArgumentException | IOException err) {
                     //showPopup(err.toString(), "error");
                     err.printStackTrace();
