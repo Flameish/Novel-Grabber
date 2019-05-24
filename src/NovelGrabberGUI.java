@@ -1,22 +1,31 @@
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.Objects;
+import java.util.Scanner;
+
+import static java.lang.System.out;
 
 /*
  *  Window display and handling.
  */
 public class NovelGrabberGUI {
     static final DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
+    static final DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
+    private static final JList<String> checkList = new JList<>(listModelCheckerLinks);
+    static TrayIcon trayIcon;
     private static final String NL = System.getProperty("line.separator");
     private static final String[] fileTypeList = {".html", ".txt"};
+    private static JFrame frmNovelGrabber;
+    private String versionNumber = "v1.4.0";
     private static final JList<String> chapterLinkList = new JList<>(listModelChapterLinks);
+    private ImageIcon favicon = new ImageIcon("src/images/favicon.png");
     static JTextField singleChapterLink;
     static JTextField chapterListURL;
     static JTextField saveLocation;
@@ -44,7 +53,9 @@ public class NovelGrabberGUI {
     private static JProgressBar progressBar;
     private static JProgressBar manProgressBar;
     private static JCheckBox manCreateToc = new JCheckBox("Create ToC");
-    private JFrame frmNovelGrabber;
+    private ImageIcon busyGif = new ImageIcon("src/images/busy.gif");
+    private JButton checkPollStartBtn;
+    private JButton checkStopPollingBtn;
 
     /**
      * Create the application.
@@ -61,7 +72,7 @@ public class NovelGrabberGUI {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 NovelGrabberGUI window = new NovelGrabberGUI();
-                window.frmNovelGrabber.setVisible(true);
+                frmNovelGrabber.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -147,6 +158,59 @@ public class NovelGrabberGUI {
         });
     }
 
+    public static void showPopup(String errorMsg, String kind) {
+        switch (kind) {
+            case "warning":
+                JOptionPane.showMessageDialog(frmNovelGrabber, errorMsg, "Warning", JOptionPane.WARNING_MESSAGE);
+                break;
+            case "error":
+                JOptionPane.showMessageDialog(frmNovelGrabber, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
+                break;
+        }
+    }
+
+    private void Tray() {
+        if (!SystemTray.isSupported()) {
+            showPopup("SystemTray is not supported. Exiting...", "Error");
+            return;
+        }
+        SystemTray tray = SystemTray.getSystemTray();
+        Image image = Toolkit.getDefaultToolkit().getImage(String.valueOf(favicon));
+
+        ActionListener exitListener = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                out.println(Shared.time() + "Exiting...");
+                System.exit(0);
+            }
+        };
+        ActionListener openWindow = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                frmNovelGrabber.setVisible(true);
+            }
+        };
+
+        PopupMenu popup = new PopupMenu();
+        MenuItem topLable = new MenuItem("Novel-Grabber");
+        popup.add(topLable);
+        popup.addSeparator();
+        MenuItem defaultItem2 = new MenuItem("Open");
+        defaultItem2.addActionListener(openWindow);
+        popup.add(defaultItem2);
+        MenuItem defaultItem = new MenuItem("Exit");
+        defaultItem.addActionListener(exitListener);
+        popup.add(defaultItem);
+
+        trayIcon = new TrayIcon(image, "Novel-Grabber", popup);
+        trayIcon.setToolTip("Novel-Grabber");
+        trayIcon.setImageAutoSize(true);
+
+        try {
+            tray.add(trayIcon);
+        } catch (AWTException e) {
+            System.err.println("TrayIcon could not be added.");
+        }
+    }
+
     /**
      * Initialize the contents of the frame.
      */
@@ -158,20 +222,29 @@ public class NovelGrabberGUI {
         ToolTipManager.sharedInstance().setDismissDelay(dismissDelay);
         UIManager.put("ToolTip.background", new ColorUIResource(Color.white));
         String toolTipStyle = "<html><p width=\"300\">";
-
+        Tray();
         frmNovelGrabber = new JFrame();
         frmNovelGrabber.setResizable(false);
-        String versionNumber = "v1.3.0";
+        frmNovelGrabber.setIconImage(favicon.getImage());
         frmNovelGrabber.setTitle("Novel-Grabber " + versionNumber);
         frmNovelGrabber.setBounds(100, 100, 588, 650);
-        frmNovelGrabber.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frmNovelGrabber.getContentPane().setLayout(null);
+        frmNovelGrabber.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frmNovelGrabber.addWindowListener(new WindowAdapter() {
+            //I skipped unused callbacks for readability
 
+            @Override
+            public void windowClosing(WindowEvent e) {
+                frmNovelGrabber.setVisible(false);
+            }
+        });
+        frmNovelGrabber.setBackground(Color.LIGHT_GRAY);
+        frmNovelGrabber.getContentPane().setLayout(null);
+        //tabbed pane
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         tabbedPane.setFocusable(false);
         tabbedPane.setBounds(0, 0, 594, 634);
         frmNovelGrabber.getContentPane().add(tabbedPane);
-
+        //Automatic Pane
         JPanel automaticPane = new JPanel();
         automaticPane.setLayout(null);
         tabbedPane.addTab("Automatic", null, automaticPane, null);
@@ -267,7 +340,7 @@ public class NovelGrabberGUI {
                         "UTF-8")) {
                     out.print(logArea.getText());
                 } catch (IOException e) {
-                    System.out.println(e.getMessage());
+                    out.println(Shared.time() + e.getMessage());
                 }
             } else {
                 showPopup("Log is empty", "warning");
@@ -528,7 +601,7 @@ public class NovelGrabberGUI {
                         "UTF-8")) {
                     out.print(manLogField.getText());
                 } catch (IOException ec) {
-                    System.out.println(ec.getMessage());
+                    out.println(Shared.time() + ec.getMessage());
                 }
             } else {
                 showPopup("Log is empty", "warning");
@@ -728,6 +801,164 @@ public class NovelGrabberGUI {
         manWaitTime.setBounds(481, 53, 66, 20);
         manOptionPane.add(manWaitTime);
 
+        //Chapter checker
+        JPanel checkerPane = new JPanel();
+        checkerPane.setLayout(null);
+        tabbedPane.addTab("Checker", null, checkerPane, null);
+
+        JPanel checkChapterPane = new JPanel();
+        checkChapterPane.setBounds(10, 5, 557, 273);
+        checkerPane.add(checkChapterPane);
+        checkChapterPane.setBorder(BorderFactory.createTitledBorder("Get notified when a new chapter releases"));
+        checkChapterPane.setLayout(null);
+
+        JLabel checkHost = new JLabel("Novel URLs:");
+        checkChapterPane.add(checkHost);
+        checkHost.setBounds(12, 21, 116, 25);
+        checkHost.setFont(new Font("Tahoma", Font.PLAIN, 13));
+
+        chapterLinkPane.add(checkList);
+        checkList.setBackground(Color.WHITE);
+        checkList.setVisibleRowCount(-1);
+        checkList.setFixedCellWidth(512);
+
+        JScrollPane scrollPane_2 = new JScrollPane(checkList);
+        scrollPane_2.setBounds(10, 45, 532, 179);
+        checkChapterPane.add(scrollPane_2);
+        scrollPane_2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane_2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        JButton checkAddNewEntryBtn = new JButton("Add Checker");
+        checkAddNewEntryBtn.setFocusPainted(false);
+        checkAddNewEntryBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        checkAddNewEntryBtn.setBounds(334, 15, 100, 26);
+        checkChapterPane.add(checkAddNewEntryBtn);
+        checkAddNewEntryBtn.addActionListener(arg0 -> {
+            String host = (String) JOptionPane.showInputDialog(checkChapterPane,
+                    "Pick host", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE, favicon, Novel.websites, "wuxiaworld");
+            host = host.toLowerCase().replace(" ", "");
+            String checkUrl = JOptionPane.showInputDialog(checkChapterPane,
+                    "Input ToC URL", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE);
+            if (!host.isEmpty() || !checkUrl.isEmpty()) {
+                listModelCheckerLinks.addElement(checkUrl);
+                chapterChecker.hosts.add(host);
+                chapterChecker.urls.add(checkUrl);
+            }
+        });
+
+        JLabel checkBusyIcon = new JLabel(busyGif);
+        checkBusyIcon.setVisible(false);
+        checkChapterPane.add(checkBusyIcon);
+        checkBusyIcon.setBounds(10, 230, 28, 28);
+
+        JLabel checkStatusLbl = new JLabel("Checking active.");
+        checkStatusLbl.setVisible(false);
+        checkChapterPane.add(checkStatusLbl);
+        checkStatusLbl.setBounds(45, 230, 120, 28);
+
+        checkPollStartBtn = new JButton("Start checking");
+        checkPollStartBtn.setFocusPainted(false);
+        checkPollStartBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        checkPollStartBtn.setBounds(443, 230, 100, 26);
+        checkChapterPane.add(checkPollStartBtn);
+        checkPollStartBtn.addActionListener(g -> {
+            if (chapterChecker.urls.isEmpty() || chapterChecker.hosts.isEmpty()) {
+                showPopup("No checkers defined", "warning");
+            } else {
+                chapterChecker.chapterPolling();
+                checkPollStartBtn.setEnabled(false);
+                checkPollStartBtn.setVisible(false);
+                checkStopPollingBtn.setVisible(true);
+                checkStopPollingBtn.setEnabled(true);
+                checkBusyIcon.setVisible(true);
+                checkStatusLbl.setVisible(true);
+            }
+        });
+
+        checkStopPollingBtn = new JButton("Stop checking");
+        checkStopPollingBtn.setEnabled(false);
+        checkStopPollingBtn.setVisible(false);
+        checkStopPollingBtn.setFocusPainted(false);
+        checkStopPollingBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        checkStopPollingBtn.setBounds(443, 230, 100, 26);
+        checkChapterPane.add(checkStopPollingBtn);
+        checkStopPollingBtn.addActionListener(ga -> {
+            chapterChecker.killTask();
+            checkPollStartBtn.setEnabled(true);
+            checkPollStartBtn.setVisible(true);
+            checkStopPollingBtn.setVisible(false);
+            checkStopPollingBtn.setEnabled(false);
+            checkBusyIcon.setVisible(false);
+            checkStatusLbl.setVisible(false);
+        });
+
+        JButton checkRemoveEntry = new JButton("Remove");
+        checkRemoveEntry.setFocusPainted(false);
+        checkRemoveEntry.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        checkRemoveEntry.setBounds(443, 15, 100, 26);
+        checkChapterPane.add(checkRemoveEntry);
+        checkRemoveEntry.addActionListener(gc -> {
+            int[] indices = checkList.getSelectedIndices();
+            for (int i = indices.length - 1; i >= 0; i--) {
+                listModelCheckerLinks.removeElementAt(indices[i]);
+                chapterChecker.hosts.remove(indices[i]);
+                chapterChecker.urls.remove(indices[i]);
+            }
+        });
+
+        JPopupMenu checkPopUp = new JPopupMenu();
+        addPopup(checkList, checkPopUp);
+
+        JMenuItem checkLoadFromFile = new JMenuItem("Load Checkers from file");
+        checkLoadFromFile.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new File("."));
+            chooser.setDialogTitle("Choose Checker file to load");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            String filepath;
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                filepath = chooser.getSelectedFile().toString();
+                Scanner sc = null;
+                try {
+                    sc = new Scanner(new File(filepath));
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+                while (Objects.requireNonNull(sc).hasNext()) {
+                    String host = sc.next();
+                    chapterChecker.hosts.add(host);
+                    String url = sc.next();
+                    chapterChecker.urls.add(url);
+                    listModelCheckerLinks.addElement(url);
+                }
+            }
+        });
+        checkLoadFromFile.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        checkPopUp.add(checkLoadFromFile);
+
+        JSeparator separator_12 = new JSeparator();
+        checkPopUp.add(separator_12);
+
+        JMenuItem checkToFile = new JMenuItem("Save to file");
+        checkToFile.addActionListener(e -> {
+            if (!chapterChecker.urls.isEmpty()) {
+                String fileName = "Novel-Grabber_checkerList.txt";
+                try (PrintStream out = new PrintStream(fileName,
+                        "UTF-8")) {
+                    for (int i = 0; i < chapterChecker.urls.size(); i++) {
+                        out.println(chapterChecker.hosts.get(i) + " " + chapterChecker.urls.get(i));
+                    }
+                } catch (IOException ec) {
+                    out.println(Shared.time() + ec.getMessage());
+                }
+            } else {
+                showPopup("Checker list is empty", "warning");
+            }
+        });
+        checkToFile.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        checkPopUp.add(checkToFile);
+
         // manual chapter download
         btnManGrabChapters.addActionListener(e -> {
             btnManGrabChapters.setEnabled(false);
@@ -848,16 +1079,5 @@ public class NovelGrabberGUI {
             grabChapters.setEnabled(true);
         });
 
-    }
-
-    private void showPopup(String errorMsg, String kind) {
-        switch (kind) {
-            case "warning":
-                JOptionPane.showMessageDialog(frmNovelGrabber, errorMsg, "Warning", JOptionPane.WARNING_MESSAGE);
-                break;
-            case "error":
-                JOptionPane.showMessageDialog(frmNovelGrabber, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
-                break;
-        }
     }
 }

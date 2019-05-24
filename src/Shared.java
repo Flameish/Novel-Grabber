@@ -2,6 +2,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +17,8 @@ class Shared {
     static final String textEncoding = "UTF-8";
     static final String NL = System.getProperty("line.separator");
     static String tocFileName = "Table Of Contents";
+    private static LocalTime time = LocalTime.now();
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     static long startTime;
     static String htmlHead = "<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
             + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL;
@@ -77,5 +81,10 @@ class Shared {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    static String time() {
+        time = LocalTime.now();
+        return "[" + time.format(formatter) + "] ";
     }
 }
