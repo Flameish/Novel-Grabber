@@ -1,5 +1,6 @@
 # Novel-Grabber
-With Novel Grabber you can download single chapters or complete novels from various web/lightnovel sites.
+Novel-Grabber is a GUI based web scrapper that can download chapters from various supported web/lightnovel sites or 
+from any other site manually. Furthermore can Novel-Grabber poll a list of novels for new chapter releases and notify you with desktop notifications. 
 
 ## Natively supported sites
 * [Wuxiaworld](https://wuxiaworld.com/)
@@ -13,7 +14,7 @@ With Novel Grabber you can download single chapters or complete novels from vari
 * [Rainbow Turtle Translations](https://arkmachinetranslations.wordpress.com/)
 
 ## How to use
-* Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/download/v1.3.0/Novel-Grabber.jar)
+* Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/download/v1.4.0/Novel-Grabber_v1.4.0.jar)
 * Enter the link to the novel's Table of Contents page
 * Pick the corresponding host
 * Choose your save directory
@@ -49,11 +50,12 @@ Alternatively use the manual tab if your novel is not on one of the supported si
 ## Currently not working
 * Websites which load chapter lists etc. later with javascript or in other ways.
 
-## Disclaimer
-Downloaded chapters/files are for private use only.
+## Disclaimer & Warning
+Most sites prohibit the scrapping for their content. Use at your own risk. 
+Please use with appropriate wait times. Downloaded chapters are for private use only.
 
 ## Requirements
-* [Java](https://www.java.com/en/) needs to be installed.
+* [Java](https://www.java.com/en/) (version 8+) needs to be installed.
 
 ## Credits
 Novel Grabber was build in java with [jsoup](https://www.jsoup.org/) :heart:
