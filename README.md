@@ -24,8 +24,8 @@ from any other site manually. Furthermore can Novel-Grabber poll a list of novel
 
 Options:
 * "Create ToC" will create a Table of Contents file with links to all downloaded chapters. This file can be used in [Calibre](https://calibre-ebook.com/) to convert the chapters into a single epub file or any other supported format.
-* Chapter Numeration will add a number in front of the file names to keep them in order if they don't come with one in their names.
-* Invert chapter order will start to download the last chapter from the Table of Contents page first. Helpful if sites list the most recent chapter at the top.
+* "Chapter Numeration" will add a number in front of the file names to keep them in order if they don't come with one in their names.
+* "Invert chapter order" will start to download the last chapter from the Table of Contents page first. Helpful if sites list the most recent chapter at the top.
 * Normally Novel-Grabber only saves text from within paragraph tags. This is usually sufficient to provide a good chapter content coverage.
   
   But if some chapters display content in different ways, "Ignore sentence selector" will get all text from the chapter container instead.
