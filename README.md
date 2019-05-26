@@ -1,6 +1,5 @@
 # Novel-Grabber
-Novel-Grabber is a GUI based web scrapper that can download chapters from various supported web/lightnovel sites or 
-from any other site manually. Furthermore can Novel-Grabber poll a list of novels for new chapter releases and notify you with desktop notifications. 
+Novel-Grabber is a GUI based web scrapper that can download chapters from various supported web/light novel sites or from any other site manually. Furthermore,  Novel-Grabber can poll a list of novels for new chapter releases and notify you with desktop notifications.
 
 ## Natively supported sites
 * [Wuxiaworld](https://wuxiaworld.com/)
