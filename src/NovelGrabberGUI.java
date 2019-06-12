@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.awt.event.*;
@@ -24,7 +25,8 @@ public class NovelGrabberGUI {
     private static final String NL = System.getProperty("line.separator");
     private static final String[] fileTypeList = {".html", ".txt"};
     private static JFrame frmNovelGrabber;
-    private String versionNumber = "v1.4.0";
+    static String homepath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
+    static JButton checkPollStartBtn;
     private static final JList<String> chapterLinkList = new JList<>(listModelChapterLinks);
     static JTextField singleChapterLink;
     static JTextField chapterListURL;
@@ -53,13 +55,14 @@ public class NovelGrabberGUI {
     private static JProgressBar progressBar;
     private static JProgressBar manProgressBar;
     private static JCheckBox manCreateToc = new JCheckBox("Create ToC");
-    static private JButton checkPollStartBtn;
-    static private JButton checkStopPollingBtn;
+    static JButton checkStopPollingBtn;
+    static JLabel checkStatusLbl;
     static private JLabel checkBusyIcon;
-    static private JLabel checkStatusLbl;
+    static JButton checkRemoveEntry;
     static private JTextArea checkLogField;
     private JButton checkHideLogBtn;
-    private JButton checkShowLogBtn;
+    private static JButton checkShowLogBtn;
+    private String versionNumber = "v1.4.1";
 
     /**
      * Create the application.
@@ -86,15 +89,15 @@ public class NovelGrabberGUI {
     static void appendText(String logWindow, String logMsg) {
         switch (logWindow) {
             case "auto":
-                logArea.append(logMsg + NL);
+                logArea.append(Shared.time() + logMsg + NL);
                 logArea.setCaretPosition(logArea.getText().length());
                 break;
             case "manual":
-                manLogField.append(logMsg + NL);
+                manLogField.append(Shared.time() + logMsg + NL);
                 manLogField.setCaretPosition(manLogField.getText().length());
                 break;
             case "checker":
-                checkLogField.append(logMsg + NL);
+                checkLogField.append(Shared.time() + logMsg + NL);
                 checkLogField.setCaretPosition(checkLogField.getText().length());
                 break;
         }
@@ -183,11 +186,12 @@ public class NovelGrabberGUI {
         checkStatusLbl.setVisible(false);
     }
 
-    static void startPolling() {
+    private static void startPolling() {
         checkPollStartBtn.setEnabled(false);
         checkPollStartBtn.setVisible(false);
         checkStopPollingBtn.setVisible(true);
-        checkStopPollingBtn.setEnabled(true);
+        checkStopPollingBtn.setEnabled(false);
+        checkStopPollingBtn.setText("Stop checking");
         checkBusyIcon.setVisible(true);
         checkStatusLbl.setVisible(true);
         Executors.newSingleThreadExecutor().execute(new Runnable() {
@@ -493,7 +497,7 @@ public class NovelGrabberGUI {
         JLabel sleepLbl = new JLabel("Wait time:");
         sleepLbl.setBounds(389, 60, 66, 14);
         sleepLbl.setToolTipText(
-                "<html><p width=\"300\">Time in miliseconds to wait before each chapter grab. (1000 for 1 second).</p></html>");
+                "<html><p width=\"300\">Time in miliseconds to wait before each chapter grab. (1000 for 1 second) Please select an appropriate wait time for the host.</p></html>");
         optionSelect.add(sleepLbl);
 
         waitTime = new JTextField();
@@ -821,7 +825,7 @@ public class NovelGrabberGUI {
 
         JLabel manWaitTimeLbl = new JLabel("Wait time:");
         manWaitTimeLbl.setToolTipText(
-                "<html><p width=\"300\">Time in miliseconds to wait before each chapter grab. We don't want to DDoS afterall :-) (1000 for 1 second).</p></html>");
+                "<html><p width=\"300\">Time in miliseconds to wait before each chapter grab. (1000 for 1 second) Please select an appropriate wait time for the host.</p></html>");
         manWaitTimeLbl.setBounds(414, 56, 66, 14);
         manOptionPane.add(manWaitTimeLbl);
 
@@ -859,7 +863,7 @@ public class NovelGrabberGUI {
         checkChapterPane.add(scrollPane_2);
         scrollPane_2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        JButton checkAddNewEntryBtn = new JButton("Add Checker");
+        JButton checkAddNewEntryBtn = new JButton("Add");
         checkAddNewEntryBtn.setFocusPainted(false);
         checkAddNewEntryBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
         checkAddNewEntryBtn.setBounds(334, 15, 100, 26);
@@ -869,11 +873,13 @@ public class NovelGrabberGUI {
                     "Pick host:", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE, favicon, Novel.websites, "wuxiaworld");
             host = host.toLowerCase().replace(" ", "");
             String checkUrl = JOptionPane.showInputDialog(checkChapterPane,
-                    "Input ToC URL:", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE);
-            if (!host.isEmpty() || !checkUrl.isEmpty()) {
+                    "Input Table of Contents URL:", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE);
+            if (!host.isEmpty() && !checkUrl.isEmpty()) {
                 listModelCheckerLinks.addElement("[" + checkUrl + "]");
                 chapterChecker.hosts.add(host);
                 chapterChecker.urls.add(checkUrl);
+                checkRemoveEntry.setEnabled(true);
+                checkPollStartBtn.setEnabled(true);
             }
         });
         ImageIcon busyGif = new ImageIcon(getClass().getResource("/images/busy.gif"));
@@ -888,6 +894,7 @@ public class NovelGrabberGUI {
         checkStatusLbl.setBounds(45, 230, 120, 28);
 
         checkPollStartBtn = new JButton("Start checking");
+        checkPollStartBtn.setEnabled(false);
         checkPollStartBtn.setFocusPainted(false);
         checkPollStartBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
         checkPollStartBtn.setBounds(443, 230, 100, 26);
@@ -908,12 +915,12 @@ public class NovelGrabberGUI {
         checkStopPollingBtn.setBounds(443, 230, 100, 26);
         checkChapterPane.add(checkStopPollingBtn);
         checkStopPollingBtn.addActionListener(ga -> {
-            checkStopPollingBtn.setEnabled(false);
             chapterChecker.killTask();
             stopPolling();
         });
 
-        JButton checkRemoveEntry = new JButton("Remove");
+        checkRemoveEntry = new JButton("Remove");
+        checkRemoveEntry.setEnabled(false);
         checkRemoveEntry.setFocusPainted(false);
         checkRemoveEntry.setFont(new Font("Tahoma", Font.PLAIN, 11));
         checkRemoveEntry.setBounds(443, 15, 100, 26);
@@ -925,6 +932,10 @@ public class NovelGrabberGUI {
                 chapterChecker.hosts.remove(indices[i]);
                 chapterChecker.urls.remove(indices[i]);
             }
+            if (listModelCheckerLinks.isEmpty()) {
+                checkRemoveEntry.setEnabled(false);
+                checkPollStartBtn.setEnabled(false);
+            }
         });
 
         JPopupMenu checkPopUp = new JPopupMenu();
@@ -933,12 +944,17 @@ public class NovelGrabberGUI {
         JMenuItem checkLoadFromFile = new JMenuItem("Load Checkers from file");
         checkLoadFromFile.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
-            chooser.setCurrentDirectory(new File("."));
-            chooser.setDialogTitle("Choose Checker file to load");
+            chooser.setCurrentDirectory(new File(homepath));
+            chooser.setDialogTitle("Open File");
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setAcceptAllFileFilterUsed(false);
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.txt", "txt", "text");
+            chooser.setFileFilter(filter);
             String filepath;
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                listModelCheckerLinks.clear();
+                chapterChecker.hosts.clear();
+                chapterChecker.urls.clear();
                 filepath = chooser.getSelectedFile().toString();
                 Scanner sc = null;
                 try {
@@ -953,6 +969,12 @@ public class NovelGrabberGUI {
                     chapterChecker.urls.add(url);
                     listModelCheckerLinks.addElement("[" + url + "]");
                 }
+                sc.close();
+                if (!listModelCheckerLinks.isEmpty()) {
+                    checkRemoveEntry.setEnabled(true);
+                    checkPollStartBtn.setEnabled(true);
+                }
+                appendText("checker", "Loaded checkers from file.");
             }
         });
         checkLoadFromFile.setFont(new Font("Segoe UI", Font.PLAIN, 11));
@@ -963,9 +985,25 @@ public class NovelGrabberGUI {
 
         JMenuItem checkToFile = new JMenuItem("Save to file");
         checkToFile.addActionListener(e -> {
-            if (!chapterChecker.urls.isEmpty()) {
-                String fileName = "Novel-Grabber_checkerList.txt";
-                try (PrintStream out = new PrintStream(fileName,
+            if (chapterChecker.urls.isEmpty()) {
+                showPopup("Checker list is empty", "warning");
+                return;
+            }
+            File dir = new File(homepath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new File(homepath));
+            chooser.setDialogTitle("Save As");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.txt", "txt", "text");
+            chooser.setFileFilter(filter);
+            if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                String fileName = chooser.getSelectedFile().getName();
+                if (!fileName.endsWith(".txt")) fileName = fileName + ".txt";
+                try (PrintStream out = new PrintStream(homepath + File.separator + fileName,
                         "UTF-8")) {
                     for (int i = 0; i < chapterChecker.urls.size(); i++) {
                         out.println(chapterChecker.hosts.get(i) + " " + chapterChecker.urls.get(i));
@@ -973,8 +1011,7 @@ public class NovelGrabberGUI {
                 } catch (IOException ec) {
                     out.println(Shared.time() + ec.getMessage());
                 }
-            } else {
-                showPopup("Checker list is empty", "warning");
+                appendText("checker", "Saved checkers to file.");
             }
         });
         checkToFile.setFont(new Font("Segoe UI", Font.PLAIN, 11));
