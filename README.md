@@ -13,7 +13,7 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 * [Rainbow Turtle Translations](https://arkmachinetranslations.wordpress.com/)
 
 ## How to use
-* Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/download/v1.4.0/Novel-Grabber_v1.4.0.jar)
+* Download and execute [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/download/v1.4.1/Novel-Grabber_v1.4.1.jar)
 * Enter the link to the novel's Table of Contents page
 * Pick the corresponding host
 * Choose your save directory
