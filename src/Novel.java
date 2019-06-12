@@ -44,7 +44,7 @@ public class Novel {
             case "volarenovels":
                 this.host = "https://volarenovels.com/";
                 this.chapterLinkContainer = "#accordion";
-                this.chapterLinkSelecter = "a";
+                this.chapterLinkSelecter = ".chapter-item a";
                 this.chapterContainer = ".panel .fr-view";
                 this.sentenceSelecter = "p";
                 this.titleHostName = "-volare-novels";
