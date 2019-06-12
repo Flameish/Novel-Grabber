@@ -17,7 +17,7 @@ class chapterChecker {
     static List<String> urls = new ArrayList<>();
     private static ScheduledExecutorService service;
     private static String title;
-    private static int pollingInterval = 5;
+    private static int pollingInterval = 20;
     private static boolean taskIsKilled;
     private static String latestChapterListFile;
 
@@ -150,7 +150,7 @@ class chapterChecker {
         taskIsKilled = true;
         service.shutdown();
         try {
-            if (!service.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+            if (!service.awaitTermination(800, TimeUnit.MINUTES)) {
                 service.shutdownNow();
             }
         } catch (InterruptedException e) {
