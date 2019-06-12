@@ -116,7 +116,7 @@ class chapterChecker {
         NovelGrabberGUI.checkStopPollingBtn.setEnabled(true);
         if (!taskIsKilled) {
             service = Executors.newSingleThreadScheduledExecutor();
-            service.scheduleAtFixedRate(runnable, 0, pollingInterval, TimeUnit.SECONDS);
+            service.scheduleAtFixedRate(runnable, 0, pollingInterval, TimeUnit.MINUTES);
         } else {
             NovelGrabberGUI.stopPolling();
             NovelGrabberGUI.appendText("checker", "Stopping polling.");
