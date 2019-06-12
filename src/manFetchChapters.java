@@ -54,7 +54,7 @@ class manFetchChapters {
         NovelGrabberGUI.setMaxProgress(logWindow, chapterURLs.size());
         if (sentenceSelector.isEmpty() && !useSentenceSelector) useSentenceSelector = true;
         if (invertedOrder) Collections.reverse(chapterURLs);
-        //loop through all remaining chapter links and save them to file
+        //loops through all remaining chapter links and save them to file
         for (String chapter : chapterURLs) {
             chapterNumber++;
             Document doc = Jsoup.connect(chapter).get();
