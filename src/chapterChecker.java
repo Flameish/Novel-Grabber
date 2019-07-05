@@ -16,23 +16,26 @@ class chapterChecker {
     static List<String> hosts = new ArrayList<>();
     static List<String> urls = new ArrayList<>();
     private static ScheduledExecutorService service;
-    private static String title;
-    private static int pollingInterval = 20;
+    private static final int pollingInterval = 20;
+    static boolean checkerRunning;
     private static boolean taskIsKilled;
+    private static String curTitle;
     private static String latestChapterListFile;
 
     static void chapterPolling() {
-        taskIsKilled = false;
         if (!SystemTray.isSupported()) {
             NovelGrabberGUI.appendText("checker", "System tray not supported!");
             NovelGrabberGUI.stopPolling();
             return;
         }
         latestChapterListFile = NovelGrabberGUI.homepath + File.separator + "lastChapters_" + urls.hashCode() + ".txt";
-        List<Integer> latestChapter = new ArrayList<>();
+        taskIsKilled = false;
+        checkerRunning = true;
+        List<Integer> lastChapter = new ArrayList<>();
         List<Integer> toBeRemoved = new ArrayList<>();
         NovelGrabberGUI.checkStatusLbl.setText("Initializing...");
         //Initializing
+        //reads latest chapter numbers from existing file. File name is compared against hashCode() of List<String> urls.
         File file = new File(latestChapterListFile);
         if (file.exists()) {
             Scanner sc = null;
@@ -42,15 +45,16 @@ class chapterChecker {
                 ex.printStackTrace();
             }
             while (Objects.requireNonNull(sc).hasNextLine()) {
-                latestChapter.add(Integer.parseInt(sc.next()));
+                lastChapter.add(Integer.parseInt(sc.next()));
                 sc.nextLine();
             }
             sc.close();
+            //gets amount of chapters in toc of novel urls. Faulty urls get added to toBeRemoved.
         } else {
             for (int i = 0; i < urls.size(); i++) {
                 try {
                     NovelGrabberGUI.appendText("checker", "Initializing: " + urls.get(i));
-                    latestChapter.add(countChapters(hosts.get(i), urls.get(i)));
+                    lastChapter.add(countChapters(hosts.get(i), urls.get(i)));
                     Thread.sleep(3000);
                 } catch (IllegalArgumentException | IOException e) {
                     toBeRemoved.add(i);
@@ -58,21 +62,21 @@ class chapterChecker {
                     e.printStackTrace();
                 }
             }
+            //removes faulty entries
             toBeRemoved.sort(Comparator.reverseOrder());
             for (int a : toBeRemoved) {
                 NovelGrabberGUI.appendText("checker", "Removing faulty: " + urls.get(a));
                 urls.remove(a);
                 hosts.remove(a);
-
             }
             toBeRemoved.clear();
             NovelGrabberGUI.listModelCheckerLinks.clear();
+            //creates a new file to store latest chapter numbers and names it after hashCode() of entries (List<String>urls
             if (!urls.isEmpty()) {
                 latestChapterListFile = NovelGrabberGUI.homepath + File.separator + "lastChapters_" + urls.hashCode() + ".txt";
-                try (PrintStream out = new PrintStream(latestChapterListFile,
-                        "UTF-8")) {
+                try (PrintStream out = new PrintStream(latestChapterListFile, "UTF-8")) {
                     for (int i = 0; i < urls.size(); i++) {
-                        out.println(latestChapter.get(i) + " " + urls.get(i));
+                        out.println(lastChapter.get(i) + " " + urls.get(i));
                     }
                     NovelGrabberGUI.appendText("checker", "Creating latest-chapter file: " + latestChapterListFile);
                 } catch (IOException e) {
@@ -80,34 +84,39 @@ class chapterChecker {
                 }
             }
         }
-        NovelGrabberGUI.listModelCheckerLinks.clear();
-        for (int i = 0; i < urls.size(); i++) {
-            NovelGrabberGUI.listModelCheckerLinks.addElement("Latest chapter: " + latestChapter.get(i) + " / [" + urls.get(i) + "]");
-        }
         if (urls.isEmpty()) {
             NovelGrabberGUI.stopPolling();
             NovelGrabberGUI.appendText("checker", "No checkers defined.");
-            NovelGrabberGUI.checkRemoveEntry.setEnabled(false);
-            NovelGrabberGUI.checkPollStartBtn.setEnabled(false);
             return;
+        }
+        //updates checker list on GUI
+        NovelGrabberGUI.listModelCheckerLinks.clear();
+        for (int i = 0; i < urls.size(); i++) {
+            NovelGrabberGUI.listModelCheckerLinks.addElement("Latest chapter: " + lastChapter.get(i) + " / [" + urls.get(i) + "]");
         }
         Runnable runnable = () -> {
             try {
                 for (int i = 0; i < urls.size(); i++) {
-                    Thread.sleep((int) (Math.random() * 7001 + 2000));
-                    NovelGrabberGUI.appendText("checker", "Polling: " + urls.get(i));
-                    int temp = countChapters(hosts.get(i), urls.get(i));
-                    if (temp > latestChapter.get(i)) {
-                        modifyFile(latestChapterListFile, latestChapter.get(i).toString() + " " + urls.get(i), temp + " " + urls.get(i));
-                        NovelGrabberGUI.appendText("checker", "New chapter: " + temp);
-                        latestChapter.add(i, temp);
-                        NovelGrabberGUI.listModelCheckerLinks.set(i, "Latest chapter: " + latestChapter.get(i) + " / [" + urls.get(i) + "]");
-                        showNotification(title + ": " + latestChapter.get(i));
+                    if (!taskIsKilled) {
+                        Thread.sleep((int) (Math.random() * 7001 + 2000));
+                        NovelGrabberGUI.appendText("checker", "Polling: " + urls.get(i));
+                        int newChapter = countChapters(hosts.get(i), urls.get(i));
+                        if (newChapter > lastChapter.get(i)) {
+                            if (newChapter - lastChapter.get(i) > 1) {
+                                NovelGrabberGUI.appendText("checker", newChapter - lastChapter.get(i) + " new chapters.");
+                                showNotification(curTitle + ": " + (newChapter - lastChapter.get(i)) + " new chapters.");
+                            } else {
+                                NovelGrabberGUI.appendText("checker", "New chapter: " + newChapter);
+                                showNotification(curTitle + ": " + newChapter);
+                            }
+                            modifyFile(latestChapterListFile, lastChapter.get(i).toString() + " " + urls.get(i), newChapter + " " + urls.get(i));
+                            NovelGrabberGUI.listModelCheckerLinks.set(i, "Latest chapter: " + newChapter + " / [" + curTitle + "]");
+                            lastChapter.add(i, newChapter);
+                        }
                     }
-                    //testing; sets latest chapter to 1
-                    //latestChapter.set(i,1);
                 }
-                NovelGrabberGUI.appendText("checker", "Polling again in " + pollingInterval + " minutes.");
+                if (!taskIsKilled)
+                    NovelGrabberGUI.appendText("checker", "Polling again in " + pollingInterval + " minutes.");
             } catch (IllegalArgumentException | IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -134,8 +143,7 @@ class chapterChecker {
             }
             reader.close();
             String newText = oldText.toString().replaceAll(oldString, newString);
-            try (PrintStream out = new PrintStream(filePath,
-                    "UTF-8")) {
+            try (PrintStream out = new PrintStream(filePath, "UTF-8")) {
                 out.print(newText);
             } catch (IOException e) {
                 out.println(Shared.time() + e.getMessage());
@@ -146,22 +154,25 @@ class chapterChecker {
     }
 
     static void killTask() {
-        taskIsKilled = true;
-        service.shutdown();
-        try {
-            if (!service.awaitTermination(800, TimeUnit.MINUTES)) {
+        if (!(service == null)) {
+            taskIsKilled = true;
+            service.shutdown();
+            try {
+                if (!service.awaitTermination(800, TimeUnit.MINUTES)) {
+                    service.shutdownNow();
+                }
+            } catch (InterruptedException e) {
                 service.shutdownNow();
             }
-        } catch (InterruptedException e) {
-            service.shutdownNow();
+            NovelGrabberGUI.appendText("checker", "Stopped polling.");
+            NovelGrabberGUI.resetCheckerGUIButtons();
         }
-        NovelGrabberGUI.appendText("checker", "Stopping polling.");
     }
 
     private static int countChapters(String host, String tocUrl) throws IllegalArgumentException, IOException {
         Novel currentNovel = new Novel(host, tocUrl);
         Document doc = Jsoup.connect(currentNovel.getUrl()).get();
-        title = doc.title();
+        curTitle = doc.title();
         Elements content = doc.select(currentNovel.getChapterLinkContainer());
         Elements chapterItem = content.select(currentNovel.getChapterLinkSelector());
         return chapterItem.size();
