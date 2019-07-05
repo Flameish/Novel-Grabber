@@ -4,7 +4,7 @@
 public class Novel {
     static String[] websites = {"Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
             "Noodletown Translated", "BoxNovel", "Lightnovel Translations",
-            "Exiled Rebels Scanlations", "Rainbow Turtle Translations"};
+            "Exiled Rebels Scanlations", "Rainbow Turtle Translations", "Practical Guide to Evil", "Readlightnovel"};
     private String chapterLinkContainer;
     private String chapterLinkSelecter;
     private String titleHostName;
@@ -27,7 +27,7 @@ public class Novel {
             case "royalroad":
                 this.host = "https://www.royalroad.com/";
                 this.chapterLinkContainer = ".table";
-                this.chapterLinkSelecter = "td";
+                this.chapterLinkSelecter = "td:not([class])";
                 this.chapterContainer = ".chapter-content";
                 this.sentenceSelecter = "p";
                 this.titleHostName = "-Royal-Road";
@@ -61,7 +61,7 @@ public class Novel {
                 this.host = "https://boxnovel.com/";
                 this.chapterLinkContainer = ".listing-chapters_wrap";
                 this.chapterLinkSelecter = "a";
-                this.chapterContainer = ".cha-words";
+                this.chapterContainer = ".text-left";
                 this.sentenceSelecter = "p";
                 this.titleHostName = "";
                 break;
@@ -97,34 +97,50 @@ public class Novel {
                 this.sentenceSelecter = "p";
                 this.titleHostName = "";
                 break;
+            case "practicalguidetoevil":
+                this.host = "https://practicalguidetoevil.wordpress.com/";
+                this.chapterLinkContainer = ".entry-content";
+                this.chapterLinkSelecter = "li a";
+                this.chapterContainer = ".entry-content";
+                this.sentenceSelecter = "p";
+                this.titleHostName = "";
+                break;
+            case "readlightnovel":
+                this.host = "https://www.readlightnovel.org/";
+                this.chapterLinkContainer = ".tab-content";
+                this.chapterLinkSelecter = "li a";
+                this.chapterContainer = ".desc";
+                this.sentenceSelecter = "p";
+                this.titleHostName = "";
+                break;
         }
     }
 
     String getChapterLinkContainer() {
-        return this.chapterLinkContainer;
+        return chapterLinkContainer;
     }
 
     String getChapterLinkSelector() {
-        return this.chapterLinkSelecter;
+        return chapterLinkSelecter;
     }
 
     String getTitleHostName() {
-        return this.titleHostName;
+        return titleHostName;
     }
 
     String getUrl() {
-        return this.url;
+        return url;
     }
 
     String getHost() {
-        return this.host;
+        return host;
     }
 
     String getChapterContainer() {
-        return this.chapterContainer;
+        return chapterContainer;
     }
 
     String getSentenceSelector() {
-        return this.sentenceSelecter;
+        return sentenceSelecter;
     }
 }
