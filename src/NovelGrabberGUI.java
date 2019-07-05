@@ -57,18 +57,22 @@ public class NovelGrabberGUI {
     private static JCheckBox manCreateToc = new JCheckBox("Create ToC");
     static JButton checkStopPollingBtn;
     static JLabel checkStatusLbl;
-    static private JLabel checkBusyIcon;
+    static JLabel checkBusyIcon;
     static JButton checkRemoveEntry;
     static private JTextArea checkLogField;
     private JButton checkHideLogBtn;
     private static JButton checkShowLogBtn;
-    private String versionNumber = "v1.4.1";
+    static JButton checkAddNewEntryBtn;
+    static JLabel checkDefaultFileLabel;
+    static MenuItem defaultItem0;
+    private final String versionNumber = "v1.4.1";
 
     /**
      * Create the application.
      */
     private NovelGrabberGUI() {
         initialize();
+        loadDefaultCheckerList();
     }
 
     /**
@@ -166,7 +170,7 @@ public class NovelGrabberGUI {
         });
     }
 
-    public static void showPopup(String errorMsg, String kind) {
+    private static void showPopup(String errorMsg, String kind) {
         switch (kind) {
             case "warning":
                 JOptionPane.showMessageDialog(frmNovelGrabber, errorMsg, "Warning", JOptionPane.WARNING_MESSAGE);
@@ -178,29 +182,68 @@ public class NovelGrabberGUI {
     }
 
     static void stopPolling() {
-        checkPollStartBtn.setEnabled(true);
-        checkPollStartBtn.setVisible(true);
-        checkStopPollingBtn.setVisible(false);
+        checkStatusLbl.setText("Stopping polling...");
         checkStopPollingBtn.setEnabled(false);
-        checkBusyIcon.setVisible(false);
-        checkStatusLbl.setVisible(false);
+        chapterChecker.checkerRunning = false;
+        defaultItem0.setLabel("Checker not active");
+        Executors.newSingleThreadExecutor().execute(chapterChecker::killTask);
     }
 
     private static void startPolling() {
+        appendText("checker", "Started polling.");
         checkPollStartBtn.setEnabled(false);
         checkPollStartBtn.setVisible(false);
         checkStopPollingBtn.setVisible(true);
         checkStopPollingBtn.setEnabled(false);
+        checkAddNewEntryBtn.setEnabled(false);
+        checkRemoveEntry.setEnabled(false);
         checkStopPollingBtn.setText("Stop checking");
+        defaultItem0.setLabel("Stop polling");
         checkBusyIcon.setVisible(true);
         checkStatusLbl.setVisible(true);
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                chapterChecker.chapterPolling();
-            }
-        });
+        Executors.newSingleThreadExecutor().execute(chapterChecker::chapterPolling);
+    }
 
+    static void resetCheckerGUIButtons() {
+        if (chapterChecker.urls.isEmpty()) {
+            checkRemoveEntry.setEnabled(false);
+            checkPollStartBtn.setEnabled(false);
+        } else {
+            checkRemoveEntry.setEnabled(true);
+            checkPollStartBtn.setEnabled(true);
+        }
+        checkPollStartBtn.setVisible(true);
+        checkAddNewEntryBtn.setEnabled(true);
+        checkBusyIcon.setVisible(false);
+        checkStopPollingBtn.setVisible(false);
+        checkStatusLbl.setVisible(false);
+
+    }
+
+    private static void loadDefaultCheckerList() {
+        File tempFile = new File(homepath + File.separator + "default.txt");
+        if (tempFile.exists()) {
+            checkDefaultFileLabel.setVisible(false);
+            checkDefaultFileLabel.setEnabled(false);
+            Scanner sc = null;
+            try {
+                sc = new Scanner(tempFile);
+            } catch (FileNotFoundException ex) {
+                ex.printStackTrace();
+            }
+            while (Objects.requireNonNull(sc).hasNext()) {
+                String host = sc.next();
+                chapterChecker.hosts.add(host);
+                String url = sc.next();
+                chapterChecker.urls.add(url);
+                listModelCheckerLinks.addElement("[" + url + "]");
+            }
+            sc.close();
+            if (!listModelCheckerLinks.isEmpty()) {
+                appendText("checker", "Loaded default checker list.");
+                startPolling();
+            }
+        }
     }
 
     private void Tray() {
@@ -211,21 +254,21 @@ public class NovelGrabberGUI {
         SystemTray tray = SystemTray.getSystemTray();
         Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/favicon.png"));
 
-        ActionListener exitListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                out.println(Shared.time() + "Exiting...");
-                System.exit(0);
-            }
+        ActionListener exitListener = e -> {
+            out.println(Shared.time() + "Exiting...");
+            System.exit(0);
         };
-        ActionListener openWindow = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                frmNovelGrabber.setVisible(true);
-            }
-        };
+        ActionListener openWindow = e -> frmNovelGrabber.setVisible(true);
 
         PopupMenu popup = new PopupMenu();
         MenuItem topLable = new MenuItem("Novel-Grabber");
         popup.add(topLable);
+        popup.addSeparator();
+        defaultItem0 = new MenuItem("Checker not active");
+        defaultItem0.addActionListener(arg0 -> {
+            if (chapterChecker.checkerRunning) stopPolling();
+        });
+        popup.add(defaultItem0);
         popup.addSeparator();
         MenuItem defaultItem2 = new MenuItem("Open");
         defaultItem2.addActionListener(openWindow);
@@ -251,7 +294,7 @@ public class NovelGrabberGUI {
 
     private void initialize() {
         // tooltip style
-        int dismissDelay = ToolTipManager.sharedInstance().getDismissDelay();
+        int dismissDelay;
         dismissDelay = Integer.MAX_VALUE;
         ToolTipManager.sharedInstance().setDismissDelay(dismissDelay);
         UIManager.put("ToolTip.background", new ColorUIResource(Color.white));
@@ -265,7 +308,6 @@ public class NovelGrabberGUI {
         frmNovelGrabber.setBounds(100, 100, 588, 650);
         frmNovelGrabber.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frmNovelGrabber.addWindowListener(new WindowAdapter() {
-            //I skipped unused callbacks for readability
 
             @Override
             public void windowClosing(WindowEvent e) {
@@ -856,14 +898,16 @@ public class NovelGrabberGUI {
         checkList.setBackground(Color.WHITE);
         checkList.setVisibleRowCount(-1);
         checkList.setFixedCellWidth(512);
+        checkList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
         checkList.setFont(new Font("Tahoma", Font.BOLD, 12));
 
         JScrollPane scrollPane_2 = new JScrollPane(checkList);
         scrollPane_2.setBounds(10, 45, 532, 179);
         checkChapterPane.add(scrollPane_2);
         scrollPane_2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane_2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-        JButton checkAddNewEntryBtn = new JButton("Add");
+        checkAddNewEntryBtn = new JButton("Add");
         checkAddNewEntryBtn.setFocusPainted(false);
         checkAddNewEntryBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
         checkAddNewEntryBtn.setBounds(334, 15, 100, 26);
@@ -871,15 +915,17 @@ public class NovelGrabberGUI {
         checkAddNewEntryBtn.addActionListener(arg0 -> {
             String host = (String) JOptionPane.showInputDialog(checkChapterPane,
                     "Pick host:", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE, favicon, Novel.websites, "wuxiaworld");
-            host = host.toLowerCase().replace(" ", "");
             String checkUrl = JOptionPane.showInputDialog(checkChapterPane,
                     "Input Table of Contents URL:", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE);
-            if (!host.isEmpty() && !checkUrl.isEmpty()) {
-                listModelCheckerLinks.addElement("[" + checkUrl + "]");
-                chapterChecker.hosts.add(host);
-                chapterChecker.urls.add(checkUrl);
-                checkRemoveEntry.setEnabled(true);
-                checkPollStartBtn.setEnabled(true);
+            if (!(checkUrl == null) && !(host == null)) {
+                if (!host.isEmpty() && !checkUrl.isEmpty()) {
+                    host = host.toLowerCase().replace(" ", "");
+                    listModelCheckerLinks.addElement("[" + checkUrl + "]");
+                    chapterChecker.hosts.add(host);
+                    chapterChecker.urls.add(checkUrl);
+                    checkRemoveEntry.setEnabled(true);
+                    checkPollStartBtn.setEnabled(true);
+                }
             }
         });
         ImageIcon busyGif = new ImageIcon(getClass().getResource("/images/busy.gif"));
@@ -915,7 +961,6 @@ public class NovelGrabberGUI {
         checkStopPollingBtn.setBounds(443, 230, 100, 26);
         checkChapterPane.add(checkStopPollingBtn);
         checkStopPollingBtn.addActionListener(ga -> {
-            chapterChecker.killTask();
             stopPolling();
         });
 
@@ -984,6 +1029,8 @@ public class NovelGrabberGUI {
         checkPopUp.add(separator_12);
 
         JMenuItem checkToFile = new JMenuItem("Save to file");
+        checkToFile.setToolTipText(
+                "<html><p width=\"300\">Save checkers to file. \"default.txt\" will be loaded and started on startup.</p></html>");
         checkToFile.addActionListener(e -> {
             if (chapterChecker.urls.isEmpty()) {
                 showPopup("Checker list is empty", "warning");
@@ -1010,6 +1057,11 @@ public class NovelGrabberGUI {
                     }
                 } catch (IOException ec) {
                     out.println(Shared.time() + ec.getMessage());
+                }
+                if ("default.txt".equals(fileName)) {
+                    checkDefaultFileLabel.setVisible(false);
+                    checkDefaultFileLabel.setEnabled(false);
+                    appendText("checker", "Set new default checkers list.");
                 }
                 appendText("checker", "Saved checkers to file.");
             }
@@ -1051,7 +1103,6 @@ public class NovelGrabberGUI {
         checkHideLogBtn.setVisible(false);
         checkHideLogBtn.setEnabled(false);
         checkHideLogBtn.setFocusPainted(false);
-        checkHideLogBtn.setFocusable(false);
         checkHideLogBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
         checkHideLogBtn.setBounds(11, 281, 40, 26);
         checkerPane.add(checkHideLogBtn);
@@ -1063,59 +1114,62 @@ public class NovelGrabberGUI {
             checkHideLogBtn.setEnabled(false);
         });
 
+        checkDefaultFileLabel = new JLabel("No default checker file defined.");
+        checkDefaultFileLabel.setToolTipText(
+                "<html><p width=\"300\">Save your checker file as \"default.txt\" and it will be loaded and started on startup.</p></html>");
+        checkDefaultFileLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        checkDefaultFileLabel.setBounds(11, 570, 200, 26);
+        checkerPane.add(checkDefaultFileLabel);
+
+
         // manual chapter download
-        btnManGrabChapters.addActionListener(e -> {
-            Executors.newSingleThreadExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    btnManGrabChapters.setEnabled(false);
-                    // input validation
-                    if (manChapterListURL.getText().isEmpty()) {
-                        JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
-                                JOptionPane.WARNING_MESSAGE);
-                        manChapterListURL.requestFocusInWindow();
-                    } else if (manSaveLocation.getText().isEmpty()) {
-                        JOptionPane.showMessageDialog(frmNovelGrabber, "Save directory field is empty.", "Warning",
-                                JOptionPane.WARNING_MESSAGE);
-                        manSaveLocation.requestFocusInWindow();
-                    } else if (manChapterContainer.getText().isEmpty()) {
-                        JOptionPane.showMessageDialog(frmNovelGrabber, "Chapter container selector is empty.", "Warning",
-                                JOptionPane.WARNING_MESSAGE);
-                        manChapterContainer.requestFocusInWindow();
-                    } else if (manWaitTime.getText().isEmpty()) {
-                        showPopup("Wait time cannot be empty.", "warning");
-                    } else if (!manWaitTime.getText().matches("\\d+") && !manWaitTime.getText().isEmpty()) {
-                        showPopup("Wait time must contain numbers.", "warning");
-                    } else if ((Objects.requireNonNull(manFileType.getSelectedItem()).toString().equals(".txt")) && (manCreateToc.isSelected())) {
-                        JOptionPane.showMessageDialog(frmNovelGrabber,
-                                "Cannot create Table of Contents page from txt files.", "Warning",
-                                JOptionPane.WARNING_MESSAGE);
-                        manSaveLocation.requestFocusInWindow();
-                    } else if ((!manSaveLocation.getText().isEmpty())
-                            && (!manChapterListURL.getText().isEmpty())
-                            && (!manChapterContainer.getText().isEmpty())
-                            && (!manWaitTime.getText().isEmpty())) {
-                        try {
-                            manProgressBar.setStringPainted(true);
-                            manFetchChapters.manSaveChapters();
-                            if (manCreateToc.isSelected()) {
-                                Shared.createToc(manSaveLocation.getText(), "manual");
-                            }
-                            // clear arrays for next call
-                            Shared.successfulChapterNames.clear();
-                            Shared.failedChapters.clear();
-                            // Exception handling
-                        } catch (NullPointerException | IllegalArgumentException | IOException err) {
-                            JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
-                        } finally {
-                            manProgressBar.setStringPainted(false);
-                            manProgressBar.setValue(0);
-                        }
+        btnManGrabChapters.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
+            btnManGrabChapters.setEnabled(false);
+            // input validation
+            if (manChapterListURL.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                manChapterListURL.requestFocusInWindow();
+            } else if (manSaveLocation.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(frmNovelGrabber, "Save directory field is empty.", "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                manSaveLocation.requestFocusInWindow();
+            } else if (manChapterContainer.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(frmNovelGrabber, "Chapter container selector is empty.", "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                manChapterContainer.requestFocusInWindow();
+            } else if (manWaitTime.getText().isEmpty()) {
+                showPopup("Wait time cannot be empty.", "warning");
+            } else if (!manWaitTime.getText().matches("\\d+") && !manWaitTime.getText().isEmpty()) {
+                showPopup("Wait time must contain numbers.", "warning");
+            } else if ((Objects.requireNonNull(manFileType.getSelectedItem()).toString().equals(".txt")) && (manCreateToc.isSelected())) {
+                JOptionPane.showMessageDialog(frmNovelGrabber,
+                        "Cannot create Table of Contents page from txt files.", "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                manSaveLocation.requestFocusInWindow();
+            } else if ((!manSaveLocation.getText().isEmpty())
+                    && (!manChapterListURL.getText().isEmpty())
+                    && (!manChapterContainer.getText().isEmpty())
+                    && (!manWaitTime.getText().isEmpty())) {
+                try {
+                    manProgressBar.setStringPainted(true);
+                    manFetchChapters.manSaveChapters();
+                    if (manCreateToc.isSelected()) {
+                        Shared.createToc(manSaveLocation.getText(), "manual");
                     }
-                    btnManGrabChapters.setEnabled(true);
+                    // clear arrays for next call
+                    Shared.successfulChapterNames.clear();
+                    Shared.failedChapters.clear();
+                    // Exception handling
+                } catch (NullPointerException | IllegalArgumentException | IOException err) {
+                    JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    manProgressBar.setStringPainted(false);
+                    manProgressBar.setValue(0);
                 }
-            });
-        });
+            }
+            btnManGrabChapters.setEnabled(true);
+        }));
 
 
         // Single Chapter
@@ -1138,63 +1192,56 @@ public class NovelGrabberGUI {
         });
 
         // All Chapters
-        grabChapters.addActionListener(arg0 -> {
-            Executors.newSingleThreadExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    grabChapters.setEnabled(false);
-                    // input validation
-                    if (chapterListURL.getText().isEmpty()) {
-                        showPopup("URL field is empty.", "warning");
-                        chapterListURL.requestFocusInWindow();
-                    } else if ((Objects.requireNonNull(fileType.getSelectedItem()).toString().equals(".txt"))
-                            && (createTocCheckBox.isSelected())) {
-                        showPopup("Cannot create a Table of Contents file with .txt file type.", "warning");
-                    } else if (saveLocation.getText().isEmpty()) {
-                        showPopup("Save directory field is empty.", "warning");
-                        saveLocation.requestFocusInWindow();
-                    } else if ((!chapterAllCheckBox.isSelected())
-                            && ((firstChapter.getText().isEmpty()) || (lastChapter.getText().isEmpty()))) {
-                        showPopup("No chapter range defined.", "warning");
-                    } else if ((!chapterAllCheckBox.isSelected())
-                            && (!firstChapter.getText().matches("\\d+") || !lastChapter.getText().matches("\\d+"))) {
-                        showPopup("Chapter range must contain numbers.", "warning");
-                    } else if ((!chapterAllCheckBox.isSelected()) && ((Integer.parseInt(firstChapter.getText()) < 1)
-                            || (Integer.parseInt(lastChapter.getText()) < 1))) {
-                        showPopup("Chapter numbers can't be lower than 1.", "warning");
-                    } else if ((!chapterAllCheckBox.isSelected())
-                            && (Integer.parseInt(lastChapter.getText()) < Integer.parseInt(firstChapter.getText()))) {
-                        showPopup("Last chapter can't be lower than first chapter.", "warning");
-                    } else if (waitTime.getText().isEmpty()) {
-                        showPopup("Wait time cannot be empty.", "warning");
-                    } else if (!waitTime.getText().matches("\\d+") && !waitTime.getText().isEmpty()) {
-                        showPopup("Wait time must contain numbers.", "warning");
-                    } else if ((!saveLocation.getText().isEmpty())
-                            && (!chapterListURL.getText().isEmpty())
-                    ) {
-                        // grabbing chapter calls
-                        try {
-                            progressBar.setStringPainted(true);
-                            autoFetchChapters.getChapterLinks();
+        grabChapters.addActionListener(arg0 -> Executors.newSingleThreadExecutor().execute(() -> {
+            grabChapters.setEnabled(false);
+            // input validation
+            if (chapterListURL.getText().isEmpty()) {
+                showPopup("URL field is empty.", "warning");
+                chapterListURL.requestFocusInWindow();
+            } else if ((Objects.requireNonNull(fileType.getSelectedItem()).toString().equals(".txt"))
+                    && (createTocCheckBox.isSelected())) {
+                showPopup("Cannot create a Table of Contents file with .txt file type.", "warning");
+            } else if (saveLocation.getText().isEmpty()) {
+                showPopup("Save directory field is empty.", "warning");
+                saveLocation.requestFocusInWindow();
+            } else if ((!chapterAllCheckBox.isSelected())
+                    && ((firstChapter.getText().isEmpty()) || (lastChapter.getText().isEmpty()))) {
+                showPopup("No chapter range defined.", "warning");
+            } else if ((!chapterAllCheckBox.isSelected())
+                    && (!firstChapter.getText().matches("\\d+") || !lastChapter.getText().matches("\\d+"))) {
+                showPopup("Chapter range must contain numbers.", "warning");
+            } else if ((!chapterAllCheckBox.isSelected()) && ((Integer.parseInt(firstChapter.getText()) < 1)
+                    || (Integer.parseInt(lastChapter.getText()) < 1))) {
+                showPopup("Chapter numbers can't be lower than 1.", "warning");
+            } else if ((!chapterAllCheckBox.isSelected())
+                    && (Integer.parseInt(lastChapter.getText()) < Integer.parseInt(firstChapter.getText()))) {
+                showPopup("Last chapter can't be lower than first chapter.", "warning");
+            } else if (waitTime.getText().isEmpty()) {
+                showPopup("Wait time cannot be empty.", "warning");
+            } else if (!waitTime.getText().matches("\\d+") && !waitTime.getText().isEmpty()) {
+                showPopup("Wait time must contain numbers.", "warning");
+            } else if ((!saveLocation.getText().isEmpty())
+                    && (!chapterListURL.getText().isEmpty())
+            ) {
+                // grabbing chapter calls
+                try {
+                    progressBar.setStringPainted(true);
+                    autoFetchChapters.getChapterLinks();
 
-                            if (createTocCheckBox.isSelected()) {
-                                Shared.createToc(saveLocation.getText(), "auto");
-                            }
-                            Shared.successfulChapterNames.clear();
-                            Shared.failedChapters.clear();
-                        } catch (NullPointerException | IllegalArgumentException | IOException err) {
-                            //showPopup(err.toString(), "error");
-                            err.printStackTrace();
-                        } finally {
-                            progressBar.setStringPainted(false);
-                            progressBar.setValue(0);
-                        }
+                    if (createTocCheckBox.isSelected()) {
+                        Shared.createToc(saveLocation.getText(), "auto");
                     }
-                    grabChapters.setEnabled(true);
+                    Shared.successfulChapterNames.clear();
+                    Shared.failedChapters.clear();
+                } catch (NullPointerException | IllegalArgumentException | IOException err) {
+                    //showPopup(err.toString(), "error");
+                    err.printStackTrace();
+                } finally {
+                    progressBar.setStringPainted(false);
+                    progressBar.setValue(0);
                 }
-            });
-
-        });
-
+            }
+            grabChapters.setEnabled(true);
+        }));
     }
 }
