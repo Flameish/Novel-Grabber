@@ -1,3 +1,7 @@
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.ColorUIResource;
@@ -25,8 +29,8 @@ public class NovelGrabberGUI {
     private static final String NL = System.getProperty("line.separator");
     private static final String[] fileTypeList = {".html", ".txt"};
     private static JFrame frmNovelGrabber;
-    static String homepath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
-    static JButton checkPollStartBtn;
+    static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
+    static String versionNumber = "v1.5.0";
     private static final JList<String> chapterLinkList = new JList<>(listModelChapterLinks);
     static JTextField singleChapterLink;
     static JTextField chapterListURL;
@@ -65,13 +69,21 @@ public class NovelGrabberGUI {
     static JButton checkAddNewEntryBtn;
     static JLabel checkDefaultFileLabel;
     static MenuItem defaultItem0;
-    private final String versionNumber = "v1.4.1";
+    static JLabel updateStatusLbl;
+    private static JButton checkPollStartBtn;
+    static private JTextArea updateLogField;
+    private JButton updateHideLogBtn;
+    private JButton updateShowLogBtn;
+    private JScrollPane updateLogScrollpane;
+    private JTabbedPane tabbedPane;
+    private JPanel updatePane;
 
     /**
      * Create the application.
      */
     private NovelGrabberGUI() {
         initialize();
+        checkForNewReleases();
         loadDefaultCheckerList();
     }
 
@@ -103,6 +115,10 @@ public class NovelGrabberGUI {
             case "checker":
                 checkLogField.append(Shared.time() + logMsg + NL);
                 checkLogField.setCaretPosition(checkLogField.getText().length());
+                break;
+            case "update":
+                updateLogField.append(Shared.time() + logMsg + NL);
+                updateLogField.setCaretPosition(updateLogField.getText().length());
                 break;
         }
     }
@@ -221,7 +237,7 @@ public class NovelGrabberGUI {
     }
 
     private static void loadDefaultCheckerList() {
-        File tempFile = new File(homepath + File.separator + "default.txt");
+        File tempFile = new File(appdataPath + File.separator + "default.txt");
         if (tempFile.exists()) {
             checkDefaultFileLabel.setVisible(false);
             checkDefaultFileLabel.setEnabled(false);
@@ -243,6 +259,26 @@ public class NovelGrabberGUI {
                 appendText("checker", "Loaded default checker list.");
                 startPolling();
             }
+        }
+    }
+
+    private void checkForNewReleases() {
+        int oldVersionNumber = Integer.parseInt(versionNumber.replaceAll("\\D+", ""));
+        String newVersionString = null;
+        try {
+            System.out.println("Checking new releases...");
+            Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
+            Element content = doc.select("a[title]").first();
+            newVersionString = content.attr("title");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int newVersionNumber = Integer.parseInt(newVersionString.replaceAll("\\D+", ""));
+        if (newVersionNumber > oldVersionNumber) {
+            System.out.println("Found new release: " + newVersionString);
+            updateStatusLbl.setText("A new update of Novel-Grabber was released. The latest version is: " + newVersionString);
+            frmNovelGrabber.setTitle("Novel-Grabber " + versionNumber + " - New version released");
+            tabbedPane.addTab("Update", null, updatePane, null);
         }
     }
 
@@ -317,7 +353,7 @@ public class NovelGrabberGUI {
         frmNovelGrabber.setBackground(Color.LIGHT_GRAY);
         frmNovelGrabber.getContentPane().setLayout(null);
         //tabbed pane
-        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         tabbedPane.setFocusable(false);
         tabbedPane.setBounds(0, 0, 594, 634);
         frmNovelGrabber.getContentPane().add(tabbedPane);
@@ -989,7 +1025,7 @@ public class NovelGrabberGUI {
         JMenuItem checkLoadFromFile = new JMenuItem("Load Checkers from file");
         checkLoadFromFile.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
-            chooser.setCurrentDirectory(new File(homepath));
+            chooser.setCurrentDirectory(new File(appdataPath));
             chooser.setDialogTitle("Open File");
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setAcceptAllFileFilterUsed(false);
@@ -1036,12 +1072,12 @@ public class NovelGrabberGUI {
                 showPopup("Checker list is empty", "warning");
                 return;
             }
-            File dir = new File(homepath);
+            File dir = new File(appdataPath);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
             JFileChooser chooser = new JFileChooser();
-            chooser.setCurrentDirectory(new File(homepath));
+            chooser.setCurrentDirectory(new File(appdataPath));
             chooser.setDialogTitle("Save As");
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setAcceptAllFileFilterUsed(false);
@@ -1050,7 +1086,7 @@ public class NovelGrabberGUI {
             if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
                 String fileName = chooser.getSelectedFile().getName();
                 if (!fileName.endsWith(".txt")) fileName = fileName + ".txt";
-                try (PrintStream out = new PrintStream(homepath + File.separator + fileName,
+                try (PrintStream out = new PrintStream(appdataPath + File.separator + fileName,
                         "UTF-8")) {
                     for (int i = 0; i < chapterChecker.urls.size(); i++) {
                         out.println(chapterChecker.hosts.get(i) + " " + chapterChecker.urls.get(i));
@@ -1121,6 +1157,74 @@ public class NovelGrabberGUI {
         checkDefaultFileLabel.setBounds(11, 570, 200, 26);
         checkerPane.add(checkDefaultFileLabel);
 
+
+        //updater
+        updatePane = new JPanel();
+        updatePane.setLayout(null);
+
+        JPanel updateAreaPane = new JPanel();
+        updateAreaPane.setBounds(10, 5, 557, 95);
+        updatePane.add(updateAreaPane);
+        updateAreaPane.setBorder(BorderFactory.createTitledBorder("Update Novel-Grabber"));
+        updateAreaPane.setLayout(null);
+
+        updateStatusLbl = new JLabel();
+        updateAreaPane.add(updateStatusLbl);
+        updateStatusLbl.setBounds(40, 30, 420, 28);
+
+        JButton updateUpdateBtn = new JButton("Update now");
+        updateUpdateBtn.setFocusPainted(false);
+        updateUpdateBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        updateUpdateBtn.setBounds(420, 32, 100, 26);
+        updateAreaPane.add(updateUpdateBtn);
+        updateUpdateBtn.addActionListener(arg0 -> {
+            Executors.newSingleThreadExecutor().execute(updater::updateJar);
+        });
+
+        JPanel updateLogPane = new JPanel();
+        updateLogPane.setVisible(false);
+        updateLogPane.setBounds(10, 134, 557, 200);
+        updatePane.add(updateLogPane);
+        updateLogPane.setBorder(BorderFactory.createTitledBorder("Log"));
+        updateLogPane.setLayout(null);
+
+        updateLogField = new JTextArea();
+        updateLogField.setFocusable(false);
+        updateLogField.setEditable(false);
+
+        updateLogScrollpane = new JScrollPane(updateLogField);
+        updateLogScrollpane.setBounds(10, 25, 532, 159);
+        updateLogScrollpane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        updateLogScrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        updateLogPane.add(updateLogScrollpane);
+
+        updateShowLogBtn = new JButton("+");
+        updateShowLogBtn.setFocusPainted(false);
+        updateShowLogBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        updateShowLogBtn.setBounds(11, 105, 40, 26);
+        updatePane.add(updateShowLogBtn);
+        updateShowLogBtn.addActionListener(gc -> {
+            updateLogPane.setVisible(true);
+            updateShowLogBtn.setVisible(false);
+            updateShowLogBtn.setEnabled(false);
+            updateHideLogBtn.setVisible(true);
+            updateHideLogBtn.setEnabled(true);
+        });
+
+        updateHideLogBtn = new JButton("-");
+        updateHideLogBtn.setVisible(false);
+        updateHideLogBtn.setEnabled(false);
+        updateHideLogBtn.setFocusPainted(false);
+        updateHideLogBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        updateHideLogBtn.setBounds(11, 105, 40, 26);
+        updatePane.add(updateHideLogBtn);
+        updateHideLogBtn.addActionListener(gc -> {
+            updateLogPane.setVisible(false);
+            updateHideLogBtn.setVisible(false);
+            updateHideLogBtn.setEnabled(false);
+            updateShowLogBtn.setVisible(true);
+            updateShowLogBtn.setEnabled(true);
+        });
 
         // manual chapter download
         btnManGrabChapters.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
