@@ -28,7 +28,7 @@ class chapterChecker {
             NovelGrabberGUI.stopPolling();
             return;
         }
-        latestChapterListFile = NovelGrabberGUI.homepath + File.separator + "lastChapters_" + urls.hashCode() + ".txt";
+        latestChapterListFile = NovelGrabberGUI.appdataPath + File.separator + "lastChapters_" + urls.hashCode() + ".txt";
         taskIsKilled = false;
         checkerRunning = true;
         List<Integer> lastChapter = new ArrayList<>();
@@ -56,7 +56,7 @@ class chapterChecker {
                     NovelGrabberGUI.appendText("checker", "Initializing: " + urls.get(i));
                     lastChapter.add(countChapters(hosts.get(i), urls.get(i)));
                     Thread.sleep(3000);
-                } catch (IllegalArgumentException | IOException e) {
+                } catch (IllegalArgumentException e) {
                     toBeRemoved.add(i);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -73,7 +73,7 @@ class chapterChecker {
             NovelGrabberGUI.listModelCheckerLinks.clear();
             //creates a new file to store latest chapter numbers and names it after hashCode() of entries (List<String>urls
             if (!urls.isEmpty()) {
-                latestChapterListFile = NovelGrabberGUI.homepath + File.separator + "lastChapters_" + urls.hashCode() + ".txt";
+                latestChapterListFile = NovelGrabberGUI.appdataPath + File.separator + "lastChapters_" + urls.hashCode() + ".txt";
                 try (PrintStream out = new PrintStream(latestChapterListFile, "UTF-8")) {
                     for (int i = 0; i < urls.size(); i++) {
                         out.println(lastChapter.get(i) + " " + urls.get(i));
@@ -85,8 +85,13 @@ class chapterChecker {
             }
         }
         if (urls.isEmpty()) {
-            NovelGrabberGUI.stopPolling();
             NovelGrabberGUI.appendText("checker", "No checkers defined.");
+            NovelGrabberGUI.stopPolling();
+            NovelGrabberGUI.resetCheckerGUIButtons();
+            return;
+        }
+        if (lastChapter.contains(-1)) {
+            NovelGrabberGUI.appendText("checker", "Could not reach one or more hosts.");
             return;
         }
         //updates checker list on GUI
@@ -117,7 +122,7 @@ class chapterChecker {
                 }
                 if (!taskIsKilled)
                     NovelGrabberGUI.appendText("checker", "Polling again in " + pollingInterval + " minutes.");
-            } catch (IllegalArgumentException | IOException | InterruptedException e) {
+            } catch (IllegalArgumentException | InterruptedException e) {
                 e.printStackTrace();
             }
         };
@@ -127,8 +132,8 @@ class chapterChecker {
             service = Executors.newSingleThreadScheduledExecutor();
             service.scheduleAtFixedRate(runnable, 0, pollingInterval, TimeUnit.MINUTES);
         } else {
-            NovelGrabberGUI.stopPolling();
             NovelGrabberGUI.appendText("checker", "Stopping polling.");
+            NovelGrabberGUI.stopPolling();
         }
     }
 
@@ -169,13 +174,19 @@ class chapterChecker {
         }
     }
 
-    private static int countChapters(String host, String tocUrl) throws IllegalArgumentException, IOException {
+    private static int countChapters(String host, String tocUrl) {
         Novel currentNovel = new Novel(host, tocUrl);
-        Document doc = Jsoup.connect(currentNovel.getUrl()).get();
-        curTitle = doc.title();
-        Elements content = doc.select(currentNovel.getChapterLinkContainer());
-        Elements chapterItem = content.select(currentNovel.getChapterLinkSelector());
-        return chapterItem.size();
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(currentNovel.getUrl()).timeout(10 * 1000).get();
+            curTitle = doc.title();
+            Elements content = doc.select(currentNovel.getChapterLinkContainer());
+            Elements chapterItem = content.select(currentNovel.getChapterLinkSelector());
+            return chapterItem.size();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     private static void showNotification(String message) {
