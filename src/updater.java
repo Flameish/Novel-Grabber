@@ -11,7 +11,7 @@ import java.util.Map;
 class updater {
     private static String getLatestVersionString() {
         try {
-            NovelGrabberGUI.appendText("update", "Checking new releases...");
+            NovelGrabberGUI.updateProcessLbl.setText("Checking new releases...");
             Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
             Element content = doc.select("a[title]").first();
             return content.attr("title");
@@ -26,11 +26,12 @@ class updater {
         String newVersionString = getLatestVersionString();
         int newVersionNumber = Integer.parseInt(newVersionString.replaceAll("\\D+", ""));
         if (newVersionNumber > oldVersionNumber) {
-            NovelGrabberGUI.appendText("update", "Found new version: " + newVersionString);
-            NovelGrabberGUI.appendText("update", "Downloading new release...");
+            NovelGrabberGUI.updateProcessLbl.setText("Found new version: " + newVersionString);
+            NovelGrabberGUI.updateProcessLbl.setText("Downloading new release...");
+            NovelGrabberGUI.updateProcessLbl.setText("");
             String jarLink = "https://github.com/Flameish/Novel-Grabber/releases/download/" + newVersionString + "/Novel-Grabber.jar";
             try {
-                NovelGrabberGUI.appendText("update", "Finished.");
+                NovelGrabberGUI.updateProcessLbl.setText("Finished.");
                 downloadFileFromGitHub(jarLink);
                 startNovelGrabber();
                 System.exit(0);
@@ -43,7 +44,7 @@ class updater {
     }
 
     private static void startNovelGrabber() {
-        NovelGrabberGUI.appendText("update", "Starting Novel-Grabber...");
+        NovelGrabberGUI.updateProcessLbl.setText("Starting Novel-Grabber...");
         Process proc = null;
         try {
             proc = Runtime.getRuntime().exec("java -jar Novel-Grabber.jar");
