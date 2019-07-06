@@ -28,7 +28,7 @@ class updater {
         if (newVersionNumber > oldVersionNumber) {
             NovelGrabberGUI.appendText("update", "Found new version: " + newVersionString);
             NovelGrabberGUI.appendText("update", "Downloading new release...");
-            String jarLink = "https://github.com/Flameish/Novel-Grabber/releases/download/" + newVersionString + "/Novel-Grabber_" + newVersionString + ".jar";
+            String jarLink = "https://github.com/Flameish/Novel-Grabber/releases/download/" + newVersionString + "/Novel-Grabber.jar";
             try {
                 NovelGrabberGUI.appendText("update", "Finished.");
                 downloadFileFromGitHub(jarLink);
