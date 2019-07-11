@@ -46,6 +46,10 @@ Alternatively use the manual tab if your novel is not on one of the supported si
 
 ![alt text](https://i.imgur.com/bLSiaJ6.gif)<br>
 
+## Converting with Calibre
+After grabbing the desired chapters: <br>
+![alt text](https://i.imgur.com/DBtrXPh.gif)<br>
+
 ## Currently not working
 * Websites which load chapter lists etc. later with javascript or in other ways.
 
