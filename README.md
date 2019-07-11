@@ -48,7 +48,6 @@ Alternatively use the manual tab if your novel is not on one of the supported si
 ![alt text](https://i.imgur.com/bLSiaJ6.gif)<br>
 
 ## <span id="converting">Converting with Calibre</span>
-After grabbing the desired chapters: <br>
 <small>(click to enlarge)</small><br>
 ![alt text](https://i.imgur.com/DBtrXPh.gif)<br>
 
