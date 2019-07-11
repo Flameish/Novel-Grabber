@@ -47,13 +47,14 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 1. Enter the URL to the novel's "Table of Contents" page and retrieve all links on the site. 
 
 2. Afterwards remove all unwanted links from the selection window. You can use shift/crtl-select like you normally would anywhere else. (Note: The chapters should be hosted on the same site or the chapter-text selectors will probably not work)
+![alt text](https://i.imgur.com/bLSiaJ6.gif)<br>
 
 3. Input the chapter wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. <br>
 For example a `<div>` with a class `chapter-text` or id `chapter-content`. <br>
 If you go with a class name, type a `.` in front of the name (`.chapter-text`) or a `#` for ids (`#chapter-content`). <br>
 You can find more complex selector examples and information on the official [jsoup site](https://jsoup.org/cookbook/extracting-data/selector-syntax).
-
-![alt text](https://i.imgur.com/bLSiaJ6.gif)<br>
+<small>(click to enlarge)</small><br>
+![alt text](https://i.imgur.com/NGWjmUo.gif)<br>
 
 ## <span id="converting">Converting with Calibre</span>
 <small>(click to enlarge)</small><br>
