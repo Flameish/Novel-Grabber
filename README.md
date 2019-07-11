@@ -44,7 +44,7 @@ Alternatively use the manual tab if your novel is not on one of the supported si
 * While you are inspecting the webpage, take a look at the wrapper around each chapter's sentences (if there are any). Most commonly used is "\<p\>". Input just "p" if that is the case.
 * Select "Don't use a sentence selector" if you are unsure or the sentences are not embedded in paragraph tags.
 
-![alt text](https://i.imgur.com/EUdFDkf.jpg)<br>
+![alt text](https://i.imgur.com/bLSiaJ6.gif)<br>
 
 ## Currently not working
 * Websites which load chapter lists etc. later with javascript or in other ways.
