@@ -35,11 +35,9 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
      
   * <b>Paragraph text</b> will only get text from within `<p>` tags.
   * <b>Pure text</b> will get all text from the chapter content `<div>` and will not be formated.
-  * <b>Everything</b> will just get the whole HTML code of the chapter content `<div>`. Text will be <em>formated</em> like the webpage's. This method will also download and display potential images in the final output format <small><small>(EPUB, MOBI, PDF etc)</small></small>.
+  * <b>Everything</b> will just get the whole HTML code of the chapter content `<div>`. Text will be <em>formated</em> like the webpage's. This method will also download and display potential images in the final output format <small><small>(EPUB, MOBI, PDF etc)</small></small>.<br>
    
-   <b>Wait time</b> is the time between each chapter call in milliseconds (1000 for 1 second) (so you don't flood the host server with requests)
-   
-![alt text](https://i.imgur.com/OOzg8aR.png) <br>
+   <b>Wait time</b> is the time between each chapter call in milliseconds (1000 for 1 second) (so you don't flood the host server with requests)<br>![alt text](https://i.imgur.com/OOzg8aR.png) <br>
 
 <strong>Manual:</strong>
 
@@ -51,7 +49,7 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 3. Input the chapter wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. <br>
 For example a `<div>` with a class `chapter-text` or id `chapter-content`. <br>
 If you go with a class name, type a `.` in front of the name (`.chapter-text`) or a `#` for ids (`#chapter-content`). <br>
-You can find more complex selector examples and information on the official [jsoup site](https://jsoup.org/cookbook/extracting-data/selector-syntax).<br><small>(click to enlarge)</small><br>![alt text](https://i.imgur.com/NGWjmUo.gif)<br>
+You can find more complex selector examples and information on the official [jsoup site](https://jsoup.org/cookbook/extracting-data/selector-syntax).<br><small><a href="https://i.imgur.com/NGWjmUo.gif">(Showcase)</a></small><br>
 
 ## <span id="converting">Converting with Calibre</span>
 <small>(click to enlarge)</small><br>
