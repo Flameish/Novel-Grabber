@@ -92,8 +92,7 @@ class autoFetchChapters {
                 return;
             }
             //Set Table of Content file name
-            Shared.tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(), "")
-                    + "-Chapter-" + firstChapter + "-" + lastChapter);
+            Shared.tocFileName = "Table of Contents " + firstChapter + "-" + lastChapter;
             NovelGrabberGUI.setMaxProgress("auto", (lastChapter - firstChapter) + 1);
 
             //Decide what text selection to use
