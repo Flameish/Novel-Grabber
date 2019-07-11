@@ -21,28 +21,6 @@ class updater {
         }
     }
 
-    static void updateJar() {
-        int oldVersionNumber = Integer.parseInt(NovelGrabberGUI.versionNumber.replaceAll("\\D+", ""));
-        String newVersionString = getLatestVersionString();
-        int newVersionNumber = Integer.parseInt(newVersionString.replaceAll("\\D+", ""));
-        if (newVersionNumber > oldVersionNumber) {
-            NovelGrabberGUI.updateProcessLbl.setText("Found new version: " + newVersionString);
-            NovelGrabberGUI.updateProcessLbl.setText("Downloading new release...");
-            NovelGrabberGUI.updateProcessLbl.setText("");
-            String jarLink = "https://github.com/Flameish/Novel-Grabber/releases/download/" + newVersionString + "/Novel-Grabber.jar";
-            try {
-                NovelGrabberGUI.updateProcessLbl.setText("Finished.");
-                downloadFileFromGitHub(jarLink);
-                startNovelGrabber();
-                System.exit(0);
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        } else {
-            NovelGrabberGUI.appendText("update", "Novel-Grabber is up-to-date!");
-        }
-    }
-
     private static void startNovelGrabber() {
         NovelGrabberGUI.updateProcessLbl.setText("Starting Novel-Grabber...");
         Process proc = null;
@@ -63,6 +41,7 @@ class updater {
     }
 
     private static void downloadFileFromGitHub(String URL) throws Throwable {
+        NovelGrabberGUI.updateProcessLbl.setText("Downloading new release...");
         String link = URL;
         String fileName = "Novel-Grabber.jar";
         java.net.URL url = new URL(link);
@@ -83,4 +62,27 @@ class updater {
         }
         output.close();
     }
+
+    /**
+     * TODO: future 2+.x.x/ x.10+.x releases might break the comparison
+     */
+    static void updateJar() {
+        String newVersionString = getLatestVersionString();
+        int oldVersionNumber = Integer.parseInt(NovelGrabberGUI.versionNumber.replaceAll("\\D+", ""));
+        int newVersionNumber = Integer.parseInt(newVersionString.replaceAll("\\D+", ""));
+        if (newVersionNumber > oldVersionNumber) {
+            String jarLink = "https://github.com/Flameish/Novel-Grabber/releases/download/" + newVersionString + "/Novel-Grabber.jar";
+            try {
+                downloadFileFromGitHub(jarLink);
+                startNovelGrabber();
+                System.exit(0);
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        } else {
+            NovelGrabberGUI.appendText("update", "Novel-Grabber is up-to-date.");
+        }
+    }
+
+
 }
