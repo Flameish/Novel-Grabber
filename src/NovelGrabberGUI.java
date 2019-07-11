@@ -543,6 +543,7 @@ public class NovelGrabberGUI {
         createTocCheckBox.setFocusPainted(false);
         createTocCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
         createTocCheckBox.setBounds(6, 20, 81, 23);
+        createTocCheckBox.setSelected(true);
         optionSelect.add(createTocCheckBox);
         createTocCheckBox.setToolTipText(toolTipStyle
                 + "Will create a \"Table of Contents\" file which can be used to convert all chapter files into a single epub file in calibre.</p></html>");
@@ -917,6 +918,7 @@ public class NovelGrabberGUI {
                 "<html><p width=\"300\">Will create a \"Table of Contents\" file which can be used to convert all chapter files into a single epub file in calibre.</p></html>");
         manCreateToc.setFont(new Font("Tahoma", Font.PLAIN, 11));
         manCreateToc.setFocusPainted(false);
+        manCreateToc.setSelected(true);
         manCreateToc.setBounds(6, 20, 81, 23);
         manOptionPane.add(manCreateToc);
 
