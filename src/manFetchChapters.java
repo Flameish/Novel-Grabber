@@ -3,7 +3,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,10 +16,12 @@ class manFetchChapters {
     private static String chapterContainer;
     private static String saveLocation;
     private static String fileType;
-    private static String sentenceSelector;
     private static boolean chapterNumeration;
     private static boolean invertedOrder;
-    private static boolean useSentenceSelector;
+    private static boolean withParagraphTags;
+    private static boolean withPureText;
+    private static boolean withHTML;
+    private static String logWindow = "manual";
 
     /**
      * Stores all hyperlinks from the given URL.
@@ -27,7 +29,7 @@ class manFetchChapters {
     static void retrieveLinks()
             throws IllegalArgumentException, IOException {
         String url = NovelGrabberGUI.manChapterListURL.getText();
-        NovelGrabberGUI.appendText("manual", "Retrieving links from: " + url);
+        NovelGrabberGUI.appendText(logWindow, "Retrieving links from: " + url);
         Document doc = Jsoup.connect(url).get();
         Elements links = doc.select("a[href]");
         String currChapterLink;
@@ -38,7 +40,7 @@ class manFetchChapters {
                 NovelGrabberGUI.listModelChapterLinks.addElement(chapterLink.text());
             }
         }
-        if (!chapterURLs.isEmpty()) NovelGrabberGUI.appendText("manual", chapterURLs.size() + " links retrieved.");
+        if (!chapterURLs.isEmpty()) NovelGrabberGUI.appendText(logWindow, chapterURLs.size() + " links retrieved.");
     }
 
     /**
@@ -50,82 +52,20 @@ class manFetchChapters {
         getOptions();
         String fileName;
         int chapterNumber = 0;
-        String logWindow = "manual";
         NovelGrabberGUI.setMaxProgress(logWindow, chapterURLs.size());
-        if (sentenceSelector.isEmpty() && !useSentenceSelector) useSentenceSelector = true;
         if (invertedOrder) Collections.reverse(chapterURLs);
         //loops through all remaining chapter links and save them to file
         for (String chapter : chapterURLs) {
             chapterNumber++;
-            Document doc = Jsoup.connect(chapter).get();
-            doc.outputSettings(new Document.OutputSettings().prettyPrint(false));
             fileName = manSetFileName(chapterNumber);
-            try {
-                Element content = doc.select(chapterContainer).first();
-                // sentence selector function
-                if (!useSentenceSelector) {
-                    Elements p = content.select(sentenceSelector);
-                    if (p.isEmpty()) {
-                        NovelGrabberGUI.appendText(logWindow, "[ERROR] Could not detect sentence wrapper for chapter "
-                                + chapterNumber + "(" + chapter + ")");
-                        Shared.failedChapters.add(chapterNumber);
-
-                    } else {
-                        File dir = new File(saveLocation);
-                        if (!dir.exists())
-                            dir.mkdirs();
-                        try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName,
-                                Shared.textEncoding)) {
-                            if (fileType.equals(".txt")) {
-                                for (Element x : p) {
-                                    out.println(x.text() + Shared.NL);
-                                }
-                            }
-                            if (fileType.equals(".html")) {
-                                out.print(Shared.htmlHead);
-                                for (Element x : p) {
-                                    out.print("<p>" + x.text() + "</p>" + Shared.NL);
-                                }
-                                out.print(Shared.htmlFoot);
-                            }
-                        }
-                        Shared.successfulChapter(fileName, logWindow);
-                    }
-                    //all text function
-                } else {
-                    content.select("br").append("\\n");
-                    content.select("p").prepend("\\n\\n");
-                    String chapterText = content.text().replaceAll("\\\\n", "\n");
-                    File dir = new File(saveLocation);
-                    if (!dir.exists())
-                        dir.mkdirs();
-                    try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, Shared.textEncoding)) {
-                        if (fileType.equals(".txt")) {
-                            out.print(chapterText);
-                        }
-                        if (fileType.equals(".html")) {
-                            out.print(Shared.htmlHead);
-                            try (BufferedReader reader = new BufferedReader(new StringReader(chapterText))) {
-                                String line = reader.readLine();
-                                while (line != null) {
-                                    if (!line.isEmpty()) {
-                                        out.append("<p>").append(line).append("</p>").append(Shared.NL);
-                                    }
-                                    line = reader.readLine();
-                                }
-                            } catch (IOException exc) {
-                                Shared.failedChapters.add(chapterNumber);
-                            }
-                            out.print(Shared.htmlFoot);
-                        }
-                    }
-                    Shared.successfulChapter(fileName, logWindow);
-                }
-
-            } catch (Exception noSelectors) {
-                NovelGrabberGUI.appendText(logWindow,
-                        "[ERROR] Could not detect sentence wrapper for chapter " + chapterNumber + "(" + chapter + ")");
-                Shared.failedChapters.add(chapterNumber);
+            if (withParagraphTags) {
+                Shared.saveChapterParagraphTag(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, logWindow, fileType);
+            }
+            if (withPureText) {
+                Shared.saveChapterPureText(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, logWindow, fileType);
+            }
+            if (withHTML) {
+                Shared.saveChapterWithHTML(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, logWindow, fileType);
             }
             Shared.sleep(logWindow);
         }
@@ -144,24 +84,21 @@ class manFetchChapters {
             if (invertedOrder) {
                 fileName = NovelGrabberGUI.listModelChapterLinks
                         .get(NovelGrabberGUI.listModelChapterLinks.getSize() - chapterNumber)
-                        .replaceAll("[^\\w]+", "-") + fileType;
+                        .replaceAll("[^\\w]+", "-");
             } else {
                 fileName = NovelGrabberGUI.listModelChapterLinks.get(chapterNumber - 1)
-                        .replaceAll("[^\\w]+", "-") + fileType;
+                        .replaceAll("[^\\w]+", "-");
             }
-
         } else {
             if (invertedOrder) {
                 fileName = "Ch-" + chapterNumber + "-"
                         + NovelGrabberGUI.listModelChapterLinks
                         .get(NovelGrabberGUI.listModelChapterLinks.getSize() - chapterNumber)
-                        .replaceAll("[^\\w]+", "-")
-                        + fileType;
+                        .replaceAll("[^\\w]+", "-");
             } else {
                 fileName = "Ch-" + chapterNumber + "-" + NovelGrabberGUI.listModelChapterLinks
-                        .get(chapterNumber - 1).replaceAll("[^\\w]+", "-") + fileType;
+                        .get(chapterNumber - 1).replaceAll("[^\\w]+", "-");
             }
-
         }
         return fileName;
     }
@@ -173,9 +110,10 @@ class manFetchChapters {
         chapterContainer = NovelGrabberGUI.manChapterContainer.getText();
         saveLocation = NovelGrabberGUI.manSaveLocation.getText();
         fileType = NovelGrabberGUI.manFileType.getSelectedItem().toString();
-        sentenceSelector = NovelGrabberGUI.manSentenceSelector.getText();
         chapterNumeration = NovelGrabberGUI.manUseNumeration.isSelected();
         invertedOrder = NovelGrabberGUI.manCheckInvertOrder.isSelected();
-        useSentenceSelector = NovelGrabberGUI.manUseSentenceSelector.isSelected();
+        withParagraphTags = NovelGrabberGUI.manParagraphTextSelect.isSelected();
+        withPureText = NovelGrabberGUI.manPureTextSelect.isSelected();
+        withHTML = NovelGrabberGUI.manGetImages.isSelected();
     }
 }
