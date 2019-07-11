@@ -18,7 +18,8 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 * Choose your save directory
 * Select the desired chapter range 
 * Pick from various options
-* Done!
+* Grab chapters
+* <a href="#converting">Convert Table of Contents file to desired format in Calibre</a>
 
 Options:
 * "Create ToC" will create a Table of Contents file with links to all downloaded chapters. This file can be used in [Calibre](https://calibre-ebook.com/) to convert the chapters into a single epub file or any other supported format.
@@ -46,7 +47,7 @@ Alternatively use the manual tab if your novel is not on one of the supported si
 
 ![alt text](https://i.imgur.com/bLSiaJ6.gif)<br>
 
-## Converting with Calibre
+## <span id="converting">Converting with Calibre</span>
 After grabbing the desired chapters: <br>
 ![alt text](https://i.imgur.com/DBtrXPh.gif)<br>
 
