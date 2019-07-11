@@ -49,7 +49,8 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 3. Input the chapter wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. <br>
 For example a `<div>` with a class `chapter-text` or id `chapter-content`. <br>
 If you go with a class name, type a `.` in front of the name (`.chapter-text`) or a `#` for ids (`#chapter-content`). <br>
-You can find more complex selector examples and information on the official [jsoup site](https://jsoup.org/cookbook/extracting-data/selector-syntax).<br><small><a href="https://i.imgur.com/NGWjmUo.gif">(Showcase)</a></small><br>
+<small><a href="https://i.imgur.com/NGWjmUo.gif">(Showcase)</a></small><br>
+You can find more complex selector examples and information on the official [jsoup site](https://jsoup.org/cookbook/extracting-data/selector-syntax).<br>
 
 ## <span id="converting">Converting with Calibre</span>
 <small>(click to enlarge)</small><br>
