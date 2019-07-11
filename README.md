@@ -35,7 +35,7 @@ Options:
 * To not flood the server, specify a wait time in milliseconds. (1000 for 1 second) Novel-Grabber will wait that long between each chapter call.
 * Currently, chapters can only be saved as HTML or TXT files since converting can be done in Calibre.
 
-![alt text](https://i.imgur.com/uM2RgF7.jpg) <br>
+![alt text](https://i.imgur.com/Hsg11vu.png) <br>
 
 Alternatively use the manual tab if your novel is not on one of the supported sites:
 * Enter the URL to the novel's "Table of Contents" page and retrieve all links on the site. Afterwards remove all unwanted links from the selection window. You can use shift/crtl-select like you normally would anywhere else. (Note: The chapters should be hosted on the same site or the chapter-text selectors will probably not work)
