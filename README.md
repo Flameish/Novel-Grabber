@@ -12,7 +12,8 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 * [Exiled Rebels Scanlations](https://exiledrebelsscanlations.com/) 
 
 ## How to use
-####Automatic:
+<strong>Automatic:</strong>
+
 1. Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
 2. Enter the link to the novel's Table of Contents page
 3. Pick the corresponding host
@@ -40,7 +41,8 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
    
 ![alt text](https://i.imgur.com/OOzg8aR.png) <br>
 
-####Manual:
+<strong>Manual:</strong>
+
 <small>(if your novel is not on one of the natively supported sites)</small>
 1. Enter the URL to the novel's "Table of Contents" page and retrieve all links on the site. 
 
