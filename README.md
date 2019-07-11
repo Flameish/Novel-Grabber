@@ -1,4 +1,4 @@
-# Novel-Grabber
+# ![alt text](https://i.imgur.com/LrV2tLe.png)Novel-Grabber
 Novel-Grabber is a GUI based web scrapper that can download chapters from various supported web/light novel sites or from any other site manually. Furthermore,  Novel-Grabber can poll a list of novels for new chapter releases and notify you with desktop notifications.
 
 ## Natively supported sites
@@ -21,7 +21,7 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 5. Select the desired chapter range
 6. Pick from various options
 7. Grab chapters
-8. <a href="#converting">Convert Table of Contents file to desired format in Calibre</a>
+8. <a href="#converting-with-calibre">Convert Table of Contents file to desired format in Calibre</a>
 
 * Options:
 
@@ -52,7 +52,7 @@ If you go with a class name, type a `.` in front of the name (`.chapter-text`) o
 <small><a href="https://i.imgur.com/NGWjmUo.gif">(Showcase)</a></small><br>
 You can find more complex selector examples and information on the official [jsoup site](https://jsoup.org/cookbook/extracting-data/selector-syntax).<br>
 
-## <span id="converting">Converting with Calibre</span>
+## Converting with Calibre
 <small>(click to enlarge)</small><br>
 ![alt text](https://i.imgur.com/DBtrXPh.gif)<br>
 
