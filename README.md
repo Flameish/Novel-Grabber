@@ -6,11 +6,10 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 * [Royalroad](https://royalroad.com/)
 * [Gravitytales](https://gravitytales.com/)
 * [Volarenovels](https://volarenovels.com/)
-* [Noodletown Translated](https://noodletowntranslated.com/)
 * [BoxNovel](https://boxnovel.com/)
 * [Lightnovel Translations](https://lightnovelstranslations.com/)
-* [Exiled Rebels Scanlations](https://exiledrebelsscanlations.com/)
-* [Rainbow Turtle Translations](https://arkmachinetranslations.wordpress.com/)
+* [Noodletown Translated](https://noodletowntranslated.com/)
+* [Exiled Rebels Scanlations](https://exiledrebelsscanlations.com/) 
 
 ## How to use
 * Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
@@ -57,5 +56,7 @@ Please use with appropriate wait times. Downloaded chapters are for private use 
 ## Requirements
 * [Java](https://www.java.com/en/) (version 8+) needs to be installed.
 
-## Credits
+## Credits & Libraries 
 Novel Grabber was build in java with [jsoup](https://www.jsoup.org/) :heart:
+#####Other dependencies: 
+* [json-simple](https://code.google.com/archive/p/json-simple/)
