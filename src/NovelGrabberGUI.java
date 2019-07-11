@@ -1,3 +1,7 @@
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,12 +13,11 @@ import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.util.Objects;
-import java.util.Scanner;
 import java.util.concurrent.Executors;
 
 import static java.lang.System.out;
@@ -23,15 +26,15 @@ import static java.lang.System.out;
  *  Window display and handling.
  */
 public class NovelGrabberGUI {
-    static final DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
-    static final DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
+    static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
+    static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
     private static final JList<String> checkList = new JList<>(listModelCheckerLinks);
     static TrayIcon trayIcon;
     private static final String NL = System.getProperty("line.separator");
     private static final String[] fileTypeList = {".html", ".txt"};
     private static JFrame frmNovelGrabber;
     static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
-    static String versionNumber = "v1.5.0";
+    static String versionNumber = "v1.6.0";
     private static final JList<String> chapterLinkList = new JList<>(listModelChapterLinks);
     static JLabel updateProcessLbl;
     static JTextField singleChapterLink;
@@ -43,27 +46,31 @@ public class NovelGrabberGUI {
     static JTextField firstChapter;
     static JTextField lastChapter;
     static JTextField waitTime;
-    static JCheckBox useSentenceSelector;
+    static JCheckBox paragraphTextSelect;
+    static JCheckBox pureTextSelect;
+    static JCheckBox getImages;
     static JCheckBox useNumeration;
     static JCheckBox checkInvertOrder;
     static JCheckBox chapterAllCheckBox;
-    static JCheckBox manUseSentenceSelector;
+    static JCheckBox manParagraphTextSelect;
+    static JCheckBox manPureTextSelect;
+    static JCheckBox manGetImages;
     static JTextField manSaveLocation;
     static JTextField manWaitTime;
     static JComboBox manFileType;
     static JTextField manChapterContainer;
-    static JTextField manSentenceSelector;
     static JCheckBox manCheckInvertOrder;
     static JCheckBox manUseNumeration = new JCheckBox("Chapter numeration");
     static JTextField manChapterListURL;
     private static JTextArea logArea;
     private static JTextArea manLogField;
-    private static JProgressBar progressBar;
+    static JProgressBar progressBar;
     private static JProgressBar manProgressBar;
     private static JCheckBox manCreateToc = new JCheckBox("Create ToC");
     static JButton checkStopPollingBtn;
     static JLabel checkStatusLbl;
     private static JLabel checkBusyIcon;
+    static JLabel manBusyIcon;
     private static JButton checkRemoveEntry;
     static private JTextArea checkLogField;
     private JButton checkHideLogBtn;
@@ -234,28 +241,25 @@ public class NovelGrabberGUI {
         checkBusyIcon.setVisible(false);
         checkStopPollingBtn.setVisible(false);
         checkStatusLbl.setVisible(false);
-
     }
 
     private static void loadDefaultCheckerList() {
-        File tempFile = new File(appdataPath + File.separator + "default.txt");
-        if (tempFile.exists()) {
+        File filepath = new File(appdataPath + File.separator + "default.json");
+        if (filepath.exists()) {
             checkDefaultFileLabel.setVisible(false);
             checkDefaultFileLabel.setEnabled(false);
-            Scanner sc = null;
+            JSONParser parser = new JSONParser();
             try {
-                sc = new Scanner(tempFile);
-            } catch (FileNotFoundException ex) {
-                ex.printStackTrace();
+                JSONArray a = (JSONArray) parser.parse(new FileReader(filepath));
+                for (Object o : a) {
+                    JSONObject checker = (JSONObject) o;
+                    chapterChecker.hosts.add((String) checker.get("HOST"));
+                    chapterChecker.urls.add((String) checker.get("URL"));
+                    listModelCheckerLinks.addElement("[" + checker.get("URL") + "]");
+                }
+            } catch (IOException | ParseException ec) {
+                ec.printStackTrace();
             }
-            while (Objects.requireNonNull(sc).hasNext()) {
-                String host = sc.next();
-                chapterChecker.hosts.add(host);
-                String url = sc.next();
-                chapterChecker.urls.add(url);
-                listModelCheckerLinks.addElement("[" + url + "]");
-            }
-            sc.close();
             if (!listModelCheckerLinks.isEmpty()) {
                 appendText("checker", "Loaded default checker list.");
                 startPolling();
@@ -263,20 +267,21 @@ public class NovelGrabberGUI {
         }
     }
 
+    /*
+     *Looks up the latest version String on github releases. Displays the Update Tab if a new version was released.    /**
+     * TODO: future 2+.x.x/ x.10+.x releases might break the comparison
+     */
     private void checkForNewReleases() {
-        int oldVersionNumber = Integer.parseInt(versionNumber.replaceAll("\\D+", ""));
-        String newVersionString = null;
         try {
-            System.out.println("Checking new releases...");
             Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
             Element versionString = doc.select("a[title]").first();
-            newVersionString = versionString.attr("title");
+            String newVersionString = versionString.attr("title");
+            int oldVersionNumber = Integer.parseInt(versionNumber.replaceAll("\\D+", ""));
             int newVersionNumber = Integer.parseInt(newVersionString.replaceAll("\\D+", ""));
             if (newVersionNumber > oldVersionNumber) {
-                System.out.println("Found new release: " + newVersionString);
+                tabbedPane.addTab("Update", null, updatePane, null);
                 updateStatusLbl.setText("A new update of Novel-Grabber was released. The latest version is: " + newVersionString);
                 frmNovelGrabber.setTitle("Novel-Grabber " + versionNumber + " - New version released");
-                tabbedPane.addTab("Update", null, updatePane, null);
                 updateLogLbl.setText("Changes in " + newVersionString + ":");
                 Element releaseDesc = doc.select(".markdown-body").first();
                 Elements descLines = releaseDesc.select("li");
@@ -569,15 +574,61 @@ public class NovelGrabberGUI {
         checkInvertOrder.setBounds(6, 60, 129, 23);
         optionSelect.add(checkInvertOrder);
 
-        useSentenceSelector = new JCheckBox("Ignore sentence selector");
-        useSentenceSelector.setFocusPainted(false);
-        useSentenceSelector.setToolTipText(
+        paragraphTextSelect = new JCheckBox("Paragraph tags");
+        paragraphTextSelect.setFocusPainted(false);
+        paragraphTextSelect.setToolTipText(
+                "<html><p width=\"300\">Only grabs text from within paragraph tags.</p></html>");
+        paragraphTextSelect.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        paragraphTextSelect.setBounds(151, 20, 150, 23);
+        optionSelect.add(paragraphTextSelect);
+        paragraphTextSelect.addItemListener(arg0 -> {
+            if (paragraphTextSelect.isSelected()) {
+                pureTextSelect.setEnabled(false);
+                getImages.setEnabled(false);
+            }
+            if (!paragraphTextSelect.isSelected()) {
+                pureTextSelect.setEnabled(true);
+                getImages.setEnabled(true);
+            }
+        });
+
+        pureTextSelect = new JCheckBox("Pure text");
+        pureTextSelect.setFocusPainted(false);
+        pureTextSelect.setToolTipText(
                 "<html><p width=\"300\">Grabs all text within the chapter container. " +
-                        "Useful if chapters use a spreadsheat to display various things such as character stats in a VRMMO novel. "
-                        + "Also required for some sites/chapters which do not embed the text in paragraph tags.</p></html>");
-        useSentenceSelector.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        useSentenceSelector.setBounds(151, 20, 150, 23);
-        optionSelect.add(useSentenceSelector);
+                        "Required for sites/chapters which do not embed the text in paragraph tags.</p></html>");
+        pureTextSelect.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        pureTextSelect.setBounds(151, 40, 150, 23);
+        optionSelect.add(pureTextSelect);
+        pureTextSelect.addItemListener(arg0 -> {
+            if (pureTextSelect.isSelected()) {
+                paragraphTextSelect.setEnabled(false);
+                getImages.setEnabled(false);
+            }
+            if (!pureTextSelect.isSelected()) {
+                paragraphTextSelect.setEnabled(true);
+                getImages.setEnabled(true);
+            }
+        });
+
+        getImages = new JCheckBox("Everything");
+        getImages.setFocusPainted(false);
+        getImages.setToolTipText(
+                "<html><p width=\"300\">(EXPERIMENTAL) Grabs straight html code. Text will have formating and images will be displayed. "
+                        + "Calibre does a good job converting everything and removing un-needed html code.</p></html>");
+        getImages.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        getImages.setBounds(151, 60, 150, 23);
+        optionSelect.add(getImages);
+        getImages.addItemListener(arg0 -> {
+            if (getImages.isSelected()) {
+                paragraphTextSelect.setEnabled(false);
+                pureTextSelect.setEnabled(false);
+            }
+            if (!getImages.isSelected()) {
+                paragraphTextSelect.setEnabled(true);
+                pureTextSelect.setEnabled(true);
+            }
+        });
 
         JLabel sleepLbl = new JLabel("Wait time:");
         sleepLbl.setBounds(389, 60, 66, 14);
@@ -652,7 +703,7 @@ public class NovelGrabberGUI {
         chapterLinkPane.setBorder(BorderFactory.createTitledBorder("Chapter links select"));
         chapterLinkPane.setLayout(null);
 
-        JLabel lblManualToc = new JLabel("Table Of Contents URL");
+        JLabel lblManualToc = new JLabel("Table Of Contents URL:");
         lblManualToc.setFont(new Font("Tahoma", Font.PLAIN, 11));
         lblManualToc.setBounds(13, 17, 158, 25);
         chapterLinkPane.add(lblManualToc);
@@ -676,6 +727,9 @@ public class NovelGrabberGUI {
                 listModelChapterLinks.removeElementAt(indices[i]);
                 manFetchChapters.chapterURLs.remove(indices[i]);
             }
+            if (listModelChapterLinks.isEmpty()) {
+                removeLinks.setEnabled(false);
+            }
             appendText("manual", indices.length + " links removed.");
         });
         removeLinks.setBounds(448, 77, 99, 25);
@@ -691,6 +745,12 @@ public class NovelGrabberGUI {
         manLinkSelect.setBackground(Color.WHITE);
         manLinkSelect.setLayout(null);
         linkSelectTabbedPane.addTab("Link select", null, manLinkSelect, null);
+
+        ImageIcon manBusyGif = new ImageIcon(getClass().getResource("/images/busy.gif"));
+        manBusyIcon = new JLabel(manBusyGif);
+        manBusyIcon.setVisible(false);
+        chapterLinkPane.add(manBusyIcon);
+        manBusyIcon.setBounds(140, 12, 28, 28);
 
         chapterLinkList.setBackground(Color.WHITE);
         chapterLinkList.setVisibleRowCount(-1);
@@ -756,7 +816,7 @@ public class NovelGrabberGUI {
         JButton retrieveLinks = new JButton("Retrieve Links");
         retrieveLinks.setFocusPainted(false);
         retrieveLinks.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        retrieveLinks.addActionListener(arg0 -> {
+        retrieveLinks.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             if (manChapterListURL.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
                         JOptionPane.WARNING_MESSAGE);
@@ -764,17 +824,22 @@ public class NovelGrabberGUI {
             }
             if (!manChapterListURL.getText().isEmpty()) {
                 try {
+                    retrieveLinks.setEnabled(false);
+                    NovelGrabberGUI.manBusyIcon.setVisible(true);
                     manFetchChapters.chapterURLs.clear();
                     listModelChapterLinks.clear();
                     manFetchChapters.retrieveLinks();
                 } catch (NullPointerException | IllegalArgumentException | IOException err) {
                     JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
                 } finally {
-                    removeLinks.setEnabled(true);
+                    retrieveLinks.setEnabled(true);
+                    if (!listModelChapterLinks.isEmpty()) {
+                        removeLinks.setEnabled(true);
+                    }
+                    NovelGrabberGUI.manBusyIcon.setVisible(false);
                 }
             }
-
-        });
+        }));
         retrieveLinks.setBounds(448, 13, 99, 27);
         chapterLinkPane.add(retrieveLinks);
 
@@ -786,48 +851,18 @@ public class NovelGrabberGUI {
 
         JLabel lblChapterContainerSelector = new JLabel("Chapter container selector:");
         lblChapterContainerSelector.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        lblChapterContainerSelector.setBounds(20, 11, 153, 25);
+        lblChapterContainerSelector.setBounds(20, 28, 153, 25);
         lblChapterContainerSelector.setToolTipText(toolTipStyle
                 + "Input chapter wrapping <div> selector following jsoup conventions. For example: .fr-view/.chapter-text etc for <div> class names. #mw-content-text/#chapter-wrapper for <div> id names. More info on jsoup.org</p></html>");
 
         textSelectPane.add(lblChapterContainerSelector);
 
-        JLabel lblSentenceSelector = new JLabel("Sentence selector:");
-        lblSentenceSelector.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        lblSentenceSelector.setBounds(20, 42, 120, 25);
-        lblSentenceSelector
-                .setToolTipText(toolTipStyle + "Input html sentence wrapping. Use \"p\" for the paragraph tag.</p></html>");
-        textSelectPane.add(lblSentenceSelector);
-
         manChapterContainer = new JTextField();
         manChapterContainer.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manChapterContainer.setBounds(177, 13, 144, 20);
+        manChapterContainer.setBounds(177, 30, 200, 23);
         textSelectPane.add(manChapterContainer);
         manChapterContainer.setColumns(10);
 
-        manSentenceSelector = new JTextField();
-        manSentenceSelector.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manSentenceSelector.setBounds(177, 44, 86, 20);
-        textSelectPane.add(manSentenceSelector);
-        manSentenceSelector.setColumns(10);
-
-        manUseSentenceSelector = new JCheckBox("Don't use a sentence selector");
-        manUseSentenceSelector.setFocusPainted(false);
-        manUseSentenceSelector.setToolTipText(
-                "<html><p width=\"300\">Grabs all text within the chapter container. " +
-                        "Useful if chapters use a spreadsheat to display various things such as character stats in a VRMMO novel. " +
-                        "Also required for some sites/chapters which do not embed the text in paragraph tags.</p></html>");
-        manUseSentenceSelector.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manUseSentenceSelector.setBounds(337, 43, 172, 23);
-        textSelectPane.add(manUseSentenceSelector);
-        manUseSentenceSelector.addItemListener(arg0 -> {
-            if (manUseSentenceSelector.isSelected()) {
-                manSentenceSelector.setEnabled(false);
-            }
-            if (!manUseSentenceSelector.isSelected()) {
-                manSentenceSelector.setEnabled(true);
-            }
-        });
 
         manProgressBar = new JProgressBar();
         manProgressBar.setBounds(15, 560, 430, 27);
@@ -885,6 +920,62 @@ public class NovelGrabberGUI {
         manCreateToc.setBounds(6, 20, 81, 23);
         manOptionPane.add(manCreateToc);
 
+        manParagraphTextSelect = new JCheckBox("Paragraph tags");
+        manParagraphTextSelect.setFocusPainted(false);
+        manParagraphTextSelect.setToolTipText(
+                "<html><p width=\"300\">Only grabs text from within paragraph tags.</p></html>");
+        manParagraphTextSelect.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        manParagraphTextSelect.setBounds(151, 20, 150, 23);
+        manOptionPane.add(manParagraphTextSelect);
+        manParagraphTextSelect.addItemListener(arg0 -> {
+            if (manParagraphTextSelect.isSelected()) {
+                manPureTextSelect.setEnabled(false);
+                manGetImages.setEnabled(false);
+            }
+            if (!manParagraphTextSelect.isSelected()) {
+                manPureTextSelect.setEnabled(true);
+                manGetImages.setEnabled(true);
+            }
+        });
+
+        manPureTextSelect = new JCheckBox("Pure text");
+        manPureTextSelect.setFocusPainted(false);
+        manPureTextSelect.setToolTipText(
+                "<html><p width=\"300\">Grabs all text within the chapter container. " +
+                        "Required for sites/chapters which do not embed the text in paragraph tags.</p></html>");
+        manPureTextSelect.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        manPureTextSelect.setBounds(151, 40, 150, 23);
+        manOptionPane.add(manPureTextSelect);
+        manPureTextSelect.addItemListener(arg0 -> {
+            if (manPureTextSelect.isSelected()) {
+                manParagraphTextSelect.setEnabled(false);
+                manGetImages.setEnabled(false);
+            }
+            if (!manPureTextSelect.isSelected()) {
+                manParagraphTextSelect.setEnabled(true);
+                manGetImages.setEnabled(true);
+            }
+        });
+
+        manGetImages = new JCheckBox("Everything");
+        manGetImages.setFocusPainted(false);
+        manGetImages.setToolTipText(
+                "<html><p width=\"300\">(EXPERIMENTAL) Grabs straight html code. Text will have formating and images will be displayed. "
+                        + "Calibre does a good job converting everything and removing un-needed html code.</p></html>");
+        manGetImages.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        manGetImages.setBounds(151, 60, 150, 23);
+        manOptionPane.add(manGetImages);
+        manGetImages.addItemListener(arg0 -> {
+            if (manGetImages.isSelected()) {
+                manParagraphTextSelect.setEnabled(false);
+                manPureTextSelect.setEnabled(false);
+            }
+            if (!manGetImages.isSelected()) {
+                manParagraphTextSelect.setEnabled(true);
+                manPureTextSelect.setEnabled(true);
+            }
+        });
+
         manFileType = new JComboBox<>(fileTypeList);
         manFileType.setFocusable(false);
         manFileType.setFont(new Font("Tahoma", Font.PLAIN, 11));
@@ -928,7 +1019,8 @@ public class NovelGrabberGUI {
         //Chapter checker
         JPanel checkerPane = new JPanel();
         checkerPane.setLayout(null);
-        tabbedPane.addTab("Checker", null, checkerPane, null);
+        //Only display the checker tab if System Tray is supported on the OS
+        if (SystemTray.isSupported()) tabbedPane.addTab("Checker", null, checkerPane, null);
 
         JPanel checkChapterPane = new JPanel();
         checkChapterPane.setBounds(10, 5, 557, 273);
@@ -1040,7 +1132,7 @@ public class NovelGrabberGUI {
             chooser.setDialogTitle("Open File");
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setAcceptAllFileFilterUsed(false);
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.txt", "txt", "text");
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.json", "json", "JSON");
             chooser.setFileFilter(filter);
             String filepath;
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -1048,20 +1140,18 @@ public class NovelGrabberGUI {
                 chapterChecker.hosts.clear();
                 chapterChecker.urls.clear();
                 filepath = chooser.getSelectedFile().toString();
-                Scanner sc = null;
+                JSONParser parser = new JSONParser();
                 try {
-                    sc = new Scanner(new File(filepath));
-                } catch (FileNotFoundException ex) {
-                    ex.printStackTrace();
+                    JSONArray a = (JSONArray) parser.parse(new FileReader(filepath));
+                    for (Object o : a) {
+                        JSONObject checker = (JSONObject) o;
+                        chapterChecker.hosts.add((String) checker.get("HOST"));
+                        chapterChecker.urls.add((String) checker.get("URL"));
+                        listModelCheckerLinks.addElement("[" + checker.get("URL") + "]");
+                    }
+                } catch (IOException | ParseException ec) {
+                    ec.printStackTrace();
                 }
-                while (Objects.requireNonNull(sc).hasNext()) {
-                    String host = sc.next();
-                    chapterChecker.hosts.add(host);
-                    String url = sc.next();
-                    chapterChecker.urls.add(url);
-                    listModelCheckerLinks.addElement("[" + url + "]");
-                }
-                sc.close();
                 if (!listModelCheckerLinks.isEmpty()) {
                     checkRemoveEntry.setEnabled(true);
                     checkPollStartBtn.setEnabled(true);
@@ -1090,22 +1180,15 @@ public class NovelGrabberGUI {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File(appdataPath));
             chooser.setDialogTitle("Save As");
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             chooser.setAcceptAllFileFilterUsed(false);
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.txt", "txt", "text");
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.json", "json", "JSON");
             chooser.setFileFilter(filter);
             if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                String fileName = chooser.getSelectedFile().getName();
-                if (!fileName.endsWith(".txt")) fileName = fileName + ".txt";
-                try (PrintStream out = new PrintStream(appdataPath + File.separator + fileName,
-                        "UTF-8")) {
-                    for (int i = 0; i < chapterChecker.urls.size(); i++) {
-                        out.println(chapterChecker.hosts.get(i) + " " + chapterChecker.urls.get(i));
-                    }
-                } catch (IOException ec) {
-                    out.println(Shared.time() + ec.getMessage());
-                }
-                if ("default.txt".equals(fileName)) {
+                String filepath = chooser.getSelectedFile().toString();
+                if (!filepath.endsWith(".json")) filepath = filepath + ".json";
+                chapterChecker.writeDataToJSON(filepath, false);
+                if ("default.json".equals(filepath)) {
                     checkDefaultFileLabel.setVisible(false);
                     checkDefaultFileLabel.setEnabled(false);
                     appendText("checker", "Set new default checkers list.");
@@ -1200,13 +1283,13 @@ public class NovelGrabberGUI {
         updateLogLbl.setBounds(13, 73, 200, 28);
 
         updateLogField = new JTextArea();
+        updateLogField.setWrapStyleWord(true);
+        updateLogField.setLineWrap(true);
         updateLogField.setFocusable(false);
         updateLogField.setEditable(false);
 
         updateLogScrollpane = new JScrollPane(updateLogField);
         updateLogScrollpane.setBounds(12, 100, 532, 159);
-        updateLogScrollpane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        updateLogScrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         updateAreaPane.add(updateLogScrollpane);
 
         updateProcessLbl = new JLabel();
@@ -1238,18 +1321,30 @@ public class NovelGrabberGUI {
                 JOptionPane.showMessageDialog(frmNovelGrabber,
                         "Cannot create Table of Contents page from txt files.", "Warning",
                         JOptionPane.WARNING_MESSAGE);
-                manSaveLocation.requestFocusInWindow();
+            } else if ((Objects.requireNonNull(manFileType.getSelectedItem()).toString().equals(".txt")) && (manGetImages.isSelected())) {
+                JOptionPane.showMessageDialog(frmNovelGrabber,
+                        "Cannot grab HTML content with .txt file type.", "Warning",
+                        JOptionPane.WARNING_MESSAGE);
             } else if ((!manSaveLocation.getText().isEmpty())
                     && (!manChapterListURL.getText().isEmpty())
                     && (!manChapterContainer.getText().isEmpty())
                     && (!manWaitTime.getText().isEmpty())) {
                 try {
                     manProgressBar.setStringPainted(true);
+                    if (manGetImages.isSelected()) {
+                        Shared.blacklistedTag.add("a");
+                        Shared.blacklistedTag.add("script");
+                        Shared.blacklistedTag.add("input");
+                    }
                     manFetchChapters.manSaveChapters();
                     if (manCreateToc.isSelected()) {
                         Shared.createToc(manSaveLocation.getText(), "manual");
                     }
                     // clear arrays for next call
+                    if (manGetImages.isSelected()) {
+                        Shared.blacklistedTag.clear();
+                        Shared.images.clear();
+                    }
                     Shared.successfulChapterNames.clear();
                     Shared.failedChapters.clear();
                     // Exception handling
@@ -1262,7 +1357,6 @@ public class NovelGrabberGUI {
             }
             btnManGrabChapters.setEnabled(true);
         }));
-
 
         // Single Chapter
         getChapterBtn.addActionListener(e -> {
@@ -1283,7 +1377,7 @@ public class NovelGrabberGUI {
             }
         });
 
-        // All Chapters
+        //Multiple chapters
         grabChapters.addActionListener(arg0 -> Executors.newSingleThreadExecutor().execute(() -> {
             grabChapters.setEnabled(false);
             // input validation
@@ -1293,6 +1387,9 @@ public class NovelGrabberGUI {
             } else if ((Objects.requireNonNull(fileType.getSelectedItem()).toString().equals(".txt"))
                     && (createTocCheckBox.isSelected())) {
                 showPopup("Cannot create a Table of Contents file with .txt file type.", "warning");
+            } else if ((Objects.requireNonNull(fileType.getSelectedItem()).toString().equals(".txt"))
+                    && (getImages.isSelected())) {
+                showPopup("Cannot grab HTML content with .txt file type.", "warning");
             } else if (saveLocation.getText().isEmpty()) {
                 showPopup("Save directory field is empty.", "warning");
                 saveLocation.requestFocusInWindow();
@@ -1317,11 +1414,20 @@ public class NovelGrabberGUI {
             ) {
                 // grabbing chapter calls
                 try {
-                    progressBar.setStringPainted(true);
+                    if (getImages.isSelected()) {
+                        Shared.blacklistedTag.add("a");
+                        Shared.blacklistedTag.add("script");
+                        Shared.blacklistedTag.add("input");
+                    }
+
                     autoFetchChapters.getChapterLinks();
 
                     if (createTocCheckBox.isSelected()) {
                         Shared.createToc(saveLocation.getText(), "auto");
+                    }
+                    if (getImages.isSelected()) {
+                        Shared.blacklistedTag.clear();
+                        Shared.images.clear();
                     }
                     Shared.successfulChapterNames.clear();
                     Shared.failedChapters.clear();
