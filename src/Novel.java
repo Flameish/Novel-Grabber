@@ -4,143 +4,90 @@
 public class Novel {
     static String[] websites = {"Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
             "Noodletown Translated", "BoxNovel", "Lightnovel Translations",
-            "Exiled Rebels Scanlations", "Rainbow Turtle Translations", "Practical Guide to Evil", "Readlightnovel"};
-    private String chapterLinkContainer;
+            "Exiled Rebels Scanlations", "Practical Guide to Evil"};
     private String chapterLinkSelecter;
     private String titleHostName;
     private String url;
     private String host;
     private String chapterContainer;
-    private String sentenceSelecter;
 
     public Novel(String domain, String urla) {
         url = urla;
         switch (domain) {
-            case "wuxiaworld":
-                this.host = "https://wuxiaworld.com/";
-                this.chapterLinkContainer = "#accordion";
-                this.chapterLinkSelecter = ".chapter-item";
-                this.chapterContainer = ".p-15 .fr-view";
-                this.sentenceSelecter = "p";
-                this.titleHostName = "-WuxiaWorld";
+            case "wuxiaworld": //compared from websites[] with whitespaces removed and lowercase
+                this.host = "https://wuxiaworld.com/"; //Website URL
+                this.chapterLinkSelecter = "#accordion .chapter-item"; //Table of contents chapter links
+                this.chapterContainer = ".p-15 .fr-view"; //chapter text
+                this.titleHostName = "-WuxiaWorld"; //From the tab title with whitespaces removed
                 break;
             case "royalroad":
                 this.host = "https://www.royalroad.com/";
-                this.chapterLinkContainer = ".table";
-                this.chapterLinkSelecter = "td:not([class])";
+                this.chapterLinkSelecter = ".table td:not([class])";
                 this.chapterContainer = ".chapter-content";
-                this.sentenceSelecter = "p";
                 this.titleHostName = "-Royal-Road";
                 break;
             case "gravitytales":
                 this.host = "http://gravitytales.com/";
-                this.chapterLinkContainer = ".table";
-                this.chapterLinkSelecter = "td";
-                this.chapterContainer = ".fr-view";
-                this.sentenceSelecter = "p";
+                this.chapterLinkSelecter = ".table td";
+                this.chapterContainer = "#chapterContent";
                 this.titleHostName = "-Gravity-Tales";
-                url = urla + "/chapters";
+                url = urla + "/chapters"; //gravity tales' chapter list is at gravitytales.com/NOVEL/chapters
                 break;
             case "volarenovels":
                 this.host = "https://volarenovels.com/";
-                this.chapterLinkContainer = "#accordion";
-                this.chapterLinkSelecter = ".chapter-item a";
-                this.chapterContainer = ".panel .fr-view";
-                this.sentenceSelecter = "p";
+                this.chapterLinkSelecter = "#accordion .chapter-item a";
+                this.chapterContainer = ".jfontsize_content.fr-view";
                 this.titleHostName = "-volare-novels";
                 break;
             case "noodletowntranslated":
                 this.host = "https://www.noodletowntranslated.com/";
-                this.chapterLinkContainer = "table";
-                this.chapterLinkSelecter = "a";
-                this.chapterContainer = ".post-content";
-                this.sentenceSelecter = "p";
+                this.chapterLinkSelecter = "table a";
+                this.chapterContainer = ".post-inner .post-content";
                 this.titleHostName = "-Noodletown-Translated";
                 break;
             case "boxnovel":
                 this.host = "https://boxnovel.com/";
-                this.chapterLinkContainer = ".listing-chapters_wrap";
-                this.chapterLinkSelecter = "a";
+                this.chapterLinkSelecter = ".listing-chapters_wrap a";
                 this.chapterContainer = ".text-left";
-                this.sentenceSelecter = "p";
                 this.titleHostName = "";
                 break;
             case "lightnoveltranslations":
                 this.host = "https://lightnovelstranslations.com/";
-                this.chapterLinkContainer = ".entry-content";
-                this.chapterLinkSelecter = "a[href^=" + urla + "]";
+                this.chapterLinkSelecter = ".entry-content a[href^=" + urla + "]";
                 this.chapterContainer = ".entry-content";
-                this.sentenceSelecter = "p";
                 this.titleHostName = "";
                 break;
             case "exiledrebelsscanlations":
                 this.host = "https://exiledrebelsscanlations.com/";
-                this.chapterLinkContainer = ".lcp_catlist";
-                this.chapterLinkSelecter = "a[href^=https://exiledrebels]";
+                this.chapterLinkSelecter = ".lcp_catlist a[href^=https://exiledrebelsscanlations.com/]";
                 this.chapterContainer = ".entry-content";
-                this.sentenceSelecter = "p";
-                this.titleHostName = "";
-                break;
-            case "rainbowturtletranslations":
-                this.host = "https://arkmachinetranslations.wordpress.com/";
-                this.chapterLinkContainer = ".entry-content";
-                this.chapterLinkSelecter = "a[href^=https://arkmachinetranslations]";
-                this.chapterContainer = ".entry-content";
-                this.sentenceSelecter = "p";
-                this.titleHostName = "";
-                break;
-            case "creativenovels":
-                this.host = "https://creativenovels.com/";
-                this.chapterLinkContainer = ".post_box";
-                this.chapterLinkSelecter = "a";
-                this.chapterContainer = ".entry-content";
-                this.sentenceSelecter = "p";
                 this.titleHostName = "";
                 break;
             case "practicalguidetoevil":
                 this.host = "https://practicalguidetoevil.wordpress.com/";
-                this.chapterLinkContainer = ".entry-content";
-                this.chapterLinkSelecter = "li a";
+                this.chapterLinkSelecter = ".entry-content li a";
                 this.chapterContainer = ".entry-content";
-                this.sentenceSelecter = "p";
-                this.titleHostName = "";
-                break;
-            case "readlightnovel":
-                this.host = "https://www.readlightnovel.org/";
-                this.chapterLinkContainer = ".tab-content";
-                this.chapterLinkSelecter = "li a";
-                this.chapterContainer = ".desc";
-                this.sentenceSelecter = "p";
                 this.titleHostName = "";
                 break;
         }
     }
-
-    String getChapterLinkContainer() {
-        return chapterLinkContainer;
-    }
-
     String getChapterLinkSelector() {
-        return chapterLinkSelecter;
+        return this.chapterLinkSelecter;
     }
 
     String getTitleHostName() {
-        return titleHostName;
+        return this.titleHostName;
     }
 
     String getUrl() {
-        return url;
+        return this.url;
     }
 
     String getHost() {
-        return host;
+        return this.host;
     }
 
     String getChapterContainer() {
-        return chapterContainer;
-    }
-
-    String getSentenceSelector() {
-        return sentenceSelecter;
+        return this.chapterContainer;
     }
 }
