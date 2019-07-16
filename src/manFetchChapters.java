@@ -15,12 +15,8 @@ class manFetchChapters {
     static final List<String> chapterURLs = new ArrayList<>();
     private static String chapterContainer;
     private static String saveLocation;
-    private static String fileType;
     private static boolean chapterNumeration;
     private static boolean invertedOrder;
-    private static boolean withParagraphTags;
-    private static boolean withPureText;
-    private static boolean withHTML;
     private static String logWindow = "manual";
 
     /**
@@ -33,6 +29,8 @@ class manFetchChapters {
         Document doc = Jsoup.connect(url).get();
         Elements links = doc.select("a[href]");
         String currChapterLink;
+        chapterURLs.clear();
+        NovelGrabberGUI.listModelChapterLinks.removeAllElements();
         for (Element chapterLink : links) {
             currChapterLink = chapterLink.attr("abs:href");
             if (currChapterLink.startsWith("http") && !chapterLink.text().isEmpty()) {
@@ -44,35 +42,51 @@ class manFetchChapters {
     }
 
     /**
-     * Save selected chapters to file from manual tab
+     * Handles downloading each chapter.
      */
-    static void manSaveChapters()
-            throws IllegalArgumentException, IOException {
+    static void manSaveChaptersFromList() throws IllegalArgumentException {
         Shared.startTime = System.nanoTime();
         getOptions();
         String fileName;
         int chapterNumber = 0;
         NovelGrabberGUI.setMaxProgress(logWindow, chapterURLs.size());
         if (invertedOrder) Collections.reverse(chapterURLs);
-        //loops through all remaining chapter links and save them to file
+        // Loop through all remaining chapter links and save them to file.
         for (String chapter : chapterURLs) {
             chapterNumber++;
             fileName = manSetFileName(chapterNumber);
-            if (withParagraphTags) {
-                Shared.saveChapterParagraphTag(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, logWindow, fileType);
-            }
-            if (withPureText) {
-                Shared.saveChapterPureText(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, logWindow, fileType);
-            }
-            if (withHTML) {
-                Shared.saveChapterWithHTML(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, logWindow, fileType);
-            }
+            Shared.saveChapterWithHTML(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, logWindow);
             Shared.sleep(logWindow);
         }
         Shared.report(chapterNumber, logWindow);
+        // Since chapter links are not getting cleared, they need to be re-inversed.
         if (invertedOrder) {
             Collections.reverse(chapterURLs);
         }
+    }
+
+    static void saveChaptersLinkToLink(String[] args) {
+        Shared.startTime = System.nanoTime();
+        NovelGrabberGUI.appendText(logWindow, "[INFO]Connecting...");
+        getOptions();
+        Shared.nextChapterBtn = args[2];
+        String nextChapter = args[0];
+        int chapterNumber = 0;
+        while (true) {
+            chapterNumber++;
+            Shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, saveLocation, chapterContainer, chapterNumeration, logWindow);
+            nextChapter = Shared.nextChapterURL;
+            if (nextChapter.equals(args[1]) || (nextChapter + "/").equals(args[1])) {
+                chapterNumber++;
+                Shared.sleep("manual");
+                Shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, saveLocation, chapterContainer, chapterNumeration, logWindow);
+                break;
+            }
+            Shared.sleep("manual");
+        }
+        // "Resetting" the nextChapterBtn
+        Shared.nextChapterBtn = "NOT_SET";
+        Shared.report(chapterNumber, logWindow);
     }
 
     /**
@@ -109,11 +123,7 @@ class manFetchChapters {
     private static void getOptions() {
         chapterContainer = NovelGrabberGUI.manChapterContainer.getText();
         saveLocation = NovelGrabberGUI.manSaveLocation.getText();
-        fileType = NovelGrabberGUI.manFileType.getSelectedItem().toString();
         chapterNumeration = NovelGrabberGUI.manUseNumeration.isSelected();
         invertedOrder = NovelGrabberGUI.manCheckInvertOrder.isSelected();
-        withParagraphTags = NovelGrabberGUI.manParagraphTextSelect.isSelected();
-        withPureText = NovelGrabberGUI.manPureTextSelect.isSelected();
-        withHTML = NovelGrabberGUI.manGetImages.isSelected();
     }
 }

@@ -32,7 +32,9 @@ class chapterChecker {
     private static String curTitle;
     private static String latestChapterListFile;
 
-
+    /**
+     * Checker handling.
+     */
     static void chapterPolling() {
         taskIsKilled = false;
         checkerRunning = true;
@@ -58,10 +60,11 @@ class chapterChecker {
             NovelGrabberGUI.resetCheckerGUIButtons();
             return;
         }
-        //updates checker list on GUI with chapter numbers
+        // Updates checker list on GUI with chapter numbers.
         for (int i = 0; i < urls.size(); i++) {
             NovelGrabberGUI.listModelCheckerLinks.set(i, "Latest chapter: " + lastChapters.get(i) + " / [" + urls.get(i) + "]");
         }
+        // Runs every set interval.
         Runnable runnable = () -> {
             try {
                 for (int i = 0; i < urls.size(); i++) {
@@ -89,6 +92,7 @@ class chapterChecker {
                 e.printStackTrace();
             }
         };
+        // Start scheduled task.
         if (!taskIsKilled) {
             NovelGrabberGUI.checkStatusLbl.setText("Checking active.");
             NovelGrabberGUI.checkStopPollingBtn.setEnabled(true);
@@ -100,9 +104,12 @@ class chapterChecker {
         }
     }
 
+    /**
+     * Creates and fills a file for a new list of Checkers.
+     */
     private static void initializeFile() {
         NovelGrabberGUI.checkStatusLbl.setText("Initializing...");
-        //gets chapter count for each entry
+        // Gets chapter count for each Checker entry.
         for (int i = 0; i < urls.size(); i++) {
             try {
                 NovelGrabberGUI.appendText("checker", "Initializing: " + urls.get(i));
@@ -114,7 +121,7 @@ class chapterChecker {
                 e.printStackTrace();
             }
         }
-        //removes faulty entries
+        // Remove faulty entries.
         toBeRemoved.sort(Comparator.reverseOrder());
         for (int a : toBeRemoved) {
             NovelGrabberGUI.appendText("checker", "Removing faulty: " + urls.get(a));
@@ -123,14 +130,16 @@ class chapterChecker {
             NovelGrabberGUI.listModelCheckerLinks.removeElementAt(a);
         }
         toBeRemoved.clear();
-        //creates a new file to store latest chapter numbers and names it after hashCode() of entries (List<String>urls
+        // Create a new file to store latest chapter numbers. File name is the hashCode() of List<String>urls.
         if (!urls.isEmpty()) {
             latestChapterListFile = NovelGrabberGUI.appdataPath + File.separator + "lastChapters_" + urls.hashCode() + ".json";
             writeDataToJSON(latestChapterListFile, true);
         }
     }
 
-    //reads latest chapter numbers from existing file
+    /**
+     * Reads latest chapter numbers from existing file.
+     */
     private static void readDataFromJSON() {
         JSONParser parser = new JSONParser();
         try {

@@ -1,10 +1,12 @@
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Data class 101.
  */
 public class Novel {
     static String[] websites = {"Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
-            "Noodletown Translated", "BoxNovel", "Lightnovel Translations",
-            "Exiled Rebels Scanlations", "Practical Guide to Evil"};
+            "Light Novels Translations", "WordExcerpt", "Misty Cloud Translations", "BoxNovel"};
     private String chapterLinkSelecter;
     private String titleHostName;
     private String url;
@@ -13,12 +15,14 @@ public class Novel {
 
     public Novel(String domain, String urla) {
         url = urla;
+        List<String> blacklistedTags = null;
         switch (domain) {
             case "wuxiaworld": //compared from websites[] with whitespaces removed and lowercase
                 this.host = "https://wuxiaworld.com/"; //Website URL
                 this.chapterLinkSelecter = "#accordion .chapter-item"; //Table of contents chapter links
                 this.chapterContainer = ".p-15 .fr-view"; //chapter text
                 this.titleHostName = "-WuxiaWorld"; //From the tab title with whitespaces removed
+                blacklistedTags = Arrays.asList("a.chapter-nav");
                 break;
             case "royalroad":
                 this.host = "https://www.royalroad.com/";
@@ -38,39 +42,37 @@ public class Novel {
                 this.chapterLinkSelecter = "#accordion .chapter-item a";
                 this.chapterContainer = ".jfontsize_content.fr-view";
                 this.titleHostName = "-volare-novels";
+                blacklistedTags = Arrays.asList("a.chapter-nav", "div[id^=div-gpt-ad]", "span[style=font-size: 0]", "span[class=hidden-text]");
                 break;
-            case "noodletowntranslated":
-                this.host = "https://www.noodletowntranslated.com/";
-                this.chapterLinkSelecter = "table a";
-                this.chapterContainer = ".post-inner .post-content";
-                this.titleHostName = "-Noodletown-Translated";
+            case "wordexcerpt":
+                this.host = "https://wordexcerpt.com/";
+                this.chapterLinkSelecter = ".listing-chapters_wrap a[href^=" + urla + "]";
+                this.chapterContainer = ".text-left";
+                this.titleHostName = "-WordExcerpt";
+                blacklistedTags = Arrays.asList("center", "meta", "script");
+                break;
+            case "lightnovelstranslations":
+                this.host = "https://lightnovelstranslations.com/";
+                this.chapterLinkSelecter = ".entry-content a[href^=" + urla + "]:not(a[rel])";
+                this.chapterContainer = ".entry-content";
+                this.titleHostName = "";
+                blacklistedTags = Arrays.asList("div.code-block", ".sharedaddy", "#textbox");
                 break;
             case "boxnovel":
                 this.host = "https://boxnovel.com/";
                 this.chapterLinkSelecter = ".listing-chapters_wrap a";
                 this.chapterContainer = ".text-left";
                 this.titleHostName = "";
+                blacklistedTags = Arrays.asList("div.code-block");
                 break;
-            case "lightnoveltranslations":
-                this.host = "https://lightnovelstranslations.com/";
-                this.chapterLinkSelecter = ".entry-content a[href^=" + urla + "]";
-                this.chapterContainer = ".entry-content";
-                this.titleHostName = "";
-                break;
-            case "exiledrebelsscanlations":
-                this.host = "https://exiledrebelsscanlations.com/";
-                this.chapterLinkSelecter = ".lcp_catlist a[href^=https://exiledrebelsscanlations.com/]";
-                this.chapterContainer = ".entry-content";
-                this.titleHostName = "";
-                break;
-            case "practicalguidetoevil":
-                this.host = "https://practicalguidetoevil.wordpress.com/";
-                this.chapterLinkSelecter = ".entry-content li a";
-                this.chapterContainer = ".entry-content";
-                this.titleHostName = "";
-                break;
+
+        }
+        if (!(blacklistedTags == null)) {
+            Shared.blacklistedTags.clear();
+            Shared.blacklistedTags.addAll(blacklistedTags);
         }
     }
+
     String getChapterLinkSelector() {
         return this.chapterLinkSelecter;
     }
