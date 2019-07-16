@@ -57,8 +57,7 @@ Using Chapter-To-Chapter navigation:
 
 ## <span id="converting">Converting with Calibre</span>
 <small>(click to enlarge)</small><br>
-https://i.imgur.com/DBtrXPh.gif
-![alt text]()<br>
+![alt text](https://i.imgur.com/DBtrXPh.gif)<br>
 
 ## Disclaimer & Warning
 Most sites prohibit the scrapping for their content. Use at your own risk. 
