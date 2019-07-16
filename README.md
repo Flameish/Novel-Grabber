@@ -41,7 +41,7 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
 Using a Table of Content URL:</strong>
 1. Enter the URL to the novel's "Table of Contents" page and retrieve all links on the site. 
 
-2. Afterwards remove all unwanted links from the selection window. You can use shift/crtl-select like you normally would anywhere else. (Note: The chapters should be hosted on the same site or the chapter-text selectors will probably not work)
+2. Afterwards remove all unwanted links from the selection window. You can use shift/crtl-select like you normally would anywhere else. (Note: The chapters should be hosted on the same site or the chapter-text selectors will probably not work)<br>
 ![alt text](https://i.imgur.com/bLSiaJ6.gif)
 
 3. Input the chapter container wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. <br>
