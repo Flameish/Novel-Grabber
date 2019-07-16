@@ -6,7 +6,7 @@ import java.util.List;
  */
 public class Novel {
     static String[] websites = {"Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
-            "Light Novels Translations", "WordExcerpt", "Misty Cloud Translations", "BoxNovel"};
+            "Light Novels Translations", "WordExcerpt", "BoxNovel"};
     private String chapterLinkSelecter;
     private String titleHostName;
     private String url;

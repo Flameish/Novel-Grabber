@@ -824,7 +824,7 @@ public class NovelGrabberGUI {
             if (manLinkToLink.isSelected()) {
                 linkSelectTabbedPane.remove(manLinkSelect);
                 manChapterListURL.setEnabled(false);
-
+                manCheckInvertOrder.setEnabled(false);
                 JPanel panel = new JPanel();
                 panel.setLayout(null);
                 panel.setPreferredSize(new Dimension(250, 130));
@@ -865,6 +865,7 @@ public class NovelGrabberGUI {
             } else {
                 linkSelectTabbedPane.addTab("Link select", null, manLinkSelect, null);
                 manChapterListURL.setEnabled(true);
+                manCheckInvertOrder.setEnabled(true);
             }
         });
         chapterLinkPane.add(manLinkToLink);
@@ -971,14 +972,14 @@ public class NovelGrabberGUI {
         manGetImages.setBounds(151, 20, 150, 23);
         manOptionPane.add(manGetImages);
 
-        JButton manRemoveTagsBtn = new JButton("Remove Tags");
+        JButton manRemoveTagsBtn = new JButton("Blacklisted Tags");
         manRemoveTagsBtn.setFocusPainted(false);
-        manRemoveTagsBtn.setBounds(415, 15, 100, 24);
+        manRemoveTagsBtn.setBounds(405, 15, 110, 24);
         manRemoveTagsBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
         manRemoveTagsBtn.addActionListener(arg0 -> {
             String newBlacklistedTags = JOptionPane.showInputDialog(manualPane,
                     "Enter tags to be removed from the chapter container separated by \",\" \n" +
-                            "Example:  \n <a>a,div.someClass.2ndClass,script#IDname", "Remove tags", JOptionPane.PLAIN_MESSAGE);
+                            "Example:  \n a,div.someClass.2ndClass,script#IDname", "Blacklisted Tags", JOptionPane.PLAIN_MESSAGE);
             if (!(newBlacklistedTags == null || newBlacklistedTags.isEmpty())) {
                 Shared.blacklistedTags.addAll(Arrays.asList(newBlacklistedTags.split(",")));
                 manShowTagsBtn.setEnabled(true);
