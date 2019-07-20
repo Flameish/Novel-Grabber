@@ -4,35 +4,65 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-/*
- * Chapter download handling
+/**
+ * Chapter download handling of the automatic tab.
  */
 class autoFetchChapters {
-    private static String tocUrl;
-    private static String saveLocation;
-    private static String host;
-    private static boolean chapterNumeration;
-    private static String logWindow = "auto";
+    private static String window = "auto";
+    private String saveLocation;
+    private boolean chapterNumeration;
+    private boolean allChapters;
+    private boolean invertOrder;
+    private boolean getImages;
+    private int firstChapter;
+    private int lastChapter;
+    private Novel currentNovel;
+    private int chaptersProcessed;
+    private Shared a;
+
+    autoFetchChapters() {
+        this.saveLocation = NovelGrabberGUI.saveLocation.getText();
+        this.chapterNumeration = NovelGrabberGUI.useNumeration.isSelected();
+        this.allChapters = NovelGrabberGUI.chapterAllCheckBox.isSelected();
+        this.invertOrder = NovelGrabberGUI.checkInvertOrder.isSelected();
+        if (!NovelGrabberGUI.chapterAllCheckBox.isSelected()) {
+            this.firstChapter = Integer.parseInt(NovelGrabberGUI.firstChapter.getText());
+            this.lastChapter = Integer.parseInt(NovelGrabberGUI.lastChapter.getText());
+        }
+        this.getImages = NovelGrabberGUI.getImages.isSelected();
+
+        String tocUrl = NovelGrabberGUI.chapterListURL.getText();
+        String host = Objects.requireNonNull(NovelGrabberGUI.allChapterHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", "");
+        this.currentNovel = new Novel(host, tocUrl);
+        long startTime = System.nanoTime();
+        a = new Shared(currentNovel.getBlacklistedTags());
+        getChapterLinks();
+        if (NovelGrabberGUI.createTocCheckBox.isSelected()) a.createToc(saveLocation, window);
+        a.report(chaptersProcessed, window, startTime);
+    }
 
     /**
-     * Opens novel's table of contents page, retrieves chapter links from selected
-     * chapter range and processes them with saveChapters()
+     * Opens chapter link and tries to save it's content in current directory.
      */
-    static void getChapterLinks() {
-        Shared.startTime = System.nanoTime();
-        getOptions();
-        int chaptersProcessed = 0;
-        Novel currentNovel = new Novel(host, tocUrl);
+    static void saveSingleChapter() {
+        String url = NovelGrabberGUI.singleChapterLink.getText();
+        String host = Objects.requireNonNull(NovelGrabberGUI.singleChapterHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", "");
+        Novel currentNovel = new Novel(host, url);
+        NovelGrabberGUI.appendText(window, "Connecting...");
+        Shared a = new Shared(currentNovel.getBlacklistedTags());
+        a.saveChapterWithHTML(url, 1, "Chapter", "./", currentNovel.getChapterContainer(), false, window, NovelGrabberGUI.getImages.isSelected());
+    }
+
+    private void getChapterLinks() {
         List<String> chapterLinks = new ArrayList<>();
         List<String> chaptersNames = new ArrayList<>();
-
-        NovelGrabberGUI.appendText("auto", "[INFO]Connecting...");
         try {
+            NovelGrabberGUI.appendText(window, "[INFO]Connecting...");
             Document doc = Jsoup.connect(currentNovel.getUrl()).get();
             //Get chapter links
             Elements chapterItems = doc.select(currentNovel.getChapterLinkSelector());
@@ -41,85 +71,52 @@ class autoFetchChapters {
                 chapterLinks.add(chapterLink.attr("abs:href"));
                 chaptersNames.add(chapterLink.text());
             }
-            //Reverse link order if selected
-            if (NovelGrabberGUI.checkInvertOrder.isSelected()) {
+            // Reverse link order if selected
+            if (invertOrder) {
                 Collections.reverse(chapterLinks);
                 Collections.reverse(chaptersNames);
             }
-            //grab all chapters
-            if (NovelGrabberGUI.chapterAllCheckBox.isSelected()) {
-                Shared.tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(), ""));
-                NovelGrabberGUI.setMaxProgress("auto", chapterLinks.size());
-                //Decide what text selection to use
-                NovelGrabberGUI.progressBar.setStringPainted(true);
-                for (int i = 1; i <= links.size(); i++) {
-                    chaptersProcessed++;
-                    Shared.saveChapterWithHTML(chapterLinks.get(i - 1), i, chaptersNames.get(i - 1),
-                            saveLocation, currentNovel.getChapterContainer(), chapterNumeration, logWindow);
-                    Shared.sleep(logWindow);
-                }
-            //grab chapters from specific range
+            // Grab all chapters
+            if (allChapters) {
+                processAllChapters(chapterLinks, chaptersNames, doc, links);
+                // Grab chapters from specific range
             } else {
-                int firstChapter = Integer.parseInt(NovelGrabberGUI.firstChapter.getText());
-                int lastChapter = Integer.parseInt(NovelGrabberGUI.lastChapter.getText());
                 if (lastChapter > chapterLinks.size()) {
-                    NovelGrabberGUI.appendText("auto", "[ERROR] Novel does not have that many chapters. " +
+                    NovelGrabberGUI.appendText(window, "[ERROR] Novel does not have that many chapters. " +
                             "(" + chapterLinks.size() + " detected.)");
                     return;
                 }
-                //Set Table of Content file name
-                Shared.tocFileName = "Table of Contents " + firstChapter + "-" + lastChapter;
-                NovelGrabberGUI.setMaxProgress("auto", (lastChapter - firstChapter) + 1);
-
-                NovelGrabberGUI.progressBar.setStringPainted(true);
-                for (int i = firstChapter; i <= lastChapter; i++) {
-                    chaptersProcessed++;
-                    Shared.saveChapterWithHTML(chapterLinks.get(i - 1), i, chaptersNames.get(i - 1),
-                            saveLocation, currentNovel.getChapterContainer(), chapterNumeration, logWindow);
-                    Shared.sleep(logWindow);
-                }
+                processSpecificChapters(chapterLinks, chaptersNames);
             }
-            Shared.report(chaptersProcessed, "auto");
         } catch (IllegalArgumentException | IOException e) {
+            NovelGrabberGUI.appendText(window, "[ERROR]" + e.getMessage());
             e.printStackTrace();
-            NovelGrabberGUI.appendText(logWindow, "[ERROR]" + e.getMessage());
         }
     }
 
-    /**
-     * Opens chapter link and tries to save it's content in current directory.
-     */
-    static void saveSingleChapter()
-            throws IllegalArgumentException, IOException {
-        String url = NovelGrabberGUI.singleChapterLink.getText();
-        String host = NovelGrabberGUI.singleChapterHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", "");
-        Novel currentNovel = new Novel(host, url);
-        NovelGrabberGUI.appendText("auto", "Connecting...");
-        Document doc = Jsoup.connect(url).get();
-        String fileName = doc.title().replaceAll("[^\\w]+", "-") + ".html";
-        try {
-            Element content = doc.select(currentNovel.getChapterContainer()).first();
-            Elements p = content.select("p");
-            try (PrintStream out = new PrintStream(fileName, Shared.textEncoding)) {
-                out.print(Shared.htmlHead);
-                for (Element x : p) {
-                    out.print("<p>" + x.text() + "</p>" + Shared.NL);
-                }
-                out.print(Shared.htmlFoot);
-            }
-            NovelGrabberGUI.appendText("auto", fileName + " saved.");
-        } catch (Exception noSelectors) {
-            NovelGrabberGUI.appendText("auto", "Could not detect selectors on: " + url);
+    private void processSpecificChapters(List<String> chapterLinks, List<String> chaptersNames) {
+        Shared.tocFileName = "Table of Contents " + firstChapter + "-" + lastChapter;
+        NovelGrabberGUI.setMaxProgress(window, (lastChapter - firstChapter) + 1);
+
+        NovelGrabberGUI.progressBar.setStringPainted(true);
+        for (int i = firstChapter; i <= lastChapter; i++) {
+            chaptersProcessed++;
+            a.saveChapterWithHTML(chapterLinks.get(i - 1), i, chaptersNames.get(i - 1),
+                    saveLocation, currentNovel.getChapterContainer(), chapterNumeration, window, getImages);
+            Shared.sleep(window);
         }
     }
 
-    /**
-     * Saves user input from the 'Automatic' window tab to local field variables for better readability.
-     */
-    private static void getOptions() {
-        tocUrl = NovelGrabberGUI.chapterListURL.getText();
-        saveLocation = NovelGrabberGUI.saveLocation.getText();
-        host = NovelGrabberGUI.allChapterHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", "");
-        chapterNumeration = NovelGrabberGUI.useNumeration.isSelected();
+    private void processAllChapters(List<String> chapterLinks, List<String> chaptersNames, Document doc, Elements links) {
+        Shared.tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(), ""));
+        NovelGrabberGUI.setMaxProgress(window, chapterLinks.size());
+        //Decide what text selection to use
+        NovelGrabberGUI.progressBar.setStringPainted(true);
+        for (int i = 1; i <= links.size(); i++) {
+            chaptersProcessed++;
+            a.saveChapterWithHTML(chapterLinks.get(i - 1), i, chaptersNames.get(i - 1),
+                    saveLocation, currentNovel.getChapterContainer(), chapterNumeration, window, getImages);
+            Shared.sleep(window);
+        }
     }
 }

@@ -14,7 +14,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 
@@ -27,11 +29,12 @@ public class NovelGrabberGUI {
     static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
     private static final JList<String> checkList = new JList<>(listModelCheckerLinks);
+    static String versionNumber = "v1.7.1";
     static TrayIcon trayIcon;
     private static final String NL = System.getProperty("line.separator");
     private static JFrame frmNovelGrabber;
     static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
-    static String versionNumber = "v1.7.0";
+    static JCheckBox getImages;
     private static final JList<String> chapterLinkList = new JList<>(listModelChapterLinks);
     static JLabel updateProcessLbl;
     static JTextField singleChapterLink;
@@ -42,11 +45,11 @@ public class NovelGrabberGUI {
     static JTextField firstChapter;
     static JTextField lastChapter;
     static JTextField waitTime;
-    private static JCheckBox getImages;
+    static JCheckBox manGetImages;
     static JCheckBox useNumeration;
     static JCheckBox checkInvertOrder;
     static JCheckBox chapterAllCheckBox;
-    private static JCheckBox manGetImages;
+    static JCheckBox manCreateToc = new JCheckBox("Create ToC");
     static JTextField manSaveLocation;
     static JTextField manWaitTime;
     static JTextField manChapterContainer;
@@ -57,7 +60,7 @@ public class NovelGrabberGUI {
     private static JTextArea manLogField;
     static JProgressBar progressBar;
     private static JProgressBar manProgressBar;
-    private static JCheckBox manCreateToc = new JCheckBox("Create ToC");
+    static String[] chapterToChapterArgs = new String[3];
     static JButton checkStopPollingBtn;
     static JLabel checkStatusLbl;
     private static JLabel checkBusyIcon;
@@ -77,7 +80,8 @@ public class NovelGrabberGUI {
     private JLabel updateLogLbl;
     private JButton manShowTagsBtn;
     private DefaultListModel<String> tempListModel;
-    private String[] chapterToChapterArgs = new String[3];
+    static JCheckBox createTocCheckBox;
+    private static List<String> blacklistedTags = new ArrayList<>();
 
     /**
      * Create the application.
@@ -128,14 +132,14 @@ public class NovelGrabberGUI {
         switch (progressBarSelect) {
             case "auto":
                 progressBar.setValue(progressBar.getValue() + 1);
-                if (progressBar.getValue() < progressBar.getMaximum()) {
-                    progressBar.setString((progressBar.getValue() + 1) + " / " + progressBar.getMaximum());
+                if (progressBar.getValue() <= progressBar.getMaximum()) {
+                    progressBar.setString((progressBar.getValue()) + " / " + progressBar.getMaximum());
                 }
                 break;
             case "manual":
                 manProgressBar.setValue(manProgressBar.getValue() + 1);
-                if (manProgressBar.getValue() < manProgressBar.getMaximum()) {
-                    manProgressBar.setString((manProgressBar.getValue() + 1) + " / " + manProgressBar.getMaximum());
+                if (manProgressBar.getValue() <= manProgressBar.getMaximum()) {
+                    manProgressBar.setString((manProgressBar.getValue()) + " / " + manProgressBar.getMaximum());
                 }
                 break;
         }
@@ -431,20 +435,19 @@ public class NovelGrabberGUI {
             tagScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             tagScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             tagScrollPane.setBounds(0, 0, 532, 180);
-
-            for (String alreadyBlacklistedTags : Shared.blacklistedTags) {
-                tempListModel.addElement(alreadyBlacklistedTags);
+            if (!(scummyNovelToGetTags.getBlacklistedTags() == null)) {
+                for (String alreadyBlacklistedTags : scummyNovelToGetTags.getBlacklistedTags()) {
+                    tempListModel.addElement(alreadyBlacklistedTags);
+                }
             }
-
             JOptionPane.showOptionDialog(null, tagScrollPane, "Tags to be removed", JOptionPane.PLAIN_MESSAGE, JOptionPane.PLAIN_MESSAGE, null, null, null);
-            Shared.blacklistedTags.clear();
         });
         allChapterPane.add(showTagsBtn);
 
-        JButton btnNewButton = new JButton("Browse...");
-        btnNewButton.setFocusPainted(false);
-        btnNewButton.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        btnNewButton.addActionListener(arg0 -> {
+        JButton browseBtn = new JButton("Browse...");
+        browseBtn.setFocusPainted(false);
+        browseBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        browseBtn.addActionListener(arg0 -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
             chooser.setDialogTitle("Choose destination directory");
@@ -455,13 +458,13 @@ public class NovelGrabberGUI {
                 saveLocation.setText(chooser.getSelectedFile().toString());
             }
         });
-        btnNewButton.setBounds(456, 79, 86, 27);
-        allChapterPane.add(btnNewButton);
+        browseBtn.setBounds(456, 79, 86, 27);
+        allChapterPane.add(browseBtn);
 
-        JLabel lblDestinationDirectory = new JLabel("Save directory:");
-        lblDestinationDirectory.setBounds(10, 80, 103, 25);
-        allChapterPane.add(lblDestinationDirectory);
-        lblDestinationDirectory.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        JLabel saveLocationLbl = new JLabel("Save directory:");
+        saveLocationLbl.setBounds(10, 80, 103, 25);
+        allChapterPane.add(saveLocationLbl);
+        saveLocationLbl.setFont(new Font("Tahoma", Font.PLAIN, 11));
 
         saveLocation = new JTextField();
         saveLocation.setBounds(152, 80, 294, 25);
@@ -471,6 +474,7 @@ public class NovelGrabberGUI {
 
         logArea = new JTextArea();
         logArea.setEditable(false);
+        logArea.setFont(new Font("Zurich Ex BT", Font.PLAIN, 13));
         logArea.setBounds(-22, 11, 235, 41);
         allChapterPane.add(logArea);
 
@@ -515,12 +519,12 @@ public class NovelGrabberGUI {
 
         progressBar = new JProgressBar();
         progressBar.setBounds(10, 436, 409, 25);
-        allChapterPane.add(progressBar);
         progressBar.setFont(new Font("Tahoma", Font.PLAIN, 15));
         progressBar.setForeground(new Color(0, 128, 128));
         progressBar.setMinimum(0);
         progressBar.setMaximum(100);
         progressBar.setString("");
+        allChapterPane.add(progressBar);
 
         JButton grabChapters = new JButton("Grab chapters");
         grabChapters.setFocusPainted(false);
@@ -577,7 +581,7 @@ public class NovelGrabberGUI {
         allChapterPane.add(optionSelect);
         optionSelect.setLayout(null);
 
-        JCheckBox createTocCheckBox = new JCheckBox("Create ToC");
+        createTocCheckBox = new JCheckBox("Create ToC");
         createTocCheckBox.setFocusPainted(false);
         createTocCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
         createTocCheckBox.setBounds(6, 20, 81, 23);
@@ -739,6 +743,7 @@ public class NovelGrabberGUI {
         manLogField.setFocusable(false);
         manLogField.setBounds(0, 0, 532, 159);
         manLogField.setEditable(false);
+        manLogField.setFont(new Font("Zurich Ex BT", Font.PLAIN, 13));
 
         JPanel manLogArea = new JPanel();
         manLogArea.add(manLogField);
@@ -895,11 +900,11 @@ public class NovelGrabberGUI {
         manProgressBar.setBounds(15, 560, 430, 27);
         manualPane.add(manProgressBar);
 
-        JButton btnManGrabChapters = new JButton("Grab Chapters");
-        btnManGrabChapters.setFocusPainted(false);
-        btnManGrabChapters.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        btnManGrabChapters.setBounds(455, 560, 112, 27);
-        manualPane.add(btnManGrabChapters);
+        JButton manGrabChaptersBtn = new JButton("Grab Chapters");
+        manGrabChaptersBtn.setFocusPainted(false);
+        manGrabChaptersBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        manGrabChaptersBtn.setBounds(455, 560, 112, 27);
+        manualPane.add(manGrabChaptersBtn);
 
         JLabel lblSaveLocation = new JLabel("Save directory:");
         lblSaveLocation.setFont(new Font("Tahoma", Font.PLAIN, 11));
@@ -981,7 +986,7 @@ public class NovelGrabberGUI {
                     "Enter tags to be removed from the chapter container separated by \",\" \n" +
                             "Example:  \n a,div.someClass.2ndClass,script#IDname", "Blacklisted Tags", JOptionPane.PLAIN_MESSAGE);
             if (!(newBlacklistedTags == null || newBlacklistedTags.isEmpty())) {
-                Shared.blacklistedTags.addAll(Arrays.asList(newBlacklistedTags.split(",")));
+                blacklistedTags.addAll(Arrays.asList(newBlacklistedTags.split(",")));
                 manShowTagsBtn.setEnabled(true);
             }
         });
@@ -1003,7 +1008,7 @@ public class NovelGrabberGUI {
             manTagScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             manTagScrollPane.setBounds(0, 0, 532, 180);
 
-            for (String alreadyBlacklistedTags : Shared.blacklistedTags) {
+            for (String alreadyBlacklistedTags : blacklistedTags) {
                 tempListModel.addElement(alreadyBlacklistedTags);
             }
 
@@ -1013,7 +1018,7 @@ public class NovelGrabberGUI {
                     int[] indices = tempJList.getSelectedIndices();
                     for (int i = indices.length - 1; i >= 0; i--) {
                         tempListModel.removeElementAt(indices[i]);
-                        Shared.blacklistedTags.remove(indices[i]);
+                        blacklistedTags.remove(indices[i]);
                     }
                 }
                 if (tempListModel.isEmpty()) {
@@ -1316,8 +1321,9 @@ public class NovelGrabberGUI {
         updatePane.add(updateProcessLbl);
 
         // manual chapter download
-        btnManGrabChapters.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
-            btnManGrabChapters.setEnabled(false);
+        manGrabChaptersBtn.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
+            manGrabChaptersBtn.setEnabled(false);
+            // Chapter-To-Chapter
             // input validation
             if (manLinkToLink.isSelected()) {
                 if (manSaveLocation.getText().isEmpty()) {
@@ -1336,25 +1342,18 @@ public class NovelGrabberGUI {
                         && (!manChapterContainer.getText().isEmpty())
                         && (!manWaitTime.getText().isEmpty())) {
                     try {
-                        Shared.getImages = manGetImages.isSelected();
-                        manFetchChapters.saveChaptersLinkToLink(chapterToChapterArgs);
-                        if (manCreateToc.isSelected()) {
-                            Shared.createToc(manSaveLocation.getText(), "manual");
-                        }
-                        // clear arrays for next call
-                        if (manGetImages.isSelected()) Shared.images.clear();
-                        Shared.blacklistedTags.clear();
-                        Shared.successfulChapterNames.clear();
-                        Shared.failedChapters.clear();
+                        manFetchChapters processChapters = new manFetchChapters("chapterToChapter", blacklistedTags);
                         // Exception handling
-                    } catch (NullPointerException | IllegalArgumentException | IOException err) {
-                        JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
+                    } catch (NullPointerException | IllegalArgumentException err) {
+                        appendText("manual", err.getMessage());
+                        err.printStackTrace();
                     } finally {
                         manProgressBar.setStringPainted(false);
                         manProgressBar.setValue(0);
                     }
                 }
-                btnManGrabChapters.setEnabled(true);
+                manGrabChaptersBtn.setEnabled(true);
+                // input validation
             } else {
                 if (manChapterListURL.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
@@ -1378,27 +1377,18 @@ public class NovelGrabberGUI {
                         && (!manWaitTime.getText().isEmpty())) {
                     try {
                         manProgressBar.setStringPainted(true);
-                        Shared.getImages = manGetImages.isSelected();
-                        manFetchChapters.manSaveChaptersFromList();
-                        if (manCreateToc.isSelected()) {
-                            Shared.createToc(manSaveLocation.getText(), "manual");
-                        }
-                        // clear arrays for next call
-                        if (manGetImages.isSelected()) Shared.images.clear();
-                        Shared.blacklistedTags.clear();
-                        Shared.successfulChapterNames.clear();
-                        Shared.failedChapters.clear();
+                        manFetchChapters processChapters = new manFetchChapters("chaptersFromList", blacklistedTags);
                         // Exception handling
-                    } catch (NullPointerException | IllegalArgumentException | IOException err) {
-                        JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
+                    } catch (NullPointerException | IllegalArgumentException err) {
+                        appendText("manual", err.getMessage());
+                        err.printStackTrace();
                     } finally {
                         manProgressBar.setStringPainted(false);
                         manProgressBar.setValue(0);
                     }
                 }
-                btnManGrabChapters.setEnabled(true);
+                manGrabChaptersBtn.setEnabled(true);
             }
-
         }));
 
         // Single Chapter
@@ -1411,8 +1401,9 @@ public class NovelGrabberGUI {
                 try {
                     progressBar.setStringPainted(true);
                     autoFetchChapters.saveSingleChapter();
-                } catch (NullPointerException | IllegalArgumentException | IOException err) {
-                    JOptionPane.showMessageDialog(frmNovelGrabber, err, "Error", JOptionPane.ERROR_MESSAGE);
+                } catch (NullPointerException | IllegalArgumentException err) {
+                    appendText("auto", err.getMessage());
+                    err.printStackTrace();
                 } finally {
                     progressBar.setStringPainted(false);
                     progressBar.setValue(0);
@@ -1449,20 +1440,11 @@ public class NovelGrabberGUI {
             } else if ((!saveLocation.getText().isEmpty())
                     && (!chapterListURL.getText().isEmpty())
             ) {
-                // grabbing chapter calls
+                // Chapter grabbing
                 try {
-                    Shared.getImages = getImages.isSelected();
-                    autoFetchChapters.getChapterLinks();
-                    if (createTocCheckBox.isSelected()) {
-                        Shared.createToc(saveLocation.getText(), "auto");
-                    }
-                    // clear arrays for next call
-                    if (getImages.isSelected()) Shared.images.clear();
-                    Shared.blacklistedTags.clear();
-                    Shared.successfulChapterNames.clear();
-                    Shared.failedChapters.clear();
-                } catch (NullPointerException | IllegalArgumentException | IOException err) {
-                    //showPopup(err.toString(), "error");
+                    autoFetchChapters processChapters = new autoFetchChapters();
+                } catch (NullPointerException | IllegalArgumentException err) {
+                    appendText("auto", err.getMessage());
                     err.printStackTrace();
                 } finally {
                     progressBar.setStringPainted(false);

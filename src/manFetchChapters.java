@@ -9,23 +9,47 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Manual tab chapter download handling.
+ * Chapter download handling of the manual tab.
  */
 class manFetchChapters {
-    static final List<String> chapterURLs = new ArrayList<>();
-    private static String chapterContainer;
-    private static String saveLocation;
-    private static boolean chapterNumeration;
-    private static boolean invertedOrder;
-    private static String logWindow = "manual";
+    static List<String> chapterURLs = new ArrayList<>();
+    private static String window = "manual";
+    private String chapterContainer;
+    private String saveLocation;
+    private boolean chapterNumeration;
+    private boolean invertedOrder;
+    private boolean getImages;
+    private int chaptersProcessed;
+    private Shared a;
+
+    manFetchChapters(String method, List<String> blacklistedTags) {
+        this.chapterContainer = NovelGrabberGUI.manChapterContainer.getText();
+        this.saveLocation = NovelGrabberGUI.manSaveLocation.getText();
+        this.chapterNumeration = NovelGrabberGUI.manUseNumeration.isSelected();
+        this.invertedOrder = NovelGrabberGUI.manCheckInvertOrder.isSelected();
+        this.getImages = NovelGrabberGUI.manGetImages.isSelected();
+
+        long startTime = System.nanoTime();
+        a = new Shared(blacklistedTags);
+        switch (method) {
+            case "chapterToChapter":
+                processChaptersToChapters(NovelGrabberGUI.chapterToChapterArgs);
+                break;
+            case "chaptersFromList":
+                processChapersFromList();
+                break;
+        }
+        if (NovelGrabberGUI.manCreateToc.isSelected()) a.createToc(saveLocation, window);
+        a.report(chaptersProcessed, window, startTime);
+    }
 
     /**
-     * Stores all hyperlinks from the given URL.
+     * Stores all hyperlinks from the given URL and displays them on the GUI.
      */
     static void retrieveLinks()
             throws IllegalArgumentException, IOException {
         String url = NovelGrabberGUI.manChapterListURL.getText();
-        NovelGrabberGUI.appendText(logWindow, "Retrieving links from: " + url);
+        NovelGrabberGUI.appendText(window, "Retrieving links from: " + url);
         Document doc = Jsoup.connect(url).get();
         Elements links = doc.select("a[href]");
         String currChapterLink;
@@ -38,61 +62,58 @@ class manFetchChapters {
                 NovelGrabberGUI.listModelChapterLinks.addElement(chapterLink.text());
             }
         }
-        if (!chapterURLs.isEmpty()) NovelGrabberGUI.appendText(logWindow, chapterURLs.size() + " links retrieved.");
+        if (!chapterURLs.isEmpty()) NovelGrabberGUI.appendText(window, chapterURLs.size() + " links retrieved.");
     }
 
     /**
-     * Handles downloading each chapter.
+     * Handles downloading chapters from provided list.
      */
-    static void manSaveChaptersFromList() throws IllegalArgumentException {
-        Shared.startTime = System.nanoTime();
-        getOptions();
+    private void processChapersFromList() throws IllegalArgumentException {
         String fileName;
-        int chapterNumber = 0;
-        NovelGrabberGUI.setMaxProgress(logWindow, chapterURLs.size());
+        chaptersProcessed = 0;
+        NovelGrabberGUI.setMaxProgress(window, chapterURLs.size());
         if (invertedOrder) Collections.reverse(chapterURLs);
         // Loop through all remaining chapter links and save them to file.
         for (String chapter : chapterURLs) {
-            chapterNumber++;
-            fileName = manSetFileName(chapterNumber);
-            Shared.saveChapterWithHTML(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, logWindow);
-            Shared.sleep(logWindow);
+            chaptersProcessed++;
+            fileName = manSetFileName(chaptersProcessed);
+            a.saveChapterWithHTML(chapter, chaptersProcessed, fileName, saveLocation, chapterContainer, chapterNumeration, window, getImages);
+            Shared.sleep(window);
         }
-        Shared.report(chapterNumber, logWindow);
         // Since chapter links are not getting cleared, they need to be re-inversed.
         if (invertedOrder) {
             Collections.reverse(chapterURLs);
         }
     }
 
-    static void saveChaptersLinkToLink(String[] args) {
-        Shared.startTime = System.nanoTime();
-        NovelGrabberGUI.appendText(logWindow, "[INFO]Connecting...");
-        getOptions();
-        Shared.nextChapterBtn = args[2];
+    /**
+     * Handles downloading chapter to chapter.
+     */
+    private void processChaptersToChapters(String[] args) {
+        NovelGrabberGUI.appendText(window, "[INFO]Connecting...");
         String nextChapter = args[0];
+        String lastChapter = args[1];
+        a.nextChapterBtn = args[2];
         int chapterNumber = 0;
         while (true) {
             chapterNumber++;
-            Shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, saveLocation, chapterContainer, chapterNumeration, logWindow);
-            nextChapter = Shared.nextChapterURL;
-            if (nextChapter.equals(args[1]) || (nextChapter + "/").equals(args[1])) {
+            a.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, saveLocation, chapterContainer, chapterNumeration, window, getImages);
+            nextChapter = a.nextChapterURL;
+            if (nextChapter.equals(lastChapter) || (nextChapter + "/").equals(lastChapter)) {
                 chapterNumber++;
-                Shared.sleep("manual");
-                Shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, saveLocation, chapterContainer, chapterNumeration, logWindow);
+                Shared.sleep(window);
+                a.nextChapterBtn = "NOT_SET";
+                a.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, saveLocation, chapterContainer, chapterNumeration, window, getImages);
                 break;
             }
             Shared.sleep("manual");
         }
-        // "Resetting" the nextChapterBtn
-        Shared.nextChapterBtn = "NOT_SET";
-        Shared.report(chapterNumber, logWindow);
     }
 
     /**
      * Checks if chapter numeration is selected and set the file name accordingly.
      */
-    private static String manSetFileName(int chapterNumber) {
+    private String manSetFileName(int chapterNumber) {
         String fileName;
         if (!chapterNumeration) {
             if (invertedOrder) {
@@ -115,15 +136,5 @@ class manFetchChapters {
             }
         }
         return fileName;
-    }
-
-    /**
-     * Saves user input from the 'Manual' window tab to local field variables for better readability.
-     */
-    private static void getOptions() {
-        chapterContainer = NovelGrabberGUI.manChapterContainer.getText();
-        saveLocation = NovelGrabberGUI.manSaveLocation.getText();
-        chapterNumeration = NovelGrabberGUI.manUseNumeration.isSelected();
-        invertedOrder = NovelGrabberGUI.manCheckInvertOrder.isSelected();
     }
 }

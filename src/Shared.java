@@ -13,74 +13,21 @@ import java.util.concurrent.TimeUnit;
  * Collection of shared functions.
  */
 class Shared {
-    static final List<String> failedChapters = new ArrayList<>();
-    static final List<String> successfulChapterNames = new ArrayList<>();
-    static List<String> images = new ArrayList<>();
-    static List<String> blacklistedTags = new ArrayList<>();
-    static final String textEncoding = "UTF-8";
-    static final String NL = System.getProperty("line.separator");
+    private static final String textEncoding = "UTF-8";
+    private static final String NL = System.getProperty("line.separator");
     static String tocFileName = "Table Of Contents";
-    static long startTime;
-    static boolean getImages;
-    static String nextChapterBtn = "NOT_SET";
-    static String nextChapterURL;
-    static String htmlHead = "<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
+    private static String htmlHead = "<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
             + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL;
-    static String htmlFoot = "</body>" + NL + "</html>";
+    private static String htmlFoot = "</body>" + NL + "</html>";
+    String nextChapterURL;
+    String nextChapterBtn = "NOT_SET";
+    private List<String> failedChapters = new ArrayList<>();
+    private List<String> successfulChapterNames = new ArrayList<>();
+    private List<String> images = new ArrayList<>();
+    private List<String> blacklistedTags;
 
-    /**
-     * Processes a successful chapter.
-     */
-    private static void successfulChapter(String fileName, String window) {
-        successfulChapterNames.add(fileName);
-        NovelGrabberGUI.appendText(window, "[INFO]" + fileName + " saved.");
-        NovelGrabberGUI.updateProgress(window);
-    }
-
-    /**
-     * Logs elapsed process time and prints potential failed chapters after chapter grabs.
-     */
-    static void report(int chapterNumber, String logWindow) {
-        long endTime = System.nanoTime();
-        long elapsedTime = TimeUnit.SECONDS.convert((endTime - startTime), TimeUnit.NANOSECONDS);
-        NovelGrabberGUI.appendText(logWindow, "[INFO]Finished! " + successfulChapterNames.size() + " of "
-                + chapterNumber + " chapters successfully grabbed in " + elapsedTime + " seconds.");
-        if (!failedChapters.isEmpty()) {
-            NovelGrabberGUI.appendText(logWindow, "[ERROR]Failed to grab the following chapters:");
-            for (String failedChapter : failedChapters) {
-                NovelGrabberGUI.appendText(logWindow, failedChapter);
-            }
-        }
-    }
-
-    /**
-     * Creates a 'Table of Contents' file of successfully grabbed chapters and images.
-     * (Calibre needs links to the images to display them)
-     */
-    static void createToc(String saveLocation, String logWindow) throws FileNotFoundException, UnsupportedEncodingException {
-        if (!successfulChapterNames.isEmpty()) {
-            String fileName = tocFileName + ".html";
-            try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
-                out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
-                //Print chapter links
-                for (String chapterFileName : successfulChapterNames) {
-                    out.println("<a href=\"chapters/" + chapterFileName + ".html\">" + chapterFileName + "</a><br/>");
-                }
-                //Print image links (for calibre)
-                if (!images.isEmpty()) {
-                    for (String image : images) {
-                        // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
-                        String imageName = getImageName(image);
-                        if (imageName.equals("could_not_rename_image")) {
-                            imageName = image.hashCode() + ".jpg";
-                        }
-                        out.println("<img src=\"images/" + imageName + "\" style=\"display:none;\" /><br/>");
-                    }
-                }
-                out.print("</p>" + NL + htmlFoot);
-            }
-            NovelGrabberGUI.appendText(logWindow, "[INFO]" + fileName + " created.");
-        }
+    Shared(List<String> blacklistedTags) {
+        this.blacklistedTags = blacklistedTags;
     }
 
     /**
@@ -96,6 +43,31 @@ class Shared {
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Processes a successful chapter.
+     */
+    private void successfulChapter(String fileName, String window) {
+        successfulChapterNames.add(fileName);
+        NovelGrabberGUI.appendText(window, "[INFO]" + fileName + " saved.");
+        NovelGrabberGUI.updateProgress(window);
+    }
+
+    /**
+     * Logs elapsed process time and prints potential failed chapters after chapter grabs.
+     */
+    void report(int chapterNumber, String logWindow, long startTime) {
+        long endTime = System.nanoTime();
+        long elapsedTime = TimeUnit.SECONDS.convert((endTime - startTime), TimeUnit.NANOSECONDS);
+        NovelGrabberGUI.appendText(logWindow, "[INFO]Finished! " + successfulChapterNames.size() + " of "
+                + chapterNumber + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+        if (!failedChapters.isEmpty()) {
+            NovelGrabberGUI.appendText(logWindow, "[ERROR]Failed to grab the following chapters:");
+            for (String failedChapter : failedChapters) {
+                NovelGrabberGUI.appendText(logWindow, failedChapter);
+            }
         }
     }
 
@@ -118,7 +90,40 @@ class Shared {
         return imageName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
     }
 
-    static void downloadImage(String src, String fileLocation, String logWindow) {
+    /**
+     * Creates a 'Table of Contents' file of successfully grabbed chapters and images.
+     * (Calibre needs links to the images to display them)
+     */
+    void createToc(String saveLocation, String logWindow) {
+        if (!successfulChapterNames.isEmpty()) {
+            String fileName = tocFileName + ".html";
+            try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+                out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+                //Print chapter links
+                for (String chapterFileName : successfulChapterNames) {
+                    out.println("<a href=\"chapters/" + chapterFileName + ".html\">" + chapterFileName + "</a><br/>");
+                }
+                //Print image links (for calibre)
+                if (!images.isEmpty()) {
+                    for (String image : images) {
+                        // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
+                        String imageName = getImageName(image);
+                        if (imageName.equals("could_not_rename_image")) {
+                            imageName = image.hashCode() + ".jpg";
+                        }
+                        out.println("<img src=\"images/" + imageName + "\" style=\"display:none;\" /><br/>");
+                    }
+                }
+                out.print("</p>" + NL + htmlFoot);
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                NovelGrabberGUI.appendText(logWindow, e.getMessage());
+                e.printStackTrace();
+            }
+            NovelGrabberGUI.appendText(logWindow, "[INFO]" + fileName + " created.");
+        }
+    }
+
+    void downloadImage(String src, String fileLocation, String logWindow) {
         if (!images.contains(src)) {
             // Try to set the image name
             String name = getImageName(src);
@@ -158,10 +163,19 @@ class Shared {
     }
 
     /**
+     * Adjust chapter names for chapter numeration.
+     */
+    private static String setFilename(int chapterNumber, String fileName, boolean chapterNumeration) {
+        if (chapterNumeration) fileName = "Ch-" + chapterNumber + "-" + fileName.replaceAll("[^\\w]+", "-");
+        else fileName = fileName.replaceAll("[^\\w]+", "-");
+        return fileName;
+    }
+
+    /**
      * Main method to save chapter content.
      */
-    static void saveChapterWithHTML(String url, int chapterNumber, String fileName, String saveLocation,
-                                    String chapterContainer, boolean chapterNumeration, String logWindow) {
+    void saveChapterWithHTML(String url, int chapterNumber, String fileName, String saveLocation,
+                             String chapterContainer, boolean chapterNumeration, String logWindow, boolean getImages) {
         //Manual grabbing got it's own file naming method
         if (logWindow.equals("auto")) fileName = setFilename(chapterNumber, fileName, chapterNumeration);
 
@@ -172,13 +186,16 @@ class Shared {
 
             Element chapterContent = doc.select(chapterContainer).first();
             // Remove unwanted tags from chapter container.
-            for (String tag : blacklistedTags) {
-                chapterContent.select(tag).remove();
+            if (!(blacklistedTags == null)) {
+                for (String tag : blacklistedTags) {
+                    chapterContent.select(tag).remove();
+                }
             }
+
             //Download images of chapter container.
             if (getImages) {
                 for (Element image : chapterContent.select("img")) {
-                    Shared.downloadImage(image.absUrl("src"), saveLocation, logWindow);
+                    downloadImage(image.absUrl("src"), saveLocation, logWindow);
                 }
             }
             // Create chapters folder if it doesn't exist.
@@ -206,19 +223,10 @@ class Shared {
                 // Write content to file.
                 out.println(chapterContent);
             }
-            Shared.successfulChapter(fileName, logWindow);
+            successfulChapter(fileName, logWindow);
         } catch (Throwable e) {
-            Shared.failedChapters.add(fileName);
+            failedChapters.add(fileName);
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Adjust chapter names for chapter numeration.
-     */
-    private static String setFilename(int chapterNumber, String fileName, boolean chapterNumeration) {
-        if (chapterNumeration) fileName = "Ch-" + chapterNumber + "-" + fileName.replaceAll("[^\\w]+", "-");
-        else fileName = fileName.replaceAll("[^\\w]+", "-");
-        return fileName;
     }
 }
