@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 class Shared {
     private static final String textEncoding = "UTF-8";
     private static final String NL = System.getProperty("line.separator");
-    static String tocFileName = "Table Of Contents";
     private static String htmlHead = "<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
             + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL;
     private static String htmlFoot = "</body>" + NL + "</html>";
@@ -91,36 +90,13 @@ class Shared {
     }
 
     /**
-     * Creates a 'Table of Contents' file of successfully grabbed chapters and images.
-     * (Calibre needs links to the images to display them)
+     * Adjust chapter names for chapter numeration.
      */
-    void createToc(String saveLocation, String logWindow) {
-        if (!successfulChapterNames.isEmpty()) {
-            String fileName = tocFileName + ".html";
-            try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
-                out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
-                //Print chapter links
-                for (String chapterFileName : successfulChapterNames) {
-                    out.println("<a href=\"chapters/" + chapterFileName + ".html\">" + chapterFileName + "</a><br/>");
-                }
-                //Print image links (for calibre)
-                if (!images.isEmpty()) {
-                    for (String image : images) {
-                        // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
-                        String imageName = getImageName(image);
-                        if (imageName.equals("could_not_rename_image")) {
-                            imageName = image.hashCode() + ".jpg";
-                        }
-                        out.println("<img src=\"images/" + imageName + "\" style=\"display:none;\" /><br/>");
-                    }
-                }
-                out.print("</p>" + NL + htmlFoot);
-            } catch (FileNotFoundException | UnsupportedEncodingException e) {
-                NovelGrabberGUI.appendText(logWindow, e.getMessage());
-                e.printStackTrace();
-            }
-            NovelGrabberGUI.appendText(logWindow, "[INFO]" + fileName + " created.");
-        }
+    private static String setFilename(int chapterNumber, String fileName, boolean chapterNumeration) {
+        if (chapterNumeration) {
+            fileName = String.format("%05d", chapterNumber) + "-" + fileName.replaceAll("[^\\w]+", "-");
+        } else fileName = fileName.replaceAll("[^\\w]+", "-");
+        return fileName;
     }
 
     void downloadImage(String src, String fileLocation, String logWindow) {
@@ -163,12 +139,36 @@ class Shared {
     }
 
     /**
-     * Adjust chapter names for chapter numeration.
+     * Creates a 'Table of Contents' file of successfully grabbed chapters and images.
+     * (Calibre needs links to the images to display them)
      */
-    private static String setFilename(int chapterNumber, String fileName, boolean chapterNumeration) {
-        if (chapterNumeration) fileName = "Ch-" + chapterNumber + "-" + fileName.replaceAll("[^\\w]+", "-");
-        else fileName = fileName.replaceAll("[^\\w]+", "-");
-        return fileName;
+    void createToc(String saveLocation, String logWindow, String tocFileName) {
+        if (!successfulChapterNames.isEmpty()) {
+            String fileName = tocFileName + ".html";
+            try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+                out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+                //Print chapter links
+                for (String chapterFileName : successfulChapterNames) {
+                    out.println("<a href=\"chapters/" + chapterFileName + ".html\">" + chapterFileName + "</a><br/>");
+                }
+                //Print image links (for calibre)
+                if (!images.isEmpty()) {
+                    for (String image : images) {
+                        // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
+                        String imageName = getImageName(image);
+                        if (imageName.equals("could_not_rename_image")) {
+                            imageName = image.hashCode() + ".jpg";
+                        }
+                        out.println("<img src=\"images/" + imageName + "\" style=\"display:none;\" /><br/>");
+                    }
+                }
+                out.print("</p>" + NL + htmlFoot);
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                NovelGrabberGUI.appendText(logWindow, e.getMessage());
+                e.printStackTrace();
+            }
+            NovelGrabberGUI.appendText(logWindow, "[INFO]" + fileName + " created.");
+        }
     }
 
     /**
