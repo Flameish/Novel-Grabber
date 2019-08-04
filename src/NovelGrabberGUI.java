@@ -29,7 +29,7 @@ public class NovelGrabberGUI {
     static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
     private static final JList<String> checkList = new JList<>(listModelCheckerLinks);
-    static String versionNumber = "v1.7.1";
+    static String versionNumber = "v1.7.2";
     static TrayIcon trayIcon;
     private static final String NL = System.getProperty("line.separator");
     private static JFrame frmNovelGrabber;
@@ -371,6 +371,9 @@ public class NovelGrabberGUI {
         frmNovelGrabber.setTitle("Novel-Grabber " + versionNumber);
         frmNovelGrabber.setBounds(100, 100, 588, 650);
         frmNovelGrabber.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        if (!SystemTray.isSupported()) {
+            frmNovelGrabber.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        }
         frmNovelGrabber.addWindowListener(new WindowAdapter() {
 
             @Override
