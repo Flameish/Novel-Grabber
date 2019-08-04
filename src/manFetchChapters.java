@@ -14,12 +14,13 @@ import java.util.List;
 class manFetchChapters {
     static List<String> chapterURLs = new ArrayList<>();
     private static String window = "manual";
+    private String tocFileName = "Table-of-Contents";
     private String chapterContainer;
     private String saveLocation;
     private boolean chapterNumeration;
     private boolean invertedOrder;
     private boolean getImages;
-    private int chaptersProcessed;
+    private int chapterNumber;
     private Shared a;
 
     manFetchChapters(String method, List<String> blacklistedTags) {
@@ -39,8 +40,8 @@ class manFetchChapters {
                 processChapersFromList();
                 break;
         }
-        if (NovelGrabberGUI.manCreateToc.isSelected()) a.createToc(saveLocation, window);
-        a.report(chaptersProcessed, window, startTime);
+        if (NovelGrabberGUI.manCreateToc.isSelected()) a.createToc(saveLocation, window, tocFileName);
+        a.report(chapterNumber, window, startTime);
     }
 
     /**
@@ -70,14 +71,14 @@ class manFetchChapters {
      */
     private void processChapersFromList() throws IllegalArgumentException {
         String fileName;
-        chaptersProcessed = 0;
+        chapterNumber = 0;
         NovelGrabberGUI.setMaxProgress(window, chapterURLs.size());
         if (invertedOrder) Collections.reverse(chapterURLs);
         // Loop through all remaining chapter links and save them to file.
         for (String chapter : chapterURLs) {
-            chaptersProcessed++;
-            fileName = manSetFileName(chaptersProcessed);
-            a.saveChapterWithHTML(chapter, chaptersProcessed, fileName, saveLocation, chapterContainer, chapterNumeration, window, getImages);
+            chapterNumber++;
+            fileName = manSetFileName(chapterNumber);
+            a.saveChapterWithHTML(chapter, chapterNumber, fileName, saveLocation, chapterContainer, chapterNumeration, window, getImages);
             Shared.sleep(window);
         }
         // Since chapter links are not getting cleared, they need to be re-inversed.

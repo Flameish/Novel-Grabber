@@ -14,6 +14,7 @@ import java.util.Objects;
  */
 class autoFetchChapters {
     private static String window = "auto";
+    private String tocFileName;
     private String saveLocation;
     private boolean chapterNumeration;
     private boolean allChapters;
@@ -42,7 +43,7 @@ class autoFetchChapters {
         long startTime = System.nanoTime();
         a = new Shared(currentNovel.getBlacklistedTags());
         getChapterLinks();
-        if (NovelGrabberGUI.createTocCheckBox.isSelected()) a.createToc(saveLocation, window);
+        if (NovelGrabberGUI.createTocCheckBox.isSelected()) a.createToc(saveLocation, window, tocFileName);
         a.report(chaptersProcessed, window, startTime);
     }
 
@@ -95,7 +96,7 @@ class autoFetchChapters {
     }
 
     private void processSpecificChapters(List<String> chapterLinks, List<String> chaptersNames) {
-        Shared.tocFileName = "Table of Contents " + firstChapter + "-" + lastChapter;
+        tocFileName = "Table of Contents " + firstChapter + "-" + lastChapter;
         NovelGrabberGUI.setMaxProgress(window, (lastChapter - firstChapter) + 1);
 
         NovelGrabberGUI.progressBar.setStringPainted(true);
@@ -108,9 +109,8 @@ class autoFetchChapters {
     }
 
     private void processAllChapters(List<String> chapterLinks, List<String> chaptersNames, Document doc, Elements links) {
-        Shared.tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(), ""));
+        tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(), ""));
         NovelGrabberGUI.setMaxProgress(window, chapterLinks.size());
-        //Decide what text selection to use
         NovelGrabberGUI.progressBar.setStringPainted(true);
         for (int i = 1; i <= links.size(); i++) {
             chaptersProcessed++;
