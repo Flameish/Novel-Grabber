@@ -33,7 +33,7 @@ Novel-Grabber is a GUI based web scrapper that can download chapters from variou
    <b>Get images</b> downloads potential images in a chapter. They will be displayed after <a href="#converting">converting with Calibre</a>.
    
    <b>Wait time</b> is the time between each chapter call in milliseconds (1000 for 1 second) (so you don't flood the host server with requests)<br>
-   ![alt text](https://i.imgur.com/OOzg8aR.png)
+   ![alt text](https://i.imgur.com/xirqzbM.png)
 
 <strong>Manual:</strong>
 

@@ -22,6 +22,7 @@ class Shared {
     String nextChapterBtn = "NOT_SET";
     private List<String> failedChapters = new ArrayList<>();
     private List<String> successfulChapterNames = new ArrayList<>();
+    private List<String> successfulFilenames = new ArrayList<>();
     private List<String> images = new ArrayList<>();
     private List<String> blacklistedTags;
 
@@ -48,9 +49,10 @@ class Shared {
     /**
      * Processes a successful chapter.
      */
-    private void successfulChapter(String fileName, String window) {
-        successfulChapterNames.add(fileName);
-        NovelGrabberGUI.appendText(window, "[INFO]" + fileName + " saved.");
+    private void successfulChapter(String fileName, String chapterName, String window) {
+        successfulChapterNames.add(chapterName);
+        successfulFilenames.add(fileName);
+        NovelGrabberGUI.appendText(window, "[INFO]" + chapterName + " saved.");
         NovelGrabberGUI.updateProgress(window);
     }
 
@@ -148,8 +150,8 @@ class Shared {
             try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
                 out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
                 //Print chapter links
-                for (String chapterFileName : successfulChapterNames) {
-                    out.println("<a href=\"chapters/" + chapterFileName + ".html\">" + chapterFileName + "</a><br/>");
+                for (int i = 0; i < successfulChapterNames.size(); i++) {
+                    out.println("<a href=\"chapters/" + successfulFilenames.get(i) + ".html\">" + successfulChapterNames.get(i) + "</a><br/>");
                 }
                 //Print image links (for calibre)
                 if (!images.isEmpty()) {
@@ -174,10 +176,11 @@ class Shared {
     /**
      * Main method to save chapter content.
      */
-    void saveChapterWithHTML(String url, int chapterNumber, String fileName, String saveLocation,
+    void saveChapterWithHTML(String url, int chapterNumber, String chapterName, String saveLocation,
                              String chapterContainer, boolean chapterNumeration, String logWindow, boolean getImages) {
         //Manual grabbing got it's own file naming method
-        if (logWindow.equals("auto")) fileName = setFilename(chapterNumber, fileName, chapterNumeration);
+        String fileName = "";
+        if (logWindow.equals("auto")) fileName = setFilename(chapterNumber, chapterName, chapterNumeration);
 
         try {
             Document doc = Jsoup.connect(url).get();
@@ -223,9 +226,9 @@ class Shared {
                 // Write content to file.
                 out.println(chapterContent);
             }
-            successfulChapter(fileName, logWindow);
+            successfulChapter(fileName, chapterName, logWindow);
         } catch (Throwable e) {
-            failedChapters.add(fileName);
+            failedChapters.add(chapterName);
             e.printStackTrace();
         }
     }

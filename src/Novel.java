@@ -9,6 +9,7 @@ public class Novel {
             "Light Novels Translations", "WordExcerpt", "BoxNovel"};
     private String chapterLinkSelecter;
     private String titleHostName;
+    private int ordinalIndexForBaseNovel;
     private String url;
     private String host;
     private String chapterContainer;
@@ -20,6 +21,7 @@ public class Novel {
         switch (domain) {
             case "wuxiaworld": //compared from websites[] with whitespaces removed and lowercase
                 this.host = "https://wuxiaworld.com/"; //Website URL
+                this.ordinalIndexForBaseNovel = 5; // To trim down string to base novel url
                 this.chapterLinkSelecter = "#accordion .chapter-item"; //Table of contents chapter links
                 this.chapterContainer = ".p-15 .fr-view"; //chapter text
                 this.titleHostName = "-WuxiaWorld"; //From the tab title with whitespaces removed
@@ -27,6 +29,7 @@ public class Novel {
                 break;
             case "royalroad":
                 this.host = "https://www.royalroad.com/";
+                this.ordinalIndexForBaseNovel = 6;
                 this.chapterLinkSelecter = ".table td:not([class])";
                 this.chapterContainer = ".chapter-content";
                 this.titleHostName = "-Royal-Road";
@@ -34,6 +37,7 @@ public class Novel {
                 break;
             case "gravitytales":
                 this.host = "http://gravitytales.com/";
+                this.ordinalIndexForBaseNovel = 5;
                 this.chapterLinkSelecter = ".table td";
                 this.chapterContainer = "#chapterContent";
                 this.titleHostName = "-Gravity-Tales";
@@ -42,6 +46,7 @@ public class Novel {
                 break;
             case "volarenovels":
                 this.host = "https://volarenovels.com/";
+                this.ordinalIndexForBaseNovel = 5;
                 this.chapterLinkSelecter = "#accordion .chapter-item a";
                 this.chapterContainer = ".jfontsize_content.fr-view";
                 this.titleHostName = "-volare-novels";
@@ -49,13 +54,15 @@ public class Novel {
                 break;
             case "wordexcerpt":
                 this.host = "https://wordexcerpt.com/";
-                this.chapterLinkSelecter = ".listing-chapters_wrap a[href^=" + urla + "]";
+                this.ordinalIndexForBaseNovel = 5;
+                this.chapterLinkSelecter = ".listing-chapters_wrap a[href]";
                 this.chapterContainer = ".text-left";
                 this.titleHostName = "-WordExcerpt";
                 this.blacklistedTags = Arrays.asList("center", "meta", "script");
                 break;
             case "lightnovelstranslations":
                 this.host = "https://lightnovelstranslations.com/";
+                this.ordinalIndexForBaseNovel = 4;
                 this.chapterLinkSelecter = ".entry-content a[href^=" + urla + "]:not(a[rel])";
                 this.chapterContainer = ".entry-content";
                 this.titleHostName = "";
@@ -63,6 +70,7 @@ public class Novel {
                 break;
             case "boxnovel":
                 this.host = "https://boxnovel.com/";
+                this.ordinalIndexForBaseNovel = 5;
                 this.chapterLinkSelecter = ".listing-chapters_wrap a";
                 this.chapterContainer = ".text-left";
                 this.titleHostName = "";
@@ -90,6 +98,10 @@ public class Novel {
 
     String getChapterContainer() {
         return this.chapterContainer;
+    }
+
+    int getordinalIndexForBaseNovel() {
+        return this.ordinalIndexForBaseNovel;
     }
 
     List<String> getBlacklistedTags() {

@@ -29,7 +29,7 @@ public class NovelGrabberGUI {
     static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
     private static final JList<String> checkList = new JList<>(listModelCheckerLinks);
-    static String versionNumber = "v1.7.2";
+    static String versionNumber = "v1.8.0";
     static TrayIcon trayIcon;
     private static final String NL = System.getProperty("line.separator");
     private static JFrame frmNovelGrabber;
@@ -82,6 +82,7 @@ public class NovelGrabberGUI {
     private DefaultListModel<String> tempListModel;
     static JCheckBox createTocCheckBox;
     private static List<String> blacklistedTags = new ArrayList<>();
+    static JCheckBox toLastChapter;
 
     /**
      * Create the application.
@@ -191,7 +192,7 @@ public class NovelGrabberGUI {
         });
     }
 
-    private static void showPopup(String errorMsg, String kind) {
+    static void showPopup(String errorMsg, String kind) {
         switch (kind) {
             case "warning":
                 JOptionPane.showMessageDialog(frmNovelGrabber, errorMsg, "Warning", JOptionPane.WARNING_MESSAGE);
@@ -544,39 +545,57 @@ public class NovelGrabberGUI {
         chapterAllCheckBox = new JCheckBox("All");
         chapterAllCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
         chapterAllCheckBox.setFocusable(false);
-        chapterAllCheckBox.setBounds(101, 12, 62, 23);
+        chapterAllCheckBox.setBounds(81, 12, 62, 23);
         chapterSelect.add(chapterAllCheckBox);
         chapterAllCheckBox.addItemListener(arg0 -> {
             if (chapterAllCheckBox.isSelected()) {
                 firstChapter.setEnabled(false);
                 lastChapter.setEnabled(false);
+                toLastChapter.setEnabled(false);
             }
             if (!chapterAllCheckBox.isSelected()) {
                 firstChapter.setEnabled(true);
                 lastChapter.setEnabled(true);
+                toLastChapter.setEnabled(true);
             }
         });
 
         JLabel lblChapter = new JLabel("Chapter range:");
-        lblChapter.setBounds(210, 16, 113, 14);
+        lblChapter.setBounds(190, 16, 113, 14);
         chapterSelect.add(lblChapter);
 
         firstChapter = new JTextField();
-        firstChapter.setBounds(325, 13, 60, 20);
+        firstChapter.setBounds(305, 13, 60, 20);
         firstChapter.setColumns(10);
         firstChapter.setHorizontalAlignment(JTextField.CENTER);
         chapterSelect.add(firstChapter);
 
         JLabel lblTo = new JLabel("-");
-        lblTo.setBounds(396, 11, 6, 20);
+        lblTo.setBounds(376, 11, 6, 20);
         lblTo.setFont(new Font("Tahoma", Font.PLAIN, 16));
         chapterSelect.add(lblTo);
 
         lastChapter = new JTextField();
-        lastChapter.setBounds(413, 13, 60, 20);
+        lastChapter.setBounds(393, 13, 60, 20);
         lastChapter.setColumns(10);
         lastChapter.setHorizontalAlignment(JTextField.CENTER);
         chapterSelect.add(lastChapter);
+
+        toLastChapter = new JCheckBox("Last");
+        toLastChapter.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        toLastChapter.setFocusable(false);
+        toLastChapter.setBounds(460, 13, 60, 20);
+        chapterSelect.add(toLastChapter);
+        toLastChapter.addItemListener(arg0 -> {
+            if (toLastChapter.isSelected()) {
+                lastChapter.setEnabled(false);
+                chapterAllCheckBox.setEnabled(false);
+            }
+            if (!toLastChapter.isSelected()) {
+                lastChapter.setEnabled(true);
+                chapterAllCheckBox.setEnabled(true);
+            }
+        });
 
         JPanel optionSelect = new JPanel();
         optionSelect.setBounds(10, 165, 532, 95);
@@ -595,9 +614,10 @@ public class NovelGrabberGUI {
 
 
         useNumeration = new JCheckBox("Chapter numeration");
+        useNumeration = new JCheckBox("Chapter numeration");
         useNumeration.setFocusPainted(false);
         useNumeration.setToolTipText(toolTipStyle
-                + "Will add a chapter number infront of the chapter name. Helpful for ordering chapters which don't have a chapter number in their title.</p></html>");
+                + "Will add a chapter number in front of the chapter name to keep them in order when converting.</p></html>");
         useNumeration.setFont(new Font("Tahoma", Font.PLAIN, 11));
         useNumeration.setBounds(6, 40, 121, 23);
         optionSelect.add(useNumeration);
@@ -647,14 +667,14 @@ public class NovelGrabberGUI {
         btnVisitWebsite.setBounds(456, 48, 86, 27);
         allChapterPane.add(btnVisitWebsite);
 
-        //Single chapter
+        // Get chapter number
         JPanel singleChapterPane = new JPanel();
         singleChapterPane.setBounds(10, 489, 557, 95);
         automaticPane.add(singleChapterPane);
-        singleChapterPane.setBorder(BorderFactory.createTitledBorder("Get single chapter"));
+        singleChapterPane.setBorder(BorderFactory.createTitledBorder("Display chapter number of chapter"));
         singleChapterPane.setLayout(null);
 
-        JButton getChapterBtn = new JButton("Grab chapter");
+        JButton getChapterBtn = new JButton("Get number");
         getChapterBtn.setFocusPainted(false);
         getChapterBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
         getChapterBtn.setBounds(429, 58, 113, 27);
@@ -958,7 +978,7 @@ public class NovelGrabberGUI {
 
         manUseNumeration = new JCheckBox("Chapter numeration");
         manUseNumeration.setToolTipText(
-                "<html><p width=\"300\">Will add a chapter number infront of the chapter name. Helpful for ordering chapters which don't have a chapter number in their title.</p></html>");
+                "<html><p width=\"300\">Will add a chapter number in front of the chapter name to keep them in order when converting.</p></html>");
         manUseNumeration.setFocusPainted(false);
         manUseNumeration.setFont(new Font("Tahoma", Font.PLAIN, 11));
         manUseNumeration.setBounds(6, 40, 121, 23);
@@ -1394,25 +1414,24 @@ public class NovelGrabberGUI {
             }
         }));
 
-        // Single Chapter
-        getChapterBtn.addActionListener(e -> {
+        // Get chapter number
+        getChapterBtn.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             if (singleChapterLink.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
                         JOptionPane.WARNING_MESSAGE);
                 singleChapterLink.requestFocusInWindow();
             } else if (!singleChapterLink.getText().isEmpty()) {
                 try {
-                    progressBar.setStringPainted(true);
-                    autoFetchChapters.saveSingleChapter();
+                    getChapterBtn.setEnabled(false);
+                    autoFetchChapters.getChapterNumber(singleChapterHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", ""), singleChapterLink.getText());
                 } catch (NullPointerException | IllegalArgumentException err) {
                     appendText("auto", err.getMessage());
                     err.printStackTrace();
                 } finally {
-                    progressBar.setStringPainted(false);
-                    progressBar.setValue(0);
+                    getChapterBtn.setEnabled(true);
                 }
             }
-        });
+        }));
 
         //Multiple chapters
         grabChapters.addActionListener(arg0 -> Executors.newSingleThreadExecutor().execute(() -> {
@@ -1424,18 +1443,25 @@ public class NovelGrabberGUI {
             } else if (saveLocation.getText().isEmpty()) {
                 showPopup("Save directory field is empty.", "warning");
                 saveLocation.requestFocusInWindow();
-            } else if ((!chapterAllCheckBox.isSelected())
+            } else if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
                     && ((firstChapter.getText().isEmpty()) || (lastChapter.getText().isEmpty()))) {
                 showPopup("No chapter range defined.", "warning");
-            } else if ((!chapterAllCheckBox.isSelected())
+            } else if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
                     && (!firstChapter.getText().matches("\\d+") || !lastChapter.getText().matches("\\d+"))) {
                 showPopup("Chapter range must contain numbers.", "warning");
-            } else if ((!chapterAllCheckBox.isSelected()) && ((Integer.parseInt(firstChapter.getText()) < 1)
+            } else if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
+                    && ((Integer.parseInt(firstChapter.getText()) < 1)
                     || (Integer.parseInt(lastChapter.getText()) < 1))) {
                 showPopup("Chapter numbers can't be lower than 1.", "warning");
-            } else if ((!chapterAllCheckBox.isSelected())
+            } else if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
                     && (Integer.parseInt(lastChapter.getText()) < Integer.parseInt(firstChapter.getText()))) {
                 showPopup("Last chapter can't be lower than first chapter.", "warning");
+            } else if ((!chapterAllCheckBox.isSelected()) && (toLastChapter.isSelected())
+                    && (!firstChapter.getText().matches("\\d+"))) {
+                showPopup("First chapter selection must contain numbers.", "warning");
+            } else if ((!chapterAllCheckBox.isSelected()) && (toLastChapter.isSelected())
+                    && (!firstChapter.getText().isEmpty() && Integer.parseInt(firstChapter.getText()) < 1)) {
+                showPopup("First chapter number can't be lower than 1.", "warning");
             } else if (waitTime.getText().isEmpty()) {
                 showPopup("Wait time cannot be empty.", "warning");
             } else if (!waitTime.getText().matches("\\d+") && !waitTime.getText().isEmpty()) {
