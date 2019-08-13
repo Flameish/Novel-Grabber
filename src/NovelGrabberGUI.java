@@ -29,7 +29,7 @@ public class NovelGrabberGUI {
     static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
     private static final JList<String> checkList = new JList<>(listModelCheckerLinks);
-    static String versionNumber = "v1.8.0";
+    static String versionNumber = "1.8.1";
     static TrayIcon trayIcon;
     private static final String NL = System.getProperty("line.separator");
     private static JFrame frmNovelGrabber;
@@ -81,7 +81,7 @@ public class NovelGrabberGUI {
     private JButton manShowTagsBtn;
     private DefaultListModel<String> tempListModel;
     static JCheckBox createTocCheckBox;
-    private static List<String> blacklistedTags = new ArrayList<>();
+    static List<String> blacklistedTags = new ArrayList<>();
     static JCheckBox toLastChapter;
 
     /**
@@ -273,10 +273,9 @@ public class NovelGrabberGUI {
         try {
             Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
             Element versionString = doc.select("a[title]").first();
+            String oldVersionString = versionNumber;
             String newVersionString = versionString.attr("title");
-            int oldVersionNumber = Integer.parseInt(versionNumber.replaceAll("\\D+", ""));
-            int newVersionNumber = Integer.parseInt(newVersionString.replaceAll("\\D+", ""));
-            if (newVersionNumber > oldVersionNumber) {
+            if (updater.compareStrings(oldVersionString, newVersionString) == -1) {
                 tabbedPane.addTab("Update", null, updatePane, null);
                 updateStatusLbl.setText("A new update of Novel-Grabber was released. The latest version is: " + newVersionString);
                 frmNovelGrabber.setTitle("Novel-Grabber " + versionNumber + " - New version released");
@@ -402,23 +401,23 @@ public class NovelGrabberGUI {
 
         chapterListURL = new JTextField();
         chapterListURL.setBounds(152, 19, 390, 25);
-        allChapterPane.add(chapterListURL);
         chapterListURL.setToolTipText("");
         chapterListURL.setColumns(10);
+        allChapterPane.add(chapterListURL);
 
         JLabel lblNovelChapterList = new JLabel("Table of Contents URL:");
         lblNovelChapterList.setLabelFor(chapterListURL);
-        lblNovelChapterList.setBounds(10, 19, 116, 25);
+        lblNovelChapterList.setBounds(10, 19, 150, 25);
         allChapterPane.add(lblNovelChapterList);
         lblNovelChapterList.setFont(new Font("Tahoma", Font.PLAIN, 11));
 
 
         JLabel lblNewLabel = new JLabel("Host website:");
-        lblNewLabel.setBounds(10, 49, 80, 25);
+        lblNewLabel.setBounds(10, 49, 150, 25);
         allChapterPane.add(lblNewLabel);
         lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
 
-        allChapterHostSelection = new JComboBox<>(Novel.websites);
+        allChapterHostSelection = new JComboBox<>(HostSettings.websites);
         allChapterHostSelection.setFocusable(false);
         allChapterHostSelection.setBounds(152, 49, 260, 25);
         allChapterPane.add(allChapterHostSelection);
@@ -434,13 +433,13 @@ public class NovelGrabberGUI {
             tempListModel = new DefaultListModel<>();
             JList<String> tempJList = new JList<>(tempListModel);
 
-            Novel scummyNovelToGetTags = new Novel(allChapterHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", ""), "");
+            HostSettings tempSettings = new HostSettings(allChapterHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", ""), "");
             JScrollPane tagScrollPane = new JScrollPane(tempJList);
             tagScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             tagScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             tagScrollPane.setBounds(0, 0, 532, 180);
-            if (!(scummyNovelToGetTags.getBlacklistedTags() == null)) {
-                for (String alreadyBlacklistedTags : scummyNovelToGetTags.getBlacklistedTags()) {
+            if (!(tempSettings.blacklistedTags == null)) {
+                for (String alreadyBlacklistedTags : tempSettings.blacklistedTags) {
                     tempListModel.addElement(alreadyBlacklistedTags);
                 }
             }
@@ -466,7 +465,7 @@ public class NovelGrabberGUI {
         allChapterPane.add(browseBtn);
 
         JLabel saveLocationLbl = new JLabel("Save directory:");
-        saveLocationLbl.setBounds(10, 80, 103, 25);
+        saveLocationLbl.setBounds(10, 80, 150, 25);
         allChapterPane.add(saveLocationLbl);
         saveLocationLbl.setFont(new Font("Tahoma", Font.PLAIN, 11));
 
@@ -523,11 +522,6 @@ public class NovelGrabberGUI {
 
         progressBar = new JProgressBar();
         progressBar.setBounds(10, 436, 409, 25);
-        progressBar.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        progressBar.setForeground(new Color(0, 128, 128));
-        progressBar.setMinimum(0);
-        progressBar.setMaximum(100);
-        progressBar.setString("");
         allChapterPane.add(progressBar);
 
         JButton grabChapters = new JButton("Grab chapters");
@@ -606,20 +600,18 @@ public class NovelGrabberGUI {
         createTocCheckBox = new JCheckBox("Create ToC");
         createTocCheckBox.setFocusPainted(false);
         createTocCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        createTocCheckBox.setBounds(6, 20, 81, 23);
+        createTocCheckBox.setBounds(6, 20, 145, 23);
         createTocCheckBox.setSelected(true);
         optionSelect.add(createTocCheckBox);
         createTocCheckBox.setToolTipText(toolTipStyle
                 + "Will create a \"Table of Contents\" file which can be used to convert all chapter files into a single epub file in calibre.</p></html>");
 
-
-        useNumeration = new JCheckBox("Chapter numeration");
         useNumeration = new JCheckBox("Chapter numeration");
         useNumeration.setFocusPainted(false);
         useNumeration.setToolTipText(toolTipStyle
                 + "Will add a chapter number in front of the chapter name to keep them in order when converting.</p></html>");
         useNumeration.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        useNumeration.setBounds(6, 40, 121, 23);
+        useNumeration.setBounds(6, 40, 145, 23);
         optionSelect.add(useNumeration);
 
         checkInvertOrder = new JCheckBox("Invert chapter order");
@@ -627,7 +619,7 @@ public class NovelGrabberGUI {
         checkInvertOrder.setToolTipText(
                 "<html><p width=\"300\">Invert  the chapter order and download the last chapter first. Useful if sites list the highest chapter at the top</p></html>");
         checkInvertOrder.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        checkInvertOrder.setBounds(6, 60, 129, 23);
+        checkInvertOrder.setBounds(6, 60, 145, 23);
         optionSelect.add(checkInvertOrder);
 
         getImages = new JCheckBox("Get images");
@@ -640,6 +632,7 @@ public class NovelGrabberGUI {
 
         JLabel sleepLbl = new JLabel("Wait time:");
         sleepLbl.setBounds(389, 67, 66, 14);
+        sleepLbl.setFont(new Font("Tahoma", Font.PLAIN, 11));
         sleepLbl.setToolTipText(
                 "<html><p width=\"300\">Time in miliseconds to wait before each chapter grab. (1000 for 1 second) Please select an appropriate wait time for the host.</p></html>");
         optionSelect.add(sleepLbl);
@@ -649,14 +642,15 @@ public class NovelGrabberGUI {
         waitTime.setColumns(10);
         waitTime.setBounds(456, 64, 66, 20);
         waitTime.setText("0");
+        waitTime.setFont(new Font("Tahoma", Font.PLAIN, 11));
         optionSelect.add(waitTime);
 
         JButton btnVisitWebsite = new JButton("Visit...");
         btnVisitWebsite.addActionListener(arg0 -> {
             try {
-                Novel emptyNovel = new Novel(
+                HostSettings emptyNovel = new HostSettings(
                         Objects.requireNonNull(allChapterHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", ""), "");
-                URI uri = new URI(emptyNovel.getHost());
+                URI uri = new URI(emptyNovel.host);
                 openWebpage(uri);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -665,6 +659,7 @@ public class NovelGrabberGUI {
         });
         btnVisitWebsite.setFocusPainted(false);
         btnVisitWebsite.setBounds(456, 48, 86, 27);
+        btnVisitWebsite.setFont(new Font("Tahoma", Font.PLAIN, 11));
         allChapterPane.add(btnVisitWebsite);
 
         // Get chapter number
@@ -674,31 +669,31 @@ public class NovelGrabberGUI {
         singleChapterPane.setBorder(BorderFactory.createTitledBorder("Display chapter number of chapter"));
         singleChapterPane.setLayout(null);
 
-        JButton getChapterBtn = new JButton("Get number");
-        getChapterBtn.setFocusPainted(false);
-        getChapterBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        getChapterBtn.setBounds(429, 58, 113, 27);
-        singleChapterPane.add(getChapterBtn);
+        JLabel lblchapterURL = new JLabel("Chapter URL:");
+        lblchapterURL.setBounds(10, 24, 130, 25);
+        singleChapterPane.add(lblchapterURL);
+        lblchapterURL.setFont(new Font("Tahoma", Font.PLAIN, 11));
 
         singleChapterLink = new JTextField();
         singleChapterLink.setBounds(133, 25, 409, 25);
         singleChapterPane.add(singleChapterLink);
         singleChapterLink.setColumns(10);
 
-        JLabel lblchapterURL = new JLabel("Chapter URL:");
-        lblchapterURL.setBounds(10, 24, 100, 25);
-        singleChapterPane.add(lblchapterURL);
-        lblchapterURL.setFont(new Font("Tahoma", Font.PLAIN, 11));
-
         JLabel label = new JLabel("Host website:");
         label.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        label.setBounds(10, 59, 73, 25);
+        label.setBounds(10, 59, 130, 25);
         singleChapterPane.add(label);
 
-        singleChapterHostSelection = new JComboBox<>(Novel.websites);
+        singleChapterHostSelection = new JComboBox<>(HostSettings.websites);
         singleChapterHostSelection.setFocusable(false);
         singleChapterHostSelection.setBounds(133, 59, 286, 25);
         singleChapterPane.add(singleChapterHostSelection);
+
+        JButton getChapterBtn = new JButton("Get number");
+        getChapterBtn.setFocusPainted(false);
+        getChapterBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        getChapterBtn.setBounds(429, 58, 113, 27);
+        singleChapterPane.add(getChapterBtn);
 
         // Manual Tab
         JPanel manualPane = new JPanel();
@@ -713,17 +708,8 @@ public class NovelGrabberGUI {
 
         JLabel lblManualToc = new JLabel("Table Of Contents URL:");
         lblManualToc.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        lblManualToc.setBounds(13, 17, 158, 25);
+        lblManualToc.setBounds(13, 17, 170, 25);
         chapterLinkPane.add(lblManualToc);
-
-        JSeparator manLinkPaneSeperator = new JSeparator();
-        chapterLinkPane.add(manLinkPaneSeperator);
-        manLinkPaneSeperator.setBounds(13, 70, 533, 5);
-
-        manChapterListURL = new JTextField();
-        manChapterListURL.setBounds(178, 14, 260, 25);
-        chapterLinkPane.add(manChapterListURL);
-        manChapterListURL.setColumns(10);
 
         JButton removeLinks = new JButton("Remove links");
         removeLinks.setFont(new Font("Tahoma", Font.PLAIN, 11));
@@ -744,6 +730,42 @@ public class NovelGrabberGUI {
         });
         removeLinks.setBounds(448, 77, 99, 25);
         chapterLinkPane.add(removeLinks);
+
+        JButton retrieveLinks = new JButton("Retrieve Links");
+        retrieveLinks.setFocusPainted(false);
+        retrieveLinks.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        retrieveLinks.addActionListener(e -> {
+            if (manChapterListURL.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                manChapterListURL.requestFocusInWindow();
+            }
+            if (!manChapterListURL.getText().isEmpty()) {
+                try {
+                    retrieveLinks.setEnabled(false);
+                    manFetchChapters.retrieveLinks();
+                } catch (NullPointerException | IllegalArgumentException | IOException err) {
+                    err.printStackTrace();
+                } finally {
+                    retrieveLinks.setEnabled(true);
+                    if (!listModelChapterLinks.isEmpty()) {
+                        removeLinks.setEnabled(true);
+                    }
+                }
+            }
+        });
+        retrieveLinks.setBounds(448, 13, 99, 27);
+        chapterLinkPane.add(retrieveLinks);
+
+        manChapterListURL = new JTextField();
+        manChapterListURL.setBounds(178, 14, 260, 25);
+        manChapterListURL.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        chapterLinkPane.add(manChapterListURL);
+        manChapterListURL.setColumns(10);
+
+        JSeparator manLinkPaneSeperator = new JSeparator();
+        chapterLinkPane.add(manLinkPaneSeperator);
+        manLinkPaneSeperator.setBounds(13, 70, 533, 5);
 
         JTabbedPane linkSelectTabbedPane = new JTabbedPane(JTabbedPane.TOP);
         linkSelectTabbedPane.setFocusable(false);
@@ -814,32 +836,6 @@ public class NovelGrabberGUI {
         });
         mntmClearLog_1.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         popupMenu_1.add(mntmClearLog_1);
-
-        JButton retrieveLinks = new JButton("Retrieve Links");
-        retrieveLinks.setFocusPainted(false);
-        retrieveLinks.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        retrieveLinks.addActionListener(e -> {
-            if (manChapterListURL.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(frmNovelGrabber, "URL field is empty.", "Warning",
-                        JOptionPane.WARNING_MESSAGE);
-                manChapterListURL.requestFocusInWindow();
-            }
-            if (!manChapterListURL.getText().isEmpty()) {
-                try {
-                    retrieveLinks.setEnabled(false);
-                    manFetchChapters.retrieveLinks();
-                } catch (NullPointerException | IllegalArgumentException | IOException err) {
-                    err.printStackTrace();
-                } finally {
-                    retrieveLinks.setEnabled(true);
-                    if (!listModelChapterLinks.isEmpty()) {
-                        removeLinks.setEnabled(true);
-                    }
-                }
-            }
-        });
-        retrieveLinks.setBounds(448, 13, 99, 27);
-        chapterLinkPane.add(retrieveLinks);
 
         JCheckBox manLinkToLink = new JCheckBox("Use Chapter-To-Chapter navigation");
         manLinkToLink.setFocusPainted(false);
@@ -973,7 +969,7 @@ public class NovelGrabberGUI {
         manCreateToc.setFont(new Font("Tahoma", Font.PLAIN, 11));
         manCreateToc.setFocusPainted(false);
         manCreateToc.setSelected(true);
-        manCreateToc.setBounds(6, 20, 81, 23);
+        manCreateToc.setBounds(6, 20, 145, 23);
         manOptionPane.add(manCreateToc);
 
         manUseNumeration = new JCheckBox("Chapter numeration");
@@ -981,7 +977,7 @@ public class NovelGrabberGUI {
                 "<html><p width=\"300\">Will add a chapter number in front of the chapter name to keep them in order when converting.</p></html>");
         manUseNumeration.setFocusPainted(false);
         manUseNumeration.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manUseNumeration.setBounds(6, 40, 121, 23);
+        manUseNumeration.setBounds(6, 40, 145, 23);
         manOptionPane.add(manUseNumeration);
 
         manCheckInvertOrder = new JCheckBox("Invert chapter order");
@@ -989,7 +985,7 @@ public class NovelGrabberGUI {
         manCheckInvertOrder.setToolTipText(
                 "<html><p width=\"300\">Invert the chapter order and download the last chapter first. Useful if sites list the highest chapter at the top.</p></html>");
         manCheckInvertOrder.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manCheckInvertOrder.setBounds(6, 60, 139, 23);
+        manCheckInvertOrder.setBounds(6, 60, 145, 23);
         manOptionPane.add(manCheckInvertOrder);
 
         manGetImages = new JCheckBox("Get images");
@@ -1103,7 +1099,7 @@ public class NovelGrabberGUI {
         checkChapterPane.add(checkAddNewEntryBtn);
         checkAddNewEntryBtn.addActionListener(arg0 -> {
             String host = (String) JOptionPane.showInputDialog(checkChapterPane,
-                    "Pick host:", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE, favicon, Novel.websites, "wuxiaworld");
+                    "Pick host:", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE, favicon, HostSettings.websites, "wuxiaworld");
             String checkUrl = JOptionPane.showInputDialog(checkChapterPane,
                     "Input Table of Contents URL:", "Add a Novel to check", JOptionPane.PLAIN_MESSAGE);
             if (!(checkUrl == null) && !(host == null)) {
@@ -1365,7 +1361,7 @@ public class NovelGrabberGUI {
                         && (!manChapterContainer.getText().isEmpty())
                         && (!manWaitTime.getText().isEmpty())) {
                     try {
-                        manFetchChapters processChapters = new manFetchChapters("chapterToChapter", blacklistedTags);
+                        Download manDownload = new Download("chapterToChapter");
                         // Exception handling
                     } catch (NullPointerException | IllegalArgumentException err) {
                         appendText("manual", err.getMessage());
@@ -1400,7 +1396,7 @@ public class NovelGrabberGUI {
                         && (!manWaitTime.getText().isEmpty())) {
                     try {
                         manProgressBar.setStringPainted(true);
-                        manFetchChapters processChapters = new manFetchChapters("chaptersFromList", blacklistedTags);
+                        Download manDownload = new Download("chaptersFromList");
                         // Exception handling
                     } catch (NullPointerException | IllegalArgumentException err) {
                         appendText("manual", err.getMessage());
@@ -1471,7 +1467,7 @@ public class NovelGrabberGUI {
             ) {
                 // Chapter grabbing
                 try {
-                    autoFetchChapters processChapters = new autoFetchChapters();
+                    Download autoDownload = new Download();
                 } catch (NullPointerException | IllegalArgumentException err) {
                     appendText("auto", err.getMessage());
                     err.printStackTrace();
