@@ -10,14 +10,10 @@ import java.util.Map;
 
 class updater {
 
-    /**
-     * TODO: future 2+.x.x/ x.10+.x releases might break the comparison
-     */
     static void updateJar() {
+        String oldVersionString = NovelGrabberGUI.versionNumber;
         String newVersionString = getLatestVersionString();
-        int oldVersionNumber = Integer.parseInt(NovelGrabberGUI.versionNumber.replaceAll("\\D+", ""));
-        int newVersionNumber = Integer.parseInt(newVersionString.replaceAll("\\D+", ""));
-        if (newVersionNumber > oldVersionNumber) {
+        if (compareStrings(oldVersionString, newVersionString) == -1) {
             String jarLink = "https://github.com/Flameish/Novel-Grabber/releases/download/" + newVersionString + "/Novel-Grabber.jar";
             try {
                 downloadFileFromGitHub(jarLink);
@@ -44,6 +40,22 @@ class updater {
             e.printStackTrace();
             return "-1";
         }
+    }
+
+    // Compare version strings
+    static int compareStrings(String oldVersionString, String newVersionString) {
+        String[] oldStrings = oldVersionString.split("\\.");
+        String[] newStrings = newVersionString.split("\\.");
+        int length = Math.max(oldStrings.length, newStrings.length);
+        for (int i = 0; i < length; i++) {
+            int oldVersionNumber = i < oldStrings.length ? Integer.parseInt(oldStrings[i]) : 0;
+            int newVersionNumber = i < newStrings.length ? Integer.parseInt(newStrings[i]) : 0;
+            if (oldVersionNumber < newVersionNumber)
+                return -1;
+            if (oldVersionNumber > newVersionNumber)
+                return 1;
+        }
+        return 0;
     }
 
     /**
