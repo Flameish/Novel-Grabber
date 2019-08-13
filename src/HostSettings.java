@@ -4,18 +4,25 @@ import java.util.List;
 /**
  * Data class 101.
  */
-public class Novel {
-    static String[] websites = {"Wuxiaworld", "Royal Road", "Gravity Tales", "Volare Novels",
-            "Light Novels Translations", "WordExcerpt", "BoxNovel"};
-    private String chapterLinkSelecter;
-    private String titleHostName;
-    private int ordinalIndexForBaseNovel;
-    private String url;
-    private String host;
-    private String chapterContainer;
-    private List<String> blacklistedTags;
+public class HostSettings {
+    static String[] websites = {
+            "Wuxiaworld",
+            "Royal Road",
+            "Gravity Tales",
+            "Volare Novels",
+            "Light Novels Translations",
+            "WordExcerpt",
+            "BoxNovel"
+    };
+    String chapterLinkSelecter;
+    String titleHostName;
+    String url;
+    String host;
+    String chapterContainer;
+    List<String> blacklistedTags;
+    int ordinalIndexForBaseNovel;
 
-    public Novel(String domain, String urla) {
+    public HostSettings(String domain, String urla) {
         url = urla;
         List<String> blacklistedTags = null;
         switch (domain) {
@@ -78,33 +85,5 @@ public class Novel {
                 break;
 
         }
-    }
-
-    String getChapterLinkSelector() {
-        return this.chapterLinkSelecter;
-    }
-
-    String getTitleHostName() {
-        return this.titleHostName;
-    }
-
-    String getUrl() {
-        return this.url;
-    }
-
-    String getHost() {
-        return this.host;
-    }
-
-    String getChapterContainer() {
-        return this.chapterContainer;
-    }
-
-    int getordinalIndexForBaseNovel() {
-        return this.ordinalIndexForBaseNovel;
-    }
-
-    List<String> getBlacklistedTags() {
-        return this.blacklistedTags;
     }
 }
