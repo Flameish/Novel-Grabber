@@ -7,46 +7,70 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Chapter download handling of the automatic tab.
  */
 class autoFetchChapters {
-    private static String window = "auto";
-    private String tocFileName;
-    private String saveLocation;
-    private boolean chapterNumeration;
-    private boolean allChapters;
-    private boolean invertOrder;
-    private boolean getImages;
-    private int firstChapter;
-    private int lastChapter;
-    private Novel currentNovel;
-    private int chaptersProcessed;
-    private Shared a;
 
-    autoFetchChapters() {
-        long startTime = System.nanoTime();
-        this.saveLocation = NovelGrabberGUI.saveLocation.getText();
-        this.chapterNumeration = NovelGrabberGUI.useNumeration.isSelected();
-        this.allChapters = NovelGrabberGUI.chapterAllCheckBox.isSelected();
-        this.invertOrder = NovelGrabberGUI.checkInvertOrder.isSelected();
-        if (!NovelGrabberGUI.chapterAllCheckBox.isSelected()) {
-            this.firstChapter = Integer.parseInt(NovelGrabberGUI.firstChapter.getText());
-            if (!NovelGrabberGUI.toLastChapter.isSelected()) {
-                this.lastChapter = Integer.parseInt(NovelGrabberGUI.lastChapter.getText());
+    static void grabChapters(Download currGrab) {
+        try {
+            NovelGrabberGUI.appendText(currGrab.window, "[INFO]Connecting...");
+            Document doc = Jsoup.connect(currGrab.currHostSettings.url).get();
+            // Get chapter links and names.
+            Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
+            Elements links = chapterItems.select("a[href]");
+            for (Element chapterLink : links) {
+                currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
+                currGrab.chaptersNames.add(chapterLink.text());
             }
+            // Reverse link order if selected.
+            if (currGrab.invertOrder) {
+                Collections.reverse(currGrab.chapterLinks);
+                Collections.reverse(currGrab.chaptersNames);
+            }
+            // To latest chapter.
+            if (NovelGrabberGUI.toLastChapter.isSelected()) {
+                currGrab.lastChapter = currGrab.chapterLinks.size();
+            }
+            // Grab all chapters.
+            if (currGrab.allChapters) {
+                processAllChapters(doc, links, currGrab);
+                // Grab chapters from specific range.
+            } else {
+                if (currGrab.lastChapter > currGrab.chapterLinks.size()) {
+                    NovelGrabberGUI.appendText(currGrab.window, "[ERROR] Novel does not have that many chapters. " +
+                            "(" + currGrab.chapterLinks.size() + " detected.)");
+                    return;
+                }
+                processSpecificChapters(currGrab);
+            }
+        } catch (IllegalArgumentException | IOException e) {
+            NovelGrabberGUI.appendText(currGrab.window, "[ERROR]" + e.getMessage());
+            e.printStackTrace();
         }
-        this.getImages = NovelGrabberGUI.getImages.isSelected();
-        String tocUrl = NovelGrabberGUI.chapterListURL.getText();
-        String host = Objects.requireNonNull(NovelGrabberGUI.allChapterHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", "");
+    }
 
-        this.currentNovel = new Novel(host, tocUrl);
-        a = new Shared(currentNovel.getBlacklistedTags());
-        getChapterLinks();
-        if (NovelGrabberGUI.createTocCheckBox.isSelected()) a.createToc(saveLocation, window, tocFileName);
-        a.report(chaptersProcessed, window, startTime);
+    private static void processSpecificChapters(Download currGrab) {
+        currGrab.tocFileName = "Table of Contents " + currGrab.firstChapter + "-" + currGrab.lastChapter;
+        NovelGrabberGUI.setMaxProgress(currGrab.window, (currGrab.lastChapter - currGrab.firstChapter) + 1);
+        NovelGrabberGUI.progressBar.setStringPainted(true);
+        for (int i = currGrab.firstChapter; i <= currGrab.lastChapter; i++) {
+            Shared.saveChapterWithHTML(currGrab.chapterLinks.get(i - 1), i, currGrab.chaptersNames.get(i - 1),
+                    currGrab.currHostSettings.chapterContainer, currGrab);
+            Shared.sleep(currGrab.window);
+        }
+    }
+
+    private static void processAllChapters(Document doc, Elements links, Download currGrab) {
+        currGrab.tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currGrab.currHostSettings.titleHostName, ""));
+        NovelGrabberGUI.setMaxProgress(currGrab.window, currGrab.chapterLinks.size());
+        NovelGrabberGUI.progressBar.setStringPainted(true);
+        for (int i = 1; i <= links.size(); i++) {
+            Shared.saveChapterWithHTML(currGrab.chapterLinks.get(i - 1), i, currGrab.chaptersNames.get(i - 1),
+                    currGrab.currHostSettings.chapterContainer, currGrab);
+            Shared.sleep(currGrab.window);
+        }
     }
 
     /**
@@ -55,14 +79,14 @@ class autoFetchChapters {
     static void getChapterNumber(String host, String chapterURL) {
         List<String> chapterLinks = new ArrayList<>();
         List<String> chaptersNames = new ArrayList<>();
-        Novel tempNovel = new Novel(host, "");
-        String novelLink = chapterURL.substring(0, ordinalIndexOf(chapterURL, "/", tempNovel.getordinalIndexForBaseNovel()));
-        tempNovel = new Novel(host, novelLink);
-        if (tempNovel.getHost().equals("http://gravitytales.com/")) novelLink = novelLink + "/chapters";
         try {
+            HostSettings tempHostSettings = new HostSettings(host, "");
+            String novelLink = chapterURL.substring(0, Shared.ordinalIndexOf(chapterURL, "/", tempHostSettings.ordinalIndexForBaseNovel));
+            tempHostSettings = new HostSettings(host, novelLink);
+            if (tempHostSettings.host.equals("http://gravitytales.com/")) novelLink = novelLink + "/chapters";
             Document doc = Jsoup.connect(novelLink).get();
             // Get chapter links and names.
-            Elements chapterItems = doc.select(tempNovel.getChapterLinkSelector());
+            Elements chapterItems = doc.select(tempHostSettings.chapterLinkSelecter);
             Elements links = chapterItems.select("a[href]");
             for (Element chapterLink : links) {
                 chapterLinks.add(chapterLink.attr("abs:href"));
@@ -73,84 +97,11 @@ class autoFetchChapters {
                 chapterNumber = chapterLinks.indexOf(chapterURL.substring(0, chapterURL.lastIndexOf("/")));
             if (chapterNumber == -1) NovelGrabberGUI.showPopup("Could not find chapter number.", "error");
             else {
-                NovelGrabberGUI.appendText(window, "[INFO]Chapter name: " + chaptersNames.get(chapterNumber));
-                NovelGrabberGUI.appendText(window, "[INFO]Chapter number: " + (chapterNumber + 1));
+                NovelGrabberGUI.appendText("auto", "[INFO]Chapter name: " + chaptersNames.get(chapterNumber));
+                NovelGrabberGUI.appendText("auto", "[INFO]Chapter number: " + (chapterNumber + 1));
             }
         } catch (IllegalArgumentException | IOException e) {
-            NovelGrabberGUI.appendText(window, "[ERROR]" + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void processSpecificChapters(List<String> chapterLinks, List<String> chaptersNames) {
-        tocFileName = "Table of Contents " + firstChapter + "-" + lastChapter;
-        NovelGrabberGUI.setMaxProgress(window, (lastChapter - firstChapter) + 1);
-
-        NovelGrabberGUI.progressBar.setStringPainted(true);
-        for (int i = firstChapter; i <= lastChapter; i++) {
-            chaptersProcessed++;
-            a.saveChapterWithHTML(chapterLinks.get(i - 1), i, chaptersNames.get(i - 1),
-                    saveLocation, currentNovel.getChapterContainer(), chapterNumeration, window, getImages);
-            Shared.sleep(window);
-        }
-    }
-
-    private void processAllChapters(List<String> chapterLinks, List<String> chaptersNames, Document doc, Elements links) {
-        tocFileName = (doc.title().replaceAll("[^\\w]+", "-").replace(currentNovel.getTitleHostName(), ""));
-        NovelGrabberGUI.setMaxProgress(window, chapterLinks.size());
-        NovelGrabberGUI.progressBar.setStringPainted(true);
-        for (int i = 1; i <= links.size(); i++) {
-            chaptersProcessed++;
-            a.saveChapterWithHTML(chapterLinks.get(i - 1), i, chaptersNames.get(i - 1),
-                    saveLocation, currentNovel.getChapterContainer(), chapterNumeration, window, getImages);
-            Shared.sleep(window);
-        }
-    }
-
-    // Utility
-    private static int ordinalIndexOf(String str, String substr, int n) {
-        int pos = str.indexOf(substr);
-        while (--n > 0 && pos != -1)
-            pos = str.indexOf(substr, pos + 1);
-        return pos;
-    }
-
-    private void getChapterLinks() {
-        List<String> chapterLinks = new ArrayList<>();
-        List<String> chaptersNames = new ArrayList<>();
-        try {
-            NovelGrabberGUI.appendText(window, "[INFO]Connecting...");
-            Document doc = Jsoup.connect(currentNovel.getUrl()).get();
-            // Get chapter links and names.
-            Elements chapterItems = doc.select(currentNovel.getChapterLinkSelector());
-            Elements links = chapterItems.select("a[href]");
-            for (Element chapterLink : links) {
-                chapterLinks.add(chapterLink.attr("abs:href"));
-                chaptersNames.add(chapterLink.text());
-            }
-            // Reverse link order if selected.
-            if (invertOrder) {
-                Collections.reverse(chapterLinks);
-                Collections.reverse(chaptersNames);
-            }
-            // To latest chapter.
-            if (NovelGrabberGUI.toLastChapter.isSelected()) {
-                lastChapter = chapterLinks.size();
-            }
-            // Grab all chapters.
-            if (allChapters) {
-                processAllChapters(chapterLinks, chaptersNames, doc, links);
-                // Grab chapters from specific range.
-            } else {
-                if (lastChapter > chapterLinks.size()) {
-                    NovelGrabberGUI.appendText(window, "[ERROR] Novel does not have that many chapters. " +
-                            "(" + chapterLinks.size() + " detected.)");
-                    return;
-                }
-                processSpecificChapters(chapterLinks, chaptersNames);
-            }
-        } catch (IllegalArgumentException | IOException e) {
-            NovelGrabberGUI.appendText(window, "[ERROR]" + e.getMessage());
+            NovelGrabberGUI.appendText("auto", "[ERROR]" + e.getMessage());
             e.printStackTrace();
         }
     }
