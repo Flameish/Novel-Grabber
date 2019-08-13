@@ -186,11 +186,11 @@ class chapterChecker {
     }
 
     private static int countChapters(String host, String tocUrl) {
-        Novel currentNovel = new Novel(host, tocUrl);
+        HostSettings currHostSettings = new HostSettings(host, tocUrl);
         try {
-            Document doc = Jsoup.connect(currentNovel.getUrl()).timeout(30 * 1000).get();
+            Document doc = Jsoup.connect(currHostSettings.url).timeout(30 * 1000).get();
             curTitle = doc.title();
-            Elements chapterItems = doc.select(currentNovel.getChapterLinkSelector());
+            Elements chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
             return chapterItems.size();
         } catch (IOException e) {
             e.printStackTrace();
