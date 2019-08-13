@@ -19,6 +19,7 @@ public class Download {
     boolean chapterNumeration;
     boolean allChapters;
     boolean invertOrder;
+    boolean createTocCheckBox;
     long startTime = System.nanoTime();
     int firstChapter;
     int lastChapter;
@@ -31,6 +32,7 @@ public class Download {
         this.chapterNumeration = NovelGrabberGUI.useNumeration.isSelected();
         this.allChapters = NovelGrabberGUI.chapterAllCheckBox.isSelected();
         this.invertOrder = NovelGrabberGUI.checkInvertOrder.isSelected();
+        this.createTocCheckBox = NovelGrabberGUI.createTocCheckBox.isSelected();
         this.window = "auto";
         if (!NovelGrabberGUI.chapterAllCheckBox.isSelected()) {
             this.firstChapter = Integer.parseInt(NovelGrabberGUI.firstChapter.getText());
@@ -41,12 +43,14 @@ public class Download {
         this.getImages = NovelGrabberGUI.getImages.isSelected();
         String tocUrl = NovelGrabberGUI.chapterListURL.getText();
         String host = Objects.requireNonNull(NovelGrabberGUI.allChapterHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", "");
+
+        // Create HostSettings
         this.currHostSettings = new HostSettings(host, tocUrl);
         this.blacklistedTags = currHostSettings.blacklistedTags;
 
         // Functions
         autoFetchChapters.grabChapters(this);
-        if (NovelGrabberGUI.createTocCheckBox.isSelected()) Shared.createToc(this);
+        if (createTocCheckBox) Shared.createToc(this);
         Shared.report(this);
 
     }
@@ -57,6 +61,7 @@ public class Download {
         this.saveLocation = NovelGrabberGUI.manSaveLocation.getText();
         this.chapterNumeration = NovelGrabberGUI.manUseNumeration.isSelected();
         this.invertOrder = NovelGrabberGUI.manCheckInvertOrder.isSelected();
+        this.createTocCheckBox = NovelGrabberGUI.manCreateToc.isSelected();
         this.getImages = NovelGrabberGUI.manGetImages.isSelected();
         this.blacklistedTags = NovelGrabberGUI.blacklistedTags;
         this.window = "manual";
@@ -71,7 +76,7 @@ public class Download {
                 manFetchChapters.processChapersFromList(this);
                 break;
         }
-        if (NovelGrabberGUI.manCreateToc.isSelected()) Shared.createToc(this);
+        if (createTocCheckBox) Shared.createToc(this);
         Shared.report(this);
     }
 }
