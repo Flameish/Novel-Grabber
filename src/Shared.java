@@ -5,8 +5,6 @@ import org.jsoup.nodes.Element;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,17 +16,6 @@ class Shared {
     private static String htmlHead = "<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
             + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL;
     private static String htmlFoot = "</body>" + NL + "</html>";
-    String nextChapterURL;
-    String nextChapterBtn = "NOT_SET";
-    private List<String> failedChapters = new ArrayList<>();
-    private List<String> successfulChapterNames = new ArrayList<>();
-    private List<String> successfulFilenames = new ArrayList<>();
-    private List<String> images = new ArrayList<>();
-    private List<String> blacklistedTags;
-
-    Shared(List<String> blacklistedTags) {
-        this.blacklistedTags = blacklistedTags;
-    }
 
     /**
      * Freeze thread for selected wait time.
@@ -49,25 +36,26 @@ class Shared {
     /**
      * Processes a successful chapter.
      */
-    private void successfulChapter(String fileName, String chapterName, String window) {
-        successfulChapterNames.add(chapterName);
-        successfulFilenames.add(fileName);
-        NovelGrabberGUI.appendText(window, "[INFO]" + chapterName + " saved.");
-        NovelGrabberGUI.updateProgress(window);
+    private static void successfulChapter(String fileName, String chapterName, Download currGrab) {
+        currGrab.successfulChapterNames.add(chapterName);
+        currGrab.successfulFilenames.add(fileName);
+        NovelGrabberGUI.appendText(currGrab.window, "[INFO]" + chapterName + " saved.");
+        NovelGrabberGUI.updateProgress(currGrab.window);
     }
 
     /**
      * Logs elapsed process time and prints potential failed chapters after chapter grabs.
      */
-    void report(int chapterNumber, String logWindow, long startTime) {
+    static void report(Download currGrab) {
         long endTime = System.nanoTime();
-        long elapsedTime = TimeUnit.SECONDS.convert((endTime - startTime), TimeUnit.NANOSECONDS);
-        NovelGrabberGUI.appendText(logWindow, "[INFO]Finished! " + successfulChapterNames.size() + " of "
-                + chapterNumber + " chapters successfully grabbed in " + elapsedTime + " seconds.");
-        if (!failedChapters.isEmpty()) {
-            NovelGrabberGUI.appendText(logWindow, "[ERROR]Failed to grab the following chapters:");
-            for (String failedChapter : failedChapters) {
-                NovelGrabberGUI.appendText(logWindow, failedChapter);
+        long elapsedTime = TimeUnit.SECONDS.convert((endTime - currGrab.startTime), TimeUnit.NANOSECONDS);
+        NovelGrabberGUI.appendText(currGrab.window, "[INFO]Finished! "
+                + (currGrab.successfulChapterNames.size() - currGrab.failedChapters.size()) + " of "
+                + currGrab.successfulChapterNames.size() + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+        if (!currGrab.failedChapters.isEmpty()) {
+            NovelGrabberGUI.appendText(currGrab.window, "[ERROR]Failed to grab the following chapters:");
+            for (String failedChapter : currGrab.failedChapters) {
+                NovelGrabberGUI.appendText(currGrab.window, failedChapter);
             }
         }
     }
@@ -75,7 +63,7 @@ class Shared {
     /**
      * Returns the image name without the href address/path
      */
-    static String getImageName(String src) {
+    private static String getImageName(String src) {
         String imageName;
         int indexname = src.lastIndexOf("/");
         if (indexname == src.length()) {
@@ -88,7 +76,7 @@ class Shared {
         else if (imageName.contains(".jpg")) imageName = imageName.replaceAll("\\.jpg(.*)", ".jpg");
         else if (imageName.contains(".gif")) imageName = imageName.replaceAll("\\.gif(.*)", ".gif");
         else return "could_not_rename_image";
-        return imageName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        return imageName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
     }
 
     /**
@@ -101,8 +89,8 @@ class Shared {
         return fileName;
     }
 
-    void downloadImage(String src, String fileLocation, String logWindow) {
-        if (!images.contains(src)) {
+    private static void downloadImage(String src, Download currGrab) {
+        if (!currGrab.images.contains(src)) {
             // Try to set the image name
             String name = getImageName(src);
             // If image could not be renamed correctly, the hashCode of the source + .jpg
@@ -120,7 +108,7 @@ class Shared {
                 InputStream input = http.getInputStream();
                 byte[] buffer = new byte[4096];
                 // Create images folder
-                String filepath = fileLocation + File.separator + "images";
+                String filepath = currGrab.saveLocation + File.separator + "images";
                 File dir = new File(filepath);
                 if (!dir.exists()) dir.mkdirs();
                 // Save image to file
@@ -130,12 +118,12 @@ class Shared {
                         output.write(buffer, 0, n);
                     }
                 }
-                images.add(src);
-                NovelGrabberGUI.appendText(logWindow, "[INFO]" + name + " saved.");
+                currGrab.images.add(src);
+                NovelGrabberGUI.appendText(currGrab.window, "[INFO]" + name + " saved.");
                 //General catch
             } catch (Throwable e) {
                 e.printStackTrace();
-                NovelGrabberGUI.appendText(logWindow, "[ERROR]Failed to save " + name);
+                NovelGrabberGUI.appendText(currGrab.window, "[ERROR]Failed to save " + name);
             }
         }
     }
@@ -144,18 +132,18 @@ class Shared {
      * Creates a 'Table of Contents' file of successfully grabbed chapters and images.
      * (Calibre needs links to the images to display them)
      */
-    void createToc(String saveLocation, String logWindow, String tocFileName) {
-        if (!successfulChapterNames.isEmpty()) {
-            String fileName = tocFileName + ".html";
-            try (PrintStream out = new PrintStream(saveLocation + File.separator + fileName, textEncoding)) {
+    static void createToc(Download currGrab) {
+        if (!currGrab.successfulChapterNames.isEmpty()) {
+            String fileName = currGrab.tocFileName + ".html";
+            try (PrintStream out = new PrintStream(currGrab.saveLocation + File.separator + fileName, textEncoding)) {
                 out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
                 //Print chapter links
-                for (int i = 0; i < successfulChapterNames.size(); i++) {
-                    out.println("<a href=\"chapters/" + successfulFilenames.get(i) + ".html\">" + successfulChapterNames.get(i) + "</a><br/>");
+                for (int i = 0; i < currGrab.successfulChapterNames.size(); i++) {
+                    out.println("<a href=\"chapters/" + currGrab.successfulFilenames.get(i) + ".html\">" + currGrab.successfulChapterNames.get(i) + "</a><br/>");
                 }
                 //Print image links (for calibre)
-                if (!images.isEmpty()) {
-                    for (String image : images) {
+                if (!currGrab.images.isEmpty()) {
+                    for (String image : currGrab.images) {
                         // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
                         String imageName = getImageName(image);
                         if (imageName.equals("could_not_rename_image")) {
@@ -166,43 +154,42 @@ class Shared {
                 }
                 out.print("</p>" + NL + htmlFoot);
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
-                NovelGrabberGUI.appendText(logWindow, e.getMessage());
+                NovelGrabberGUI.appendText(currGrab.window, e.getMessage());
                 e.printStackTrace();
             }
-            NovelGrabberGUI.appendText(logWindow, "[INFO]" + fileName + " created.");
+            NovelGrabberGUI.appendText(currGrab.window, "[INFO]" + fileName + " created.");
         }
     }
 
     /**
      * Main method to save chapter content.
      */
-    void saveChapterWithHTML(String url, int chapterNumber, String chapterName, String saveLocation,
-                             String chapterContainer, boolean chapterNumeration, String logWindow, boolean getImages) {
+    static void saveChapterWithHTML(String url, int chapterNumber, String chapterName, String chapterContainer, Download currGrab) {
         //Manual grabbing got it's own file naming method
-        String fileName = "";
-        if (logWindow.equals("auto")) fileName = setFilename(chapterNumber, chapterName, chapterNumeration);
+        String fileName = setFilename(chapterNumber, chapterName, currGrab.chapterNumeration);
 
         try {
             Document doc = Jsoup.connect(url).get();
             // Getting the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter.
-            if (!nextChapterBtn.equals("NOT_SET")) nextChapterURL = doc.select(nextChapterBtn).first().absUrl("href");
+            if (!currGrab.nextChapterBtn.equals("NOT_SET"))
+                currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
 
             Element chapterContent = doc.select(chapterContainer).first();
             // Remove unwanted tags from chapter container.
-            if (!(blacklistedTags == null)) {
-                for (String tag : blacklistedTags) {
+            if (!(currGrab.blacklistedTags == null)) {
+                for (String tag : currGrab.blacklistedTags) {
                     chapterContent.select(tag).remove();
                 }
             }
 
             //Download images of chapter container.
-            if (getImages) {
+            if (currGrab.getImages) {
                 for (Element image : chapterContent.select("img")) {
-                    downloadImage(image.absUrl("src"), saveLocation, logWindow);
+                    downloadImage(image.absUrl("src"), currGrab);
                 }
             }
             // Create chapters folder if it doesn't exist.
-            File dir = new File(saveLocation + File.separator + "chapters");
+            File dir = new File(currGrab.saveLocation + File.separator + "chapters");
             if (!dir.exists()) dir.mkdirs();
             // Write chapter content to file.
             try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", Shared.textEncoding)) {
@@ -211,7 +198,7 @@ class Shared {
                     for (Element image : chapterContent.select("img")) {
                         // Check if the image was successfully downloaded.
                         String src = image.absUrl("src");
-                        if (images.contains(src)) {
+                        if (currGrab.images.contains(src)) {
                             // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
                             String imageName = getImageName(image.attr("src"));
                             if (imageName.equals("could_not_rename_image")) {
@@ -226,10 +213,18 @@ class Shared {
                 // Write content to file.
                 out.println(chapterContent);
             }
-            successfulChapter(fileName, chapterName, logWindow);
+            successfulChapter(fileName, chapterName, currGrab);
         } catch (Throwable e) {
-            failedChapters.add(chapterName);
+            currGrab.failedChapters.add(chapterName);
             e.printStackTrace();
         }
+    }
+
+    // Utility
+    static int ordinalIndexOf(String str, String substr, int n) {
+        int pos = str.indexOf(substr);
+        while (--n > 0 && pos != -1)
+            pos = str.indexOf(substr, pos + 1);
+        return pos;
     }
 }
