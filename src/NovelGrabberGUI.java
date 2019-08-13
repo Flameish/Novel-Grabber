@@ -265,10 +265,6 @@ public class NovelGrabberGUI {
         }
     }
 
-    /*
-     *Looks up the latest version String on github releases. Displays the Update Tab if a new version was released.    /**
-     * TODO: future 2+.x.x/ x.10+.x releases might break the comparison
-     */
     private void checkForNewReleases() {
         try {
             Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
