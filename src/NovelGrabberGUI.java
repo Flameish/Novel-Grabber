@@ -89,7 +89,7 @@ public class NovelGrabberGUI {
      */
     private NovelGrabberGUI() {
         initialize();
-        //checkForNewReleases();
+        checkForNewReleases();
         loadDefaultCheckerList();
     }
 
