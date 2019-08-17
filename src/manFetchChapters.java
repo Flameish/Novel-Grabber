@@ -62,6 +62,7 @@ class manFetchChapters {
      */
     static void processChaptersToChapters(String[] args, Download currGrab) {
         NovelGrabberGUI.appendText(currGrab.window, "[INFO]Connecting...");
+        NovelGrabberGUI.setMaxProgress(currGrab.window, 9001);
         String nextChapter = args[0];
         String lastChapter = args[1];
         currGrab.nextChapterBtn = args[2];
@@ -78,6 +79,18 @@ class manFetchChapters {
                 break;
             }
             Shared.sleep("manual");
+        }
+    }
+
+    static void manGetMetadata(Download currGrab) {
+        if (NovelGrabberGUI.manMetadata[0] != null && !NovelGrabberGUI.manMetadata[0].isEmpty()) {
+            currGrab.bookTitle = NovelGrabberGUI.manMetadata[0].replaceAll("[^a-zA-Z0-9.\\-]", " ");
+        } else currGrab.bookTitle = "Unknown";
+        if (NovelGrabberGUI.manMetadata[1] != null && !NovelGrabberGUI.manMetadata[1].isEmpty()) {
+            currGrab.bookAuthor = NovelGrabberGUI.manMetadata[1].replaceAll("[^a-zA-Z0-9.\\-]", " ");
+        } else currGrab.bookAuthor = "Unknown";
+        if (NovelGrabberGUI.manMetadata[2] != null && !NovelGrabberGUI.manMetadata[2].isEmpty()) {
+            currGrab.bookCover = NovelGrabberGUI.manMetadata[2];
         }
     }
 

@@ -25,8 +25,10 @@ class Shared {
             switch (window) {
                 case "auto":
                     Thread.sleep(Integer.parseInt(NovelGrabberGUI.waitTime.getText()));
+                    break;
                 case "manual":
                     Thread.sleep(Integer.parseInt(NovelGrabberGUI.manWaitTime.getText()));
+                    break;
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
@@ -82,15 +84,12 @@ class Shared {
     /**
      * Adjust chapter names for chapter numeration.
      */
-    private static String setFilename(int chapterNumber, String fileName, boolean chapterNumeration) {
-        if (chapterNumeration) {
-            fileName = String.format("%05d", chapterNumber) + "-" + fileName.replaceAll("[^\\w]+", "-");
-        } else fileName = fileName.replaceAll("[^\\w]+", "-");
-        return fileName;
+    private static String setFilename(int chapterNumber, String fileName) {
+        return String.format("%05d", chapterNumber) + "-" + fileName.replaceAll("[^\\w]+", "-");
     }
 
-    private static void downloadImage(String src, Download currGrab) {
-        if (!currGrab.images.contains(src)) {
+    static void downloadImage(String src, Download currGrab) {
+        if (!currGrab.imageLinks.contains(src)) {
             // Try to set the image name
             String name = getImageName(src);
             // If image could not be renamed correctly, the hashCode of the source + .jpg
@@ -98,7 +97,8 @@ class Shared {
             if (name.equals("could_not_rename_image")) {
                 name = src.hashCode() + ".jpg";
             }
-
+            //For LiberSpark
+            if (src.startsWith("//")) src = src.replace("//", "https://");
             try {
                 // Connect to image source
                 URL url = new URL(src);
@@ -107,7 +107,7 @@ class Shared {
                 http.connect();
                 InputStream input = http.getInputStream();
                 byte[] buffer = new byte[4096];
-                // Create images folder
+                // Create imageLinks folder
                 String filepath = currGrab.saveLocation + File.separator + "images";
                 File dir = new File(filepath);
                 if (!dir.exists()) dir.mkdirs();
@@ -118,7 +118,8 @@ class Shared {
                         output.write(buffer, 0, n);
                     }
                 }
-                currGrab.images.add(src);
+                currGrab.imageLinks.add(src);
+                currGrab.imageNames.add(name);
                 NovelGrabberGUI.appendText(currGrab.window, "[INFO]" + name + " saved.");
                 //General catch
             } catch (Throwable e) {
@@ -129,8 +130,8 @@ class Shared {
     }
 
     /**
-     * Creates a 'Table of Contents' file of successfully grabbed chapters and images.
-     * (Calibre needs links to the images to display them)
+     * Creates a 'Table of Contents' file of successfully grabbed chapters and imageLinks.
+     * (Calibre needs links to the imageLinks to display them)
      */
     static void createToc(Download currGrab) {
         if (!currGrab.successfulChapterNames.isEmpty()) {
@@ -142,14 +143,14 @@ class Shared {
                     out.println("<a href=\"chapters/" + currGrab.successfulFilenames.get(i) + ".html\">" + currGrab.successfulChapterNames.get(i) + "</a><br/>");
                 }
                 //Print image links (for calibre)
-                if (!currGrab.images.isEmpty()) {
-                    for (String image : currGrab.images) {
+                if (!currGrab.imageLinks.isEmpty()) {
+                    for (String image : currGrab.imageLinks) {
                         // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
                         String imageName = getImageName(image);
                         if (imageName.equals("could_not_rename_image")) {
                             imageName = image.hashCode() + ".jpg";
                         }
-                        out.println("<img src=\"images/" + imageName + "\" style=\"display:none;\" /><br/>");
+                        out.println("<img src=\"imageLinks/" + imageName + "\" style=\"display:none;\" /><br/>");
                     }
                 }
                 out.print("</p>" + NL + htmlFoot);
@@ -166,7 +167,7 @@ class Shared {
      */
     static void saveChapterWithHTML(String url, int chapterNumber, String chapterName, String chapterContainer, Download currGrab) {
         //Manual grabbing got it's own file naming method
-        String fileName = setFilename(chapterNumber, chapterName, currGrab.chapterNumeration);
+        String fileName = setFilename(chapterNumber, chapterName);
 
         try {
             Document doc = Jsoup.connect(url).get();
@@ -182,7 +183,7 @@ class Shared {
                 }
             }
 
-            //Download images of chapter container.
+            //Download imageLinks of chapter container.
             if (currGrab.getImages) {
                 for (Element image : chapterContent.select("img")) {
                     downloadImage(image.absUrl("src"), currGrab);
@@ -198,7 +199,7 @@ class Shared {
                     for (Element image : chapterContent.select("img")) {
                         // Check if the image was successfully downloaded.
                         String src = image.absUrl("src");
-                        if (currGrab.images.contains(src)) {
+                        if (currGrab.imageLinks.contains(src)) {
                             // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
                             String imageName = getImageName(image.attr("src"));
                             if (imageName.equals("could_not_rename_image")) {

@@ -96,10 +96,10 @@ class updater {
         InputStream input = http.getInputStream();
         byte[] buffer = new byte[4096];
         int n;
-        OutputStream output = new FileOutputStream(new File(fileName));
-        while ((n = input.read(buffer)) != -1) {
-            output.write(buffer, 0, n);
+        try (OutputStream output = new FileOutputStream(new File(fileName))) {
+            while ((n = input.read(buffer)) != -1) {
+                output.write(buffer, 0, n);
+            }
         }
-        output.close();
     }
 }

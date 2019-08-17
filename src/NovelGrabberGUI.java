@@ -29,7 +29,7 @@ public class NovelGrabberGUI {
     static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
     private static final JList<String> checkList = new JList<>(listModelCheckerLinks);
-    static String versionNumber = "1.8.1";
+    static String versionNumber = "1.9.0";
     static TrayIcon trayIcon;
     private static final String NL = System.getProperty("line.separator");
     private static JFrame frmNovelGrabber;
@@ -46,15 +46,12 @@ public class NovelGrabberGUI {
     static JTextField lastChapter;
     static JTextField waitTime;
     static JCheckBox manGetImages;
-    static JCheckBox useNumeration;
     static JCheckBox checkInvertOrder;
     static JCheckBox chapterAllCheckBox;
-    static JCheckBox manCreateToc = new JCheckBox("Create ToC");
     static JTextField manSaveLocation;
     static JTextField manWaitTime;
     static JTextField manChapterContainer;
     static JCheckBox manCheckInvertOrder;
-    static JCheckBox manUseNumeration = new JCheckBox("Chapter numeration");
     static JTextField manChapterListURL;
     private static JTextArea logArea;
     private static JTextArea manLogField;
@@ -80,16 +77,19 @@ public class NovelGrabberGUI {
     private JLabel updateLogLbl;
     private JButton manShowTagsBtn;
     private DefaultListModel<String> tempListModel;
-    static JCheckBox createTocCheckBox;
     static List<String> blacklistedTags = new ArrayList<>();
     static JCheckBox toLastChapter;
+    static JComboBox<String> manExportSelection;
+    static JComboBox<String> exportSelection;
+    static String[] manMetadata = new String[3];
+    private static String[] exportFormats = {"EPUB", "Calibre"};
 
     /**
      * Create the application.
      */
     private NovelGrabberGUI() {
         initialize();
-        checkForNewReleases();
+        //checkForNewReleases();
         loadDefaultCheckerList();
     }
 
@@ -593,38 +593,36 @@ public class NovelGrabberGUI {
         allChapterPane.add(optionSelect);
         optionSelect.setLayout(null);
 
-        createTocCheckBox = new JCheckBox("Create ToC");
-        createTocCheckBox.setFocusPainted(false);
-        createTocCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        createTocCheckBox.setBounds(6, 20, 145, 23);
-        createTocCheckBox.setSelected(true);
-        optionSelect.add(createTocCheckBox);
-        createTocCheckBox.setToolTipText(toolTipStyle
-                + "Will create a \"Table of Contents\" file which can be used to convert all chapter files into a single epub file in calibre.</p></html>");
-
-        useNumeration = new JCheckBox("Chapter numeration");
-        useNumeration.setFocusPainted(false);
-        useNumeration.setToolTipText(toolTipStyle
-                + "Will add a chapter number in front of the chapter name to keep them in order when converting.</p></html>");
-        useNumeration.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        useNumeration.setBounds(6, 40, 145, 23);
-        optionSelect.add(useNumeration);
+        getImages = new JCheckBox("Get images");
+        getImages.setFocusPainted(false);
+        getImages.setToolTipText(
+                "<html><p width=\"300\">Download and display images.</p></html>");
+        getImages.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        getImages.setBounds(6, 20, 145, 23);
+        optionSelect.add(getImages);
 
         checkInvertOrder = new JCheckBox("Invert chapter order");
         checkInvertOrder.setFocusPainted(false);
         checkInvertOrder.setToolTipText(
                 "<html><p width=\"300\">Invert  the chapter order and download the last chapter first. Useful if sites list the highest chapter at the top</p></html>");
         checkInvertOrder.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        checkInvertOrder.setBounds(6, 60, 145, 23);
+        checkInvertOrder.setBounds(6, 40, 145, 23);
         optionSelect.add(checkInvertOrder);
 
-        getImages = new JCheckBox("Get images");
-        getImages.setFocusPainted(false);
-        getImages.setToolTipText(
-                "<html><p width=\"300\">Download and display images.</p></html>");
-        getImages.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        getImages.setBounds(151, 20, 150, 23);
-        optionSelect.add(getImages);
+        JLabel exportLbl = new JLabel("Export:");
+        exportLbl.setToolTipText(
+                "<html><p width=\"300\">Select which output format you want. </p></html>");
+        exportLbl.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        exportLbl.setBounds(389, 18, 66, 14);
+        optionSelect.add(exportLbl);
+
+        exportSelection = new JComboBox<>(exportFormats);
+        exportSelection.setToolTipText(
+                "<html><p width=\"300\">Select which output format you want. </p></html>");
+        exportSelection.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        exportSelection.setBounds(439, 15, 83, 23);
+        optionSelect.add(exportSelection);
+
 
         JLabel sleepLbl = new JLabel("Wait time:");
         sleepLbl.setBounds(389, 67, 66, 14);
@@ -959,42 +957,103 @@ public class NovelGrabberGUI {
         manOptionPane.setLayout(null);
         manOptionPane.setBorder(BorderFactory.createTitledBorder("Option select"));
 
-        manCreateToc = new JCheckBox("Create ToC");
-        manCreateToc.setToolTipText(
-                "<html><p width=\"300\">Will create a \"Table of Contents\" file which can be used to convert all chapter files into a single epub file in calibre.</p></html>");
-        manCreateToc.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manCreateToc.setFocusPainted(false);
-        manCreateToc.setSelected(true);
-        manCreateToc.setBounds(6, 20, 145, 23);
-        manOptionPane.add(manCreateToc);
-
-        manUseNumeration = new JCheckBox("Chapter numeration");
-        manUseNumeration.setToolTipText(
-                "<html><p width=\"300\">Will add a chapter number in front of the chapter name to keep them in order when converting.</p></html>");
-        manUseNumeration.setFocusPainted(false);
-        manUseNumeration.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manUseNumeration.setBounds(6, 40, 145, 23);
-        manOptionPane.add(manUseNumeration);
+        manGetImages = new JCheckBox("Get images");
+        manGetImages.setFocusPainted(false);
+        manGetImages.setToolTipText(
+                "<html><p width=\"300\">Download and display images.</p></html>");
+        manGetImages.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        manGetImages.setBounds(6, 20, 145, 23);
+        manOptionPane.add(manGetImages);
 
         manCheckInvertOrder = new JCheckBox("Invert chapter order");
         manCheckInvertOrder.setFocusPainted(false);
         manCheckInvertOrder.setToolTipText(
                 "<html><p width=\"300\">Invert the chapter order and download the last chapter first. Useful if sites list the highest chapter at the top.</p></html>");
         manCheckInvertOrder.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manCheckInvertOrder.setBounds(6, 60, 145, 23);
+        manCheckInvertOrder.setBounds(6, 40, 145, 23);
         manOptionPane.add(manCheckInvertOrder);
 
-        manGetImages = new JCheckBox("Get images");
-        manGetImages.setFocusPainted(false);
-        manGetImages.setToolTipText(
-                "<html><p width=\"300\">Download and display images.</p></html>");
-        manGetImages.setFont(new Font("Tahoma", Font.PLAIN, 11));
-        manGetImages.setBounds(151, 20, 150, 23);
-        manOptionPane.add(manGetImages);
+        JButton manEditMeta = new JButton("Edit Metadata");
+        manEditMeta.setFocusPainted(false);
+        manEditMeta.setToolTipText(
+                "<html><p width=\"300\">Set title, author and cover image of epub.</p></html>");
+        manEditMeta.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        manEditMeta.setBounds(290, 14, 110, 24);
+        manEditMeta.addActionListener(arg0 -> {
+            JPanel panel = new JPanel();
+            panel.setLayout(null);
+            panel.setPreferredSize(new Dimension(250, 130));
+
+            JLabel titleLbl = new JLabel("Title:");
+            titleLbl.setBounds(0, 0, 250, 20);
+            panel.add(titleLbl);
+
+            JTextField titleField = new JTextField();
+            titleField.setBounds(0, 20, 250, 20);
+            titleField.setText(manMetadata[0]);
+            panel.add(titleField);
+
+            JLabel authorLbl = new JLabel("Author:");
+            authorLbl.setBounds(0, 40, 250, 20);
+            panel.add(authorLbl);
+
+            JTextField authorField = new JTextField();
+            authorField.setText(manMetadata[1]);
+            authorField.setBounds(0, 60, 250, 20);
+            panel.add(authorField);
+
+            JLabel coverLbl = new JLabel("Cover image:");
+            coverLbl.setBounds(0, 80, 250, 20);
+            panel.add(coverLbl);
+
+            JTextField coverField = new JTextField();
+            coverField.setText(manMetadata[2]);
+            coverField.setBounds(0, 100, 150, 20);
+            panel.add(coverField);
+
+            JButton metaBrowseBtn = new JButton("Browse...");
+            metaBrowseBtn.setFocusPainted(false);
+            metaBrowseBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
+            metaBrowseBtn.setBounds(160, 98, 90, 24);
+            metaBrowseBtn.addActionListener(arg01 -> {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setCurrentDirectory(new File(appdataPath));
+                chooser.setDialogTitle("Open File");
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setAcceptAllFileFilterUsed(false);
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("jpg png gif", "png", "jpg", "gif");
+                chooser.setFileFilter(filter);
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    coverField.setText(chooser.getSelectedFile().toString());
+                }
+            });
+            panel.add(metaBrowseBtn);
+
+            JOptionPane.showConfirmDialog(manOptionPane, panel, "Edit metadata", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
+            manMetadata[0] = titleField.getText();
+            manMetadata[1] = authorField.getText();
+            manMetadata[2] = coverField.getText();
+
+        });
+        manOptionPane.add(manEditMeta);
+
+        JLabel manExportLbl = new JLabel("Export:");
+        manExportLbl.setToolTipText(
+                "<html><p width=\"300\">Select which output format you want. </p></html>");
+        manExportLbl.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        manExportLbl.setBounds(414, 18, 66, 14);
+        manOptionPane.add(manExportLbl);
+
+        manExportSelection = new JComboBox<>(exportFormats);
+        manExportSelection.setToolTipText(
+                "<html><p width=\"300\">Select which output format you want. </p></html>");
+        manExportSelection.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        manExportSelection.setBounds(461, 15, 86, 23);
+        manOptionPane.add(manExportSelection);
 
         JButton manRemoveTagsBtn = new JButton("Blacklisted Tags");
         manRemoveTagsBtn.setFocusPainted(false);
-        manRemoveTagsBtn.setBounds(405, 15, 110, 24);
+        manRemoveTagsBtn.setBounds(290, 40, 110, 24);
         manRemoveTagsBtn.setFont(new Font("Tahoma", Font.PLAIN, 11));
         manRemoveTagsBtn.addActionListener(arg0 -> {
             String newBlacklistedTags = JOptionPane.showInputDialog(manualPane,
@@ -1013,7 +1072,7 @@ public class NovelGrabberGUI {
         manShowTagsBtn.setBorder(BorderFactory.createEmptyBorder());
         manShowTagsBtn.setContentAreaFilled(false);
         manShowTagsBtn.setEnabled(false);
-        manShowTagsBtn.setBounds(522, 15, 25, 25);
+        manShowTagsBtn.setBounds(260, 40, 25, 25);
         manShowTagsBtn.addActionListener(arg0 -> {
             DefaultListModel<String> tempListModel = new DefaultListModel<>();
             JList<String> tempJList = new JList<>(tempListModel);

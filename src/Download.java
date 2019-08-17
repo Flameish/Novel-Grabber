@@ -9,63 +9,71 @@ public class Download {
     List<String> failedChapters = new ArrayList<>();
     List<String> successfulChapterNames = new ArrayList<>();
     List<String> successfulFilenames = new ArrayList<>();
-    List<String> images = new ArrayList<>();
+    List<String> imageLinks = new ArrayList<>();
+    List<String> imageNames = new ArrayList<>();
     List<String> blacklistedTags;
     String window;
     String saveLocation;
     String tocFileName;
     String chapterContainer;
     boolean getImages;
-    boolean chapterNumeration;
     boolean allChapters;
     boolean invertOrder;
-    boolean createTocCheckBox;
     long startTime = System.nanoTime();
     int firstChapter;
     int lastChapter;
     String nextChapterURL;
     String nextChapterBtn = "NOT_SET";
 
+    //Metadata
+    String bookTitle;
+    String bookCover;
+    String bookAuthor;
+
     Download() {
         // Settings
-        this.saveLocation = NovelGrabberGUI.saveLocation.getText();
-        this.chapterNumeration = NovelGrabberGUI.useNumeration.isSelected();
-        this.allChapters = NovelGrabberGUI.chapterAllCheckBox.isSelected();
-        this.invertOrder = NovelGrabberGUI.checkInvertOrder.isSelected();
-        this.createTocCheckBox = NovelGrabberGUI.createTocCheckBox.isSelected();
-        this.window = "auto";
+        saveLocation = NovelGrabberGUI.saveLocation.getText();
+        allChapters = NovelGrabberGUI.chapterAllCheckBox.isSelected();
+        invertOrder = NovelGrabberGUI.checkInvertOrder.isSelected();
+        window = "auto";
         if (!NovelGrabberGUI.chapterAllCheckBox.isSelected()) {
-            this.firstChapter = Integer.parseInt(NovelGrabberGUI.firstChapter.getText());
+            firstChapter = Integer.parseInt(NovelGrabberGUI.firstChapter.getText());
             if (!NovelGrabberGUI.toLastChapter.isSelected()) {
-                this.lastChapter = Integer.parseInt(NovelGrabberGUI.lastChapter.getText());
+                lastChapter = Integer.parseInt(NovelGrabberGUI.lastChapter.getText());
             }
         }
-        this.getImages = NovelGrabberGUI.getImages.isSelected();
+        getImages = NovelGrabberGUI.getImages.isSelected();
         String tocUrl = NovelGrabberGUI.chapterListURL.getText();
         String host = Objects.requireNonNull(NovelGrabberGUI.allChapterHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", "");
 
         // Create HostSettings
-        this.currHostSettings = new HostSettings(host, tocUrl);
-        this.blacklistedTags = currHostSettings.blacklistedTags;
+        currHostSettings = new HostSettings(host, tocUrl);
+        blacklistedTags = currHostSettings.blacklistedTags;
 
         // Functions
         autoFetchChapters.grabChapters(this);
-        if (createTocCheckBox) Shared.createToc(this);
         Shared.report(this);
-
+        if (!successfulFilenames.isEmpty()) {
+            switch ((String) NovelGrabberGUI.exportSelection.getSelectedItem()) {
+                case "Calibre":
+                    Shared.createToc(this);
+                    break;
+                case "EPUB":
+                    ToEpub epub = new ToEpub(this);
+                    break;
+            }
+        }
     }
 
     Download(String method) {
         // Settings
-        this.chapterContainer = NovelGrabberGUI.manChapterContainer.getText();
-        this.saveLocation = NovelGrabberGUI.manSaveLocation.getText();
-        this.chapterNumeration = NovelGrabberGUI.manUseNumeration.isSelected();
-        this.invertOrder = NovelGrabberGUI.manCheckInvertOrder.isSelected();
-        this.createTocCheckBox = NovelGrabberGUI.manCreateToc.isSelected();
-        this.getImages = NovelGrabberGUI.manGetImages.isSelected();
-        this.blacklistedTags = NovelGrabberGUI.blacklistedTags;
-        this.window = "manual";
-        this.tocFileName = "Table of Contents";
+        chapterContainer = NovelGrabberGUI.manChapterContainer.getText();
+        saveLocation = NovelGrabberGUI.manSaveLocation.getText();
+        invertOrder = NovelGrabberGUI.manCheckInvertOrder.isSelected();
+        getImages = NovelGrabberGUI.manGetImages.isSelected();
+        blacklistedTags = NovelGrabberGUI.blacklistedTags;
+        window = "manual";
+        tocFileName = "Table of Contents";
 
         // Functions
         switch (method) {
@@ -76,7 +84,17 @@ public class Download {
                 manFetchChapters.processChapersFromList(this);
                 break;
         }
-        if (createTocCheckBox) Shared.createToc(this);
         Shared.report(this);
+        manFetchChapters.manGetMetadata(this);
+        if (!successfulFilenames.isEmpty()) {
+            switch ((String) NovelGrabberGUI.manExportSelection.getSelectedItem()) {
+                case "CALIBRE":
+                    Shared.createToc(this);
+                    break;
+                case "EPUB":
+                    ToEpub epub = new ToEpub(this);
+                    break;
+            }
+        }
     }
 }

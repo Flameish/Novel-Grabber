@@ -16,7 +16,9 @@ class autoFetchChapters {
     static void grabChapters(Download currGrab) {
         try {
             NovelGrabberGUI.appendText(currGrab.window, "[INFO]Connecting...");
+            // Connect to webpage
             Document doc = Jsoup.connect(currGrab.currHostSettings.url).get();
+            getMetadata(currGrab, doc);
             // Get chapter links and names.
             Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
             Elements links = chapterItems.select("a[href]");
@@ -48,6 +50,30 @@ class autoFetchChapters {
         } catch (IllegalArgumentException | IOException e) {
             NovelGrabberGUI.appendText(currGrab.window, "[ERROR]" + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private static void getMetadata(Download currGrab, Document doc) {
+        if (!currGrab.currHostSettings.bookTitleSelector.isEmpty()) {
+            currGrab.bookTitle = doc.select(currGrab.currHostSettings.bookTitleSelector).first().text().replaceAll("[^a-zA-Z0-9.\\-]", " ");
+        }
+        if (!currGrab.currHostSettings.bookAuthorSelector.isEmpty()) {
+            currGrab.bookAuthor = doc.select(currGrab.currHostSettings.bookAuthorSelector).first().text().replaceAll("[^a-zA-Z0-9.\\-]", " ");
+        }
+        if (!currGrab.currHostSettings.bookCoverSelector.isEmpty()) {
+            Element coverSelect = doc.select(currGrab.currHostSettings.bookCoverSelector).first();
+            if (coverSelect != null) {
+                String coverLink;
+                if (currGrab.currHostSettings.host.equals("https://wordexcerpt.com/"))
+                    coverLink = coverSelect.attr("data-src");
+                else coverLink = coverSelect.attr("src");
+                Shared.downloadImage(coverLink, currGrab);
+                currGrab.bookCover = currGrab.saveLocation + "/images/" + currGrab.imageNames.get(0);
+                /* downloadImage() adds every image to Lists and this interferes with
+                   the cover image when adding images from these Lists to the epub */
+                currGrab.imageNames.clear();
+                currGrab.imageLinks.clear();
+            }
         }
     }
 
@@ -84,6 +110,8 @@ class autoFetchChapters {
             String novelLink = chapterURL.substring(0, Shared.ordinalIndexOf(chapterURL, "/", tempHostSettings.ordinalIndexForBaseNovel));
             tempHostSettings = new HostSettings(host, novelLink);
             if (tempHostSettings.host.equals("http://gravitytales.com/")) novelLink = novelLink + "/chapters";
+            if (tempHostSettings.host.equals("https://liberspark.com/"))
+                novelLink = novelLink.replace("/read/", "/novel/");
             Document doc = Jsoup.connect(novelLink).get();
             // Get chapter links and names.
             Elements chapterItems = doc.select(tempHostSettings.chapterLinkSelecter);
@@ -95,6 +123,8 @@ class autoFetchChapters {
             int chapterNumber = chapterLinks.indexOf(chapterURL);
             if (chapterNumber == -1)
                 chapterNumber = chapterLinks.indexOf(chapterURL.substring(0, chapterURL.lastIndexOf("/")));
+            if (chapterNumber == -1)
+                chapterNumber = chapterLinks.indexOf(chapterURL.replace("https:", "http:"));
             if (chapterNumber == -1) NovelGrabberGUI.showPopup("Could not find chapter number.", "error");
             else {
                 NovelGrabberGUI.appendText("auto", "[INFO]Chapter name: " + chaptersNames.get(chapterNumber));
