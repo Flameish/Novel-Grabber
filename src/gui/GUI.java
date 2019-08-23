@@ -125,7 +125,9 @@ public class GUI extends JFrame {
         initialize();
         checkForNewReleases();
         loadDefaultCheckerList();
+
         tabbedPane.setEnabledAt(3, false);
+
         browseButton.addActionListener(arg0 -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -137,6 +139,7 @@ public class GUI extends JFrame {
                 saveLocation.setText(chooser.getSelectedFile().toString());
             }
         });
+
         autoVisitButton.addActionListener(arg0 -> {
             try {
                 HostSettings emptyNovel = new HostSettings(

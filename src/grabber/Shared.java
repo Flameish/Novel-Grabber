@@ -54,8 +54,8 @@ class Shared {
         long endTime = System.nanoTime();
         long elapsedTime = TimeUnit.SECONDS.convert((endTime - currGrab.startTime), TimeUnit.NANOSECONDS);
         currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
-                + (currGrab.successfulChapterNames.size() - currGrab.failedChapters.size()) + " of "
-                + currGrab.successfulChapterNames.size() + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+                + ((currGrab.successfulChapterNames.size() - 2) - currGrab.failedChapters.size()) + " of "
+                + (currGrab.successfulChapterNames.size() - 2) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
         if (!currGrab.failedChapters.isEmpty()) {
             currGrab.gui.appendText(currGrab.window, "[ERROR]Failed to grab the following chapters:");
             for (String failedChapter : currGrab.failedChapters) {

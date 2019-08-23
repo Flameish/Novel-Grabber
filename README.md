@@ -8,16 +8,17 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 * [Volarenovels](https://volarenovels.com/)
 * [Light Novels Translations](https://lightnovelstranslations.com/)
 * [WordExcerpt](https://wordexcerpt.com/)
-* [BoxNovel](https://boxnovel.com/) <br>and more...
+* [BoxNovel](https://boxnovel.com/) (Only loads ~1400 chapters, use manual chapter-to-chapter grabbing for more)
+<br>and more...
 
 ## How to use
 <strong>Automatic:</strong>
 
-1. grabber.Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
+1. Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
 (If you can't execute the jar, try navigating to the jar location with cmd/terminal and use: `java -jar Novel-Grabber.jar`)
 2. Enter the link to the novel's Table of Contents page
 3. Pick the corresponding host
-4. Choose your save directory
+4. Click on 'Check' to see if everything is alright with your input
 5. Select the desired chapter range
 6. Pick from various options
 7. Grab chapters

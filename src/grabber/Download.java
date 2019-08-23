@@ -50,7 +50,6 @@ public class Download {
     public Download(GUI myGUI) {
         // Settings
         gui = myGUI;
-        saveLocation = gui.saveLocation.getText();
         String tocUrl = gui.chapterListURL.getText();
         String host = Objects.requireNonNull(gui.autoHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", "");
         window = "auto";
@@ -103,6 +102,7 @@ public class Download {
     }
 
     public void startAutoDownload() {
+        saveLocation = gui.saveLocation.getText();
         export = gui.exportSelection.getSelectedItem().toString();
         waitTime = Integer.parseInt(gui.waitTime.getText());
         allChapters = gui.chapterAllCheckBox.isSelected();

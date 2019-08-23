@@ -117,7 +117,7 @@ class ToEpub {
             // Create EpubWriter
             EpubWriter epubWriter = new EpubWriter();
             // Write the Book as Epub
-            epubWriter.write(book, new FileOutputStream(currGrab.saveLocation + "/" + currGrab.bookTitle + ".epub"));
+            epubWriter.write(book, new FileOutputStream(currGrab.saveLocation + File.separator + currGrab.bookTitle + ".epub"));
             currGrab.gui.appendText(currGrab.window, "[INFO]Epub successfully created.");
 
             Path chaptersFolder = Paths.get(currGrab.saveLocation + "/chapters");
