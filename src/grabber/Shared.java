@@ -1,10 +1,19 @@
+package grabber;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,16 +29,9 @@ class Shared {
     /**
      * Freeze thread for selected wait time.
      */
-    static void sleep(String window) {
+    static void sleep(int waitTime) {
         try {
-            switch (window) {
-                case "auto":
-                    Thread.sleep(Integer.parseInt(NovelGrabberGUI.waitTime.getText()));
-                    break;
-                case "manual":
-                    Thread.sleep(Integer.parseInt(NovelGrabberGUI.manWaitTime.getText()));
-                    break;
-            }
+            Thread.sleep(waitTime);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
@@ -41,8 +43,8 @@ class Shared {
     private static void successfulChapter(String fileName, String chapterName, Download currGrab) {
         currGrab.successfulChapterNames.add(chapterName);
         currGrab.successfulFilenames.add(fileName);
-        NovelGrabberGUI.appendText(currGrab.window, "[INFO]" + chapterName + " saved.");
-        NovelGrabberGUI.updateProgress(currGrab.window);
+        currGrab.gui.appendText(currGrab.window, "[INFO]" + chapterName + " saved.");
+        currGrab.gui.updateProgress(currGrab.window);
     }
 
     /**
@@ -51,13 +53,13 @@ class Shared {
     static void report(Download currGrab) {
         long endTime = System.nanoTime();
         long elapsedTime = TimeUnit.SECONDS.convert((endTime - currGrab.startTime), TimeUnit.NANOSECONDS);
-        NovelGrabberGUI.appendText(currGrab.window, "[INFO]Finished! "
+        currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
                 + (currGrab.successfulChapterNames.size() - currGrab.failedChapters.size()) + " of "
                 + currGrab.successfulChapterNames.size() + " chapters successfully grabbed in " + elapsedTime + " seconds.");
         if (!currGrab.failedChapters.isEmpty()) {
-            NovelGrabberGUI.appendText(currGrab.window, "[ERROR]Failed to grab the following chapters:");
+            currGrab.gui.appendText(currGrab.window, "[ERROR]Failed to grab the following chapters:");
             for (String failedChapter : currGrab.failedChapters) {
-                NovelGrabberGUI.appendText(currGrab.window, failedChapter);
+                currGrab.gui.appendText(currGrab.window, failedChapter);
             }
         }
     }
@@ -78,7 +80,7 @@ class Shared {
         else if (imageName.contains(".jpg")) imageName = imageName.replaceAll("\\.jpg(.*)", ".jpg");
         else if (imageName.contains(".gif")) imageName = imageName.replaceAll("\\.gif(.*)", ".gif");
         else return "could_not_rename_image";
-        return imageName.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+        return imageName.replaceAll("[\\\\/:*?\"<>|]", "_");
     }
 
     /**
@@ -117,16 +119,51 @@ class Shared {
                     while ((n = input.read(buffer)) != -1) {
                         output.write(buffer, 0, n);
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    currGrab.gui.appendText(currGrab.window, e.getMessage());
                 }
                 currGrab.imageLinks.add(src);
                 currGrab.imageNames.add(name);
-                NovelGrabberGUI.appendText(currGrab.window, "[INFO]" + name + " saved.");
+                currGrab.gui.appendText(currGrab.window, "[INFO]" + name + " saved.");
                 //General catch
             } catch (Throwable e) {
                 e.printStackTrace();
-                NovelGrabberGUI.appendText(currGrab.window, "[ERROR]Failed to save " + name);
+                currGrab.gui.appendText(currGrab.window, "[ERROR]Failed to save " + name);
             }
         }
+    }
+
+    // Saves the novel cover into a buffered Image
+    static BufferedImage getBufferedCover(String src, Download currGrab) {
+        if (!currGrab.imageLinks.contains(src)) {
+            // Try to set the image name
+            String name = getImageName(src);
+            // If image could not be renamed correctly, the hashCode of the source + .jpg
+            // will be set as the image name.
+            if (name.equals("could_not_rename_image")) {
+                name = src.hashCode() + ".jpg";
+            }
+            //For LiberSpark
+            if (src.startsWith("//")) src = src.replace("//", "https://");
+            try {
+                // Connect to image source
+                URL url = new URL(src);
+                HttpURLConnection http = (HttpURLConnection) url.openConnection();
+                http.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+                http.connect();
+                BufferedImage imageInput = ImageIO.read(http.getInputStream());
+                currGrab.bufferedCoverName = name;
+                currGrab.imageLinks.add(src);
+                currGrab.imageNames.add(name);
+                return imageInput;
+                //General catch
+            } catch (Throwable e) {
+                e.printStackTrace();
+                currGrab.gui.appendText(currGrab.window, "[ERROR]Failed to get" + name);
+            }
+        }
+        return null;
     }
 
     /**
@@ -135,31 +172,66 @@ class Shared {
      */
     static void createToc(Download currGrab) {
         if (!currGrab.successfulChapterNames.isEmpty()) {
-            String fileName = currGrab.tocFileName + ".html";
-            try (PrintStream out = new PrintStream(currGrab.saveLocation + File.separator + fileName, textEncoding)) {
+            String fileName = currGrab.tocFileName;
+            String filePath = currGrab.saveLocation + File.separator + fileName;
+            // Change the save location to path /chapters instead
+            if (currGrab.export.equals("EPUB")) {
+                filePath = currGrab.saveLocation + File.separator + "chapters" + File.separator + fileName;
+            }
+            try (PrintStream out = new PrintStream(filePath + ".html", textEncoding)) {
                 out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
                 //Print chapter links
-                for (int i = 0; i < currGrab.successfulChapterNames.size(); i++) {
-                    out.println("<a href=\"chapters/" + currGrab.successfulFilenames.get(i) + ".html\">" + currGrab.successfulChapterNames.get(i) + "</a><br/>");
+                // -1 so it doesnt print the cover page
+                for (int i = 0; i < currGrab.successfulChapterNames.size() - 1; i++) {
+                    // Change href to chapters depending on export
+                    if (currGrab.export.equals("EPUB")) out.println("<a href=\""
+                            + currGrab.successfulFilenames.get(i) + ".html\">" + currGrab.successfulChapterNames.get(i)
+                            + "</a><br/>");
+                    else out.println("<a href=\"chapters/" + currGrab.successfulFilenames.get(i) + ".html\">"
+                            + currGrab.successfulChapterNames.get(i) + "</a><br/>");
                 }
                 //Print image links (for calibre)
-                if (!currGrab.imageLinks.isEmpty()) {
+                if (!currGrab.imageLinks.isEmpty() && !currGrab.export.equals("EPUB")) {
                     for (String image : currGrab.imageLinks) {
                         // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
                         String imageName = getImageName(image);
                         if (imageName.equals("could_not_rename_image")) {
                             imageName = image.hashCode() + ".jpg";
                         }
-                        out.println("<img src=\"imageLinks/" + imageName + "\" style=\"display:none;\" /><br/>");
+                        out.println("<img src=\"images/" + imageName + "\" style=\"display:none;\" /><br/>");
                     }
                 }
                 out.print("</p>" + NL + htmlFoot);
+                successfulChapter(fileName, "Table of Contents", currGrab);
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
-                NovelGrabberGUI.appendText(currGrab.window, e.getMessage());
+                currGrab.gui.appendText(currGrab.window, e.getMessage());
                 e.printStackTrace();
             }
-            NovelGrabberGUI.appendText(currGrab.window, "[INFO]" + fileName + " created.");
         }
+    }
+
+    static void createCoverPage(Download currGrab) {
+        String fileName = "coverPage";
+        String filePath = currGrab.saveLocation + File.separator + "chapters" + File.separator + fileName;
+        String imageName = currGrab.bookCover;
+        imageName = getFileName(imageName);
+        try (PrintStream out = new PrintStream(filePath + ".html", textEncoding)) {
+            out.print(htmlHead + "<div class=\"cover\" style=\"padding: 0pt; margin:0pt; text-align: center; padding:0pt; margin: 0pt;\">" + NL);
+            out.println("<img src=\"" + imageName + "\" class=\"cover.img\" style=\"width: 600px; height: 800px;\" />");
+            out.print("</div>" + NL + htmlFoot);
+            successfulChapter(fileName, "Cover Page", currGrab);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            currGrab.gui.appendText(currGrab.window, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    static String getFileName(String imageName) {
+        if (imageName != null && imageName.contains("/"))
+            imageName = imageName.substring(imageName.lastIndexOf("/") + 1);
+        if (imageName != null && imageName.contains("\\"))
+            imageName = imageName.substring(imageName.lastIndexOf("\\") + 1);
+        return imageName;
     }
 
     /**
@@ -183,7 +255,7 @@ class Shared {
                 }
             }
 
-            //Download imageLinks of chapter container.
+            // grabber.Download images of chapter container.
             if (currGrab.getImages) {
                 for (Element image : chapterContent.select("img")) {
                     downloadImage(image.absUrl("src"), currGrab);
@@ -193,7 +265,7 @@ class Shared {
             File dir = new File(currGrab.saveLocation + File.separator + "chapters");
             if (!dir.exists()) dir.mkdirs();
             // Write chapter content to file.
-            try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", Shared.textEncoding)) {
+            try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", textEncoding)) {
                 if (chapterContent.select("img").size() > 0) {
                     // Iterate each image in chapter content.
                     for (Element image : chapterContent.select("img")) {
@@ -227,5 +299,24 @@ class Shared {
         while (--n > 0 && pos != -1)
             pos = str.indexOf(substr, pos + 1);
         return pos;
+    }
+
+    public static void deleteFolderAndItsContent(final Path folder) throws IOException {
+        Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                if (exc != null) {
+                    throw exc;
+                }
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }

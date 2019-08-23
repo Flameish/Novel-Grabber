@@ -1,3 +1,6 @@
+package updater;
+
+import gui.GUI;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,10 +11,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-class updater {
+public class updater {
 
-    static void updateJar() {
-        String oldVersionString = NovelGrabberGUI.versionNumber;
+    public static void updateJar() {
+        String oldVersionString = GUI.versionNumber;
         String newVersionString = getLatestVersionString();
         if (compareStrings(oldVersionString, newVersionString) == -1) {
             String jarLink = "https://github.com/Flameish/Novel-Grabber/releases/download/" + newVersionString + "/Novel-Grabber.jar";
@@ -22,8 +25,6 @@ class updater {
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
-        } else {
-            NovelGrabberGUI.appendText("update", "Novel-Grabber is up-to-date.");
         }
     }
 
@@ -32,7 +33,6 @@ class updater {
      */
     private static String getLatestVersionString() {
         try {
-            NovelGrabberGUI.updateProcessLbl.setText("Checking new releases...");
             Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
             Element content = doc.select("a[title]").first();
             return content.attr("title");
@@ -43,7 +43,7 @@ class updater {
     }
 
     // Compare version strings
-    static int compareStrings(String oldVersionString, String newVersionString) {
+    public static int compareStrings(String oldVersionString, String newVersionString) {
         String[] oldStrings = oldVersionString.split("\\.");
         String[] newStrings = newVersionString.split("\\.");
         int length = Math.max(oldStrings.length, newStrings.length);
@@ -62,7 +62,6 @@ class updater {
      * Starts the new downloaded Novel-Grabber.jar
      */
     private static void startNovelGrabber() {
-        NovelGrabberGUI.updateProcessLbl.setText("Starting Novel-Grabber...");
         Process proc = null;
         try {
             proc = Runtime.getRuntime().exec("java -jar Novel-Grabber.jar");
@@ -81,7 +80,6 @@ class updater {
     }
 
     private static void downloadFileFromGitHub(String URL) throws Throwable {
-        NovelGrabberGUI.updateProcessLbl.setText("Downloading new release...");
         String link = URL;
         String fileName = "Novel-Grabber.jar";
         java.net.URL url = new URL(link);

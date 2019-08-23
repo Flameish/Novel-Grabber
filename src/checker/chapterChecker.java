@@ -1,3 +1,7 @@
+package checker;
+
+import grabber.HostSettings;
+import gui.GUI;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -20,49 +24,48 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.toIntExact;
 
-class chapterChecker {
-    static List<String> hosts = new ArrayList<>();
-    static List<String> urls = new ArrayList<>();
+public class chapterChecker {
+    public static List<String> hosts = new ArrayList<>();
+    public static List<String> urls = new ArrayList<>();
     private static List<Integer> lastChapters;
     private static List<Integer> toBeRemoved;
     private static ScheduledExecutorService service;
     private static final int pollingInterval = 20;
-    static boolean checkerRunning;
+    public static boolean checkerRunning;
     private static boolean taskIsKilled;
     private static String curTitle;
     private static String latestChapterListFile;
 
-    /**
-     * Checker handling.
-     */
-    static void chapterPolling() {
+
+    //checker handling.
+    public static void chapterPolling(GUI mygui) {
         taskIsKilled = false;
         checkerRunning = true;
         lastChapters = new ArrayList<>();
         toBeRemoved = new ArrayList<>();
 
-        latestChapterListFile = NovelGrabberGUI.appdataPath + File.separator + "lastChapters_" + urls.hashCode() + ".json";
+        latestChapterListFile = GUI.appdataPath + File.separator + "lastChapters_" + urls.hashCode() + ".json";
         File file = new File(latestChapterListFile);
         if (file.exists()) {
             readDataFromJSON();
         } else {
-            initializeFile();
+            initializeFile(mygui);
         }
         if (urls.isEmpty()) {
-            NovelGrabberGUI.appendText("checker", "No checkers defined.");
-            NovelGrabberGUI.stopPolling();
-            NovelGrabberGUI.resetCheckerGUIButtons();
+            mygui.appendText("checker", "No checkers defined.");
+            mygui.stopPolling();
+            mygui.resetCheckerGUIButtons();
             return;
         }
         if (lastChapters.contains(-1)) {
-            NovelGrabberGUI.appendText("checker", "Could not reach one or more hosts.");
-            NovelGrabberGUI.stopPolling();
-            NovelGrabberGUI.resetCheckerGUIButtons();
+            mygui.appendText("checker", "Could not reach one or more hosts.");
+            mygui.stopPolling();
+            mygui.resetCheckerGUIButtons();
             return;
         }
-        // Updates checker list on GUI with chapter numbers.
+        // Updates checker list on gui with chapter numbers.
         for (int i = 0; i < urls.size(); i++) {
-            NovelGrabberGUI.listModelCheckerLinks.set(i, "Latest chapter: " + lastChapters.get(i) + " / [" + urls.get(i) + "]");
+            GUI.listModelCheckerLinks.set(i, "Latest chapter: " + lastChapters.get(i) + " / [" + urls.get(i) + "]");
         }
         // Runs every set interval.
         Runnable runnable = () -> {
@@ -70,49 +73,49 @@ class chapterChecker {
                 for (int i = 0; i < urls.size(); i++) {
                     if (!taskIsKilled) {
                         Thread.sleep((int) (Math.random() * 3001 + 2000));
-                        NovelGrabberGUI.appendText("checker", "Polling: " + urls.get(i));
+                        mygui.appendText("checker", "Polling: " + urls.get(i));
                         int newChapter = countChapters(hosts.get(i), urls.get(i));
                         if (newChapter > lastChapters.get(i)) {
                             if (newChapter - lastChapters.get(i) > 1) {
-                                NovelGrabberGUI.appendText("checker", newChapter - lastChapters.get(i) + " new chapters.");
+                                mygui.appendText("checker", newChapter - lastChapters.get(i) + " new chapters.");
                                 showNotification(curTitle + ": " + (newChapter - lastChapters.get(i)) + " new chapters.");
                             } else {
-                                NovelGrabberGUI.appendText("checker", "New chapter: " + newChapter);
+                                mygui.appendText("checker", "New chapter: " + newChapter);
                                 showNotification(curTitle + ": " + newChapter);
                             }
                             lastChapters.add(i, newChapter);
                             writeDataToJSON(latestChapterListFile, true);
-                            NovelGrabberGUI.listModelCheckerLinks.set(i, "Latest chapter: " + newChapter + " / [" + curTitle + "]");
+                            GUI.listModelCheckerLinks.set(i, "Latest chapter: " + newChapter + " / [" + curTitle + "]");
                         }
                     }
                 }
                 if (!taskIsKilled)
-                    NovelGrabberGUI.appendText("checker", "Polling again in " + pollingInterval + " minutes.");
+                    mygui.appendText("checker", "Polling again in " + pollingInterval + " minutes.");
             } catch (IllegalArgumentException | InterruptedException e) {
                 e.printStackTrace();
             }
         };
         // Start scheduled task.
         if (!taskIsKilled) {
-            NovelGrabberGUI.checkStatusLbl.setText("Checking active.");
-            NovelGrabberGUI.checkStopPollingBtn.setEnabled(true);
+            mygui.checkStatusLbl.setText("Checking active.");
+            mygui.checkStopPollingBtn.setEnabled(true);
             service = Executors.newSingleThreadScheduledExecutor();
             service.scheduleAtFixedRate(runnable, 0, pollingInterval, TimeUnit.MINUTES);
         } else {
-            NovelGrabberGUI.appendText("checker", "Stopping polling.");
-            NovelGrabberGUI.stopPolling();
+            mygui.appendText("checker", "Stopping polling.");
+            mygui.stopPolling();
         }
     }
 
     /**
      * Creates and fills a file for a new list of Checkers.
      */
-    private static void initializeFile() {
-        NovelGrabberGUI.checkStatusLbl.setText("Initializing...");
-        // Gets chapter count for each Checker entry.
+    private static void initializeFile(GUI mygui) {
+        mygui.checkStatusLbl.setText("Initializing...");
+        // Gets chapter count for each checker entry.
         for (int i = 0; i < urls.size(); i++) {
             try {
-                NovelGrabberGUI.appendText("checker", "Initializing: " + urls.get(i));
+                mygui.appendText("checker", "Initializing: " + urls.get(i));
                 lastChapters.add(countChapters(hosts.get(i), urls.get(i)));
                 Thread.sleep(3000);
             } catch (IllegalArgumentException e) {
@@ -124,15 +127,15 @@ class chapterChecker {
         // Remove faulty entries.
         toBeRemoved.sort(Comparator.reverseOrder());
         for (int a : toBeRemoved) {
-            NovelGrabberGUI.appendText("checker", "Removing faulty: " + urls.get(a));
+            mygui.appendText("checker", "Removing faulty: " + urls.get(a));
             urls.remove(a);
             hosts.remove(a);
-            NovelGrabberGUI.listModelCheckerLinks.removeElementAt(a);
+            GUI.listModelCheckerLinks.removeElementAt(a);
         }
         toBeRemoved.clear();
         // Create a new file to store latest chapter numbers. File name is the hashCode() of List<String>urls.
         if (!urls.isEmpty()) {
-            latestChapterListFile = NovelGrabberGUI.appdataPath + File.separator + "lastChapters_" + urls.hashCode() + ".json";
+            latestChapterListFile = GUI.appdataPath + File.separator + "lastChapters_" + urls.hashCode() + ".json";
             writeDataToJSON(latestChapterListFile, true);
         }
     }
@@ -153,7 +156,7 @@ class chapterChecker {
         }
     }
 
-    static void writeDataToJSON(String filepath, boolean withChapters) {
+    public static void writeDataToJSON(String filepath, boolean withChapters) {
         JSONArray array = new JSONArray();
         for (int i = 0; i < hosts.size(); i++) {
             JSONObject checker = new JSONObject();
@@ -169,7 +172,7 @@ class chapterChecker {
         }
     }
 
-    static void killTask() {
+    public static void killTask(GUI mygui) {
         if (!(service == null)) {
             taskIsKilled = true;
             service.shutdown();
@@ -180,8 +183,8 @@ class chapterChecker {
             } catch (InterruptedException e) {
                 service.shutdownNow();
             }
-            NovelGrabberGUI.appendText("checker", "Stopped polling.");
-            NovelGrabberGUI.resetCheckerGUIButtons();
+            mygui.appendText("checker", "Stopped polling.");
+            mygui.resetCheckerGUIButtons();
         }
     }
 
@@ -200,7 +203,7 @@ class chapterChecker {
 
     private static void showNotification(String message) {
         try {
-            NovelGrabberGUI.trayIcon.displayMessage("Novel-Grabber: Chapter release", message, TrayIcon.MessageType.INFO);
+            GUI.trayIcon.displayMessage("Novel-Grabber: Chapter release", message, TrayIcon.MessageType.INFO);
         } catch (Exception e) {
             e.printStackTrace();
         }

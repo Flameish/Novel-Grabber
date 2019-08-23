@@ -1,11 +1,13 @@
+package grabber;
+
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Data class 101.
  */
-class HostSettings {
-    static String[] websites = {
+public class HostSettings {
+    public static String[] websites = {
             "Wuxiaworld",
             "Royal Road",
             "Gravity Tales",
@@ -16,18 +18,20 @@ class HostSettings {
             "LiberSpark",
             "Chrysanthemum Garden"
     };
-    String chapterLinkSelecter;
+
+    public String chapterLinkSelecter;
     String titleHostName;
-    String url;
-    String host;
+    public String url;
+    public String host;
+    public List<String> blacklistedTags;
+    int ordinalIndexForBaseNovel;
     String chapterContainer;
     String bookTitleSelector;
-    String bookCoverSelector;
     String bookAuthorSelector;
-    List<String> blacklistedTags;
-    int ordinalIndexForBaseNovel;
+    String bookSubjectSelector;
+    String bookCoverSelector;
 
-    HostSettings(String domain, String urla) {
+    public HostSettings(String domain, String urla) {
         url = urla;
         switch (domain) {
             case "wuxiaworld": //compared from websites[] with whitespaces removed and lowercase
@@ -40,6 +44,7 @@ class HostSettings {
                 bookTitleSelector = ".p-15 h4";
                 bookCoverSelector = "img.media-object";
                 bookAuthorSelector = ".media-body dd";
+                bookSubjectSelector = ".genres a";
                 break;
             case "royalroad":
                 host = "https://www.royalroad.com/";
@@ -51,6 +56,7 @@ class HostSettings {
                 bookTitleSelector = "h1[property=name]";
                 bookCoverSelector = "img.thumbnail";
                 bookAuthorSelector = "h4 span[property=name] a";
+                bookSubjectSelector = ".tags span";
                 break;
             case "gravitytales":
                 host = "http://gravitytales.com/";
@@ -60,9 +66,10 @@ class HostSettings {
                 titleHostName = "-Gravity-Tales";
                 url = urla + "/chapters"; //gravity tales' chapter list is at gravitytales.com/NOVEL/chapters
                 blacklistedTags = null;
-                bookTitleSelector = ".p-tb-10-rl-30 h3"; //Fix
-                bookCoverSelector = "";
-                bookAuthorSelector = "div.p-tb-10-rl-30 p :not(b)";
+                bookTitleSelector = ".main-content h3"; //Fix
+                bookCoverSelector = "#coverImg";
+                bookAuthorSelector = ".main-content h4";
+                bookSubjectSelector = ".desc p";
                 break;
             case "volarenovels":
                 host = "https://volarenovels.com/";
@@ -74,6 +81,7 @@ class HostSettings {
                 bookTitleSelector = "h3.title";
                 bookCoverSelector = "img.m-tb-30";
                 bookAuthorSelector = "div.p-tb-10-rl-30 p"; //Fix
+                bookSubjectSelector = ".tags a";
                 break;
             case "wordexcerpt":
                 host = "https://wordexcerpt.com/";
@@ -85,6 +93,7 @@ class HostSettings {
                 bookTitleSelector = ".post-title h1";
                 bookCoverSelector = "div.summary_image a img";
                 bookAuthorSelector = ".author-content a";
+                bookSubjectSelector = ".genres-content a";
                 break;
             case "lightnovelstranslations":
                 host = "https://lightnovelstranslations.com/";
@@ -96,6 +105,7 @@ class HostSettings {
                 bookTitleSelector = "#content h1.entry-title";
                 bookCoverSelector = "#content p img.alignnone";
                 bookAuthorSelector = "";
+                bookSubjectSelector = "";
                 break;
             case "boxnovel":
                 host = "https://boxnovel.com/";
@@ -107,6 +117,7 @@ class HostSettings {
                 bookTitleSelector = ".post-title h3";
                 bookCoverSelector = ".summary_image img";
                 bookAuthorSelector = ".author-content";
+                bookSubjectSelector = ".genres-content a";
                 break;
             case "liberspark":
                 host = "https://liberspark.com/";
@@ -118,6 +129,8 @@ class HostSettings {
                 bookTitleSelector = "h1[style=text-align:left]";
                 bookCoverSelector = "img#uploaded-cover-image";
                 bookAuthorSelector = ".novel-author-info a h4";
+                bookSubjectSelector = ".novel-author-info a h4";
+                bookSubjectSelector = "";
                 break;
             case "chrysanthemumgarden":
                 host = "https://chrysanthemumgarden.com/";
@@ -125,7 +138,8 @@ class HostSettings {
                 chapterLinkSelecter = ".translated-chapters a";
                 chapterContainer = "#novel-content";
                 titleHostName = "--ChrysanthemumGarden";
-                blacklistedTags = Arrays.asList("div.chrys-ads",
+                blacklistedTags = Arrays.asList(".chrys-ads",
+                        ".google",
                         "h3[style=color:transparent;height:1px;margin:0;padding:0;overflow:hidden]",
                         "p[style=height:1px;margin:0;padding:0;overflow:hidden]",
                         "span[style=height:1px;width:0;overflow:hidden;display:inline-block]",
@@ -134,6 +148,7 @@ class HostSettings {
                 bookTitleSelector = "h1.novel-title";
                 bookCoverSelector = "img.materialboxed";
                 bookAuthorSelector = "";
+                bookSubjectSelector = ".novel-container a[href^=https://chrysanthemumgarden.com/genre/]";
                 break;
         }
     }

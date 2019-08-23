@@ -1,5 +1,5 @@
 # ![alt text](https://i.imgur.com/LrV2tLe.png)Novel-Grabber
-Novel-Grabber is a GUI based web scrapper that can download and convert chapters into EPUB from various supported web/light novel sites or from any other site manually. Furthermore,  Novel-Grabber can poll a list of novels for new chapter releases and notify you with desktop notifications.
+Novel-Grabber is a gui based web scrapper that can download and convert chapters into EPUB from various supported web/light novel sites or from any other site manually. Furthermore,  Novel-Grabber can poll a list of novels for new chapter releases and notify you with desktop notifications.
 
 ## Natively supported sites
 * [Wuxiaworld](https://wuxiaworld.com/)
@@ -13,7 +13,7 @@ Novel-Grabber is a GUI based web scrapper that can download and convert chapters
 ## How to use
 <strong>Automatic:</strong>
 
-1. Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
+1. grabber.Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
 (If you can't execute the jar, try navigating to the jar location with cmd/terminal and use: `java -jar Novel-Grabber.jar`)
 2. Enter the link to the novel's Table of Contents page
 3. Pick the corresponding host

@@ -1,3 +1,8 @@
+/*
+import checker.chapterChecker;
+import updater.updater;
+import grabber.HostSettings;
+import grabber.manFetchChapters;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -22,9 +27,11 @@ import java.util.concurrent.Executors;
 
 import static java.lang.System.out;
 
+*/
 /*
  *  Window display and handling.
- */
+ *//*
+
 public class NovelGrabberGUI {
     static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -84,18 +91,26 @@ public class NovelGrabberGUI {
     static String[] manMetadata = new String[3];
     private static String[] exportFormats = {"EPUB", "Calibre"};
 
-    /**
-     * Create the application.
-     */
+    */
+/**
+ * Create the application.
+ * <p>
+ * Launch the application
+ * <p>
+ * Initialize the contents of the frame.
+ *//*
+
     private NovelGrabberGUI() {
         initialize();
         checkForNewReleases();
         loadDefaultCheckerList();
     }
 
-    /**
-     * Launch the application
-     */
+    */
+/**
+ * Launch the application
+ *//*
+
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
@@ -207,7 +222,7 @@ public class NovelGrabberGUI {
         checkStatusLbl.setText("Stopping polling...");
         checkStopPollingBtn.setEnabled(false);
         chapterChecker.checkerRunning = false;
-        defaultItem0.setLabel("Checker not active");
+        defaultItem0.setLabel("checker not active");
         Executors.newSingleThreadExecutor().execute(chapterChecker::killTask);
     }
 
@@ -324,7 +339,7 @@ public class NovelGrabberGUI {
         popup.add(aboutLabel);
 
         popup.addSeparator();
-        defaultItem0 = new MenuItem("Checker not active");
+        defaultItem0 = new MenuItem("checker not active");
         defaultItem0.addActionListener(arg0 -> {
             if (chapterChecker.checkerRunning) stopPolling();
         });
@@ -348,9 +363,11 @@ public class NovelGrabberGUI {
         }
     }
 
-    /**
-     * Initialize the contents of the frame.
-     */
+    */
+/**
+ * Initialize the contents of the frame.
+ *//*
+
 
     private void initialize() {
         // tooltip style
@@ -596,7 +613,7 @@ public class NovelGrabberGUI {
         getImages = new JCheckBox("Get images");
         getImages.setFocusPainted(false);
         getImages.setToolTipText(
-                "<html><p width=\"300\">Download and display images.</p></html>");
+                "<html><p width=\"300\">grabber.Download and display images.</p></html>");
         getImages.setFont(new Font("Tahoma", Font.PLAIN, 11));
         getImages.setBounds(6, 20, 145, 23);
         optionSelect.add(getImages);
@@ -737,8 +754,8 @@ public class NovelGrabberGUI {
             if (!manChapterListURL.getText().isEmpty()) {
                 try {
                     retrieveLinks.setEnabled(false);
-                    manFetchChapters.retrieveLinks();
-                } catch (NullPointerException | IllegalArgumentException | IOException err) {
+                    //grabber.manFetchChapters.retrieveLinks(frmNovelGrabber);
+                } catch (NullPointerException | IllegalArgumentException  err) {
                     err.printStackTrace();
                 } finally {
                     retrieveLinks.setEnabled(true);
@@ -960,7 +977,7 @@ public class NovelGrabberGUI {
         manGetImages = new JCheckBox("Get images");
         manGetImages.setFocusPainted(false);
         manGetImages.setToolTipText(
-                "<html><p width=\"300\">Download and display images.</p></html>");
+                "<html><p width=\"300\">grabber.Download and display images.</p></html>");
         manGetImages.setFont(new Font("Tahoma", Font.PLAIN, 11));
         manGetImages.setBounds(6, 20, 145, 23);
         manOptionPane.add(manGetImages);
@@ -1087,18 +1104,7 @@ public class NovelGrabberGUI {
             }
 
             JButton removeBtn = new JButton("Remove");
-            removeBtn.addActionListener(arg1 -> {
-                if (!tempListModel.isEmpty()) {
-                    int[] indices = tempJList.getSelectedIndices();
-                    for (int i = indices.length - 1; i >= 0; i--) {
-                        tempListModel.removeElementAt(indices[i]);
-                        blacklistedTags.remove(indices[i]);
-                    }
-                }
-                if (tempListModel.isEmpty()) {
-                    manShowTagsBtn.setEnabled(false);
-                }
-            });
+            removeBtn.addActionListener(
             JButton[] buttons = {removeBtn};
             JOptionPane.showOptionDialog(null, manTagScrollPane, "Tags to be removed", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
         });
@@ -1121,7 +1127,7 @@ public class NovelGrabberGUI {
         JPanel checkerPane = new JPanel();
         checkerPane.setLayout(null);
         //Only display the checker tab if System Tray is supported on the OS
-        if (SystemTray.isSupported()) tabbedPane.addTab("Checker", null, checkerPane, null);
+        if (SystemTray.isSupported()) tabbedPane.addTab("checker", null, checkerPane, null);
 
         JPanel checkChapterPane = new JPanel();
         checkChapterPane.setBounds(10, 5, 557, 273);
@@ -1269,7 +1275,7 @@ public class NovelGrabberGUI {
                 "<html><p width=\"300\">Save checkers to file. \"default.txt\" will be loaded and started on startup.</p></html>");
         checkToFile.addActionListener(e -> {
             if (chapterChecker.urls.isEmpty()) {
-                showPopup("Checker list is empty", "warning");
+                showPopup("checker list is empty", "warning");
                 return;
             }
             File dir = new File(appdataPath);
@@ -1349,7 +1355,7 @@ public class NovelGrabberGUI {
         checkerPane.add(checkDefaultFileLabel);
 
 
-        //updater
+        //updater.updater
         updatePane = new JPanel();
         updatePane.setLayout(null);
 
@@ -1416,7 +1422,8 @@ public class NovelGrabberGUI {
                         && (!manChapterContainer.getText().isEmpty())
                         && (!manWaitTime.getText().isEmpty())) {
                     try {
-                        Download manDownload = new Download("chapterToChapter");
+                        manProgressBar.setStringPainted(true);
+                        //grabber.Download manDownload = new grabber.Download(this,"chapterToChapter");
                         // Exception handling
                     } catch (NullPointerException | IllegalArgumentException err) {
                         appendText("manual", err.getMessage());
@@ -1451,7 +1458,7 @@ public class NovelGrabberGUI {
                         && (!manWaitTime.getText().isEmpty())) {
                     try {
                         manProgressBar.setStringPainted(true);
-                        Download manDownload = new Download("chaptersFromList");
+                        //grabber.Download manDownload = new grabber.Download("chaptersFromList");
                         // Exception handling
                     } catch (NullPointerException | IllegalArgumentException err) {
                         appendText("manual", err.getMessage());
@@ -1474,7 +1481,7 @@ public class NovelGrabberGUI {
             } else if (!singleChapterLink.getText().isEmpty()) {
                 try {
                     getChapterBtn.setEnabled(false);
-                    autoFetchChapters.getChapterNumber(singleChapterHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", ""), singleChapterLink.getText());
+                   // grabber.autoFetchChapters.getChapterNumber(singleChapterHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", ""), singleChapterLink.getText());
                 } catch (NullPointerException | IllegalArgumentException err) {
                     appendText("auto", err.getMessage());
                     err.printStackTrace();
@@ -1522,7 +1529,7 @@ public class NovelGrabberGUI {
             ) {
                 // Chapter grabbing
                 try {
-                    Download autoDownload = new Download();
+                   // grabber.Download autoDownload = new grabber.Download();
                 } catch (NullPointerException | IllegalArgumentException err) {
                     appendText("auto", err.getMessage());
                     err.printStackTrace();
@@ -1535,3 +1542,4 @@ public class NovelGrabberGUI {
         }));
     }
 }
+*/
