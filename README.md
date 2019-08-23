@@ -32,7 +32,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
    <b>Export:</b> Currently you can export to EPUB or a Calibre <a href="#converting">compatible table of contents file</a>.
    
    <b>Wait time</b> is the time between each chapter call in milliseconds (1000 for 1 second) (so you don't flood the host server with requests)<br>
-   ![alt text](https://i.imgur.com/1wyoBu9.png)
+   ![alt text](https://i.imgur.com/CEXUTZk.png)
 
 <strong>Manual:</strong>
 
@@ -41,7 +41,7 @@ Using a Table of Content URL:</strong>
 1. Enter the URL to the novel's "Table of Contents" page and retrieve all links on the site. 
 
 2. Afterwards remove all unwanted links from the selection window. You can use shift/crtl-select like you normally would anywhere else. (Note: The chapters should be hosted on the same site or the chapter-text selectors will probably not work)<br>
-![alt text](https://i.imgur.com/Noa5Dot.gif)
+![alt text](https://i.imgur.com/j9TbP0l.gif)
 
 3. Input the chapter container wrapper the site uses. (Inspect a chapter page in your browser and look for something with which the container is identifiable. <br>
 For example a `<div>` with a class `chapter-text` or id `chapter-content`. <br>
