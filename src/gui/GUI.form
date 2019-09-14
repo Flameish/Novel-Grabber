@@ -14,7 +14,9 @@
             <preferred-size width="200" height="200"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <enabled value="true"/>
+        </properties>
         <border type="none"/>
         <children>
           <grid id="ac250" binding="autoTab" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -1055,8 +1057,8 @@
               <tabbedpane title="Update"/>
             </constraints>
             <properties>
-              <enabled value="true"/>
-              <visible value="false"/>
+              <enabled value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>

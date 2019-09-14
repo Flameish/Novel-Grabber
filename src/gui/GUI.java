@@ -131,8 +131,6 @@ public class GUI extends JFrame {
         checkForNewReleases();
         loadDefaultCheckerList();
 
-        tabbedPane.setEnabledAt(3, false);
-
         browseButton.addActionListener(arg0 -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -791,6 +789,7 @@ public class GUI extends JFrame {
     }
 
     private void checkForNewReleases() {
+        tabbedPane.setEnabledAt(3, false);
         try {
             Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
             Element versionString = doc.select("a[title]").first();
