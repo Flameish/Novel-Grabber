@@ -34,6 +34,7 @@ public class Download {
     boolean getImages;
     boolean allChapters;
     boolean invertOrder;
+    public boolean autoChapterToChapter;
     long startTime = System.nanoTime();
     int firstChapter;
     int lastChapter;
@@ -58,6 +59,9 @@ public class Download {
         currHostSettings = new HostSettings(host, tocUrl);
         blacklistedTags = currHostSettings.blacklistedTags;
         // Functions
+        if (HostSettings.autoChapterToChapterWebsitesList.contains(gui.autoHostSelection.getSelectedItem().toString())) {
+            autoChapterToChapter = true;
+        }
         autoFetchChapters.getChapters(this);
         autoFetchChapters.getMetadata(this);
     }
@@ -126,8 +130,19 @@ public class Download {
         }
         // Getting the chapters again if it was stopped previously
         if (autoFetchChapters.killTask) autoFetchChapters.getChapters(this);
+
         autoFetchChapters.killTask = false;
-        autoFetchChapters.downloadChapters(this);
+        if (autoChapterToChapter) {
+            String[] chapterInfo = {
+                    gui.autoFirstChapterURL.getText(),
+                    gui.autoLastChapterURL.getText(),
+                    currHostSettings.nextChapterBtn
+            };
+            chapterContainer = currHostSettings.chapterContainer;
+            autoFetchChapters.processChaptersToChapters(chapterInfo, this);
+        } else {
+            autoFetchChapters.downloadChapters(this);
+        }
         if (!successfulFilenames.isEmpty() && !autoFetchChapters.killTask) {
             switch ((String) gui.exportSelection.getSelectedItem()) {
                 case "Calibre":

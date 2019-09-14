@@ -246,7 +246,6 @@ class Shared {
             // Getting the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter.
             if (!currGrab.nextChapterBtn.equals("NOT_SET"))
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
-
             Element chapterContent = doc.select(chapterContainer).first();
             // Remove unwanted tags from chapter container.
             if (!(currGrab.blacklistedTags == null)) {

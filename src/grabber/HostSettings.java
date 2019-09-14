@@ -1,5 +1,4 @@
 package grabber;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,12 +11,21 @@ public class HostSettings {
             "Royal Road",
             "Gravity Tales",
             "Volare Novels",
-            "Light Novels Translations",
+            "Creative Novels",
             "WordExcerpt",
-            "BoxNovel",
             "LiberSpark",
+            "BoxNovel",
+            "Wordrain",
+            "Comrademao",
+            "Light Novels Translations",
             "Chrysanthemum Garden"
     };
+    private static String[] autoChapterToChapterWebsites = {
+            "Comrademao",
+            "Creative Novels"
+    };
+    public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
+
 
     public String chapterLinkSelecter;
     String titleHostName;
@@ -26,6 +34,7 @@ public class HostSettings {
     public List<String> blacklistedTags;
     int ordinalIndexForBaseNovel;
     String chapterContainer;
+    String nextChapterBtn;
     String bookTitleSelector;
     String bookAuthorSelector;
     String bookSubjectSelector;
@@ -149,6 +158,45 @@ public class HostSettings {
                 bookCoverSelector = "img.materialboxed";
                 bookAuthorSelector = "";
                 bookSubjectSelector = ".novel-container a[href^=https://chrysanthemumgarden.com/genre/]";
+                break;
+            case "comrademao":
+                host = "https://comrademao.com/";
+                ordinalIndexForBaseNovel = 0;
+                chapterLinkSelecter = "";
+                chapterContainer = "article div";
+                nextChapterBtn = "a.btn.btn-default.btn-sm:eq(2)";
+                titleHostName = "";
+                blacklistedTags = Arrays.asList("div#CollapseRaw");
+                bookTitleSelector = "div.wrap-content h4";
+                bookCoverSelector = "div.wrap-thumbnail img";
+                bookAuthorSelector = "div.author";
+                bookSubjectSelector = "a[rel=tag]";
+                break;
+            case "creativenovels":
+                host = "https://creativenovels.com/";
+                ordinalIndexForBaseNovel = 0;
+                chapterLinkSelecter = "";
+                chapterContainer = ".entry-content";
+                nextChapterBtn = "a.x-btn.nextkey";
+                titleHostName = "";
+                blacklistedTags = Arrays.asList(".mNS", ".support-placement");
+                bookTitleSelector = "div.e45344-16.x-text.bK_C";
+                bookCoverSelector = "img.book_cover";
+                bookAuthorSelector = "div.e45344-17.x-text.bK_C a";
+                bookSubjectSelector = "div.genre_novel";
+                break;
+            case "wordrain":
+                host = "https://wordrain69.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = "ul.main.version-chap li a:not([title])";
+                chapterContainer = ".text-left";
+                nextChapterBtn = "";
+                titleHostName = "-Wordrain69";
+                //blacklistedTags = Arrays.asList("");
+                bookTitleSelector = ".post-title h1";
+                bookCoverSelector = ".summary_image img";
+                bookAuthorSelector = ".author-content a";
+                bookSubjectSelector = ".genres-content a";
                 break;
         }
     }

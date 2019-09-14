@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.0.0";
+    public static String versionNumber = "2.1.0";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -118,6 +118,11 @@ public class GUI extends JFrame {
     private JButton stopButton;
     private JButton manStopButton;
     private JButton manJsoupInfoButton;
+    public JTextField autoLastChapterURL;
+    public JTextField autoFirstChapterURL;
+    private JLabel autoLastChapterLbl;
+    private JLabel autoFirstChapterLbl;
+    private JLabel NovelUrlLbl;
     private JButton autoEditMetadataButton;
 
 
@@ -171,26 +176,49 @@ public class GUI extends JFrame {
             if (chapterListURL.getText().isEmpty()) {
                 showPopup("URL field is empty.", "warning");
                 chapterListURL.requestFocusInWindow();
-            } else if (saveLocation.getText().isEmpty()) {
+                return;
+            }
+            if (saveLocation.getText().isEmpty()) {
                 showPopup("Save directory field is empty.", "warning");
                 saveLocation.requestFocusInWindow();
-            } else if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
-                    && (((Integer) firstChapter.getValue() < 1)
-                    || ((Integer) lastChapter.getValue()) < 1)) {
-                showPopup("Chapter numbers can't be lower than 1.", "warning");
-            } else if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
-                    && ((Integer) lastChapter.getValue()) < (Integer) firstChapter.getValue()) {
-                showPopup("Last chapter can't be lower than first chapter.", "warning");
-            } else if ((!chapterAllCheckBox.isSelected()) && (toLastChapter.isSelected())
-                    && ((Integer) firstChapter.getValue()) < 1) {
-                showPopup("First chapter number can't be lower than 1.", "warning");
-            } else if (waitTime.getText().isEmpty()) {
+                return;
+            }
+            if (!auto.autoChapterToChapter) {
+                if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
+                        && (((Integer) firstChapter.getValue() < 1)
+                        || ((Integer) lastChapter.getValue()) < 1)) {
+                    showPopup("Chapter numbers can't be lower than 1.", "warning");
+                    return;
+                }
+                if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
+                        && ((Integer) lastChapter.getValue()) < (Integer) firstChapter.getValue()) {
+                    showPopup("Last chapter can't be lower than first chapter.", "warning");
+                    return;
+                }
+                if ((!chapterAllCheckBox.isSelected()) && (toLastChapter.isSelected())
+                        && ((Integer) firstChapter.getValue()) < 1) {
+                    showPopup("First chapter number can't be lower than 1.", "warning");
+                    return;
+                }
+            } else {
+                if (autoFirstChapterURL.getText().isEmpty()) {
+                    showPopup("First chapter URL is empty.", "warning");
+                    return;
+                }
+                if (autoLastChapterURL.getText().isEmpty()) {
+                    showPopup("Last chapter URL is empty.", "warning");
+                    return;
+                }
+            }
+            if (waitTime.getText().isEmpty()) {
                 showPopup("Wait time cannot be empty.", "warning");
-            } else if (!waitTime.getText().matches("\\d+") && !waitTime.getText().isEmpty()) {
+                return;
+            }
+            if (!waitTime.getText().matches("\\d+") && !waitTime.getText().isEmpty()) {
                 showPopup("Wait time must contain numbers.", "warning");
-            } else if ((!saveLocation.getText().isEmpty())
-                    && (!chapterListURL.getText().isEmpty())
-            ) {
+                return;
+            }
+            if ((!saveLocation.getText().isEmpty()) && (!chapterListURL.getText().isEmpty())) {
                 grabChaptersButton.setEnabled(false);
                 grabChaptersButton.setVisible(false);
                 stopButton.setEnabled(true);
@@ -216,6 +244,7 @@ public class GUI extends JFrame {
                 autoBusyLabel.setVisible(true);
                 auto = new Download(this);
                 if (!auto.chapterLinks.isEmpty()) grabChaptersButton.setEnabled(true);
+                if (auto.autoChapterToChapter) grabChaptersButton.setEnabled(true);
                 autoBusyLabel.setVisible(false);
             }
         }));
@@ -479,6 +508,35 @@ public class GUI extends JFrame {
                     openWebpage(new URI("https://jsoup.org/cookbook/extracting-data/selector-syntax"));
                 } catch (URISyntaxException ex) {
                     ex.printStackTrace();
+                }
+            }
+        });
+        autoHostSelection.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                String selection = autoHostSelection.getSelectedItem().toString();
+                if (HostSettings.autoChapterToChapterWebsitesList.contains(selection)) {
+                    chapterAllCheckBox.setEnabled(false);
+                    firstChapter.setEnabled(false);
+                    lastChapter.setEnabled(false);
+                    toLastChapter.setEnabled(false);
+                    checkInvertOrder.setEnabled(false);
+                    autoGetNumberButton.setEnabled(false);
+                    autoFirstChapterLbl.setVisible(true);
+                    autoFirstChapterURL.setVisible(true);
+                    autoLastChapterLbl.setVisible(true);
+                    autoLastChapterURL.setVisible(true);
+                } else {
+                    chapterAllCheckBox.setEnabled(true);
+                    firstChapter.setEnabled(true);
+                    lastChapter.setEnabled(true);
+                    toLastChapter.setEnabled(true);
+                    autoGetNumberButton.setEnabled(true);
+                    checkInvertOrder.setEnabled(true);
+                    autoFirstChapterLbl.setVisible(false);
+                    autoFirstChapterURL.setVisible(false);
+                    autoLastChapterLbl.setVisible(false);
+                    autoLastChapterURL.setVisible(false);
                 }
             }
         });
@@ -768,6 +826,10 @@ public class GUI extends JFrame {
         button1 = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
         button1.setBorder(BorderFactory.createEmptyBorder());
         button1.setContentAreaFilled(false);
+
+        autoCheckAvailability = new JButton(new ImageIcon(getClass().getResource("/images/check_icon.png")));
+        autoCheckAvailability.setBorder(BorderFactory.createEmptyBorder());
+        autoCheckAvailability.setContentAreaFilled(false);
 
         autoVisitButton = new JButton(new ImageIcon(getClass().getResource("/images/website_icon.png")));
         autoVisitButton.setBorder(BorderFactory.createEmptyBorder());

@@ -34,11 +34,13 @@ public class autoFetchChapters {
             // Connect to webpage
             Document doc = Jsoup.connect(currGrab.currHostSettings.url).get();
             // Get chapter links and names.
-            Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
-            Elements links = chapterItems.select("a[href]");
-            for (Element chapterLink : links) {
-                currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
-                currGrab.chaptersNames.add(chapterLink.text());
+            if (!currGrab.autoChapterToChapter) {
+                Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
+                Elements links = chapterItems.select("a[href]");
+                for (Element chapterLink : links) {
+                    currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
+                    currGrab.chaptersNames.add(chapterLink.text());
+                }
             }
             currGrab.tocDoc = doc;
         } catch (IllegalArgumentException | IOException e) {
@@ -141,10 +143,14 @@ public class autoFetchChapters {
                 currGrab.bookSubjects = null;
                 currGrab.gui.autoBookSubjects.setText("");
             }
-            // Chapter
+            // Chapter number
             if (!currGrab.chapterLinks.isEmpty()) {
                 currGrab.gui.autoChapterAmount.setText(String.valueOf(currGrab.chapterLinks.size()));
                 currGrab.gui.autoGetNumberButton.setEnabled(true);
+            }
+            if (currGrab.autoChapterToChapter) {
+                currGrab.gui.autoChapterAmount.setText("Unknown");
+                currGrab.gui.autoGetNumberButton.setEnabled(false);
             }
             // Cover
             if (!currGrab.currHostSettings.bookCoverSelector.isEmpty()) {
@@ -202,6 +208,44 @@ public class autoFetchChapters {
         for (int i = 1; i <= currGrab.chapterLinks.size(); i++) {
             Shared.saveChapterWithHTML(currGrab.chapterLinks.get(i - 1), i, currGrab.chaptersNames.get(i - 1),
                     currGrab.currHostSettings.chapterContainer, currGrab);
+            if (killTask) {
+                currGrab.gui.appendText(currGrab.window, "[INFO]Stopped.");
+                Path chaptersFolder = Paths.get(currGrab.saveLocation + "/chapters");
+                Path imagesFolder = Paths.get(currGrab.saveLocation + "/images");
+                try {
+                    if (Files.exists(imagesFolder)) Shared.deleteFolderAndItsContent(imagesFolder);
+                    if (Files.exists(chaptersFolder)) Shared.deleteFolderAndItsContent(chaptersFolder);
+                } catch (IOException e) {
+                    currGrab.gui.appendText(currGrab.window, e.getMessage());
+                    e.printStackTrace();
+                }
+                return;
+            }
+            Shared.sleep(currGrab.waitTime);
+        }
+    }
+
+    /**
+     * Handles downloading chapter to chapter.
+     */
+    static void processChaptersToChapters(String[] args, Download currGrab) {
+        currGrab.gui.appendText(currGrab.window, "[INFO]Connecting...");
+        currGrab.gui.setMaxProgress(currGrab.window, 9001);
+        String nextChapter = args[0];
+        String lastChapter = args[1];
+        currGrab.nextChapterBtn = args[2];
+        int chapterNumber = 0;
+        while (true) {
+            chapterNumber++;
+            Shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, currGrab.chapterContainer, currGrab);
+            nextChapter = currGrab.nextChapterURL;
+            if (nextChapter.equals(lastChapter) || (nextChapter + "/").equals(lastChapter)) {
+                chapterNumber++;
+                Shared.sleep(currGrab.waitTime);
+                currGrab.nextChapterBtn = "NOT_SET";
+                Shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, currGrab.chapterContainer, currGrab);
+                break;
+            }
             if (killTask) {
                 currGrab.gui.appendText(currGrab.window, "[INFO]Stopped.");
                 Path chaptersFolder = Paths.get(currGrab.saveLocation + "/chapters");
