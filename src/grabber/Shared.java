@@ -53,9 +53,15 @@ class Shared {
     static void report(Download currGrab) {
         long endTime = System.nanoTime();
         long elapsedTime = TimeUnit.SECONDS.convert((endTime - currGrab.startTime), TimeUnit.NANOSECONDS);
-        currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
-                + ((currGrab.successfulChapterNames.size() - 2) - currGrab.failedChapters.size()) + " of "
-                + (currGrab.successfulChapterNames.size() - 2) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+        if (currGrab.export.equals("EPUB")) {
+            currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
+                    + ((currGrab.successfulChapterNames.size() - 2) - currGrab.failedChapters.size()) + " of "
+                    + (currGrab.successfulChapterNames.size() - 2) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+        } else {
+            currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
+                    + ((currGrab.successfulChapterNames.size() - 1) - currGrab.failedChapters.size()) + " of "
+                    + (currGrab.successfulChapterNames.size() - 1) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+        }
         if (!currGrab.failedChapters.isEmpty()) {
             currGrab.gui.appendText(currGrab.window, "[ERROR]Failed to grab the following chapters:");
             for (String failedChapter : currGrab.failedChapters) {
@@ -181,14 +187,17 @@ class Shared {
             try (PrintStream out = new PrintStream(filePath + ".html", textEncoding)) {
                 out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
                 //Print chapter links
-                // -1 so it doesnt print the cover page
-                for (int i = 0; i < currGrab.successfulChapterNames.size() - 1; i++) {
-                    // Change href to chapters depending on export
-                    if (currGrab.export.equals("EPUB")) out.println("<a href=\""
-                            + currGrab.successfulFilenames.get(i) + ".html\">" + currGrab.successfulChapterNames.get(i)
-                            + "</a><br/>");
-                    else out.println("<a href=\"chapters/" + currGrab.successfulFilenames.get(i) + ".html\">"
-                            + currGrab.successfulChapterNames.get(i) + "</a><br/>");
+                if (currGrab.export.equals("EPUB")) {
+                    for (int i = 0; i < currGrab.successfulChapterNames.size() - 1; i++) {
+                        out.println("<a href=\""
+                                + currGrab.successfulFilenames.get(i) + ".html\">" + currGrab.successfulChapterNames.get(i)
+                                + "</a><br/>");
+                    }
+                } else {
+                    for (int i = 0; i < currGrab.successfulChapterNames.size(); i++) {
+                        out.println("<a href=\"chapters/" + currGrab.successfulFilenames.get(i) + ".html\">"
+                                + currGrab.successfulChapterNames.get(i) + "</a><br/>");
+                    }
                 }
                 //Print image links (for calibre)
                 if (!currGrab.imageLinks.isEmpty() && !currGrab.export.equals("EPUB")) {
@@ -253,6 +262,10 @@ class Shared {
                     chapterContent.select(tag).remove();
                 }
             }
+            // Replace custom strings
+            if (currGrab.currHostSettings.host.equals("https://www.wattpad.com/")) {
+                chapterContent.select("pre").tagName("div");
+            }
 
             // grabber.Download images of chapter container.
             if (currGrab.getImages) {
@@ -265,6 +278,7 @@ class Shared {
             if (!dir.exists()) dir.mkdirs();
             // Write chapter content to file.
             try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", textEncoding)) {
+                // Images
                 if (chapterContent.select("img").size() > 0) {
                     // Iterate each image in chapter content.
                     for (Element image : chapterContent.select("img")) {
@@ -282,12 +296,13 @@ class Shared {
                         } else chapterContent.select("img").remove();
                     }
                 }
-                // Write content to file.
+                // Write text content to file.
                 out.println(chapterContent);
             }
             successfulChapter(fileName, chapterName, currGrab);
         } catch (Throwable e) {
             currGrab.failedChapters.add(chapterName);
+            currGrab.gui.appendText(currGrab.window, "[ERROR]" + e.getMessage());
             e.printStackTrace();
         }
     }

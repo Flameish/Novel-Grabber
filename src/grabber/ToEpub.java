@@ -83,6 +83,7 @@ class ToEpub {
                         + currGrab.successfulFilenames.get(currGrab.successfulFilenames.size() - 2) + ".html");
                 resource = new Resource(inputStream, currGrab.successfulFilenames.get(currGrab.successfulFilenames.size() - 2) + ".html");
                 book.setCoverPage(resource);
+                book.addSection(currGrab.successfulChapterNames.get(currGrab.successfulChapterNames.size() - 2), resource);
                 inputStream.close();
             } else {
                 book.setCoverImage(new Resource(getClass().getResourceAsStream("/images/cover_placeholder.png"), "cover_placeholder.png"));

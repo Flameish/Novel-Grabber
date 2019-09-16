@@ -16,6 +16,8 @@ import org.jsoup.select.Elements;
 import updater.updater;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
@@ -32,7 +34,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.1.0";
+    public static String versionNumber = "2.1.1";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -70,7 +72,7 @@ public class GUI extends JFrame {
     public JButton checkStopPollingBtn;
     public JLabel autoBookSubjects;
     private JList<String> manLinkList;
-    private Download auto;
+    public Download auto;
     private JFrame window;
     private JTabbedPane tabbedPane;
     private JPanel rootPanel;
@@ -241,7 +243,10 @@ public class GUI extends JFrame {
             if (!chapterListURL.getText().isEmpty()) {
                 autoBusyLabel.setVisible(true);
                 auto = new Download(this);
-                if (!auto.chapterLinks.isEmpty()) grabChaptersButton.setEnabled(true);
+                if (!auto.chapterLinks.isEmpty()) {
+                    grabChaptersButton.setEnabled(true);
+                    autoGetNumberButton.setEnabled(true);
+                }
                 if (auto.autoChapterToChapter) grabChaptersButton.setEnabled(true);
                 autoBusyLabel.setVisible(false);
             }
@@ -519,7 +524,6 @@ public class GUI extends JFrame {
                     lastChapter.setEnabled(false);
                     toLastChapter.setEnabled(false);
                     checkInvertOrder.setEnabled(false);
-                    autoGetNumberButton.setEnabled(false);
                     autoFirstChapterLbl.setVisible(true);
                     autoFirstChapterURL.setVisible(true);
                     autoLastChapterLbl.setVisible(true);
@@ -529,7 +533,6 @@ public class GUI extends JFrame {
                     firstChapter.setEnabled(true);
                     lastChapter.setEnabled(true);
                     toLastChapter.setEnabled(true);
-                    autoGetNumberButton.setEnabled(true);
                     checkInvertOrder.setEnabled(true);
                     autoFirstChapterLbl.setVisible(false);
                     autoFirstChapterURL.setVisible(false);
@@ -538,6 +541,7 @@ public class GUI extends JFrame {
                 }
             }
         });
+
     }
 
     public static void main(String[] args) {
@@ -829,6 +833,26 @@ public class GUI extends JFrame {
         autoCheckAvailability = new JButton(new ImageIcon(getClass().getResource("/images/check_icon.png")));
         autoCheckAvailability.setBorder(BorderFactory.createEmptyBorder());
         autoCheckAvailability.setContentAreaFilled(false);
+
+        chapterListURL = new JTextField();
+        // Listen for changes in the text
+        chapterListURL.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            void warn() {
+                grabChaptersButton.setEnabled(false);
+            }
+        });
 
         autoVisitButton = new JButton(new ImageIcon(getClass().getResource("/images/website_icon.png")));
         autoVisitButton.setBorder(BorderFactory.createEmptyBorder());

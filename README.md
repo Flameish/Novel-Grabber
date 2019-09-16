@@ -8,7 +8,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 * [Volarenovels](https://volarenovels.com/)
 * [Light Novels Translations](https://lightnovelstranslations.com/)
 * [WordExcerpt](https://wordexcerpt.com/)
-* [BoxNovel](https://boxnovel.com/) (Only loads ~1400 chapters, use manual chapter-to-chapter grabbing for more)
+* [BoxNovel](https://boxnovel.com/)
 <br>and more...
 
 ## How to use

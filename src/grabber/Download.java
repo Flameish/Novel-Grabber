@@ -35,7 +35,7 @@ public class Download {
     boolean allChapters;
     boolean invertOrder;
     public boolean autoChapterToChapter;
-    long startTime = System.nanoTime();
+    public long startTime;
     int firstChapter;
     int lastChapter;
     int waitTime;
@@ -48,6 +48,7 @@ public class Download {
     List<String> bookSubjects = new ArrayList<>();
     String bookCover;
 
+    // Automatic
     public Download(GUI myGUI) {
         // Settings
         gui = myGUI;
@@ -66,8 +67,10 @@ public class Download {
         autoFetchChapters.getMetadata(this);
     }
 
+    // Manual
     public Download(GUI myGUI, String method) {
         // Settings
+        startTime = System.nanoTime();
         gui = myGUI;
         chapterContainer = myGUI.manChapterContainer.getText();
         saveLocation = myGUI.manSaveLocation.getText();
@@ -106,6 +109,7 @@ public class Download {
     }
 
     public void startAutoDownload() {
+        startTime = System.nanoTime();
         saveLocation = gui.saveLocation.getText();
         export = gui.exportSelection.getSelectedItem().toString();
         waitTime = Integer.parseInt(gui.waitTime.getText());

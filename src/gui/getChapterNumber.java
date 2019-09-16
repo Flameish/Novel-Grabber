@@ -57,7 +57,7 @@ public class getChapterNumber extends JDialog {
     }
 
     private void onOK(GUI gui) {
-        String[] infos = autoFetchChapters.getChapterNumber(gui, chapterField.getText());
+        String[] infos = autoFetchChapters.getChapterNumber(gui, chapterField.getText(), gui.auto);
         chapterNameLbl.setText(infos[0]);
         chapterNumberLbl.setText(infos[1]);
     }

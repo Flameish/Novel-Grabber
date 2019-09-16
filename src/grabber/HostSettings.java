@@ -13,8 +13,10 @@ public class HostSettings {
             "Volare Novels",
             "Creative Novels",
             "WordExcerpt",
-            "LiberSpark",
+            "Wattpad",
+            "FanFiction",
             "BoxNovel",
+            "LiberSpark",
             "Wordrain",
             "Comrademao",
             "Light Novels Translations",
@@ -22,6 +24,7 @@ public class HostSettings {
     };
     private static String[] autoChapterToChapterWebsites = {
             "Comrademao",
+            "BoxNovel",
             "Creative Novels"
     };
     public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
@@ -75,9 +78,9 @@ public class HostSettings {
                 titleHostName = "-Gravity-Tales";
                 url = urla + "/chapters"; //gravity tales' chapter list is at gravitytales.com/NOVEL/chapters
                 blacklistedTags = null;
-                bookTitleSelector = ".main-content h3"; //Fix
+                bookTitleSelector = ".main-content h3:eq(1)"; //Fix
                 bookCoverSelector = "#coverImg";
-                bookAuthorSelector = ".main-content h4";
+                bookAuthorSelector = ".main-content h4:eq(1)";
                 bookSubjectSelector = ".desc p";
                 break;
             case "volarenovels":
@@ -121,6 +124,7 @@ public class HostSettings {
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".listing-chapters_wrap a";
                 chapterContainer = ".text-left";
+                nextChapterBtn = ".btn.next_page";
                 titleHostName = "";
                 blacklistedTags = Arrays.asList("div.code-block");
                 bookTitleSelector = ".post-title h3";
@@ -164,7 +168,7 @@ public class HostSettings {
                 ordinalIndexForBaseNovel = 0;
                 chapterLinkSelecter = "";
                 chapterContainer = "article div";
-                nextChapterBtn = "a.btn.btn-default.btn-sm:eq(2)";
+                nextChapterBtn = "a.btn.btn-default.btn-sm:has(i.fa-angle-right)";
                 titleHostName = "";
                 blacklistedTags = Arrays.asList("div#CollapseRaw");
                 bookTitleSelector = "div.wrap-content h4";
@@ -197,6 +201,32 @@ public class HostSettings {
                 bookCoverSelector = ".summary_image img";
                 bookAuthorSelector = ".author-content a";
                 bookSubjectSelector = ".genres-content a";
+                break;
+            case "wattpad":
+                host = "https://www.wattpad.com/";
+                ordinalIndexForBaseNovel = 0;
+                chapterLinkSelecter = ".table-of-contents a";
+                chapterContainer = ".panel-reading pre";
+                nextChapterBtn = "";
+                titleHostName = "-Wattpad";
+                blacklistedTags = Arrays.asList("span.comment-marker");
+                bookTitleSelector = ".container h1";
+                bookCoverSelector = ".cover.cover-lg img";
+                bookAuthorSelector = "a.send-author-event.on-navigate:not(.avatar)";
+                bookSubjectSelector = ".tag-items li div.tag-item";
+                break;
+            case "fanfiction":
+                host = "https://www.fanfiction.net/";
+                ordinalIndexForBaseNovel = 0;
+                chapterLinkSelecter = "#chap_select option";
+                chapterContainer = "#storytext";
+                nextChapterBtn = "";
+                titleHostName = "|FanFiction";
+                //blacklistedTags = Arrays.asList("");
+                bookTitleSelector = "#profile_top b.xcontrast_txt";
+                bookCoverSelector = "#profile_top img.cimage";
+                bookAuthorSelector = "#profile_top a.xcontrast_txt";
+                bookSubjectSelector = "";
                 break;
         }
     }

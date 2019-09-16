@@ -10,10 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Chapter download handling of the automatic tab.
@@ -26,20 +24,31 @@ public class autoFetchChapters {
             // Need to reset in case of stopped grabbing
             currGrab.chapterLinks.clear();
             currGrab.chaptersNames.clear();
-            currGrab.successfulFilenames.clear();
-            currGrab.successfulChapterNames.clear();
-            currGrab.failedChapters.clear();
-            currGrab.imageLinks.clear();
-            currGrab.imageNames.clear();
             // Connect to webpage
             Document doc = Jsoup.connect(currGrab.currHostSettings.url).get();
             // Get chapter links and names.
             if (!currGrab.autoChapterToChapter) {
-                Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
-                Elements links = chapterItems.select("a[href]");
-                for (Element chapterLink : links) {
-                    currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
-                    currGrab.chaptersNames.add(chapterLink.text());
+                if (currGrab.currHostSettings.host.equals("https://www.fanfiction.net/")) {
+                    Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
+                    String fullLink = doc.select("link[rel=canonical]").attr("abs:href");
+                    String baseLinkStart = fullLink.substring(0, Shared.ordinalIndexOf(fullLink, "/", 5) + 1);
+                    String baseLinkEnd = fullLink.substring(baseLinkStart.length() + 1);
+
+                    Elements links = chapterItems.select("option[value]");
+                    for (Element chapterLink : links) {
+                        if (!currGrab.chapterLinks.contains(baseLinkStart + chapterLink.attr("value") + baseLinkEnd)) {
+                            currGrab.chapterLinks.add(baseLinkStart + chapterLink.attr("value") + baseLinkEnd);
+                            currGrab.chaptersNames.add(chapterLink.text());
+                        }
+                    }
+
+                } else {
+                    Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
+                    Elements links = chapterItems.select("a[href]");
+                    for (Element chapterLink : links) {
+                        currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
+                        currGrab.chaptersNames.add(chapterLink.text());
+                    }
                 }
             }
             currGrab.tocDoc = doc;
@@ -50,6 +59,11 @@ public class autoFetchChapters {
     }
 
     static void downloadChapters(Download currGrab) {
+        currGrab.successfulFilenames.clear();
+        currGrab.successfulChapterNames.clear();
+        currGrab.failedChapters.clear();
+        currGrab.imageLinks.clear();
+        currGrab.imageNames.clear();
         currGrab.gui.appendText(currGrab.window, "[INFO]Connecting...");
         // Reverse link order if selected.
         if (currGrab.invertOrder) {
@@ -265,37 +279,19 @@ public class autoFetchChapters {
 
     /**
      * Displays chapter name and chapter number.
-     * TODO: pass doc directly.
      */
-    public static String[] getChapterNumber(GUI gui, String chapterURL) {
-        List<String> chapterLinks = new ArrayList<>();
-        List<String> chaptersNames = new ArrayList<>();
+    public static String[] getChapterNumber(GUI gui, String chapterURL, Download currGrab) {
         try {
-            String host = gui.autoHostSelection.getSelectedItem().toString().toLowerCase().replaceAll(" ", "");
-            HostSettings tempHostSettings = new HostSettings(host, "");
-            String novelLink = chapterURL.substring(0, Shared.ordinalIndexOf(chapterURL, "/", tempHostSettings.ordinalIndexForBaseNovel));
-            tempHostSettings = new HostSettings(host, novelLink);
-            if (tempHostSettings.host.equals("http://gravitytales.com/")) novelLink = novelLink + "/chapters";
-            if (tempHostSettings.host.equals("https://liberspark.com/"))
-                novelLink = novelLink.replace("/read/", "/novel/");
-            Document doc = Jsoup.connect(novelLink).get();
-            // Get chapter links and names.
-            Elements chapterItems = doc.select(tempHostSettings.chapterLinkSelecter);
-            Elements links = chapterItems.select("a[href]");
-            for (Element chapterLink : links) {
-                chapterLinks.add(chapterLink.attr("abs:href"));
-                chaptersNames.add(chapterLink.text());
-            }
-            int chapterNumber = chapterLinks.indexOf(chapterURL);
+            int chapterNumber = currGrab.chapterLinks.indexOf(chapterURL);
             if (chapterNumber == -1)
-                chapterNumber = chapterLinks.indexOf(chapterURL.substring(0, chapterURL.lastIndexOf("/")));
+                chapterNumber = currGrab.chapterLinks.indexOf(chapterURL.substring(0, chapterURL.lastIndexOf("/")));
             if (chapterNumber == -1)
-                chapterNumber = chapterLinks.indexOf(chapterURL.replace("https:", "http:"));
+                chapterNumber = currGrab.chapterLinks.indexOf(chapterURL.replace("https:", "http:"));
             if (chapterNumber == -1) gui.showPopup("Could not find chapter number.", "error");
             else {
-                return new String[]{chaptersNames.get(chapterNumber), String.valueOf(chapterNumber + 1)};
+                return new String[]{currGrab.chaptersNames.get(chapterNumber), String.valueOf(chapterNumber + 1)};
             }
-        } catch (IllegalArgumentException | IOException e) {
+        } catch (IllegalArgumentException e) {
             gui.appendText("auto", "[ERROR]" + e.getMessage());
             e.printStackTrace();
         }
