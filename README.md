@@ -3,6 +3,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 
 
 ##Natively supported sites
+
 | ​ | ​ | ​|
 | --- | --- | --- | 
 | [Wuxiaworld](https://wuxiaworld.com/) | [Royalroad](https://royalroad.com/) | [Gravitytales](https://gravitytales.com/)|
