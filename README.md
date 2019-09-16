@@ -1,16 +1,16 @@
 # ![alt text](https://i.imgur.com/LrV2tLe.png)Novel-Grabber
 Novel-Grabber is a gui based web scrapper that can download and convert chapters into EPUB from various supported web/light novel sites or from any other site manually. Furthermore,  Novel-Grabber can poll a list of novels for new chapter releases and notify you with desktop notifications.
 
-## Natively supported sites
-* [Wuxiaworld](https://wuxiaworld.com/)
-* [Royalroad](https://royalroad.com/)
-* [Gravitytales](https://gravitytales.com/)
-* [Volarenovels](https://volarenovels.com/)
-* [Light Novels Translations](https://lightnovelstranslations.com/)
-* [WordExcerpt](https://wordexcerpt.com/)
-* [BoxNovel](https://boxnovel.com/)
-<br>and more...
 
+##Natively supported sites
+​ | ​ | ​
+--- | --- | ---
+[Wuxiaworld](https://wuxiaworld.com/) | [Royalroad](https://royalroad.com/) | [Gravitytales](https://gravitytales.com/)
+[Volarenovels](https://volarenovels.com/)| [Creative Novels](https://https://creativenovels.com/.com/) | [WordExcerpt](https://wordexcerpt.com/)
+[Wattpad](https://wattpad.com/) | [FanFiction](https://fanfiction.net/) | [BoxNovel](https://boxnovel.com/)
+[LiberSpark](https://liberspark.com/) |[Wordrain](https://wordrain69.com/) | [Comrademao](https://comrademao.com/)
+[Light Novels Translations](https://lightnovelstranslations.com/) | [Chrysanthemum Garden](https://chrysanthemumgarden.com/)|  
+​ | ​|  
 ## How to use
 <strong>Automatic:</strong>
 
