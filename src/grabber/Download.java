@@ -13,11 +13,11 @@ import java.util.Objects;
 
 public class Download {
     public List<String> chapterLinks = new ArrayList<>();
-    HostSettings currHostSettings;
+    public HostSettings currHostSettings;
     public BufferedImage bufferedCover;
     public String bufferedCoverName;
     public Document tocDoc;
-    GUI gui;
+    public GUI gui;
 
     List<String> chaptersNames = new ArrayList<>();
     List<String> failedChapters = new ArrayList<>();
@@ -43,10 +43,10 @@ public class Download {
     String nextChapterBtn = "NOT_SET";
 
     //Metadata
-    String bookTitle;
-    String bookAuthor;
-    List<String> bookSubjects = new ArrayList<>();
-    String bookCover;
+    public String bookTitle;
+    public String bookAuthor;
+    public List<String> bookSubjects = new ArrayList<>();
+    public String bookCover;
 
     // Automatic
     public Download(GUI myGUI) {
@@ -123,7 +123,7 @@ public class Download {
         }
         getImages = gui.getImages.isSelected();
         // Write buffered cover to save location
-        if (bufferedCover != null) {
+        if (bufferedCover != null && bookCover != null) {
             try {
                 File outputfile = new File(saveLocation + File.separator + "images" + File.separator + bufferedCoverName);
                 if (!outputfile.exists()) outputfile.mkdirs();

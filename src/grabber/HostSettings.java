@@ -1,5 +1,6 @@
 package grabber;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -52,7 +53,7 @@ public class HostSettings {
                 chapterLinkSelecter = "#accordion .chapter-item"; //Table of contents chapter links
                 chapterContainer = ".p-15 .fr-view"; //chapter text
                 titleHostName = "-WuxiaWorld"; //From the tab title with whitespaces removed
-                blacklistedTags = Arrays.asList("a.chapter-nav");
+                blacklistedTags = new LinkedList<>(Arrays.asList("a.chapter-nav"));
                 bookTitleSelector = ".p-15 h4";
                 bookCoverSelector = "img.media-object";
                 bookAuthorSelector = ".media-body dd";

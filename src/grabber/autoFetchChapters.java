@@ -141,12 +141,33 @@ public class autoFetchChapters {
                         allTags = allTags.replace("Genres:", "");
                         currGrab.bookSubjects = Arrays.asList(allTags.split(", "));
                         for (String eachTag : currGrab.bookSubjects) {
-                            currGrab.gui.autoBookSubjects.setText(currGrab.gui.autoBookSubjects.getText() + eachTag + " ");
+                            currGrab.gui.autoBookSubjects.setText(currGrab.gui.autoBookSubjects.getText() + eachTag + ",");
+                            if (!currGrab.gui.autoBookSubjects.getText().isEmpty()) {
+                                currGrab.gui.autoBookSubjects.setText(
+                                        currGrab.gui.autoBookSubjects.getText().substring(0,
+                                                currGrab.gui.autoBookSubjects.getText().lastIndexOf(",")));
+                            }
                         }
                     } else {
                         for (Element tag : tags) {
                             currGrab.bookSubjects.add(tag.text());
-                            currGrab.gui.autoBookSubjects.setText(currGrab.gui.autoBookSubjects.getText() + tag.text() + " ");
+                        }
+
+                        // Display book subjects on GUI
+                        int maxNumberOfSubjects = 0;
+                        currGrab.gui.autoBookSubjects.setText("<html>");
+                        for (String eachTag : currGrab.bookSubjects) {
+                            currGrab.gui.autoBookSubjects.setText(currGrab.gui.autoBookSubjects.getText() + eachTag + ", ");
+                            maxNumberOfSubjects++;
+                            if (maxNumberOfSubjects == 4) {
+                                maxNumberOfSubjects = 0;
+                                currGrab.gui.autoBookSubjects.setText(currGrab.gui.autoBookSubjects.getText() + "<br>");
+                            }
+                        }
+                        if (!currGrab.gui.autoBookSubjects.getText().isEmpty()) {
+                            currGrab.gui.autoBookSubjects.setText(
+                                    currGrab.gui.autoBookSubjects.getText().substring(0,
+                                            currGrab.gui.autoBookSubjects.getText().lastIndexOf(",")));
                         }
                     }
                 } else {
