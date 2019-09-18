@@ -78,7 +78,7 @@ public class GUI extends JFrame {
     private JPanel rootPanel;
     private JButton browseButton;
     private JButton autoVisitButton;
-    private JButton button1;
+    private JButton autoShowBlacklistedTagsBtn;
     private JLabel coverImage;
     private JButton grabChaptersButton;
     private JButton autoCheckAvailability;
@@ -125,6 +125,8 @@ public class GUI extends JFrame {
     private JLabel autoLastChapterLbl;
     private JLabel autoFirstChapterLbl;
     private JLabel NovelUrlLbl;
+    private JButton autoEditMetaBtn;
+    private JButton autoEditBlacklistBtn;
     private JButton autoEditMetadataButton;
 
 
@@ -155,7 +157,7 @@ public class GUI extends JFrame {
                 e.printStackTrace();
             }
         });
-        button1.addActionListener(arg0 -> {
+        autoShowBlacklistedTagsBtn.addActionListener(arg0 -> {
             DefaultListModel<String> tempListModel = new DefaultListModel<>();
             JList<String> tempJList = new JList<>(tempListModel);
 
@@ -169,7 +171,7 @@ public class GUI extends JFrame {
                     tempListModel.addElement(alreadyBlacklistedTags);
                 }
             }
-            JOptionPane.showOptionDialog(null, tagScrollPane, "Tags to be removed", JOptionPane.PLAIN_MESSAGE, JOptionPane.PLAIN_MESSAGE, null, null, null);
+            JOptionPane.showOptionDialog(null, tagScrollPane, "Blacklisted Tags:", JOptionPane.PLAIN_MESSAGE, JOptionPane.PLAIN_MESSAGE, null, null, null);
         });
         grabChaptersButton.addActionListener(arg0 -> Executors.newSingleThreadExecutor().execute(() -> {
             // input validation
@@ -246,8 +248,14 @@ public class GUI extends JFrame {
                 if (!auto.chapterLinks.isEmpty()) {
                     grabChaptersButton.setEnabled(true);
                     autoGetNumberButton.setEnabled(true);
+                    autoEditMetaBtn.setEnabled(true);
+                    autoEditBlacklistBtn.setEnabled(true);
                 }
-                if (auto.autoChapterToChapter) grabChaptersButton.setEnabled(true);
+                if (auto.autoChapterToChapter) {
+                    grabChaptersButton.setEnabled(true);
+                    autoEditMetaBtn.setEnabled(true);
+                    autoEditBlacklistBtn.setEnabled(true);
+                }
                 autoBusyLabel.setVisible(false);
             }
         }));
@@ -437,18 +445,8 @@ public class GUI extends JFrame {
                 manSaveLocation.setText(chooser.getSelectedFile().toString());
             }
         });
-        manBlackListedTags.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                manSetBlacklistedTags.main();
-            }
-        });
-        chapterToChapterButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ChapterToChapter.main();
-            }
-        });
+        manBlackListedTags.addActionListener(e -> manSetBlacklistedTags.main());
+        chapterToChapterButton.addActionListener(e -> ChapterToChapter.main());
         updateButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             updaterStatus.setVisible(true);
             updater.updateJar();
@@ -460,6 +458,10 @@ public class GUI extends JFrame {
                     "Novel URL:", "Add a novel to check", JOptionPane.PLAIN_MESSAGE);
             if (!(checkUrl == null) && !(host == null)) {
                 if (!host.isEmpty() && !checkUrl.isEmpty()) {
+                    if (HostSettings.autoChapterToChapterWebsitesList.contains(host)) {
+                        appendText("checker", host + " is not supported.");
+                        return;
+                    }
                     host = host.toLowerCase().replace(" ", "");
                     listModelCheckerLinks.addElement("[" + checkUrl + "]");
                     chapterChecker.hosts.add(host);
@@ -491,18 +493,12 @@ public class GUI extends JFrame {
                 checkPollStartBtn.setEnabled(false);
             }
         });
-        autoEditMetadataButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        autoEditMetadataButton.addActionListener(e -> {
 
-            }
         });
-        manStopButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                manStopButton.setEnabled(false);
-                manFetchChapters.killTask = true;
-            }
+        manStopButton.addActionListener(e -> {
+            manStopButton.setEnabled(false);
+            manFetchChapters.killTask = true;
         });
         manJsoupInfoButton.addActionListener(new ActionListener() {
             @Override
@@ -514,34 +510,33 @@ public class GUI extends JFrame {
                 }
             }
         });
-        autoHostSelection.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                String selection = autoHostSelection.getSelectedItem().toString();
-                if (HostSettings.autoChapterToChapterWebsitesList.contains(selection)) {
-                    chapterAllCheckBox.setEnabled(false);
-                    firstChapter.setEnabled(false);
-                    lastChapter.setEnabled(false);
-                    toLastChapter.setEnabled(false);
-                    checkInvertOrder.setEnabled(false);
-                    autoFirstChapterLbl.setVisible(true);
-                    autoFirstChapterURL.setVisible(true);
-                    autoLastChapterLbl.setVisible(true);
-                    autoLastChapterURL.setVisible(true);
-                } else {
-                    chapterAllCheckBox.setEnabled(true);
-                    firstChapter.setEnabled(true);
-                    lastChapter.setEnabled(true);
-                    toLastChapter.setEnabled(true);
-                    checkInvertOrder.setEnabled(true);
-                    autoFirstChapterLbl.setVisible(false);
-                    autoFirstChapterURL.setVisible(false);
-                    autoLastChapterLbl.setVisible(false);
-                    autoLastChapterURL.setVisible(false);
-                }
+        autoHostSelection.addItemListener(e -> {
+            String selection = autoHostSelection.getSelectedItem().toString();
+            if (HostSettings.autoChapterToChapterWebsitesList.contains(selection)) {
+                chapterAllCheckBox.setEnabled(false);
+                firstChapter.setEnabled(false);
+                lastChapter.setEnabled(false);
+                toLastChapter.setEnabled(false);
+                checkInvertOrder.setEnabled(false);
+                autoFirstChapterLbl.setVisible(true);
+                autoFirstChapterURL.setVisible(true);
+                autoLastChapterLbl.setVisible(true);
+                autoLastChapterURL.setVisible(true);
+            } else {
+                chapterAllCheckBox.setEnabled(true);
+                firstChapter.setEnabled(true);
+                lastChapter.setEnabled(true);
+                toLastChapter.setEnabled(true);
+                checkInvertOrder.setEnabled(true);
+                autoFirstChapterLbl.setVisible(false);
+                autoFirstChapterURL.setVisible(false);
+                autoLastChapterLbl.setVisible(false);
+                autoLastChapterURL.setVisible(false);
             }
         });
 
+        autoEditBlacklistBtn.addActionListener(e -> autoSetBlacklistedTags.main(auto));
+        autoEditMetaBtn.addActionListener(e -> autoEditMetadata.main(auto));
     }
 
     public static void main(String[] args) {
@@ -826,9 +821,9 @@ public class GUI extends JFrame {
         // Automatic Tab
         autoHostSelection = new JComboBox(HostSettings.websites);
 
-        button1 = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
-        button1.setBorder(BorderFactory.createEmptyBorder());
-        button1.setContentAreaFilled(false);
+        autoShowBlacklistedTagsBtn = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
+        autoShowBlacklistedTagsBtn.setBorder(BorderFactory.createEmptyBorder());
+        autoShowBlacklistedTagsBtn.setContentAreaFilled(false);
 
         autoCheckAvailability = new JButton(new ImageIcon(getClass().getResource("/images/check_icon.png")));
         autoCheckAvailability.setBorder(BorderFactory.createEmptyBorder());
@@ -870,6 +865,14 @@ public class GUI extends JFrame {
         autoEditMetadataButton = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));
         autoEditMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         autoEditMetadataButton.setContentAreaFilled(false);
+
+        autoEditMetaBtn = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));
+        autoEditMetaBtn.setBorder(BorderFactory.createEmptyBorder());
+        autoEditMetaBtn.setContentAreaFilled(false);
+
+        autoEditBlacklistBtn = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
+        autoEditBlacklistBtn.setBorder(BorderFactory.createEmptyBorder());
+        autoEditBlacklistBtn.setContentAreaFilled(false);
 
         autoGetNumberButton = new JButton(new ImageIcon(getClass().getResource("/images/search_icon.png")));
         autoGetNumberButton.setBorder(BorderFactory.createEmptyBorder());

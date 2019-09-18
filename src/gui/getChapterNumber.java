@@ -60,6 +60,7 @@ public class getChapterNumber extends JDialog {
         String[] infos = autoFetchChapters.getChapterNumber(gui, chapterField.getText(), gui.auto);
         chapterNameLbl.setText(infos[0]);
         chapterNumberLbl.setText(infos[1]);
+        dialog.pack();
     }
 
     private void onCancel() {
