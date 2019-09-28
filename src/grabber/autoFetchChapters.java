@@ -10,8 +10,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Chapter download handling of the automatic tab.
@@ -27,28 +28,84 @@ public class autoFetchChapters {
             // Connect to webpage
             Document doc = Jsoup.connect(currGrab.currHostSettings.url).get();
             // Get chapter links and names.
+            Elements chapterItems;
+            Elements links;
             if (!currGrab.autoChapterToChapter) {
-                if (currGrab.currHostSettings.host.equals("https://www.fanfiction.net/")) {
-                    Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
-                    String fullLink = doc.select("link[rel=canonical]").attr("abs:href");
-                    String baseLinkStart = fullLink.substring(0, Shared.ordinalIndexOf(fullLink, "/", 5) + 1);
-                    String baseLinkEnd = fullLink.substring(baseLinkStart.length() + 1);
+                switch (currGrab.currHostSettings.host) {
+                    // Custom chapter selection
+                    case "https://www.fanfiction.net/":
+                        chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
+                        String fullLink = doc.select("link[rel=canonical]").attr("abs:href");
+                        String baseLinkStart = fullLink.substring(0, Shared.ordinalIndexOf(fullLink, "/", 5) + 1);
+                        String baseLinkEnd = fullLink.substring(baseLinkStart.length() + 1);
 
-                    Elements links = chapterItems.select("option[value]");
-                    for (Element chapterLink : links) {
-                        if (!currGrab.chapterLinks.contains(baseLinkStart + chapterLink.attr("value") + baseLinkEnd)) {
-                            currGrab.chapterLinks.add(baseLinkStart + chapterLink.attr("value") + baseLinkEnd);
+                        links = chapterItems.select("option[value]");
+                        for (Element chapterLink : links) {
+                            if (!currGrab.chapterLinks.contains(baseLinkStart + chapterLink.attr("value") + baseLinkEnd)) {
+                                currGrab.chapterLinks.add(baseLinkStart + chapterLink.attr("value") + baseLinkEnd);
+                                currGrab.chaptersNames.add(chapterLink.text());
+                            }
+                        }
+
+                        break;
+                    case "https://www.flying-lines.com/":
+                        chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
+                        links = chapterItems.select("a[href]");
+                        String chapterName;
+                        int chapterNumber;
+                        String chapterURL;
+                        for (Element chapterLink : links) {
+                            chapterNumber = Integer.parseInt(chapterLink.text().substring(0, chapterLink.text().indexOf(".") - 1));
+                            chapterName = chapterLink.text().substring(chapterLink.text().indexOf(".") + 1);
+                            currGrab.chaptersNames.add(chapterName);
+                            chapterURL = chapterLink.attr("abs:href").replace("/novel", "/h5/novel/"
+                                    + currGrab.gui.chapterListURL.getText().substring(currGrab.gui.chapterListURL.getText().lastIndexOf("/") + 1)
+                                    + "/" + chapterNumber);
+                            currGrab.chapterLinks.add(chapterURL.substring(0, chapterURL.lastIndexOf("/")));
+                        }
+                        break;
+                    case "https://www.tapread.com/":
+                        String novelURL = currGrab.gui.chapterListURL.getText();
+                        String tapReadNovelId = novelURL.substring(novelURL.lastIndexOf("/") + 1);
+                        currGrab.xhrBookId = tapReadNovelId;
+                        Map<String, String> chapters = xhrRequest.tapReadGetChapterList("https://www.tapread.com/book/contents", "bookId=" + tapReadNovelId);
+                        for (String chapterId : chapters.keySet()) {
+
+                            currGrab.chaptersNames.add(chapters.get(chapterId));
+                            currGrab.xhrChapterIds.add(chapterId);
+                            currGrab.chapterLinks.add("https://www.tapread.com/book/index/" + tapReadNovelId + "/" + chapterId);
+                        }
+                        break;
+                    case "https://creativenovels.com/":
+                        String novelId = doc.select("chapter_list_novel_page").attr("class");
+                        xhrRequest http = new xhrRequest();
+                        String postResponse = http.sendPost("https://creativenovels.com/wp-admin/admin-ajax.php",
+                                "action=crn_chapter_list&view_id=61581");
+                        List<String> containedUrls = new ArrayList<String>();
+                        String urlRegex = "\\b((https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])";
+                        Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
+                        Matcher urlMatcher = pattern.matcher(postResponse);
+
+                        while (urlMatcher.find()) {
+                            containedUrls.add(postResponse.substring(urlMatcher.start(0),
+                                    urlMatcher.end(0)));
+                        }
+                        int i = 1;
+                        for (String chapterUrl : containedUrls) {
+                            chapterUrl = chapterUrl.substring(0, chapterUrl.lastIndexOf("/"));
+                            currGrab.chapterLinks.add(chapterUrl);
+                            currGrab.chaptersNames.add("Chapter: " + i);
+                            i++;
+                        }
+                        break;
+                    default:
+                        chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
+                        links = chapterItems.select("a[href]");
+                        for (Element chapterLink : links) {
+                            currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
                             currGrab.chaptersNames.add(chapterLink.text());
                         }
-                    }
-
-                } else {
-                    Elements chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
-                    Elements links = chapterItems.select("a[href]");
-                    for (Element chapterLink : links) {
-                        currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
-                        currGrab.chaptersNames.add(chapterLink.text());
-                    }
+                        break;
                 }
             }
             currGrab.tocDoc = doc;
@@ -66,7 +123,7 @@ public class autoFetchChapters {
         currGrab.imageNames.clear();
         currGrab.gui.appendText(currGrab.window, "[INFO]Connecting...");
         // Reverse link order if selected.
-        if (currGrab.invertOrder) {
+        if (currGrab.gui.checkInvertOrder.isSelected()) {
             Collections.reverse(currGrab.chapterLinks);
             Collections.reverse(currGrab.chaptersNames);
         }
@@ -85,6 +142,10 @@ public class autoFetchChapters {
                 return;
             }
             processSpecificChapters(currGrab);
+        }
+        if (currGrab.gui.checkInvertOrder.isSelected()) {
+            Collections.reverse(currGrab.chapterLinks);
+            Collections.reverse(currGrab.chaptersNames);
         }
     }
 
@@ -171,12 +232,12 @@ public class autoFetchChapters {
                         }
                     }
                 } else {
-                    currGrab.bookSubjects = null;
-                    currGrab.gui.autoBookSubjects.setText("");
+                    currGrab.bookSubjects.add("Unknown");
+                    currGrab.gui.autoBookSubjects.setText("Unknown");
                 }
             } else {
-                currGrab.bookSubjects = null;
-                currGrab.gui.autoBookSubjects.setText("");
+                currGrab.bookSubjects.add("Unknown");
+                currGrab.gui.autoBookSubjects.setText("Unknown");
             }
             // Chapter number
             if (!currGrab.chapterLinks.isEmpty()) {
@@ -217,8 +278,15 @@ public class autoFetchChapters {
         currGrab.gui.setMaxProgress(currGrab.window, (currGrab.lastChapter - currGrab.firstChapter) + 1);
         currGrab.gui.progressBar.setStringPainted(true);
         for (int i = currGrab.firstChapter; i <= currGrab.lastChapter; i++) {
-            Shared.saveChapterWithHTML(currGrab.chapterLinks.get(i - 1), i, currGrab.chaptersNames.get(i - 1),
-                    currGrab.currHostSettings.chapterContainer, currGrab);
+            if (currGrab.currHostSettings.host.equals("https://www.tapread.com/")) {
+                String chapterContentString = xhrRequest.tapReadGetChapterContent("https://www.tapread.com/book/chapter",
+                        "bookId=" + currGrab.xhrBookId + "&chapterId=" + currGrab.xhrChapterIds.get(i - 1));
+                Shared.saveChapterXhr(chapterContentString, i, currGrab.chaptersNames.get(i - 1),
+                        currGrab.currHostSettings.chapterContainer, currGrab);
+            } else {
+                Shared.saveChapterWithHTML(currGrab.chapterLinks.get(i - 1), i, currGrab.chaptersNames.get(i - 1),
+                        currGrab.currHostSettings.chapterContainer, currGrab);
+            }
             if (killTask) {
                 currGrab.gui.appendText(currGrab.window, "[INFO]Stopped.");
                 Path chaptersFolder = Paths.get(currGrab.saveLocation + "/chapters");
@@ -241,8 +309,15 @@ public class autoFetchChapters {
         currGrab.gui.setMaxProgress(currGrab.window, currGrab.chapterLinks.size());
         currGrab.gui.progressBar.setStringPainted(true);
         for (int i = 1; i <= currGrab.chapterLinks.size(); i++) {
-            Shared.saveChapterWithHTML(currGrab.chapterLinks.get(i - 1), i, currGrab.chaptersNames.get(i - 1),
-                    currGrab.currHostSettings.chapterContainer, currGrab);
+            if (currGrab.currHostSettings.host.equals("https://www.tapread.com/")) {
+                String chapterContentString = xhrRequest.tapReadGetChapterContent("https://www.tapread.com/book/chapter",
+                        "bookId=" + currGrab.xhrBookId + "&chapterId=" + currGrab.xhrChapterIds.get(i - 1));
+                Shared.saveChapterXhr(chapterContentString, i, currGrab.chaptersNames.get(i - 1),
+                        currGrab.currHostSettings.chapterContainer, currGrab);
+            } else {
+                Shared.saveChapterWithHTML(currGrab.chapterLinks.get(i - 1), i, currGrab.chaptersNames.get(i - 1),
+                        currGrab.currHostSettings.chapterContainer, currGrab);
+            }
             if (killTask) {
                 currGrab.gui.appendText(currGrab.window, "[INFO]Stopped.");
                 Path chaptersFolder = Paths.get(currGrab.saveLocation + "/chapters");

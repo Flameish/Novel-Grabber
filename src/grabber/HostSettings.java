@@ -13,20 +13,28 @@ public class HostSettings {
             "Gravity Tales",
             "Volare Novels",
             "Creative Novels",
+            "Flying Lines",
+            "TapRead",
             "WordExcerpt",
-            "Wattpad",
             "FanFiction",
             "BoxNovel",
             "LiberSpark",
             "Wordrain",
             "Comrademao",
             "Light Novels Translations",
+            "Zenith Novels",
+            "Translation Otaku",
+            "Ebisu Translations",
+            "ISO Hungry TLS",
+            "Kuhaku Light Novel Translations",
             "Chrysanthemum Garden"
     };
     private static String[] autoChapterToChapterWebsites = {
             "Comrademao",
-            "BoxNovel",
-            "Creative Novels"
+            "Zenith Novels",
+            "Translation Otaku",
+            "Creative Novels",
+            "BoxNovel"
     };
     public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
 
@@ -79,9 +87,9 @@ public class HostSettings {
                 titleHostName = "-Gravity-Tales";
                 url = urla + "/chapters"; //gravity tales' chapter list is at gravitytales.com/NOVEL/chapters
                 blacklistedTags = null;
-                bookTitleSelector = ".main-content h3:eq(1)"; //Fix
+                bookTitleSelector = ".main-content h3"; //Fix
                 bookCoverSelector = "#coverImg";
-                bookAuthorSelector = ".main-content h4:eq(1)";
+                bookAuthorSelector = ".main-content h4";
                 bookSubjectSelector = ".desc p";
                 break;
             case "volarenovels":
@@ -90,7 +98,7 @@ public class HostSettings {
                 chapterLinkSelecter = "#accordion .chapter-item a";
                 chapterContainer = ".jfontsize_content.fr-view";
                 titleHostName = "-volare-novels";
-                blacklistedTags = Arrays.asList("a.chapter-nav", "div[id^=div-gpt-ad]", "span[style=font-size: 0]", "span[class=hidden-text]");
+                blacklistedTags = new LinkedList<>(Arrays.asList("a.chapter-nav", "div[id^=div-gpt-ad]", "span[style=font-size: 0]", "span[class=hidden-text]"));
                 bookTitleSelector = "h3.title";
                 bookCoverSelector = "img.m-tb-30";
                 bookAuthorSelector = "div.p-tb-10-rl-30 p"; //Fix
@@ -102,7 +110,7 @@ public class HostSettings {
                 chapterLinkSelecter = ".listing-chapters_wrap a[href]";
                 chapterContainer = ".text-left";
                 titleHostName = "-WordExcerpt";
-                blacklistedTags = Arrays.asList("center", "meta", "script");
+                blacklistedTags = new LinkedList<>(Arrays.asList("center", "meta", "script"));
                 bookTitleSelector = ".post-title h1";
                 bookCoverSelector = "div.summary_image a img";
                 bookAuthorSelector = ".author-content a";
@@ -114,7 +122,7 @@ public class HostSettings {
                 chapterLinkSelecter = ".entry-content a[href^=" + urla + "]:not(a[rel])";
                 chapterContainer = ".entry-content";
                 titleHostName = "";
-                blacklistedTags = Arrays.asList("div.code-block", ".sharedaddy", "#textbox");
+                blacklistedTags = new LinkedList<>(Arrays.asList("div.code-block", ".sharedaddy", "#textbox"));
                 bookTitleSelector = "#content h1.entry-title";
                 bookCoverSelector = "#content p img.alignnone";
                 bookAuthorSelector = "";
@@ -127,7 +135,7 @@ public class HostSettings {
                 chapterContainer = ".text-left";
                 nextChapterBtn = ".btn.next_page";
                 titleHostName = "";
-                blacklistedTags = Arrays.asList("div.code-block");
+                blacklistedTags = new LinkedList<>(Arrays.asList("div.code-block"));
                 bookTitleSelector = ".post-title h3";
                 bookCoverSelector = ".summary_image img";
                 bookAuthorSelector = ".author-content";
@@ -139,7 +147,7 @@ public class HostSettings {
                 chapterLinkSelecter = "#novel-chapters-list a.text-links";
                 chapterContainer = "#reader-content";
                 titleHostName = "|LiberSpark";
-                blacklistedTags = Arrays.asList("div.ad-wrapper");
+                blacklistedTags = new LinkedList<>(Arrays.asList("div.ad-wrapper"));
                 bookTitleSelector = "h1[style=text-align:left]";
                 bookCoverSelector = "img#uploaded-cover-image";
                 bookAuthorSelector = ".novel-author-info a h4";
@@ -152,13 +160,13 @@ public class HostSettings {
                 chapterLinkSelecter = ".translated-chapters a";
                 chapterContainer = "#novel-content";
                 titleHostName = "--ChrysanthemumGarden";
-                blacklistedTags = Arrays.asList(".chrys-ads",
+                blacklistedTags = new LinkedList<>(Arrays.asList(".chrys-ads",
                         ".google",
                         "h3[style=color:transparent;height:1px;margin:0;padding:0;overflow:hidden]",
                         "p[style=height:1px;margin:0;padding:0;overflow:hidden]",
                         "span[style=height:1px;width:0;overflow:hidden;display:inline-block]",
                         ".sharedaddy",
-                        ".jum");
+                        ".jum"));
                 bookTitleSelector = "h1.novel-title";
                 bookCoverSelector = "img.materialboxed";
                 bookAuthorSelector = "";
@@ -171,7 +179,7 @@ public class HostSettings {
                 chapterContainer = "article div";
                 nextChapterBtn = "a.btn.btn-default.btn-sm:has(i.fa-angle-right)";
                 titleHostName = "";
-                blacklistedTags = Arrays.asList("div#CollapseRaw");
+                blacklistedTags = new LinkedList<>(Arrays.asList("div#CollapseRaw"));
                 bookTitleSelector = "div.wrap-content h4";
                 bookCoverSelector = "div.wrap-thumbnail img";
                 bookAuthorSelector = "div.author";
@@ -181,10 +189,10 @@ public class HostSettings {
                 host = "https://creativenovels.com/";
                 ordinalIndexForBaseNovel = 0;
                 chapterLinkSelecter = "";
-                chapterContainer = ".entry-content";
+                chapterContainer = ".post";
                 nextChapterBtn = "a.x-btn.nextkey";
                 titleHostName = "";
-                blacklistedTags = Arrays.asList(".mNS", ".support-placement");
+                blacklistedTags = new LinkedList<>(Arrays.asList(".mNS", ".support-placement"));
                 bookTitleSelector = "div.e45344-16.x-text.bK_C";
                 bookCoverSelector = "img.book_cover";
                 bookAuthorSelector = "div.e45344-17.x-text.bK_C a";
@@ -197,7 +205,7 @@ public class HostSettings {
                 chapterContainer = ".text-left";
                 nextChapterBtn = "";
                 titleHostName = "-Wordrain69";
-                //blacklistedTags = Arrays.asList("");
+                blacklistedTags = null;
                 bookTitleSelector = ".post-title h1";
                 bookCoverSelector = ".summary_image img";
                 bookAuthorSelector = ".author-content a";
@@ -207,10 +215,10 @@ public class HostSettings {
                 host = "https://www.wattpad.com/";
                 ordinalIndexForBaseNovel = 0;
                 chapterLinkSelecter = ".table-of-contents a";
-                chapterContainer = ".panel-reading pre";
+                chapterContainer = "div.page pre";
                 nextChapterBtn = "";
                 titleHostName = "-Wattpad";
-                blacklistedTags = Arrays.asList("span.comment-marker");
+                blacklistedTags = new LinkedList<>(Arrays.asList("span.comment-marker"));
                 bookTitleSelector = ".container h1";
                 bookCoverSelector = ".cover.cover-lg img";
                 bookAuthorSelector = "a.send-author-event.on-navigate:not(.avatar)";
@@ -223,11 +231,102 @@ public class HostSettings {
                 chapterContainer = "#storytext";
                 nextChapterBtn = "";
                 titleHostName = "|FanFiction";
-                //blacklistedTags = Arrays.asList("");
+                blacklistedTags = null;
                 bookTitleSelector = "#profile_top b.xcontrast_txt";
                 bookCoverSelector = "#profile_top img.cimage";
                 bookAuthorSelector = "#profile_top a.xcontrast_txt";
                 bookSubjectSelector = "";
+                break;
+            case "flyinglines":
+                host = "https://www.flying-lines.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = ".volume-item a";
+                chapterContainer = "body";
+                nextChapterBtn = "";
+                titleHostName = "";
+                blacklistedTags = null;
+                bookTitleSelector = "div.title h2";
+                bookCoverSelector = ".novel-thumb img";
+                bookAuthorSelector = ".profile";
+                bookSubjectSelector = ".btn-category";
+                break;
+            case "tapread":
+                host = "https://www.tapread.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = ".volume-item a";
+                chapterContainer = "";
+                nextChapterBtn = "";
+                titleHostName = "";
+                blacklistedTags = null;
+                bookTitleSelector = ".book-name";
+                bookCoverSelector = ".book-img img";
+                bookAuthorSelector = ".person-info .author .name";
+                bookSubjectSelector = ".book-catalog .txt";
+                break;
+            case "kuhakulightnoveltranslations":
+                host = "https://kuhakulightnoveltranslations.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = ".maxbutton";
+                chapterContainer = ".entry-content";
+                nextChapterBtn = "";
+                titleHostName = "";
+                blacklistedTags = new LinkedList<>(Arrays.asList("p[style=text-align: center;]"));
+                bookTitleSelector = "h1.entry-title";
+                bookCoverSelector = "";
+                bookAuthorSelector = "";
+                bookSubjectSelector = "";
+                break;
+            case "zenithnovels":
+                host = "https://zenithnovels.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = "";
+                chapterContainer = ".entry";
+                nextChapterBtn = ".post-next a";
+                titleHostName = "";
+                blacklistedTags = new LinkedList<>(Arrays.asList("dl", ".code-block", "p:has(strong)", "hr"));
+                bookTitleSelector = ".name.post-title.entry-title";
+                bookCoverSelector = ".entry p img";
+                bookAuthorSelector = "";
+                bookSubjectSelector = "";
+                break;
+            case "translationotaku":
+                host = "https://translatinotaku.net/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = "";
+                chapterContainer = ".elementor-widget-container:has(p)";
+                nextChapterBtn = ".elementor-post-navigation__next a";
+                titleHostName = "";
+                blacklistedTags = new LinkedList<>(Arrays.asList("div[style=float: none; margin:10px 0 10px 0; text-align:center;]"));
+                bookTitleSelector = ".elementor-heading-title";
+                bookCoverSelector = ".elementor-image img";
+                bookAuthorSelector = "";
+                bookSubjectSelector = ".elementor-text-editor p";
+                break;
+            case "isohungrytls":
+                host = "https://isohungrytls.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = "a[href^=" + url.substring(0, url.length() - 1) + "]:not(a[aria-current])";
+                chapterContainer = ".entry-content";
+                nextChapterBtn = "";
+                titleHostName = "";
+                blacklistedTags = new LinkedList<>(Arrays.asList("span.ezoic-ad", "p[style=text-align: center;]", "hr", "p:has(span[style=color: #ffffff;])"));
+                bookTitleSelector = "span[style=font-size: 24pt;]";
+                bookCoverSelector = "img";
+                bookAuthorSelector = "p:contains(Translator:)";
+                bookSubjectSelector = "p:contains(Genres:)";
+                break;
+            case "ebisutranslations":
+                host = "https://ebisutranslations.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = ".page_item";
+                chapterContainer = ".page-content:has(h1)";
+                nextChapterBtn = "";
+                titleHostName = "";
+                blacklistedTags = new LinkedList<>(Arrays.asList("div:has(div[class=row])", "hr", "script", "div.widget", "span[id^=ezoic]", "span[class^=ezoic]", "#disqus_thread"));
+                bookTitleSelector = "h1.content-header";
+                bookCoverSelector = "img";
+                bookAuthorSelector = "p:contains(Translator:)";
+                bookSubjectSelector = "p:contains(Genres:)";
                 break;
         }
     }

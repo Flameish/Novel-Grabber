@@ -70,11 +70,13 @@ public class autoSetBlacklistedTags extends JDialog {
     }
 
     private void createUIComponents() {
-        blacklistedTagsListModel = new DefaultListModel();
-        for (String tag : currGrab.currHostSettings.blacklistedTags) {
-            blacklistedTagsListModel.addElement(tag);
+        if (currGrab.currHostSettings.blacklistedTags != null) {
+            blacklistedTagsListModel = new DefaultListModel();
+            for (String tag : currGrab.currHostSettings.blacklistedTags) {
+                blacklistedTagsListModel.addElement(tag);
+            }
+            list1 = new JList(blacklistedTagsListModel);
         }
-        list1 = new JList(blacklistedTagsListModel);
         scrollPane1 = new JScrollPane(list1, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         setBlacklistRemoveButton = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));

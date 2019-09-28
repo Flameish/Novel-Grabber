@@ -3,6 +3,7 @@ package grabber;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -256,8 +257,12 @@ class Shared {
             if (!currGrab.nextChapterBtn.equals("NOT_SET"))
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
             Element chapterContent = doc.select(chapterContainer).first();
+            Elements chapterContents = null;
+            if (currGrab.currHostSettings.host.equals("https://www.flying-lines.com/")) {
+                chapterContents = doc.select("p");
+            }
             // Remove unwanted tags from chapter container.
-            if (!(currGrab.blacklistedTags == null)) {
+            if (currGrab.blacklistedTags != null && !currGrab.blacklistedTags.isEmpty()) {
                 for (String tag : currGrab.blacklistedTags) {
                     chapterContent.select(tag).remove();
                 }
@@ -267,7 +272,7 @@ class Shared {
                 chapterContent.select("pre").tagName("div");
             }
 
-            // grabber.Download images of chapter container.
+            // Download images of chapter container.
             if (currGrab.getImages) {
                 for (Element image : chapterContent.select("img")) {
                     downloadImage(image.absUrl("src"), currGrab);
@@ -297,7 +302,69 @@ class Shared {
                     }
                 }
                 // Write text content to file.
-                out.println(chapterContent);
+                if (currGrab.currHostSettings.host.equals("https://www.flying-lines.com/")) {
+                    out.println(chapterContents);
+                } else {
+                    out.println(chapterContent);
+                }
+            }
+            successfulChapter(fileName, chapterName, currGrab);
+        } catch (Throwable e) {
+            currGrab.failedChapters.add(chapterName);
+            currGrab.gui.appendText(currGrab.window, "[ERROR]" + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Save chapter content from string
+     */
+    static void saveChapterXhr(String chapterContentString, int chapterNumber, String chapterName, String chapterContainer, Download currGrab) {
+        //Manual grabbing got it's own file naming method
+        String fileName = setFilename(chapterNumber, chapterName);
+
+        try {
+            Document doc = Jsoup.parse(chapterContentString);
+            //Element chapterContent = doc.select(chapterContainer).first();
+            Elements chapterContents = doc.select("p");
+            // Remove unwanted tags from chapter container.
+            if (currGrab.blacklistedTags != null && !currGrab.blacklistedTags.isEmpty()) {
+                for (String tag : currGrab.blacklistedTags) {
+                    chapterContents.select(tag).remove();
+                }
+            }
+
+            // Download images of chapter container.
+            if (currGrab.getImages) {
+                for (Element image : chapterContents.select("img")) {
+                    downloadImage(image.absUrl("src"), currGrab);
+                }
+            }
+            // Create chapters folder if it doesn't exist.
+            File dir = new File(currGrab.saveLocation + File.separator + "chapters");
+            if (!dir.exists()) dir.mkdirs();
+            // Write chapter content to file.
+            try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", textEncoding)) {
+                // Images
+                if (chapterContents.select("img").size() > 0) {
+                    // Iterate each image in chapter content.
+                    for (Element image : chapterContents.select("img")) {
+                        // Check if the image was successfully downloaded.
+                        String src = image.absUrl("src");
+                        if (currGrab.imageLinks.contains(src)) {
+                            // Use hashCode of src + .jpg as the image name if renaming wasn't successful.
+                            String imageName = getImageName(image.attr("src"));
+                            if (imageName.equals("could_not_rename_image")) {
+                                imageName = src.hashCode() + ".jpg";
+                            }
+                            // Replace href for image to point to local path.
+                            image.attr("src", imageName);
+                            // Remove the img tag if image wasn't downloaded.
+                        } else chapterContents.select("img").remove();
+                    }
+                }
+                // Write text content to file.
+                out.println(chapterContents);
             }
             successfulChapter(fileName, chapterName, currGrab);
         } catch (Throwable e) {

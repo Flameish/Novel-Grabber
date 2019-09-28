@@ -617,12 +617,13 @@
                       <toolTipText value="Download chapters by following a &quot;next chapter button&quot;"/>
                     </properties>
                   </component>
-                  <component id="71cee" class="javax.swing.JLabel">
+                  <component id="71cee" class="javax.swing.JLabel" binding="manTocURLlbl">
                     <constraints>
                       <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text value="Table of Contents URL:"/>
+                      <visible value="false"/>
                     </properties>
                   </component>
                   <component id="5f068" class="javax.swing.JTextField" binding="manNovelURL">
@@ -632,7 +633,8 @@
                       </grid>
                     </constraints>
                     <properties>
-                      <enabled value="false"/>
+                      <enabled value="true"/>
+                      <visible value="false"/>
                     </properties>
                   </component>
                   <component id="a964a" class="javax.swing.JButton" binding="getLinksButton" default-binding="true">
@@ -640,8 +642,9 @@
                       <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <enabled value="false"/>
+                      <enabled value="true"/>
                       <text value="Get links"/>
+                      <visible value="false"/>
                     </properties>
                   </component>
                   <hspacer id="e5177">
@@ -654,8 +657,9 @@
                       <grid row="1" column="2" row-span="2" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <enabled value="false"/>
+                      <enabled value="true"/>
                       <text value="Specify chapter to chapter"/>
+                      <visible value="false"/>
                     </properties>
                   </component>
                   <component id="ed4a6" class="javax.swing.JButton" binding="manSetMetadataButton" custom-create="true">

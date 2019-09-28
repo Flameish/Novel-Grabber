@@ -31,6 +31,8 @@ public class Download {
     String saveLocation;
     String tocFileName;
     String chapterContainer;
+    String xhrBookId;
+    List<String> xhrChapterIds = new ArrayList<>();
     boolean getImages;
     boolean allChapters;
     boolean invertOrder;

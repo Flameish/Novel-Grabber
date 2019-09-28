@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.1.1";
+    public static String versionNumber = "2.1.2";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -127,6 +127,7 @@ public class GUI extends JFrame {
     private JLabel NovelUrlLbl;
     private JButton autoEditMetaBtn;
     private JButton autoEditBlacklistBtn;
+    private JLabel manTocURLlbl;
     private JButton autoEditMetadataButton;
 
 
@@ -297,9 +298,10 @@ public class GUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (chaptersFromLinksRadioButton.isSelected()) {
                     chapterToChapterRadioButton.setSelected(false);
-                    manNovelURL.setEnabled(true);
-                    getLinksButton.setEnabled(true);
-                    chapterToChapterButton.setEnabled(false);
+                    manNovelURL.setVisible(true);
+                    getLinksButton.setVisible(true);
+                    manTocURLlbl.setVisible(true);
+                    chapterToChapterButton.setVisible(false);
                     manInvertOrder.setEnabled(true);
                 }
             }
@@ -309,9 +311,10 @@ public class GUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (chapterToChapterRadioButton.isSelected()) {
                     chaptersFromLinksRadioButton.setSelected(false);
-                    manNovelURL.setEnabled(false);
-                    getLinksButton.setEnabled(false);
-                    chapterToChapterButton.setEnabled(true);
+                    manNovelURL.setVisible(false);
+                    getLinksButton.setVisible(false);
+                    manTocURLlbl.setVisible(false);
+                    chapterToChapterButton.setVisible(true);
                     manInvertOrder.setEnabled(false);
                 }
             }
