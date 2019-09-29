@@ -258,7 +258,8 @@ class Shared {
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
             Element chapterContent = doc.select(chapterContainer).first();
             Elements chapterContents = null;
-            if (currGrab.currHostSettings.host.equals("https://www.flying-lines.com/")) {
+
+            if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://www.flying-lines.com/")) {
                 chapterContents = doc.select("p");
             }
             // Remove unwanted tags from chapter container.
@@ -268,7 +269,8 @@ class Shared {
                 }
             }
             // Replace custom strings
-            if (currGrab.currHostSettings.host.equals("https://www.wattpad.com/")) {
+
+            if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://www.wattpad.com/")) {
                 chapterContent.select("pre").tagName("div");
             }
 
@@ -302,7 +304,7 @@ class Shared {
                     }
                 }
                 // Write text content to file.
-                if (currGrab.currHostSettings.host.equals("https://www.flying-lines.com/")) {
+                if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://www.flying-lines.com/")) {
                     out.println(chapterContents);
                 } else {
                     out.println(chapterContent);
