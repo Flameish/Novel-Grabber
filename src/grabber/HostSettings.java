@@ -10,6 +10,7 @@ public class HostSettings {
     public static String[] websites = {
             "Wuxiaworld",
             "Royal Road",
+            "Webnovel",
             "Gravity Tales",
             "Volare Novels",
             "Creative Novels",
@@ -327,6 +328,19 @@ public class HostSettings {
                 bookCoverSelector = "img";
                 bookAuthorSelector = "p:contains(Translator:)";
                 bookSubjectSelector = "p:contains(Genres:)";
+                break;
+            case "webnovel":
+                host = "https://www.webnovel.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = "a";
+                chapterContainer = ".cha-words";
+                nextChapterBtn = "";
+                titleHostName = "";
+                blacklistedTags = new LinkedList<>(Arrays.asList("pirate"));
+                bookTitleSelector = "p.lh24.fs16.pt24.pb24.ell.c_000 span:not(span:contains(/))";
+                bookCoverSelector = ".g_thumb img";
+                bookAuthorSelector = ".ell.dib.vam span";
+                bookSubjectSelector = "a[href^=/category/list?category=].c_000";
                 break;
         }
     }

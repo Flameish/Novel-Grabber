@@ -7,6 +7,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,6 +75,37 @@ public class autoFetchChapters {
                             currGrab.chaptersNames.add(chapters.get(chapterId));
                             currGrab.xhrChapterIds.add(chapterId);
                             currGrab.chapterLinks.add("https://www.tapread.com/book/index/" + tapReadNovelId + "/" + chapterId);
+                        }
+                        break;
+                    case "https://www.webnovel.com/":
+                        String csrfToken = "null";
+                        String bookId = currGrab.gui.chapterListURL.getText();
+                        String bookTitle = doc.select(currGrab.currHostSettings.bookTitleSelector).first().text().replaceAll("[\\\\/:*?\"<>|]", "");
+                        bookId = bookId.substring(Shared.ordinalIndexOf(bookId, "/", 4) + 1, Shared.ordinalIndexOf(bookId, "/", 5));
+
+                        String otherParameter = "";
+                        CookieManager cookieManager = new CookieManager();
+                        CookieHandler.setDefault(cookieManager);
+
+                        URL url = new URL(currGrab.gui.chapterListURL.getText());
+                        URLConnection connection = url.openConnection();
+                        connection.getContent();
+
+                        List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
+                        for (HttpCookie cookie : cookies) {
+                            if (cookie.toString().startsWith("_csrfToken")) {
+                                csrfToken = cookie.toString().substring(11);
+                            }
+
+                        }
+                        Map<String, String> webnovelChapters = xhrRequest.webnovelGetChapterList(
+                                "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken=" + csrfToken + "&bookId=" + bookId + "&_=" + otherParameter);
+                        for (String chapterId : webnovelChapters.keySet()) {
+                            currGrab.chaptersNames.add(webnovelChapters.get(chapterId));
+                            currGrab.xhrChapterIds.add(chapterId);
+                            currGrab.chapterLinks.add(
+                                    "https://www.webnovel.com/book/" + bookId + "/" + chapterId + "/"
+                                            + bookTitle.replace(" ", "-") + "/" + webnovelChapters.get(chapterId).replace(" ", "-"));
                         }
                         break;
                     case "https://creativenovels.com/":
