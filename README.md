@@ -33,7 +33,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
    <b>Export:</b> Currently you can export to EPUB or a Calibre <a href="#converting">compatible table of contents file</a>.
    
    <b>Wait time</b> is the time between each chapter call in milliseconds (1000 for 1 second) (so you don't flood the host server with requests)<br>
-   ![alt text](https://i.imgur.com/CEXUTZk.png)
+   ![alt text](https://i.imgur.com/5dueJeN.png)
 
 <strong>Manual:</strong>
 
