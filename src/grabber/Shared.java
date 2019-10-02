@@ -265,12 +265,20 @@ class Shared {
             // Remove unwanted tags from chapter container.
             if (currGrab.blacklistedTags != null && !currGrab.blacklistedTags.isEmpty()) {
                 for (String tag : currGrab.blacklistedTags) {
-                    chapterContent.select(tag).remove();
+                    if (!chapterContent.select(tag).isEmpty()) {
+                        chapterContent.select(tag).remove();
+                    }
                 }
             }
-            // Replace custom strings
-
             if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://www.wattpad.com/")) {
+                boolean isLastPage = doc.select(".page").hasClass("last-page");
+                int pageNumber = 2;
+                while (!isLastPage) {
+                    Document wattpaddPage = Jsoup.connect(url + "/page/" + pageNumber).get();
+                    chapterContent.append(wattpaddPage.select(chapterContainer).first().toString());
+                    pageNumber++;
+                    isLastPage = wattpaddPage.select(".page").hasClass("last-page");
+                }
                 chapterContent.select("pre").tagName("div");
             }
 
@@ -332,7 +340,9 @@ class Shared {
             // Remove unwanted tags from chapter container.
             if (currGrab.blacklistedTags != null && !currGrab.blacklistedTags.isEmpty()) {
                 for (String tag : currGrab.blacklistedTags) {
-                    chapterContents.select(tag).remove();
+                    if (!chapterContents.select(tag).isEmpty()) {
+                        chapterContents.select(tag).remove();
+                    }
                 }
             }
 

@@ -11,6 +11,7 @@ public class HostSettings {
             "Wuxiaworld",
             "Royal Road",
             "Webnovel",
+            "Wattpad",
             "Gravity Tales",
             "Volare Novels",
             "Creative Novels",

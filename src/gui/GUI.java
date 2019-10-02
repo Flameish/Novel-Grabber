@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.1.2";
+    public static String versionNumber = "2.1.3";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -128,12 +128,13 @@ public class GUI extends JFrame {
     private JButton autoEditMetaBtn;
     private JButton autoEditBlacklistBtn;
     private JLabel manTocURLlbl;
+    private JButton checkForUpdatesButton;
+    private JPanel newReleaseDescriptionPanel;
     private JButton autoEditMetadataButton;
 
 
     public GUI() {
         initialize();
-        checkForNewReleases();
         loadDefaultCheckerList();
 
         browseButton.addActionListener(arg0 -> {
@@ -452,6 +453,9 @@ public class GUI extends JFrame {
         chapterToChapterButton.addActionListener(e -> ChapterToChapter.main());
         updateButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             updaterStatus.setVisible(true);
+            updateButton.setVisible(false);
+            checkForUpdatesButton.setVisible(false);
+            updaterStatus.setText("Updating...");
             updater.updateJar();
         }));
         checkAddNewEntryBtn.addActionListener(arg0 -> {
@@ -540,6 +544,7 @@ public class GUI extends JFrame {
 
         autoEditBlacklistBtn.addActionListener(e -> autoSetBlacklistedTags.main(auto));
         autoEditMetaBtn.addActionListener(e -> autoEditMetadata.main(auto));
+        checkForUpdatesButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::checkForNewReleases));
     }
 
     public static void main(String[] args) {
@@ -791,13 +796,16 @@ public class GUI extends JFrame {
     }
 
     private void checkForNewReleases() {
-        tabbedPane.setEnabledAt(3, false);
+        updaterStatus.setVisible(true);
+        updaterStatus.setText("Checking for new releases...");
+        checkForUpdatesButton.setVisible(false);
         try {
             Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
             Element versionString = doc.select("a[title]").first();
             String oldVersionString = versionNumber;
             String newVersionString = versionString.attr("title");
             if (updater.compareStrings(oldVersionString, newVersionString) == -1) {
+                updateTextArea.setText("");
                 updateStatusLbl.setText("A new update of Novel-Grabber was released. The latest version is: " + newVersionString);
                 setTitle("Novel-Grabber " + versionNumber + " - New version released");
                 updateLogLbl.setText("Changes in " + newVersionString + ":");
@@ -806,11 +814,15 @@ public class GUI extends JFrame {
                 for (Element s : descLines) {
                     appendText("update", s.text());
                 }
-                tabbedPane.setEnabledAt(3, true);
+                updateButton.setVisible(true);
+                updateStatusLbl.setVisible(true);
+                newReleaseDescriptionPanel.setVisible(true);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        updaterStatus.setVisible(false);
+        checkForUpdatesButton.setVisible(true);
     }
 
     public void setBufferedCover(BufferedImage bufferedImage) {
