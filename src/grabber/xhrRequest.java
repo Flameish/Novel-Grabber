@@ -6,23 +6,16 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class xhrRequest {
 
     private final String USER_AGENT = "Mozilla/5.0";
-
-    public static void main(String[] args) {
-        System.out.println(webnovelGetChapterList(
-                "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken=CHIyllqbddlKajIDp9IUmtsYGpZDgrotMgP1Vyhm&bookId=13587434805359005&_=1569749169195"));
-    }
 
     public static Map<String, String> tapReadGetChapterList(String url, String paramenter) {
         xhrRequest http = new xhrRequest();
@@ -47,6 +40,20 @@ public class xhrRequest {
         }
     }
 
+    public static String getEncoding() {
+
+        final byte[] bytes = {'D'};
+
+        final InputStream inputStream = new ByteArrayInputStream(bytes);
+
+        final InputStreamReader reader = new InputStreamReader(inputStream);
+
+        final String encoding = reader.getEncoding();
+
+        return encoding;
+
+    }
+
     public static Map<String, String> webnovelGetChapterList(String url) {
         xhrRequest http = new xhrRequest();
         JSONParser parser = new JSONParser();
@@ -63,9 +70,11 @@ public class xhrRequest {
                 for (Object a : chapterItems) {
                     JSONObject slide = (JSONObject) a;
                     String chapterId = String.valueOf(slide.get("id"));
-                    String chapterName = String.valueOf(slide.get("name"));
+                    // Crude hotfix
+                    String chapterName = String.valueOf(slide.get("name")).replaceAll("â€™", "\'");
                     String isVip = String.valueOf(slide.get("isVip"));
                     if (isVip.equals("0")) {
+                        System.out.println(chapterName);
                         chapterMap.put(chapterId, chapterName);
                     }
                 }
@@ -101,18 +110,17 @@ public class xhrRequest {
         con.setRequestMethod("POST");
         con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-
-        String urlParameters = paramenter;
+        con.setRequestProperty("Accept-Charset", "UTF-8");
 
         // Send post request
         con.setDoOutput(true);
         DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(urlParameters);
+        wr.writeBytes(paramenter);
         wr.flush();
         wr.close();
 
         BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
+                new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
         String inputLine;
         StringBuilder response = new StringBuilder();
 
@@ -120,9 +128,6 @@ public class xhrRequest {
             response.append(inputLine);
         }
         in.close();
-
-        //print result
-        //System.out.println(response.toString());
         return response.toString();
     }
 
@@ -130,14 +135,13 @@ public class xhrRequest {
     private String sendGet(String url) throws IOException {
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-        // optional default is GET
         con.setRequestMethod("GET");
-        //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
+
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);

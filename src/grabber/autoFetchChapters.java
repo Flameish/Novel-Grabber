@@ -27,6 +27,7 @@ public class autoFetchChapters {
             currGrab.chapterLinks.clear();
             currGrab.chaptersNames.clear();
             // Connect to webpage
+            //String urlEncoded = URLEncoder.encode(currGrab.currHostSettings.url, "UTF-8");
             Document doc = Jsoup.connect(currGrab.currHostSettings.url).get();
             // Get chapter links and names.
             Elements chapterItems;
@@ -87,7 +88,7 @@ public class autoFetchChapters {
                         CookieManager cookieManager = new CookieManager();
                         CookieHandler.setDefault(cookieManager);
 
-                        URL url = new URL(currGrab.gui.chapterListURL.getText());
+                        URL url = new URL(currGrab.currHostSettings.url);
                         URLConnection connection = url.openConnection();
                         connection.getContent();
 
@@ -100,12 +101,14 @@ public class autoFetchChapters {
                         }
                         Map<String, String> webnovelChapters = xhrRequest.webnovelGetChapterList(
                                 "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken=" + csrfToken + "&bookId=" + bookId + "&_=" + otherParameter);
+                        int webnovelChapterNumber = 1;
                         for (String chapterId : webnovelChapters.keySet()) {
-                            currGrab.chaptersNames.add(webnovelChapters.get(chapterId));
+                            currGrab.chaptersNames.add("Chapter " + webnovelChapterNumber + ": " + webnovelChapters.get(chapterId));
                             currGrab.xhrChapterIds.add(chapterId);
                             currGrab.chapterLinks.add(
                                     "https://www.webnovel.com/book/" + bookId + "/" + chapterId + "/"
                                             + bookTitle.replace(" ", "-") + "/" + webnovelChapters.get(chapterId).replace(" ", "-"));
+                            webnovelChapterNumber++;
                         }
                         break;
                     case "https://creativenovels.com/":

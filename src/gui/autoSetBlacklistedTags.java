@@ -34,7 +34,7 @@ public class autoSetBlacklistedTags extends JDialog {
         });
 
         // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         addButton.addActionListener(new ActionListener() {
             @Override

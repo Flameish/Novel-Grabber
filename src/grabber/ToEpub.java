@@ -62,21 +62,23 @@ class ToEpub {
                     inputStream = new FileInputStream(currGrab.saveLocation + "/images/" + currGrab.bookCover);
                     resource = new Resource(inputStream, currGrab.bookCover);
                     book.getResources().add(resource);
-                    inputStream.close();
-                    inputStream = new FileInputStream(currGrab.saveLocation + "/images/" + currGrab.bookCover);
-                    resource = new Resource(inputStream, "cover.jpg");
                     book.setCoverImage(resource);
                     inputStream.close();
+
+/*                    inputStream = new FileInputStream(currGrab.saveLocation + "/images/" + currGrab.bookCover);
+                    resource = new Resource(inputStream, "cover.jpg");
+                    inputStream.close();*/
                 } else {
                     // Add manual cover image. Its saved as a full path
                     inputStream = new FileInputStream(currGrab.bookCover);
                     resource = new Resource(inputStream, Shared.getFileName(currGrab.bookCover));
                     book.getResources().add(resource);
-                    inputStream.close();
-                    inputStream = new FileInputStream(currGrab.bookCover);
-                    resource = new Resource(inputStream, "cover.jpg");
                     book.setCoverImage(resource);
                     inputStream.close();
+
+/*                    inputStream = new FileInputStream(currGrab.bookCover);
+                    resource = new Resource(inputStream, "cover.jpg");
+                    inputStream.close();*/
                 }
                 // Adding cover page
                 inputStream = new FileInputStream(currGrab.saveLocation + "/chapters/"

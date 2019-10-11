@@ -339,7 +339,7 @@ public class HostSettings {
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("pirate"));
                 bookTitleSelector = "p.lh24.fs16.pt24.pb24.ell.c_000 span:not(span:contains(/))";
-                bookCoverSelector = ".g_thumb img";
+                bookCoverSelector = ".g_thumb img:eq(1)";
                 bookAuthorSelector = ".ell.dib.vam span";
                 bookSubjectSelector = "a[href^=/category/list?category=].c_000";
                 break;

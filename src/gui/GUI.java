@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.1.3";
+    public static String versionNumber = "2.1.4";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -591,6 +591,7 @@ public class GUI extends JFrame {
     }
 
     private void initialize() {
+        System.setProperty("file.encoding", "UTF-8");
         add(rootPanel);
         setTitle("Novel-Grabber " + versionNumber);
         ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
