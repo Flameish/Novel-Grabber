@@ -591,7 +591,6 @@ public class GUI extends JFrame {
     }
 
     private void initialize() {
-        System.setProperty("file.encoding", "UTF-8");
         add(rootPanel);
         setTitle("Novel-Grabber " + versionNumber);
         ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
