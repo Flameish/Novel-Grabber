@@ -6,10 +6,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,13 +22,16 @@ public class autoEditMetadata extends JDialog {
     private JTextField manSetMetadataTitleField;
     private JTextField manSetMetadataAuthorField;
     private JTextField manSetMetadataTags;
+    private JScrollPane autoEditMetadataDescScrollPane;
+    private JTextArea autoEditMetadataDescArea;
+    private JCheckBox ignoreDescriptionCheckBox;
     private Download currGrab;
 
     private autoEditMetadata(Download currGrab) {
         this.currGrab = currGrab;
         setContentPane(contentPane);
         setModal(true);
-        setTitle("Edit metadata");
+        setTitle("Edit EPUB metadata");
         ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
         setIconImage(favicon.getImage());
         getRootPane().setDefaultButton(buttonOK);
@@ -72,6 +72,15 @@ public class autoEditMetadata extends JDialog {
                 manMetadataImageButton.setIcon(new ImageIcon(new ImageIcon(currGrab.bufferedCover).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
             }
         });
+        ignoreDescriptionCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (ignoreDescriptionCheckBox.isSelected()) autoEditMetadataDescArea.setEnabled(false);
+                else {
+                    autoEditMetadataDescArea.setEnabled(true);
+                }
+            }
+        });
     }
 
     static void main(Download currGrab) {
@@ -85,10 +94,14 @@ public class autoEditMetadata extends JDialog {
         // Book Title
         currGrab.bookTitle = manSetMetadataTitleField.getText();
         currGrab.gui.autoBookTitle.setText(currGrab.bookTitle);
+        // Book Description
+        currGrab.bookDesc.set(0, autoEditMetadataDescArea.getText());
         // Book Author
         currGrab.bookAuthor = manSetMetadataAuthorField.getText();
         currGrab.gui.autoAuthor.setText(currGrab.bookAuthor);
         currGrab.bookSubjects = Arrays.asList(manSetMetadataTags.getText().split(","));
+        // No description
+        currGrab.noDescription = ignoreDescriptionCheckBox.isSelected();
         // Book Tags
         manSetMetadataTags.setText("");
         int maxNumberOfSubjects = 0;
@@ -116,6 +129,15 @@ public class autoEditMetadata extends JDialog {
     }
 
     private void createUIComponents() {
+        ignoreDescriptionCheckBox = new JCheckBox();
+        ignoreDescriptionCheckBox.setSelected(currGrab.noDescription);
+        if (currGrab.bookDesc != null) {
+            autoEditMetadataDescArea = new JTextArea(currGrab.bookDesc.get(0));
+            autoEditMetadataDescArea.setLineWrap(true);
+            autoEditMetadataDescArea.setWrapStyleWord(true);
+            autoEditMetadataDescArea.setEnabled(!ignoreDescriptionCheckBox.isSelected());
+            autoEditMetadataDescScrollPane = new JScrollPane(autoEditMetadataDescArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        }
         if (currGrab.bookSubjects != null && currGrab.bookTitle != null && currGrab.bookAuthor != null) {
             manSetMetadataTitleField = new JTextField(currGrab.bookTitle);
             manSetMetadataAuthorField = new JTextField(currGrab.bookAuthor);

@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.1.4";
+    public static String versionNumber = "2.2.0";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -130,6 +130,10 @@ public class GUI extends JFrame {
     private JLabel manTocURLlbl;
     private JButton checkForUpdatesButton;
     private JPanel newReleaseDescriptionPanel;
+    public JLabel pagesCountLbl;
+    public JLabel pagesLbl;
+    public JTextArea autoBookDescArea;
+    private JScrollPane autoBookDescScrollPane;
     private JButton autoEditMetadataButton;
 
 
@@ -223,6 +227,8 @@ public class GUI extends JFrame {
                 return;
             }
             if ((!saveLocation.getText().isEmpty()) && (!chapterListURL.getText().isEmpty())) {
+                pagesLbl.setVisible(true);
+                pagesCountLbl.setVisible(true);
                 grabChaptersButton.setEnabled(false);
                 grabChaptersButton.setVisible(false);
                 stopButton.setEnabled(true);
@@ -252,6 +258,9 @@ public class GUI extends JFrame {
                     autoGetNumberButton.setEnabled(true);
                     autoEditMetaBtn.setEnabled(true);
                     autoEditBlacklistBtn.setEnabled(true);
+                    pagesCountLbl.setText("");
+                    pagesCountLbl.setVisible(false);
+                    pagesLbl.setVisible(false);
                 }
                 if (auto.autoChapterToChapter) {
                     grabChaptersButton.setEnabled(true);
@@ -902,6 +911,11 @@ public class GUI extends JFrame {
         logArea.setLineWrap(true);
         logArea.setWrapStyleWord(true);
         autoLogScrollPane = new JScrollPane(logArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        autoBookDescArea = new JTextArea();
+        autoBookDescArea.setLineWrap(true);
+        autoBookDescArea.setWrapStyleWord(true);
+        autoBookDescScrollPane = new JScrollPane(autoBookDescArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // Manual Tab
         manSetMetadataButton = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));

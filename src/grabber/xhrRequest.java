@@ -74,7 +74,6 @@ public class xhrRequest {
                     String chapterName = String.valueOf(slide.get("name")).replaceAll("â€™", "\'");
                     String isVip = String.valueOf(slide.get("isVip"));
                     if (isVip.equals("0")) {
-                        System.out.println(chapterName);
                         chapterMap.put(chapterId, chapterName);
                     }
                 }
@@ -95,6 +94,20 @@ public class xhrRequest {
             JSONObject results = (JSONObject) jsonObject.get("result");
             String content = (String) results.get("content");
             return content;
+        } catch (ParseException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String wattpadGetChapterTextURL(String chapterId) {
+        xhrRequest http = new xhrRequest();
+        JSONParser parser = new JSONParser();
+        try {
+            Object obj = parser.parse(http.sendGet("https://www.wattpad.com/v4/parts/" + chapterId + "?fields=text_url"));
+            JSONObject jsonObject = (JSONObject) obj;
+            JSONObject results = (JSONObject) jsonObject.get("text_url");
+            return (String) results.get("text");
         } catch (ParseException | IOException e) {
             e.printStackTrace();
             return null;

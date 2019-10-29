@@ -23,6 +23,8 @@ public class Download {
     List<String> failedChapters = new ArrayList<>();
     List<String> successfulChapterNames = new ArrayList<>();
     List<String> successfulFilenames = new ArrayList<>();
+    public boolean noDescription = false;
+    public List<String> bookDesc = new ArrayList<>();
     List<String> imageLinks = new ArrayList<>();
     List<String> imageNames = new ArrayList<>();
     List<String> blacklistedTags;
@@ -36,11 +38,13 @@ public class Download {
     boolean getImages;
     boolean allChapters;
     boolean invertOrder;
+    List<String> successfulExtraPagesNames = new ArrayList<>();
     public boolean autoChapterToChapter;
     public long startTime;
     int firstChapter;
     int lastChapter;
     int waitTime;
+    List<String> successfulExtraPagesFilenames = new ArrayList<>();
     String nextChapterURL;
     String nextChapterBtn = "NOT_SET";
 
@@ -49,6 +53,7 @@ public class Download {
     public String bookAuthor;
     public List<String> bookSubjects = new ArrayList<>();
     public String bookCover;
+    int wordCount = 0;
 
     // Automatic
     public Download(GUI myGUI) {
@@ -102,12 +107,12 @@ public class Download {
                 case "EPUB":
                     Shared.createCoverPage(this);
                     Shared.createToc(this);
+                    if (!bookDesc.get(0).isEmpty() && !noDescription) Shared.createDescPage(this);
                     ToEpub epub = new ToEpub(this);
                     break;
             }
             Shared.report(this);
         }
-
     }
 
     public void startAutoDownload() {
@@ -157,6 +162,7 @@ public class Download {
                 case "EPUB":
                     Shared.createCoverPage(this);
                     Shared.createToc(this);
+                    if (!bookDesc.get(0).isEmpty() && !noDescription) Shared.createDescPage(this);
                     ToEpub epub = new ToEpub(this);
                     break;
             }

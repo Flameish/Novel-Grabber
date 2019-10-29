@@ -126,9 +126,15 @@ public class manFetchChapters {
         if (manSetMetadata.manMetadataInfo[2] != null && !manSetMetadata.manMetadataInfo[2].isEmpty()) {
             currGrab.bookCover = manSetMetadata.manMetadataInfo[2];
         }
+        if (manSetMetadata.manMetadataInfo[3] != null && !manSetMetadata.manMetadataInfo[3].isEmpty()) {
+            currGrab.bookDesc.add(manSetMetadata.manMetadataInfo[3]);
+        } else {
+            currGrab.bookDesc.add("");
+        }
         if (manSetMetadata.manMetadataTags != null && !manSetMetadata.manMetadataTags.isEmpty()) {
             currGrab.bookSubjects = manSetMetadata.manMetadataTags;
         }
+        currGrab.noDescription = manSetMetadata.noDescription;
     }
 
     /**

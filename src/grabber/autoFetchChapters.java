@@ -23,19 +23,20 @@ public class autoFetchChapters {
 
     static void getChapters(Download currGrab) {
         try {
-            // Need to reset in case of stopped grabbing
+            // Needs to be reset in case of stopped grabbing
             currGrab.chapterLinks.clear();
             currGrab.chaptersNames.clear();
+            currGrab.bookDesc.clear();
+            currGrab.wordCount = 0;
             // Connect to webpage
-            //String urlEncoded = URLEncoder.encode(currGrab.currHostSettings.url, "UTF-8");
-            Document doc = Jsoup.connect(currGrab.currHostSettings.url).get();
+            Document doc = Jsoup.connect(currGrab.currHostSettings.url).timeout(30 * 1000).get();
             // Get chapter links and names.
             Elements chapterItems;
             Elements links;
             if (!currGrab.autoChapterToChapter) {
                 switch (currGrab.currHostSettings.host) {
                     // Custom chapter selection
-                    case "https://www.fanfiction.net/":
+                    case "https://fanfiction.net/":
                         chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
                         String fullLink = doc.select("link[rel=canonical]").attr("abs:href");
                         String baseLinkStart = fullLink.substring(0, Shared.ordinalIndexOf(fullLink, "/", 5) + 1);
@@ -50,7 +51,7 @@ public class autoFetchChapters {
                         }
 
                         break;
-                    case "https://www.flying-lines.com/":
+                    case "https://flying-lines.com/":
                         chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
                         links = chapterItems.select("a[href]");
                         String chapterName;
@@ -59,26 +60,25 @@ public class autoFetchChapters {
                         for (Element chapterLink : links) {
                             chapterNumber = Integer.parseInt(chapterLink.text().substring(0, chapterLink.text().indexOf(".") - 1));
                             chapterName = chapterLink.text().substring(chapterLink.text().indexOf(".") + 1);
-                            currGrab.chaptersNames.add(chapterName);
+                            currGrab.chaptersNames.add("Chapter " + chapterNumber + ": " + chapterName);
                             chapterURL = chapterLink.attr("abs:href").replace("/novel", "/h5/novel/"
                                     + currGrab.gui.chapterListURL.getText().substring(currGrab.gui.chapterListURL.getText().lastIndexOf("/") + 1)
                                     + "/" + chapterNumber);
                             currGrab.chapterLinks.add(chapterURL.substring(0, chapterURL.lastIndexOf("/")));
                         }
                         break;
-                    case "https://www.tapread.com/":
+                    case "https://tapread.com/":
                         String novelURL = currGrab.gui.chapterListURL.getText();
                         String tapReadNovelId = novelURL.substring(novelURL.lastIndexOf("/") + 1);
                         currGrab.xhrBookId = tapReadNovelId;
-                        Map<String, String> chapters = xhrRequest.tapReadGetChapterList("https://www.tapread.com/book/contents", "bookId=" + tapReadNovelId);
+                        Map<String, String> chapters = xhrRequest.tapReadGetChapterList("https://tapread.com/book/contents", "bookId=" + tapReadNovelId);
                         for (String chapterId : chapters.keySet()) {
-
                             currGrab.chaptersNames.add(chapters.get(chapterId));
                             currGrab.xhrChapterIds.add(chapterId);
-                            currGrab.chapterLinks.add("https://www.tapread.com/book/index/" + tapReadNovelId + "/" + chapterId);
+                            currGrab.chapterLinks.add("https://.tapread.com/book/index/" + tapReadNovelId + "/" + chapterId);
                         }
                         break;
-                    case "https://www.webnovel.com/":
+                    case "https://webnovel.com/":
                         String csrfToken = "null";
                         String bookId = currGrab.gui.chapterListURL.getText();
                         String bookTitle = doc.select(currGrab.currHostSettings.bookTitleSelector).first().text().replaceAll("[\\\\/:*?\"<>|]", "");
@@ -153,6 +153,8 @@ public class autoFetchChapters {
     static void downloadChapters(Download currGrab) {
         currGrab.successfulFilenames.clear();
         currGrab.successfulChapterNames.clear();
+        currGrab.successfulExtraPagesFilenames.clear();
+        currGrab.successfulExtraPagesNames.clear();
         currGrab.failedChapters.clear();
         currGrab.imageLinks.clear();
         currGrab.imageNames.clear();
@@ -205,6 +207,16 @@ public class autoFetchChapters {
             } else {
                 currGrab.bookTitle = "Unknown";
                 currGrab.gui.autoBookTitle.setText("Unknown");
+            }
+            // Description
+            if (!currGrab.currHostSettings.bookDescSelector.equals("false")) {
+                if (doc.select(currGrab.currHostSettings.bookDescSelector) != null && !doc.select(currGrab.currHostSettings.bookDescSelector).isEmpty()) {
+                    currGrab.bookDesc.add(doc.select(currGrab.currHostSettings.bookDescSelector).first().text());
+                } else {
+                    currGrab.bookDesc.add("");
+                }
+            } else {
+                currGrab.bookDesc.add("");
             }
             // Author
             if (!currGrab.currHostSettings.bookAuthorSelector.isEmpty()) {
@@ -292,6 +304,9 @@ public class autoFetchChapters {
                         if (currGrab.currHostSettings.host.equals("https://wordexcerpt.com/"))
                             coverLink = coverSelect.attr("data-src");
                         else coverLink = coverSelect.attr("src");
+                        if (currGrab.currHostSettings.host.equals("https://webnovel.com/")) {
+                            coverLink = coverLink.replace("/300/300", "/600/600");
+                        }
                         currGrab.bufferedCover = Shared.getBufferedCover(coverLink, currGrab);
                         currGrab.gui.setBufferedCover(currGrab.bufferedCover);
                         currGrab.bookCover = currGrab.imageNames.get(0);
@@ -313,8 +328,8 @@ public class autoFetchChapters {
         currGrab.gui.setMaxProgress(currGrab.window, (currGrab.lastChapter - currGrab.firstChapter) + 1);
         currGrab.gui.progressBar.setStringPainted(true);
         for (int i = currGrab.firstChapter; i <= currGrab.lastChapter; i++) {
-            if (currGrab.currHostSettings.host.equals("https://www.tapread.com/")) {
-                String chapterContentString = xhrRequest.tapReadGetChapterContent("https://www.tapread.com/book/chapter",
+            if (currGrab.currHostSettings.host.equals("https://tapread.com/")) {
+                String chapterContentString = xhrRequest.tapReadGetChapterContent("https://tapread.com/book/chapter",
                         "bookId=" + currGrab.xhrBookId + "&chapterId=" + currGrab.xhrChapterIds.get(i - 1));
                 Shared.saveChapterXhr(chapterContentString, i, currGrab.chaptersNames.get(i - 1),
                         currGrab.currHostSettings.chapterContainer, currGrab);
@@ -344,8 +359,8 @@ public class autoFetchChapters {
         currGrab.gui.setMaxProgress(currGrab.window, currGrab.chapterLinks.size());
         currGrab.gui.progressBar.setStringPainted(true);
         for (int i = 1; i <= currGrab.chapterLinks.size(); i++) {
-            if (currGrab.currHostSettings.host.equals("https://www.tapread.com/")) {
-                String chapterContentString = xhrRequest.tapReadGetChapterContent("https://www.tapread.com/book/chapter",
+            if (currGrab.currHostSettings.host.equals("https://tapread.com/")) {
+                String chapterContentString = xhrRequest.tapReadGetChapterContent("https://tapread.com/book/chapter",
                         "bookId=" + currGrab.xhrBookId + "&chapterId=" + currGrab.xhrChapterIds.get(i - 1));
                 Shared.saveChapterXhr(chapterContentString, i, currGrab.chaptersNames.get(i - 1),
                         currGrab.currHostSettings.chapterContainer, currGrab);

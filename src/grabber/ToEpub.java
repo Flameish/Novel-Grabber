@@ -14,23 +14,8 @@ import java.nio.file.Paths;
 class ToEpub {
     private FileInputStream inputStream;
     private Resource resource;
-
     ToEpub(Download currGrab) {
         writeEpub(currGrab);
-    }
-
-    /**
-     * Deletes Folder with all of its content
-     * <p>
-     * path to folder which should be deleted
-     */
-
-    private static InputStream getResource(String path) throws FileNotFoundException {
-        return new FileInputStream(path);
-    }
-
-    private static Resource getResource(String path, String href) throws IOException {
-        return new Resource(getResource(path), href);
     }
 
     private void writeEpub(Download currGrab) {
@@ -55,6 +40,10 @@ class ToEpub {
             if (currGrab.bookSubjects != null && !currGrab.bookSubjects.isEmpty()) {
                 metadata.setSubjects(currGrab.bookSubjects);
             }
+            // Description
+            if (currGrab.bookDesc != null && !currGrab.bookDesc.get(0).isEmpty() && !currGrab.noDescription) {
+                metadata.setDescriptions(currGrab.bookDesc);
+            }
             // Set cover image & page
             if (currGrab.bookCover != null && !currGrab.bookCover.isEmpty()) {
                 if (currGrab.window.equals("auto")) {
@@ -64,10 +53,6 @@ class ToEpub {
                     book.getResources().add(resource);
                     book.setCoverImage(resource);
                     inputStream.close();
-
-/*                    inputStream = new FileInputStream(currGrab.saveLocation + "/images/" + currGrab.bookCover);
-                    resource = new Resource(inputStream, "cover.jpg");
-                    inputStream.close();*/
                 } else {
                     // Add manual cover image. Its saved as a full path
                     inputStream = new FileInputStream(currGrab.bookCover);
@@ -75,31 +60,35 @@ class ToEpub {
                     book.getResources().add(resource);
                     book.setCoverImage(resource);
                     inputStream.close();
-
-/*                    inputStream = new FileInputStream(currGrab.bookCover);
-                    resource = new Resource(inputStream, "cover.jpg");
-                    inputStream.close();*/
                 }
                 // Adding cover page
                 inputStream = new FileInputStream(currGrab.saveLocation + "/chapters/"
-                        + currGrab.successfulFilenames.get(currGrab.successfulFilenames.size() - 2) + ".html");
-                resource = new Resource(inputStream, currGrab.successfulFilenames.get(currGrab.successfulFilenames.size() - 2) + ".html");
+                        + currGrab.successfulExtraPagesFilenames.get(0) + ".html");
+                resource = new Resource(inputStream, currGrab.successfulExtraPagesFilenames.get(0) + ".html");
                 book.setCoverPage(resource);
-                book.addSection(currGrab.successfulChapterNames.get(currGrab.successfulChapterNames.size() - 2), resource);
+                book.addSection(currGrab.successfulExtraPagesNames.get(0), resource);
                 inputStream.close();
             } else {
                 book.setCoverImage(new Resource(getClass().getResourceAsStream("/images/cover_placeholder.png"), "cover_placeholder.png"));
 
             }
+            // Description page
+            if (currGrab.bookDesc != null && !currGrab.bookDesc.get(0).isEmpty() && !currGrab.noDescription) {
+                inputStream = new FileInputStream(currGrab.saveLocation + "/chapters/"
+                        + currGrab.successfulExtraPagesFilenames.get(2) + ".html");
+                resource = new Resource(inputStream, currGrab.successfulExtraPagesFilenames.get(2) + ".html");
+                book.addSection(currGrab.successfulExtraPagesNames.get(2), resource);
+                inputStream.close();
+            }
             // Table of Contents
             inputStream = new FileInputStream(currGrab.saveLocation + "/chapters/"
-                    + currGrab.successfulFilenames.get(currGrab.successfulFilenames.size() - 1) + ".html");
-            resource = new Resource(inputStream, currGrab.successfulFilenames.get(currGrab.successfulFilenames.size() - 1) + ".html");
-            book.addSection(currGrab.successfulChapterNames.get(currGrab.successfulChapterNames.size() - 1), resource);
+                    + currGrab.successfulExtraPagesFilenames.get(1) + ".html");
+            resource = new Resource(inputStream, currGrab.successfulExtraPagesFilenames.get(1) + ".html");
+            book.addSection(currGrab.successfulExtraPagesNames.get(1), resource);
             inputStream.close();
 
             // Chapters
-            for (int i = 0; i < currGrab.successfulFilenames.size() - 2; i++) {
+            for (int i = 0; i < currGrab.successfulFilenames.size(); i++) {
                 inputStream = new FileInputStream(currGrab.saveLocation + "/chapters/"
                         + currGrab.successfulFilenames.get(i) + ".html");
                 resource = new Resource(inputStream, currGrab.successfulFilenames.get(i) + ".html");
@@ -123,12 +112,12 @@ class ToEpub {
             epubWriter.write(book, new FileOutputStream(currGrab.saveLocation + File.separator + currGrab.bookTitle + ".epub"));
             currGrab.gui.appendText(currGrab.window, "[INFO]Epub successfully created.");
 
+            // Delete image and chapter files
             Path chaptersFolder = Paths.get(currGrab.saveLocation + "/chapters");
             Path imagesFolder = Paths.get(currGrab.saveLocation + "/images");
 
             if (Files.exists(imagesFolder)) Shared.deleteFolderAndItsContent(imagesFolder);
             if (Files.exists(chaptersFolder)) Shared.deleteFolderAndItsContent(chaptersFolder);
-
 
         } catch (FileNotFoundException e) {
             currGrab.gui.appendText(currGrab.window, "[ERROR]" + e.getMessage());

@@ -46,6 +46,7 @@ class Shared {
         currGrab.successfulFilenames.add(fileName);
         currGrab.gui.appendText(currGrab.window, "[INFO]" + chapterName + " saved.");
         currGrab.gui.updateProgress(currGrab.window);
+        currGrab.gui.pagesCountLbl.setText(String.valueOf(currGrab.wordCount / 300));
     }
 
     /**
@@ -56,12 +57,12 @@ class Shared {
         long elapsedTime = TimeUnit.SECONDS.convert((endTime - currGrab.startTime), TimeUnit.NANOSECONDS);
         if (currGrab.export.equals("EPUB")) {
             currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
-                    + ((currGrab.successfulChapterNames.size() - 2) - currGrab.failedChapters.size()) + " of "
-                    + (currGrab.successfulChapterNames.size() - 2) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+                    + ((currGrab.successfulChapterNames.size()) - currGrab.failedChapters.size()) + " of "
+                    + (currGrab.successfulChapterNames.size()) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
         } else {
             currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
-                    + ((currGrab.successfulChapterNames.size() - 1) - currGrab.failedChapters.size()) + " of "
-                    + (currGrab.successfulChapterNames.size() - 1) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+                    + ((currGrab.successfulChapterNames.size()) - currGrab.failedChapters.size()) + " of "
+                    + (currGrab.successfulChapterNames.size()) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
         }
         if (!currGrab.failedChapters.isEmpty()) {
             currGrab.gui.appendText(currGrab.window, "[ERROR]Failed to grab the following chapters:");
@@ -186,10 +187,10 @@ class Shared {
                 filePath = currGrab.saveLocation + File.separator + "chapters" + File.separator + fileName;
             }
             try (PrintStream out = new PrintStream(filePath + ".html", textEncoding)) {
-                out.print(htmlHead + "<h1>Table of Contents</h1>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+                out.print(htmlHead + "<b>Table of Contents</b>" + NL + "<p style=\"text-indent:0pt\">" + NL);
                 //Print chapter links
                 if (currGrab.export.equals("EPUB")) {
-                    for (int i = 0; i < currGrab.successfulChapterNames.size() - 1; i++) {
+                    for (int i = 0; i < currGrab.successfulChapterNames.size(); i++) {
                         out.println("<a href=\""
                                 + currGrab.successfulFilenames.get(i) + ".html\">" + currGrab.successfulChapterNames.get(i)
                                 + "</a><br/>");
@@ -212,7 +213,8 @@ class Shared {
                     }
                 }
                 out.print("</p>" + NL + htmlFoot);
-                successfulChapter(fileName, "Table of Contents", currGrab);
+                currGrab.successfulExtraPagesNames.add("Table of Contents");
+                currGrab.successfulExtraPagesFilenames.add(fileName);
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 currGrab.gui.appendText(currGrab.window, e.getMessage());
                 e.printStackTrace();
@@ -229,7 +231,23 @@ class Shared {
             out.print(htmlHead + "<div class=\"cover\" style=\"padding: 0pt; margin:0pt; text-align: center; padding:0pt; margin: 0pt;\">" + NL);
             out.println("<img src=\"" + imageName + "\" class=\"cover.img\" style=\"width: 600px; height: 800px;\" />");
             out.print("</div>" + NL + htmlFoot);
-            successfulChapter(fileName, "Cover Page", currGrab);
+            currGrab.successfulExtraPagesNames.add("Cover");
+            currGrab.successfulExtraPagesFilenames.add(fileName);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            currGrab.gui.appendText(currGrab.window, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    static void createDescPage(Download currGrab) {
+        String fileName = "descPage";
+        String filePath = currGrab.saveLocation + File.separator + "chapters" + File.separator + fileName;
+        try (PrintStream out = new PrintStream(filePath + ".html", textEncoding)) {
+            out.print(htmlHead + "<div><b>Description<b>" + NL);
+            out.println("<p>" + currGrab.bookDesc.get(0) + "</p>");
+            out.print("</div>" + NL + htmlFoot);
+            currGrab.successfulExtraPagesNames.add("Description");
+            currGrab.successfulExtraPagesFilenames.add(fileName);
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             currGrab.gui.appendText(currGrab.window, e.getMessage());
             e.printStackTrace();
@@ -252,16 +270,22 @@ class Shared {
         String fileName = setFilename(chapterNumber, chapterName);
 
         try {
-            Document doc = Jsoup.connect(url).get();
+            Document doc;
+            if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://wattpad.com/")) {
+                doc = Jsoup.connect(xhrRequest.wattpadGetChapterTextURL(url.substring(24, url.indexOf("-")))).timeout(30 * 1000).get();
+            } else {
+                doc = Jsoup.connect(url).timeout(30 * 1000).get();
+            }
             // Getting the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter.
             if (!currGrab.nextChapterBtn.equals("NOT_SET"))
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
             Element chapterContent = doc.select(chapterContainer).first();
             Elements chapterContents = null;
 
-            if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://www.flying-lines.com/")) {
+            if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
                 chapterContents = doc.select("p");
             }
+
             // Remove unwanted tags from chapter container.
             if (currGrab.blacklistedTags != null && !currGrab.blacklistedTags.isEmpty()) {
                 for (String tag : currGrab.blacklistedTags) {
@@ -270,23 +294,17 @@ class Shared {
                     }
                 }
             }
-            if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://www.wattpad.com/")) {
-                boolean isLastPage = doc.select(".page").hasClass("last-page");
-                int pageNumber = 2;
-                while (!isLastPage) {
-                    Document wattpaddPage = Jsoup.connect(url + "/page/" + pageNumber).get();
-                    chapterContent.append(wattpaddPage.select(chapterContainer).first().toString());
-                    pageNumber++;
-                    isLastPage = wattpaddPage.select(".page").hasClass("last-page");
-                }
-                chapterContent.select("pre").tagName("div");
-            }
-
             // Download images of chapter container.
             if (currGrab.getImages) {
                 for (Element image : chapterContent.select("img")) {
                     downloadImage(image.absUrl("src"), currGrab);
                 }
+            }
+            // Add word count of chapter to total word count
+            if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
+                currGrab.wordCount = currGrab.wordCount + getWordCount(chapterContents.toString());
+            } else {
+                currGrab.wordCount = currGrab.wordCount + getWordCount(chapterContent.toString());
             }
             // Create chapters folder if it doesn't exist.
             File dir = new File(currGrab.saveLocation + File.separator + "chapters");
@@ -312,7 +330,7 @@ class Shared {
                     }
                 }
                 // Write text content to file.
-                if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://www.flying-lines.com/")) {
+                if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
                     out.println(chapterContents);
                 } else {
                     out.println(chapterContent);
@@ -335,7 +353,6 @@ class Shared {
 
         try {
             Document doc = Jsoup.parse(chapterContentString);
-            //Element chapterContent = doc.select(chapterContainer).first();
             Elements chapterContents = doc.select("p");
             // Remove unwanted tags from chapter container.
             if (currGrab.blacklistedTags != null && !currGrab.blacklistedTags.isEmpty()) {
@@ -352,6 +369,10 @@ class Shared {
                     downloadImage(image.absUrl("src"), currGrab);
                 }
             }
+
+            // Add word count of chapter to total word count
+            currGrab.wordCount = currGrab.wordCount + getWordCount(chapterContents.toString());
+
             // Create chapters folder if it doesn't exist.
             File dir = new File(currGrab.saveLocation + File.separator + "chapters");
             if (!dir.exists()) dir.mkdirs();
@@ -411,5 +432,12 @@ class Shared {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    private static int getWordCount(String html) {
+        org.jsoup.nodes.Document dom = Jsoup.parse(html);
+        String text = dom.text();
+
+        return text.split(" ").length;
     }
 }
