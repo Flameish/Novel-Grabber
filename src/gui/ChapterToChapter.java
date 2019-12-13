@@ -1,6 +1,7 @@
 package gui;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
 public class ChapterToChapter extends JDialog {
@@ -10,6 +11,7 @@ public class ChapterToChapter extends JDialog {
     private JTextField firstChapterField;
     private JTextField lastChapterField;
     private JTextField nextChapterButtonField;
+    private JTextField manChapterToChapterNumberField;
 
     public ChapterToChapter() {
         setContentPane(contentPane);
@@ -45,6 +47,23 @@ public class ChapterToChapter extends JDialog {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        manChapterToChapterNumberField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (manChapterToChapterNumberField.getText().equals("Number")) {
+                    manChapterToChapterNumberField.setText("");
+                    manChapterToChapterNumberField.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (manChapterToChapterNumberField.getText().isEmpty()) {
+                    manChapterToChapterNumberField.setForeground(Color.GRAY);
+                    manChapterToChapterNumberField.setText("Number");
+                }
+            }
+        });
     }
 
     public static void main() {
@@ -60,6 +79,11 @@ public class ChapterToChapter extends JDialog {
             GUI.chapterToChapterArgs[0] = firstChapterField.getText();
             GUI.chapterToChapterArgs[1] = lastChapterField.getText();
             GUI.chapterToChapterArgs[2] = nextChapterButtonField.getText();
+            if (!manChapterToChapterNumberField.getText().equals("Number")) {
+                GUI.chapterToChapterNumber = Integer.valueOf(manChapterToChapterNumberField.getText());
+            } else {
+                GUI.chapterToChapterNumber = 1;
+            }
         }
         dispose();
     }
@@ -70,9 +94,16 @@ public class ChapterToChapter extends JDialog {
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
+        manChapterToChapterNumberField = new JTextField("Number");
+        manChapterToChapterNumberField.setForeground(Color.GRAY);
+
         firstChapterField = new JTextField(GUI.chapterToChapterArgs[0]);
         lastChapterField = new JTextField(GUI.chapterToChapterArgs[1]);
         nextChapterButtonField = new JTextField(GUI.chapterToChapterArgs[2]);
+        if (GUI.chapterToChapterNumber != 1) {
+            manChapterToChapterNumberField.setText(String.valueOf(GUI.chapterToChapterNumber));
+
+            manChapterToChapterNumberField.setForeground(Color.BLACK);
+        }
     }
 }

@@ -87,9 +87,8 @@ public class manFetchChapters {
         String nextChapter = args[0];
         String lastChapter = args[1];
         currGrab.nextChapterBtn = args[2];
-        int chapterNumber = 0;
+        int chapterNumber = GUI.chapterToChapterNumber;
         while (true) {
-            chapterNumber++;
             Shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, currGrab.chapterContainer, currGrab);
             nextChapter = currGrab.nextChapterURL;
             if (nextChapter.equals(lastChapter) || (nextChapter + "/").equals(lastChapter)) {
@@ -112,6 +111,7 @@ public class manFetchChapters {
                 }
                 return;
             }
+            chapterNumber++;
             Shared.sleep(currGrab.waitTime);
         }
     }
@@ -129,7 +129,7 @@ public class manFetchChapters {
         if (manSetMetadata.manMetadataInfo[3] != null && !manSetMetadata.manMetadataInfo[3].isEmpty()) {
             currGrab.bookDesc.add(manSetMetadata.manMetadataInfo[3]);
         } else {
-            currGrab.bookDesc.add("");
+            currGrab.bookDesc.set(0, "");
         }
         if (manSetMetadata.manMetadataTags != null && !manSetMetadata.manMetadataTags.isEmpty()) {
             currGrab.bookSubjects = manSetMetadata.manMetadataTags;

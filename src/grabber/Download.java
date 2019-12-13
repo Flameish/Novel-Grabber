@@ -24,7 +24,7 @@ public class Download {
     List<String> successfulChapterNames = new ArrayList<>();
     List<String> successfulFilenames = new ArrayList<>();
     public boolean noDescription = false;
-    public List<String> bookDesc = new ArrayList<>();
+
     List<String> imageLinks = new ArrayList<>();
     List<String> imageNames = new ArrayList<>();
     List<String> blacklistedTags;
@@ -33,11 +33,12 @@ public class Download {
     String saveLocation;
     String tocFileName;
     String chapterContainer;
-    String xhrBookId;
+    public List<String> bookDesc = new ArrayList<>();
     List<String> xhrChapterIds = new ArrayList<>();
     boolean getImages;
     boolean allChapters;
     boolean invertOrder;
+    int xhrBookId;
     List<String> successfulExtraPagesNames = new ArrayList<>();
     public boolean autoChapterToChapter;
     public long startTime;
@@ -47,12 +48,15 @@ public class Download {
     List<String> successfulExtraPagesFilenames = new ArrayList<>();
     String nextChapterURL;
     String nextChapterBtn = "NOT_SET";
+    boolean useHeaderlessBrowser;
+    boolean displayChapterTitle;
 
     //Metadata
     public String bookTitle;
     public String bookAuthor;
     public List<String> bookSubjects = new ArrayList<>();
     public String bookCover;
+    int chapterToChapterNumber;
     int wordCount = 0;
 
     // Automatic
@@ -61,8 +65,8 @@ public class Download {
         gui = myGUI;
         String tocUrl = gui.chapterListURL.getText();
         String host = Objects.requireNonNull(gui.autoHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", "");
+        useHeaderlessBrowser = gui.useHeaderlessBrowserCheckBox.isSelected();
         window = "auto";
-
         // Create grabber.HostSettings
         currHostSettings = new HostSettings(host, tocUrl);
         blacklistedTags = currHostSettings.blacklistedTags;
@@ -79,15 +83,17 @@ public class Download {
         // Settings
         startTime = System.nanoTime();
         gui = myGUI;
-        chapterContainer = myGUI.manChapterContainer.getText();
-        saveLocation = myGUI.manSaveLocation.getText();
-        invertOrder = myGUI.manInvertOrder.isSelected();
-        getImages = myGUI.manGetImages.isSelected();
+        chapterContainer = gui.manChapterContainer.getText();
+        saveLocation = gui.manSaveLocation.getText();
+        invertOrder = gui.manInvertOrder.isSelected();
+        getImages = gui.manGetImages.isSelected();
         blacklistedTags = GUI.blacklistedTags;
         waitTime = Integer.parseInt(gui.manWaitTime.getText());
         window = "manual";
         tocFileName = "Table of Contents";
         export = gui.manExportSelection.getSelectedItem().toString();
+        displayChapterTitle = gui.manDispalyChapterTitleCheckbox.isSelected();
+        bookDesc.add(0, "");
         manFetchChapters.killTask = false;
         // Functions
         switch (method) {
@@ -122,6 +128,13 @@ public class Download {
         waitTime = Integer.parseInt(gui.waitTime.getText());
         allChapters = gui.chapterAllCheckBox.isSelected();
         invertOrder = gui.checkInvertOrder.isSelected();
+        useHeaderlessBrowser = gui.useHeaderlessBrowserCheckBox.isSelected();
+        displayChapterTitle = gui.displayChapterTitleCheckBox.isSelected();
+        if (!gui.autoChapterToChapterNumberField.getText().equals("Number")) {
+            chapterToChapterNumber = Integer.valueOf(gui.autoChapterToChapterNumberField.getText());
+        } else {
+            chapterToChapterNumber = 1;
+        }
         if (!gui.chapterAllCheckBox.isSelected()) {
             firstChapter = (Integer) gui.firstChapter.getValue();
             if (!gui.toLastChapter.isSelected()) {
@@ -143,7 +156,7 @@ public class Download {
         if (autoFetchChapters.killTask) autoFetchChapters.getChapters(this);
 
         autoFetchChapters.killTask = false;
-        if (autoChapterToChapter) {
+        if (autoChapterToChapter && !gui.useHeaderlessBrowserCheckBox.isSelected()) {
             String[] chapterInfo = {
                     gui.autoFirstChapterURL.getText(),
                     gui.autoLastChapterURL.getText(),

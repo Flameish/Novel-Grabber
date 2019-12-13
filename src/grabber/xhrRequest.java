@@ -6,7 +6,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -17,11 +20,20 @@ public class xhrRequest {
 
     private final String USER_AGENT = "Mozilla/5.0";
 
-    public static Map<String, String> tapReadGetChapterList(String url, String paramenter) {
+    public static void main(String[] args) {
+        xhrRequest http = new xhrRequest();
+        try {
+            System.out.println(http.sendPost("https://creativenovels.com/wp-admin/admin-ajax.php", "action=crn_chapter_list&view_id=9311"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Map<String, String> tapReadGetChapterList(int bookNumber) {
         xhrRequest http = new xhrRequest();
         JSONParser parser = new JSONParser();
         try {
-            Object obj = parser.parse(http.sendPost(url, paramenter));
+            Object obj = parser.parse(http.sendPost("https://www.tapread.com/book/contents", "bookId=" + bookNumber));
             JSONObject jsonObject = (JSONObject) obj;
             JSONObject results = (JSONObject) jsonObject.get("result");
             JSONArray chapterObjects = (JSONArray) results.get("chapterList");
@@ -40,18 +52,19 @@ public class xhrRequest {
         }
     }
 
-    public static String getEncoding() {
-
-        final byte[] bytes = {'D'};
-
-        final InputStream inputStream = new ByteArrayInputStream(bytes);
-
-        final InputStreamReader reader = new InputStreamReader(inputStream);
-
-        final String encoding = reader.getEncoding();
-
-        return encoding;
-
+    public static String tapReadGetChapterContent(String paramenter) {
+        xhrRequest http = new xhrRequest();
+        JSONParser parser = new JSONParser();
+        try {
+            Object obj = parser.parse(http.sendPost("https://www.tapread.com/book/chapter", paramenter));
+            JSONObject jsonObject = (JSONObject) obj;
+            JSONObject results = (JSONObject) jsonObject.get("result");
+            String content = (String) results.get("content");
+            return content;
+        } catch (ParseException | IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static Map<String, String> webnovelGetChapterList(String url) {
@@ -79,21 +92,6 @@ public class xhrRequest {
                 }
             }
             return chapterMap;
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static String tapReadGetChapterContent(String url, String paramenter) {
-        xhrRequest http = new xhrRequest();
-        JSONParser parser = new JSONParser();
-        try {
-            Object obj = parser.parse(http.sendPost(url, paramenter));
-            JSONObject jsonObject = (JSONObject) obj;
-            JSONObject results = (JSONObject) jsonObject.get("result");
-            String content = (String) results.get("content");
-            return content;
         } catch (ParseException | IOException e) {
             e.printStackTrace();
             return null;

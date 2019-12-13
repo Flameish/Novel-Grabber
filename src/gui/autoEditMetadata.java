@@ -131,13 +131,11 @@ public class autoEditMetadata extends JDialog {
     private void createUIComponents() {
         ignoreDescriptionCheckBox = new JCheckBox();
         ignoreDescriptionCheckBox.setSelected(currGrab.noDescription);
-        if (currGrab.bookDesc != null) {
-            autoEditMetadataDescArea = new JTextArea(currGrab.bookDesc.get(0));
-            autoEditMetadataDescArea.setLineWrap(true);
-            autoEditMetadataDescArea.setWrapStyleWord(true);
-            autoEditMetadataDescArea.setEnabled(!ignoreDescriptionCheckBox.isSelected());
-            autoEditMetadataDescScrollPane = new JScrollPane(autoEditMetadataDescArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        }
+        autoEditMetadataDescArea = new JTextArea(currGrab.bookDesc.get(0));
+        autoEditMetadataDescArea.setLineWrap(true);
+        autoEditMetadataDescArea.setWrapStyleWord(true);
+        autoEditMetadataDescArea.setEnabled(!ignoreDescriptionCheckBox.isSelected());
+        autoEditMetadataDescScrollPane = new JScrollPane(autoEditMetadataDescArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         if (currGrab.bookSubjects != null && currGrab.bookTitle != null && currGrab.bookAuthor != null) {
             manSetMetadataTitleField = new JTextField(currGrab.bookTitle);
             manSetMetadataAuthorField = new JTextField(currGrab.bookAuthor);

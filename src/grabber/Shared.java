@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Collection of shared functions.
  */
-class Shared {
+public class Shared {
     private static final String textEncoding = "UTF-8";
     private static final String NL = System.getProperty("line.separator");
     private static String htmlHead = "<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
@@ -284,6 +284,10 @@ class Shared {
 
             if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
                 chapterContents = doc.select("p");
+                chapterContents.wrap("<div></div>");
+                System.out.println(chapterContents);
+                chapterContent = chapterContents.select("div").first();
+                System.out.println(chapterContent);
             }
 
             // Remove unwanted tags from chapter container.
@@ -330,11 +334,9 @@ class Shared {
                     }
                 }
                 // Write text content to file.
-                if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
-                    out.println(chapterContents);
-                } else {
-                    out.println(chapterContent);
-                }
+                if (currGrab.displayChapterTitle)
+                    chapterContent.prepend("<span style=\"font-weight: 700; text-decoration: underline;\">" + chapterName + "</span>");
+                out.println(chapterContent);
             }
             successfulChapter(fileName, chapterName, currGrab);
         } catch (Throwable e) {
@@ -347,41 +349,36 @@ class Shared {
     /**
      * Save chapter content from string
      */
-    static void saveChapterXhr(String chapterContentString, int chapterNumber, String chapterName, String chapterContainer, Download currGrab) {
+    static void saveChapterFromString(String chapterContentString, int chapterNumber, String chapterName, String chapterContainer, Download currGrab) {
         //Manual grabbing got it's own file naming method
         String fileName = setFilename(chapterNumber, chapterName);
-
         try {
             Document doc = Jsoup.parse(chapterContentString);
-            Elements chapterContents = doc.select("p");
             // Remove unwanted tags from chapter container.
             if (currGrab.blacklistedTags != null && !currGrab.blacklistedTags.isEmpty()) {
                 for (String tag : currGrab.blacklistedTags) {
-                    if (!chapterContents.select(tag).isEmpty()) {
-                        chapterContents.select(tag).remove();
+                    if (!doc.select(tag).isEmpty()) {
+                        doc.select(tag).remove();
                     }
                 }
             }
-
             // Download images of chapter container.
             if (currGrab.getImages) {
-                for (Element image : chapterContents.select("img")) {
+                for (Element image : doc.select("img")) {
                     downloadImage(image.absUrl("src"), currGrab);
                 }
             }
-
             // Add word count of chapter to total word count
-            currGrab.wordCount = currGrab.wordCount + getWordCount(chapterContents.toString());
-
+            currGrab.wordCount = currGrab.wordCount + getWordCount(doc.toString());
             // Create chapters folder if it doesn't exist.
             File dir = new File(currGrab.saveLocation + File.separator + "chapters");
             if (!dir.exists()) dir.mkdirs();
             // Write chapter content to file.
             try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", textEncoding)) {
                 // Images
-                if (chapterContents.select("img").size() > 0) {
+                if (doc.select("img").size() > 0) {
                     // Iterate each image in chapter content.
-                    for (Element image : chapterContents.select("img")) {
+                    for (Element image : doc.select("img")) {
                         // Check if the image was successfully downloaded.
                         String src = image.absUrl("src");
                         if (currGrab.imageLinks.contains(src)) {
@@ -393,11 +390,14 @@ class Shared {
                             // Replace href for image to point to local path.
                             image.attr("src", imageName);
                             // Remove the img tag if image wasn't downloaded.
-                        } else chapterContents.select("img").remove();
+                        } else doc.select("img").remove();
                     }
                 }
+                // Add chapter title at the start of chapter
+                if (currGrab.displayChapterTitle)
+                    doc.prepend("<span style=\"font-weight: 700; text-decoration: underline;\">" + chapterName + "</span>");
                 // Write text content to file.
-                out.println(chapterContents);
+                out.println(doc);
             }
             successfulChapter(fileName, chapterName, currGrab);
         } catch (Throwable e) {
@@ -433,7 +433,6 @@ class Shared {
             }
         });
     }
-
     private static int getWordCount(String html) {
         org.jsoup.nodes.Document dom = Jsoup.parse(html);
         String text = dom.text();

@@ -34,14 +34,16 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.2.0";
+    public static String versionNumber = "2.3.0";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
     public static String[] chapterToChapterArgs = new String[3];
     public static TrayIcon trayIcon;
+    public static Integer chapterToChapterNumber = 1;
     private static String[] exportFormats = {"EPUB", "Calibre"};
+    private static String[] browserList = {"Chrome", "Firefox", "Edge", "Opera", "IE"};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");
     public JComboBox autoHostSelection;
@@ -132,6 +134,11 @@ public class GUI extends JFrame {
     private JPanel newReleaseDescriptionPanel;
     public JLabel pagesCountLbl;
     public JLabel pagesLbl;
+    public JCheckBox useHeaderlessBrowserCheckBox;
+    public JComboBox autoBrowserCombobox;
+    public JCheckBox displayChapterTitleCheckBox;
+    public JCheckBox manDispalyChapterTitleCheckbox;
+    public JTextField autoChapterToChapterNumberField;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
     private JButton autoEditMetadataButton;
@@ -155,9 +162,15 @@ public class GUI extends JFrame {
 
         autoVisitButton.addActionListener(arg0 -> {
             try {
-                HostSettings emptyNovel = new HostSettings(
-                        Objects.requireNonNull(autoHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", ""), "");
-                URI uri = new URI(emptyNovel.host);
+                String toOpenHostSite;
+                if (autoHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", "").equals("isohungrytls")) {
+                    toOpenHostSite = "https://isohungrytls.com/";
+                } else {
+                    HostSettings emptyNovel = new HostSettings(
+                            Objects.requireNonNull(autoHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", ""), "");
+                    toOpenHostSite = emptyNovel.host;
+                }
+                URI uri = new URI(toOpenHostSite);
                 openWebpage(uri);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -209,11 +222,11 @@ public class GUI extends JFrame {
                     return;
                 }
             } else {
-                if (autoFirstChapterURL.getText().isEmpty()) {
+                if (autoFirstChapterURL.getText().isEmpty() && !useHeaderlessBrowserCheckBox.isSelected()) {
                     showPopup("First chapter URL is empty.", "warning");
                     return;
                 }
-                if (autoLastChapterURL.getText().isEmpty()) {
+                if (autoLastChapterURL.getText().isEmpty() && !useHeaderlessBrowserCheckBox.isSelected()) {
                     showPopup("Last chapter URL is empty.", "warning");
                     return;
                 }
@@ -528,12 +541,22 @@ public class GUI extends JFrame {
         });
         autoHostSelection.addItemListener(e -> {
             String selection = autoHostSelection.getSelectedItem().toString();
+            if (HostSettings.headerlessBrowserWebsitesList.contains(selection)) {
+                useHeaderlessBrowserCheckBox.setSelected(true);
+                useHeaderlessBrowserCheckBox.setEnabled(false);
+            } else {
+                useHeaderlessBrowserCheckBox.setEnabled(true);
+            }
+            if (selection.equals("BoxNovel")) {
+                useHeaderlessBrowserCheckBox.setEnabled(true);
+            }
             if (HostSettings.autoChapterToChapterWebsitesList.contains(selection)) {
                 chapterAllCheckBox.setEnabled(false);
                 firstChapter.setEnabled(false);
                 lastChapter.setEnabled(false);
                 toLastChapter.setEnabled(false);
                 checkInvertOrder.setEnabled(false);
+                autoChapterToChapterNumberField.setVisible(true);
                 autoFirstChapterLbl.setVisible(true);
                 autoFirstChapterURL.setVisible(true);
                 autoLastChapterLbl.setVisible(true);
@@ -544,16 +567,66 @@ public class GUI extends JFrame {
                 lastChapter.setEnabled(true);
                 toLastChapter.setEnabled(true);
                 checkInvertOrder.setEnabled(true);
+                autoChapterToChapterNumberField.setVisible(false);
                 autoFirstChapterLbl.setVisible(false);
                 autoFirstChapterURL.setVisible(false);
                 autoLastChapterLbl.setVisible(false);
                 autoLastChapterURL.setVisible(false);
+            }
+            if (HostSettings.noHeaderlessBrowserWebsitesList.contains(selection)) {
+                useHeaderlessBrowserCheckBox.setSelected(false);
+                useHeaderlessBrowserCheckBox.setEnabled(false);
             }
         });
 
         autoEditBlacklistBtn.addActionListener(e -> autoSetBlacklistedTags.main(auto));
         autoEditMetaBtn.addActionListener(e -> autoEditMetadata.main(auto));
         checkForUpdatesButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::checkForNewReleases));
+        useHeaderlessBrowserCheckBox.addActionListener(e -> {
+            String selection = autoHostSelection.getSelectedItem().toString();
+            if (useHeaderlessBrowserCheckBox.isSelected()) {
+                if (selection.equals("BoxNovel")) {
+                    autoFirstChapterURL.setVisible(false);
+                    autoLastChapterURL.setVisible(false);
+                    autoFirstChapterLbl.setVisible(false);
+                    autoLastChapterLbl.setVisible(false);
+                    chapterAllCheckBox.setEnabled(true);
+                    firstChapter.setEnabled(true);
+                    lastChapter.setEnabled(true);
+                    toLastChapter.setEnabled(true);
+                    checkInvertOrder.setEnabled(true);
+                }
+            } else {
+                if (selection.equals("BoxNovel")) {
+                    autoFirstChapterURL.setVisible(true);
+                    autoLastChapterURL.setVisible(true);
+                    autoFirstChapterLbl.setVisible(true);
+                    autoLastChapterLbl.setVisible(true);
+                    chapterAllCheckBox.setEnabled(false);
+                    firstChapter.setEnabled(false);
+                    lastChapter.setEnabled(false);
+                    toLastChapter.setEnabled(false);
+                    checkInvertOrder.setEnabled(false);
+                }
+            }
+        });
+        autoChapterToChapterNumberField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (autoChapterToChapterNumberField.getText().equals("Number")) {
+                    autoChapterToChapterNumberField.setText("");
+                    autoChapterToChapterNumberField.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (autoChapterToChapterNumberField.getText().isEmpty()) {
+                    autoChapterToChapterNumberField.setForeground(Color.GRAY);
+                    autoChapterToChapterNumberField.setText("Number");
+                }
+            }
+        });
     }
 
     public static void main(String[] args) {
@@ -844,6 +917,11 @@ public class GUI extends JFrame {
     private void createUIComponents() {
         // Automatic Tab
         autoHostSelection = new JComboBox(HostSettings.websites);
+
+        autoBrowserCombobox = new JComboBox(browserList);
+
+        autoChapterToChapterNumberField = new JTextField("Number");
+        autoChapterToChapterNumberField.setForeground(Color.GRAY);
 
         autoShowBlacklistedTagsBtn = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
         autoShowBlacklistedTagsBtn.setBorder(BorderFactory.createEmptyBorder());
