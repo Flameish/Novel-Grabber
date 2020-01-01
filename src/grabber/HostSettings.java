@@ -42,6 +42,7 @@ public class HostSettings {
     };
     private static String[] headerlessBrowserWebsites = {
             "Creative Novels",
+            "Flying Lines",
             "FicFun"
     };
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
@@ -221,13 +222,16 @@ public class HostSettings {
                 chapterLinkSelecter = ".translated-chapters a";
                 chapterContainer = "#novel-content";
                 titleHostName = "--ChrysanthemumGarden";
-                blacklistedTags = new LinkedList<>(Arrays.asList(".chrys-ads",
+                blacklistedTags = new LinkedList<>(Arrays.asList(
+                        ".netlink",
+                        ".chrys-ads",
                         ".google",
                         "h3[style=color:transparent;height:1px;margin:0;padding:0;overflow:hidden]",
                         "p[style=height:1px;margin:0;padding:0;overflow:hidden]",
                         "span[style=height:1px;width:0;overflow:hidden;display:inline-block]",
                         ".sharedaddy",
-                        ".jum"));
+                        ".jum"
+                ));
                 bookTitleSelector = "h1.novel-title";
                 bookDescSelector = "false";
                 bookCoverSelector = "img.materialboxed";

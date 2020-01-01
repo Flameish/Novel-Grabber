@@ -13,6 +13,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -44,6 +45,7 @@ public class autoFetchChapters {
             currGrab.wordCount = 0;
             // Connect to webpage
             if (currGrab.useHeaderlessBrowser) {
+                currGrab.gui.appendText(currGrab.window, "[INFO]Starting headerless browser...");
                 driverSetup(currGrab);
                 wait = new WebDriverWait(driver, 30);
                 // Open website
@@ -100,13 +102,10 @@ public class autoFetchChapters {
                 String linkSelect = currGrab.currHostSettings.chapterLinkSelecter;
 
                 String baseUrl = driver.getCurrentUrl().substring(0, Shared.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
-                System.out.println(baseUrl);
                 Document doc = Jsoup.parse(driver.getPageSource(), baseUrl);
                 for (Element chapterLink : doc.select(linkSelect)) {
                     currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
-                    System.out.println(chapterLink.attr("abs:href"));
                     currGrab.chaptersNames.add(chapterLink.text());
-                    System.out.println(chapterLink.text());
                 }
                 /*
                 List<WebElement> chapterLinks = driver.findElements(By.cssSelector(linkSelect));
@@ -171,14 +170,12 @@ public class autoFetchChapters {
                                         + currGrab.gui.chapterListURL.getText().substring(currGrab.gui.chapterListURL.getText().lastIndexOf("/") + 1)
                                         + "/" + chapterNumber);
                                 currGrab.chapterLinks.add(chapterURL.substring(0, chapterURL.lastIndexOf("/")));
-                                System.out.println(chapterURL.substring(0, chapterURL.lastIndexOf("/")));
                             }
                             break;
                         case "https://tapread.com/":
                             String novelURL = currGrab.gui.chapterListURL.getText();
                             int tapReadNovelId = Integer.valueOf(novelURL.substring(novelURL.lastIndexOf("/") + 1));
                             currGrab.xhrBookId = tapReadNovelId;
-                            System.out.println(tapReadNovelId);
                             Map<String, String> chapters = xhrRequest.tapReadGetChapterList(tapReadNovelId);
                             for (String chapterId : chapters.keySet()) {
                                 currGrab.chaptersNames.add(chapters.get(chapterId));
@@ -245,9 +242,7 @@ public class autoFetchChapters {
                             chapterItems = doc.select(currGrab.currHostSettings.chapterLinkSelecter);
                             for (Element chapterLink : chapterItems) {
                                 currGrab.chapterLinks.add(chapterLink.attr("abs:href"));
-                                System.out.println(chapterLink.attr("abs:href"));
                                 currGrab.chaptersNames.add(chapterLink.text());
-                                System.out.println(chapterLink.text());
                             }
                             break;
                     }
@@ -607,8 +602,7 @@ public class autoFetchChapters {
                 break;
             case "Firefox":
                 WebDriverManager.firefoxdriver().setup();
-                //new FirefoxOptions().setHeadless(true)
-                driver = new FirefoxDriver();
+                driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true));
                 break;
             case "Opera":
                 WebDriverManager.operadriver().setup();

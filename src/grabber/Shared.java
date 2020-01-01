@@ -3,7 +3,6 @@ package grabber;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -280,13 +279,11 @@ public class Shared {
             if (!currGrab.nextChapterBtn.equals("NOT_SET"))
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
             Element chapterContent = doc.select(chapterContainer).first();
-            Elements chapterContents = null;
+            //Elements chapterContents = null;
 
             if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
-                chapterContents = doc.select("p");
-                chapterContents.wrap("<div></div>");
-                System.out.println(chapterContents);
-                chapterContent = chapterContents.select("div").first();
+                String tempChapterText = "<div>" + doc.select("p").toString() + "</div>";
+                chapterContent = Jsoup.parse(tempChapterText);
                 System.out.println(chapterContent);
             }
 
@@ -305,9 +302,7 @@ public class Shared {
                 }
             }
             // Add word count of chapter to total word count
-            if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
-                currGrab.wordCount = currGrab.wordCount + getWordCount(chapterContents.toString());
-            } else {
+            if (currGrab.window.equals("auto")) {
                 currGrab.wordCount = currGrab.wordCount + getWordCount(chapterContent.toString());
             }
             // Create chapters folder if it doesn't exist.
