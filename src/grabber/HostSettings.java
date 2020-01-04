@@ -312,7 +312,7 @@ public class HostSettings {
                 host = "https://flying-lines.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".volume-item a";
-                chapterContainer = "div.content:nth-child(4)";
+                chapterContainer = "div.content";
                 nextChapterBtn = "";
                 titleHostName = "";
                 blacklistedTags = null;
