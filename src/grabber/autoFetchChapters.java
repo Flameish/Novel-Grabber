@@ -38,6 +38,7 @@ public class autoFetchChapters {
     public static WebDriverWait wait;
     static void getChapters(Download currGrab) {
         try {
+            currGrab.gui.appendText(currGrab.window, "[INFO]Fetching novel info...");
             // Needs to be reset in case of stopped grabbing
             currGrab.chapterLinks.clear();
             currGrab.chaptersNames.clear();
@@ -45,7 +46,6 @@ public class autoFetchChapters {
             currGrab.wordCount = 0;
             // Connect to webpage
             if (currGrab.useHeaderlessBrowser) {
-                currGrab.gui.appendText(currGrab.window, "[INFO]Starting headerless browser...");
                 driverSetup(currGrab);
                 wait = new WebDriverWait(driver, 30);
                 // Open website
@@ -262,7 +262,7 @@ public class autoFetchChapters {
         currGrab.failedChapters.clear();
         currGrab.imageLinks.clear();
         currGrab.imageNames.clear();
-        currGrab.gui.appendText(currGrab.window, "[INFO]Connecting...");
+        currGrab.gui.appendText(currGrab.window, "[INFO]Downloading chapters...");
         // Reverse link order if selected.
         if (currGrab.invertOrder) {
             Collections.reverse(currGrab.chapterLinks);
@@ -595,6 +595,7 @@ public class autoFetchChapters {
     }
 
     private static void driverSetup(Download currGrab) {
+        currGrab.gui.appendText(currGrab.window, "[INFO]Starting headerless browser...");
         switch (currGrab.gui.autoBrowserCombobox.getSelectedItem().toString()) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
