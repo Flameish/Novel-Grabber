@@ -26,4 +26,6 @@ SOFTWARE.
 CREDITS:
  - json.simple https://code.google.com/archive/p/json-simple/
  - jsoup https://jsoup.org/
+ - webdrivermanager https://github.com/bonigarcia/webdrivermanager
+ - selenium https://selenium.dev/
  - Images https://icons8.com/

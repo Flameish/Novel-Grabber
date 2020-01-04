@@ -74,3 +74,5 @@ Novel Grabber was build in java with: <br>
  * [jsoup](https://www.jsoup.org/)
  * [json-simple](https://code.google.com/archive/p/json-simple/)
  * [epublib](https://github.com/psiegman/epublib)
+ * [webdrivermanager](https://github.com/bonigarcia/webdrivermanager)
+ * [selenium ](https://selenium.dev/)
