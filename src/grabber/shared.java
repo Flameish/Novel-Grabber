@@ -14,12 +14,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Collection of shared functions.
  */
-public class Shared {
+public class shared {
     private static final String textEncoding = "UTF-8";
     private static final String NL = System.getProperty("line.separator");
     private static String htmlHead = "<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
@@ -40,7 +39,7 @@ public class Shared {
     /**
      * Processes a successful chapter.
      */
-    private static void successfulChapter(String fileName, String chapterName, Download currGrab) {
+    private static void successfulChapter(String fileName, String chapterName, AutoNovel currGrab) {
         currGrab.successfulChapterNames.add(chapterName);
         currGrab.successfulFilenames.add(fileName);
         currGrab.gui.appendText(currGrab.window, "[INFO]" + chapterName + " saved.");
@@ -49,19 +48,17 @@ public class Shared {
     }
 
     /**
-     * Logs elapsed process time and prints potential failed chapters after chapter grabs.
+     * Prints potential failed chapters after chapter grabs.
      */
-    static void report(Download currGrab) {
-        long endTime = System.nanoTime();
-        long elapsedTime = TimeUnit.SECONDS.convert((endTime - currGrab.startTime), TimeUnit.NANOSECONDS);
+    static void report(AutoNovel currGrab) {
         if (currGrab.export.equals("EPUB")) {
             currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
                     + ((currGrab.successfulChapterNames.size()) - currGrab.failedChapters.size()) + " of "
-                    + (currGrab.successfulChapterNames.size()) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+                    + (currGrab.successfulChapterNames.size()) + " chapters successfully grabbed.");
         } else {
             currGrab.gui.appendText(currGrab.window, "[INFO]Finished! "
                     + ((currGrab.successfulChapterNames.size()) - currGrab.failedChapters.size()) + " of "
-                    + (currGrab.successfulChapterNames.size()) + " chapters successfully grabbed in " + elapsedTime + " seconds.");
+                    + (currGrab.successfulChapterNames.size()) + " chapters successfully grabbed.");
         }
         if (!currGrab.failedChapters.isEmpty()) {
             currGrab.gui.appendText(currGrab.window, "[ERROR]Failed to grab the following chapters:");
@@ -97,7 +94,7 @@ public class Shared {
         return String.format("%05d", chapterNumber) + "-" + fileName.replaceAll("[^\\w]+", "-");
     }
 
-    static void downloadImage(String src, Download currGrab) {
+    static void downloadImage(String src, AutoNovel currGrab) {
         if (!currGrab.imageLinks.contains(src)) {
             // Try to set the image name
             String name = getImageName(src);
@@ -141,8 +138,8 @@ public class Shared {
         }
     }
 
-    // Saves the novel cover into a buffered Image
-    static BufferedImage getBufferedCover(String src, Download currGrab) {
+    // Saves the autoNovel cover into a buffered Image
+    static BufferedImage getBufferedCover(String src, AutoNovel currGrab) {
         if (!currGrab.imageLinks.contains(src)) {
             // Try to set the image name
             String name = getImageName(src);
@@ -177,7 +174,7 @@ public class Shared {
      * Creates a 'Table of Contents' file of successfully grabbed chapters and imageLinks.
      * (Calibre needs links to the imageLinks to display them)
      */
-    static void createToc(Download currGrab) {
+    static void createToc(AutoNovel currGrab) {
         if (!currGrab.successfulChapterNames.isEmpty()) {
             String fileName = currGrab.tocFileName;
             String filePath = currGrab.saveLocation + File.separator + fileName;
@@ -221,7 +218,7 @@ public class Shared {
         }
     }
 
-    static void createCoverPage(Download currGrab) {
+    static void createCoverPage(AutoNovel currGrab) {
         String fileName = "coverPage";
         String filePath = currGrab.saveLocation + File.separator + "chapters" + File.separator + fileName;
         String imageName = currGrab.bookCover;
@@ -238,7 +235,7 @@ public class Shared {
         }
     }
 
-    static void createDescPage(Download currGrab) {
+    static void createDescPage(AutoNovel currGrab) {
         String fileName = "descPage";
         String filePath = currGrab.saveLocation + File.separator + "chapters" + File.separator + fileName;
         try (PrintStream out = new PrintStream(filePath + ".html", textEncoding)) {
@@ -264,7 +261,7 @@ public class Shared {
     /**
      * Main method to save chapter content.
      */
-    static void saveChapterWithHTML(String url, int chapterNumber, String chapterName, String chapterContainer, Download currGrab) {
+    static void saveChapterWithHTML(String url, int chapterNumber, String chapterName, String chapterContainer, AutoNovel currGrab) {
         //Manual grabbing got it's own file naming method
         String fileName = setFilename(chapterNumber, chapterName);
 
@@ -295,7 +292,7 @@ public class Shared {
                     }
                 }
             }
-            // Download images of chapter container.
+            // AutoNovel images of chapter container.
             if (currGrab.getImages) {
                 for (Element image : chapterContent.select("img")) {
                     downloadImage(image.absUrl("src"), currGrab);
@@ -344,7 +341,7 @@ public class Shared {
     /**
      * Save chapter content from string
      */
-    static void saveChapterFromString(String chapterContentString, int chapterNumber, String chapterName, String chapterContainer, Download currGrab) {
+    static void saveChapterFromString(String chapterContentString, int chapterNumber, String chapterName, String chapterContainer, AutoNovel currGrab) {
         //Manual grabbing got it's own file naming method
         String fileName = setFilename(chapterNumber, chapterName);
         try {
@@ -357,7 +354,7 @@ public class Shared {
                     }
                 }
             }
-            // Download images of chapter container.
+            // AutoNovel images of chapter container.
             if (currGrab.getImages) {
                 for (Element image : doc.select("img")) {
                     downloadImage(image.absUrl("src"), currGrab);

@@ -1,10 +1,9 @@
 package gui;
 
 import checker.chapterChecker;
-import grabber.Download;
+import grabber.AutoNovel;
 import grabber.HostSettings;
-import grabber.autoFetchChapters;
-import grabber.manFetchChapters;
+import grabber.ManNovel;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -34,7 +33,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.3.0";
+    public static String versionNumber = "2.3.1";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -46,6 +45,8 @@ public class GUI extends JFrame {
     private static String[] browserList = {"Chrome", "Firefox", "Edge", "Opera", "IE"};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");
+    public static AutoNovel autoNovel = null;
+    public static ManNovel manNovel = null;
     public JComboBox autoHostSelection;
     public JTextField chapterListURL;
     public JTextField saveLocation;
@@ -74,7 +75,6 @@ public class GUI extends JFrame {
     public JButton checkStopPollingBtn;
     public JLabel autoBookSubjects;
     private JList<String> manLinkList;
-    public Download auto;
     private JFrame window;
     private JTabbedPane tabbedPane;
     private JPanel rootPanel;
@@ -190,7 +190,12 @@ public class GUI extends JFrame {
                     tempListModel.addElement(alreadyBlacklistedTags);
                 }
             }
-            JOptionPane.showOptionDialog(null, tagScrollPane, "Blacklisted Tags:", JOptionPane.PLAIN_MESSAGE, JOptionPane.PLAIN_MESSAGE, null, null, null);
+            JOptionPane.showOptionDialog(null,
+                    tagScrollPane,
+                    "Blacklisted Tags:",
+                    JOptionPane.PLAIN_MESSAGE,
+                    JOptionPane.PLAIN_MESSAGE,
+                    null, null, null);
         });
         grabChaptersButton.addActionListener(arg0 -> Executors.newSingleThreadExecutor().execute(() -> {
             // input validation
@@ -204,7 +209,7 @@ public class GUI extends JFrame {
                 saveLocation.requestFocusInWindow();
                 return;
             }
-            if (!auto.autoChapterToChapter) {
+            if (!autoNovel.autoChapterToChapter) {
                 if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
                         && (((Integer) firstChapter.getValue() < 1)
                         || ((Integer) lastChapter.getValue()) < 1)) {
@@ -248,7 +253,7 @@ public class GUI extends JFrame {
                 stopButton.setVisible(true);
                 // Chapter grabbing
                 try {
-                    auto.startAutoDownload();
+                    autoNovel.startDownload();
                 } catch (NullPointerException | IllegalArgumentException err) {
                     appendText("auto", err.getMessage());
                     err.printStackTrace();
@@ -265,8 +270,8 @@ public class GUI extends JFrame {
         autoCheckAvailability.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             if (!chapterListURL.getText().isEmpty()) {
                 autoBusyLabel.setVisible(true);
-                auto = new Download(this);
-                if (!auto.chapterLinks.isEmpty()) {
+                autoNovel = new AutoNovel(this);
+                if (!autoNovel.chapterLinks.isEmpty()) {
                     grabChaptersButton.setEnabled(true);
                     autoGetNumberButton.setEnabled(true);
                     autoEditMetaBtn.setEnabled(true);
@@ -275,7 +280,7 @@ public class GUI extends JFrame {
                     pagesCountLbl.setVisible(false);
                     pagesLbl.setVisible(false);
                 }
-                if (auto.autoChapterToChapter) {
+                if (autoNovel.autoChapterToChapter) {
                     grabChaptersButton.setEnabled(true);
                     autoEditMetaBtn.setEnabled(true);
                     autoEditBlacklistBtn.setEnabled(true);
@@ -304,42 +309,31 @@ public class GUI extends JFrame {
             }
         });
 
-        stopButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                stopButton.setEnabled(false);
-                autoFetchChapters.killTask = true;
-            }
+        stopButton.addActionListener(e -> {
+            stopButton.setEnabled(false);
+            autoNovel.killTask = true;
         });
         // Get chapter number
-        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
-            getChapterNumber.main(this);
-        }));
+        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> getChapterNumber.main(this)));
 
-        chaptersFromLinksRadioButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (chaptersFromLinksRadioButton.isSelected()) {
-                    chapterToChapterRadioButton.setSelected(false);
-                    manNovelURL.setVisible(true);
-                    getLinksButton.setVisible(true);
-                    manTocURLlbl.setVisible(true);
-                    chapterToChapterButton.setVisible(false);
-                    manInvertOrder.setEnabled(true);
-                }
+        chaptersFromLinksRadioButton.addActionListener(e -> {
+            if (chaptersFromLinksRadioButton.isSelected()) {
+                chapterToChapterRadioButton.setSelected(false);
+                manNovelURL.setVisible(true);
+                getLinksButton.setVisible(true);
+                manTocURLlbl.setVisible(true);
+                chapterToChapterButton.setVisible(false);
+                manInvertOrder.setEnabled(true);
             }
         });
-        chapterToChapterRadioButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (chapterToChapterRadioButton.isSelected()) {
-                    chaptersFromLinksRadioButton.setSelected(false);
-                    manNovelURL.setVisible(false);
-                    getLinksButton.setVisible(false);
-                    manTocURLlbl.setVisible(false);
-                    chapterToChapterButton.setVisible(true);
-                    manInvertOrder.setEnabled(false);
-                }
+        chapterToChapterRadioButton.addActionListener(e -> {
+            if (chapterToChapterRadioButton.isSelected()) {
+                chaptersFromLinksRadioButton.setSelected(false);
+                manNovelURL.setVisible(false);
+                getLinksButton.setVisible(false);
+                manTocURLlbl.setVisible(false);
+                chapterToChapterButton.setVisible(true);
+                manInvertOrder.setEnabled(false);
             }
         });
         getLinksButton.addActionListener(e -> {
@@ -350,7 +344,7 @@ public class GUI extends JFrame {
             }
             if (!manNovelURL.getText().isEmpty()) {
                 try {
-                    manFetchChapters.retrieveLinks(this);
+                    ManNovel.retrieveLinks(this);
                 } catch (NullPointerException | IllegalArgumentException | IOException err) {
                     err.printStackTrace();
                 } finally {
@@ -368,7 +362,7 @@ public class GUI extends JFrame {
                 int[] indices = manLinkList.getSelectedIndices();
                 for (int i = indices.length - 1; i >= 0; i--) {
                     listModelChapterLinks.removeElementAt(indices[i]);
-                    manFetchChapters.chapterURLs.remove(indices[i]);
+                    ManNovel.chapterLinks.remove(indices[i]);
                 }
                 if (listModelChapterLinks.isEmpty()) {
                     manRemoveLinksButton.setEnabled(false);
@@ -402,7 +396,7 @@ public class GUI extends JFrame {
                     manStopButton.setVisible(true);
                     try {
                         manProgressBar.setStringPainted(true);
-                        Download manDownload = new Download(this, "chapterToChapter");
+                        manNovel = new ManNovel(this, "chapterToChapter");
                         // Exception handling
                     } catch (NullPointerException | IllegalArgumentException err) {
                         appendText("manual", err.getMessage());
@@ -444,7 +438,7 @@ public class GUI extends JFrame {
                     manStopButton.setVisible(true);
                     manProgressBar.setStringPainted(true);
                     try {
-                        Download manDownload = new Download(this, "chaptersFromList");
+                        manNovel = new ManNovel(this, "chaptersFromList");
                         // Exception handling
                     } catch (NullPointerException | IllegalArgumentException err) {
                         appendText("manual", err.getMessage());
@@ -482,9 +476,9 @@ public class GUI extends JFrame {
         }));
         checkAddNewEntryBtn.addActionListener(arg0 -> {
             String host = (String) JOptionPane.showInputDialog(this,
-                    "Pick host:", "Add a novel to check", JOptionPane.PLAIN_MESSAGE, null, HostSettings.websites, "wuxiaworld");
+                    "Pick host:", "Add a autoNovel to check", JOptionPane.PLAIN_MESSAGE, null, HostSettings.websites, "wuxiaworld");
             String checkUrl = JOptionPane.showInputDialog(this,
-                    "Novel URL:", "Add a novel to check", JOptionPane.PLAIN_MESSAGE);
+                    "Novel URL:", "Add a autoNovel to check", JOptionPane.PLAIN_MESSAGE);
             if (!(checkUrl == null) && !(host == null)) {
                 if (!host.isEmpty() && !checkUrl.isEmpty()) {
                     if (HostSettings.autoChapterToChapterWebsitesList.contains(host)) {
@@ -527,16 +521,13 @@ public class GUI extends JFrame {
         });
         manStopButton.addActionListener(e -> {
             manStopButton.setEnabled(false);
-            manFetchChapters.killTask = true;
+            manNovel.killTask = true;
         });
-        manJsoupInfoButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    openWebpage(new URI("https://jsoup.org/cookbook/extracting-data/selector-syntax"));
-                } catch (URISyntaxException ex) {
-                    ex.printStackTrace();
-                }
+        manJsoupInfoButton.addActionListener(e -> {
+            try {
+                openWebpage(new URI("https://jsoup.org/cookbook/extracting-data/selector-syntax"));
+            } catch (URISyntaxException ex) {
+                ex.printStackTrace();
             }
         });
         autoHostSelection.addItemListener(e -> {
@@ -579,8 +570,8 @@ public class GUI extends JFrame {
             }
         });
 
-        autoEditBlacklistBtn.addActionListener(e -> autoSetBlacklistedTags.main(auto));
-        autoEditMetaBtn.addActionListener(e -> autoEditMetadata.main(auto));
+        autoEditBlacklistBtn.addActionListener(e -> autoSetBlacklistedTags.main(autoNovel));
+        autoEditMetaBtn.addActionListener(e -> autoEditMetadata.main(autoNovel));
         checkForUpdatesButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::checkForNewReleases));
         useHeaderlessBrowserCheckBox.addActionListener(e -> {
             String selection = autoHostSelection.getSelectedItem().toString();
@@ -700,9 +691,7 @@ public class GUI extends JFrame {
         SystemTray tray = SystemTray.getSystemTray();
         Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/favicon.png"));
 
-        ActionListener exitListener = e -> {
-            System.exit(0);
-        };
+        ActionListener exitListener = e -> System.exit(0);
         ActionListener openWindow = e -> setVisible(true);
 
         PopupMenu popup = new PopupMenu();
@@ -760,7 +749,7 @@ public class GUI extends JFrame {
         Executors.newSingleThreadExecutor().execute(() -> chapterChecker.killTask(this));
     }
 
-    public void startPolling() {
+    private void startPolling() {
         appendText("checker", "Started polling.");
         checkPollStartBtn.setEnabled(false);
         checkPollStartBtn.setVisible(false);

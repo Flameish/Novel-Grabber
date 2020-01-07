@@ -102,7 +102,6 @@ public class ChapterToChapter extends JDialog {
         nextChapterButtonField = new JTextField(GUI.chapterToChapterArgs[2]);
         if (GUI.chapterToChapterNumber != 1) {
             manChapterToChapterNumberField.setText(String.valueOf(GUI.chapterToChapterNumber));
-
             manChapterToChapterNumberField.setForeground(Color.BLACK);
         }
     }

@@ -1,6 +1,6 @@
 package gui;
 
-import grabber.Download;
+import grabber.AutoNovel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -25,9 +25,9 @@ public class autoEditMetadata extends JDialog {
     private JScrollPane autoEditMetadataDescScrollPane;
     private JTextArea autoEditMetadataDescArea;
     private JCheckBox ignoreDescriptionCheckBox;
-    private Download currGrab;
+    private AutoNovel currGrab;
 
-    private autoEditMetadata(Download currGrab) {
+    private autoEditMetadata(AutoNovel currGrab) {
         this.currGrab = currGrab;
         setContentPane(contentPane);
         setModal(true);
@@ -83,7 +83,7 @@ public class autoEditMetadata extends JDialog {
         });
     }
 
-    static void main(Download currGrab) {
+    static void main(AutoNovel currGrab) {
         autoEditMetadata dialog = new autoEditMetadata(currGrab);
         dialog.pack();
         dialog.setVisible(true);

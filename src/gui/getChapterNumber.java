@@ -1,9 +1,9 @@
 package gui;
 
-import grabber.autoFetchChapters;
-
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class getChapterNumber extends JDialog {
     private static getChapterNumber dialog;
@@ -21,19 +21,10 @@ public class getChapterNumber extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK(gui);
-            }
-        });
+        buttonOK.addActionListener(e -> onOK(gui));
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        buttonCancel.addActionListener(e -> onCancel());
 
-        // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -41,12 +32,7 @@ public class getChapterNumber extends JDialog {
             }
         });
 
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     static void main(GUI gui) {
@@ -57,7 +43,7 @@ public class getChapterNumber extends JDialog {
     }
 
     private void onOK(GUI gui) {
-        String[] infos = autoFetchChapters.getChapterNumber(gui, chapterField.getText(), gui.auto);
+        String[] infos = GUI.autoNovel.getChapterNumber(gui, chapterField.getText());
         chapterNameLbl.setText(infos[0]);
         chapterNumberLbl.setText(infos[1]);
         dialog.pack();

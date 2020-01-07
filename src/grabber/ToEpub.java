@@ -14,11 +14,12 @@ import java.nio.file.Paths;
 class ToEpub {
     private FileInputStream inputStream;
     private Resource resource;
-    ToEpub(Download currGrab) {
+
+    ToEpub(AutoNovel currGrab) {
         writeEpub(currGrab);
     }
 
-    private void writeEpub(Download currGrab) {
+    private void writeEpub(AutoNovel currGrab) {
         try {
             currGrab.gui.appendText(currGrab.window, "[INFO]Writing epub...");
             // Create new Book
@@ -56,7 +57,7 @@ class ToEpub {
                 } else {
                     // Add manual cover image. Its saved as a full path
                     inputStream = new FileInputStream(currGrab.bookCover);
-                    resource = new Resource(inputStream, Shared.getFileName(currGrab.bookCover));
+                    resource = new Resource(inputStream, shared.getFileName(currGrab.bookCover));
                     book.getResources().add(resource);
                     book.setCoverImage(resource);
                     inputStream.close();
@@ -116,8 +117,8 @@ class ToEpub {
             Path chaptersFolder = Paths.get(currGrab.saveLocation + "/chapters");
             Path imagesFolder = Paths.get(currGrab.saveLocation + "/images");
 
-            if (Files.exists(imagesFolder)) Shared.deleteFolderAndItsContent(imagesFolder);
-            if (Files.exists(chaptersFolder)) Shared.deleteFolderAndItsContent(chaptersFolder);
+            if (Files.exists(imagesFolder)) shared.deleteFolderAndItsContent(imagesFolder);
+            if (Files.exists(chaptersFolder)) shared.deleteFolderAndItsContent(chaptersFolder);
 
         } catch (FileNotFoundException e) {
             currGrab.gui.appendText(currGrab.window, "[ERROR]" + e.getMessage());

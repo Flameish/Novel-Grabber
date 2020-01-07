@@ -1,6 +1,6 @@
 package gui;
 
-import grabber.Download;
+import grabber.AutoNovel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,9 +16,9 @@ public class autoSetBlacklistedTags extends JDialog {
     private JButton setBlacklistRemoveButton;
     private JList list1;
     private JScrollPane scrollPane1;
-    private Download currGrab;
+    private AutoNovel currGrab;
 
-    private autoSetBlacklistedTags(Download currGrab) {
+    private autoSetBlacklistedTags(AutoNovel currGrab) {
         this.currGrab = currGrab;
         setContentPane(contentPane);
         setModal(true);
@@ -59,7 +59,7 @@ public class autoSetBlacklistedTags extends JDialog {
         });
     }
 
-    static void main(Download currGrab) {
+    static void main(AutoNovel currGrab) {
         autoSetBlacklistedTags dialog = new autoSetBlacklistedTags(currGrab);
         dialog.pack();
         dialog.setVisible(true);
