@@ -276,12 +276,10 @@ public class shared {
             if (!currGrab.nextChapterBtn.equals("NOT_SET"))
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
             Element chapterContent = doc.select(chapterContainer).first();
-            //Elements chapterContents = null;
 
             if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
                 String tempChapterText = "<div>" + doc.select("p").toString() + "</div>";
                 chapterContent = Jsoup.parse(tempChapterText);
-                System.out.println(chapterContent);
             }
 
             // Remove unwanted tags from chapter container.
@@ -327,7 +325,7 @@ public class shared {
                 }
                 // Write text content to file.
                 if (currGrab.displayChapterTitle)
-                    chapterContent.prepend("<span style=\"font-weight: 700; text-decoration: underline;\">" + chapterName + "</span>");
+                    chapterContent.prepend("<span style=\"font-weight: 700; text-decoration: underline;\">" + chapterName + "</span><br>");
                 out.println(chapterContent);
             }
             successfulChapter(fileName, chapterName, currGrab);
@@ -354,9 +352,14 @@ public class shared {
                     }
                 }
             }
+            // Getting the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter.
+            if (!currGrab.nextChapterBtn.equals("NOT_SET"))
+                currGrab.nextChapterURL =
+                        doc.select(currGrab.nextChapterBtn).first().absUrl("href");
+            Element chapterContent = doc.select(chapterContainer).first();
             // AutoNovel images of chapter container.
             if (currGrab.getImages) {
-                for (Element image : doc.select("img")) {
+                for (Element image : chapterContent.select("img")) {
                     downloadImage(image.absUrl("src"), currGrab);
                 }
             }
@@ -368,9 +371,9 @@ public class shared {
             // Write chapter content to file.
             try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", textEncoding)) {
                 // Images
-                if (doc.select("img").size() > 0) {
+                if (chapterContent.select("img").size() > 0) {
                     // Iterate each image in chapter content.
-                    for (Element image : doc.select("img")) {
+                    for (Element image : chapterContent.select("img")) {
                         // Check if the image was successfully downloaded.
                         String src = image.absUrl("src");
                         if (currGrab.imageLinks.contains(src)) {
@@ -382,14 +385,14 @@ public class shared {
                             // Replace href for image to point to local path.
                             image.attr("src", imageName);
                             // Remove the img tag if image wasn't downloaded.
-                        } else doc.select("img").remove();
+                        } else chapterContent.select("img").remove();
                     }
                 }
                 // Add chapter title at the start of chapter
                 if (currGrab.displayChapterTitle)
-                    doc.prepend("<span style=\"font-weight: 700; text-decoration: underline;\">" + chapterName + "</span>");
+                    chapterContent.prepend("<span style=\"font-weight: 700; text-decoration: underline;\">" + chapterName + "</span><br>");
                 // Write text content to file.
-                out.println(doc);
+                out.println(chapterContent);
             }
             successfulChapter(fileName, chapterName, currGrab);
         } catch (Throwable e) {

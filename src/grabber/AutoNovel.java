@@ -10,7 +10,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -34,7 +33,7 @@ import java.util.regex.Pattern;
 
 public class AutoNovel {
     private static WebDriver driver;
-    private static WebDriverWait wait;
+    static WebDriverWait wait;
     public List<String> chapterLinks = new ArrayList<>();
     public HostSettings currHostSettings;
     public BufferedImage bufferedCover;
@@ -44,7 +43,6 @@ public class AutoNovel {
     public boolean noDescription = false;
     public List<String> bookDesc = new ArrayList<>();
     public boolean autoChapterToChapter;
-    //Metadata
     public String bookTitle;
     public String bookAuthor;
     public List<String> bookSubjects = new ArrayList<>();
@@ -129,17 +127,24 @@ public class AutoNovel {
         }
         // Getting the chapters again if it was stopped previously
         if (killTask) getChapterList();
-
         killTask = false;
-        if (autoChapterToChapter && !gui.useHeaderlessBrowserCheckBox.isSelected()) {
-            String[] chapterInfo = {
+        // Start headerless browser
+        if (useHeaderlessBrowser) {
+            driverSetup();
+            wait = new WebDriverWait(driver, 30);
+        }
+        if (autoChapterToChapter) {
+            String[] chapterToChapterArgs = {
                     gui.autoFirstChapterURL.getText(),
                     gui.autoLastChapterURL.getText(),
                     currHostSettings.nextChapterBtn
             };
-            processChaptersToChapters(chapterInfo);
+            processChaptersToChapters(chapterToChapterArgs);
         } else {
             downloadChapters();
+        }
+        if (useHeaderlessBrowser) {
+            driver.close();
         }
         if (!successfulFilenames.isEmpty() && !killTask) {
             switch ((String) gui.exportSelection.getSelectedItem()) {
@@ -320,8 +325,8 @@ public class AutoNovel {
                 chapterShow.selectByVisibleText("All");
                 break;
             case "https://creativenovels.com/":
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#tab-45344-27")));
                 driver.findElement(By.cssSelector("#tab-45344-27")).click();
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".post_box")));
                 break;
             case "https://flying-lines.com/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".chapter-tables > span:nth-child(2)")));
@@ -333,7 +338,6 @@ public class AutoNovel {
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".chapter-list a")));
                 break;
             case "https://wordexcerpt.com/":
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("li.nav-item:nth-child(2) > a:nth-child(1)")));
                 driver.findElement(By.cssSelector("li.nav-item:nth-child(2) > a:nth-child(1)")).click();
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(currHostSettings.chapterLinkSelecter)));
                 break;
@@ -345,6 +349,10 @@ public class AutoNovel {
             case "https://boxnovel.com/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".chapter-readmore")));
                 driver.findElement(By.cssSelector(".chapter-readmore")).click();
+                break;
+            case "https://wordrain69.com/":
+                driver.findElement(By.cssSelector(".chapter-readmore")).click();
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(currHostSettings.chapterLinkSelecter)));
                 break;
             case "https://ficfun.com/":
                 driver.findElement(By.cssSelector(".button-round-red")).click();
@@ -379,11 +387,6 @@ public class AutoNovel {
         if (gui.toLastChapter.isSelected()) {
             lastChapter = chapterLinks.size();
         }
-        // Start headerless browser
-        if (useHeaderlessBrowser) {
-            driverSetup();
-            wait = new WebDriverWait(driver, 30);
-        }
         // Grab all chapters.
         if (allChapters) {
             processAllChapters();
@@ -400,9 +403,6 @@ public class AutoNovel {
         if (gui.checkInvertOrder.isSelected()) {
             Collections.reverse(chapterLinks);
             Collections.reverse(chaptersNames);
-        }
-        if (useHeaderlessBrowser) {
-            driver.close();
         }
     }
 
@@ -552,7 +552,7 @@ public class AutoNovel {
                 driver.navigate().to(chapterLinks.get(i - 1));
                 String chapterContainer = currHostSettings.chapterContainer;
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(chapterContainer)));
-                WebElement chapter = driver.findElement(By.cssSelector(chapterContainer));
+                WebElement chapter = driver.findElement(By.cssSelector("body"));
                 shared.saveChapterFromString(chapter.getAttribute("innerHTML"), i, chaptersNames.get(i - 1),
                         currHostSettings.chapterContainer, this);
             } else {
@@ -596,7 +596,7 @@ public class AutoNovel {
                 driver.navigate().to(chapterLinks.get(i - 1));
                 String chapterContainer = currHostSettings.chapterContainer;
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(chapterContainer)));
-                WebElement chapter = driver.findElement(By.cssSelector(chapterContainer));
+                WebElement chapter = driver.findElement(By.cssSelector("body"));
                 shared.saveChapterFromString(chapter.getAttribute("innerHTML"), i, chaptersNames.get(i - 1),
                         currHostSettings.chapterContainer, this);
             } else {
@@ -647,13 +647,33 @@ public class AutoNovel {
         nextChapterBtn = args[2];
         int chapterNumber = chapterToChapterNumber;
         while (true) {
-            shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, currHostSettings.chapterContainer, this);
+            if (useHeaderlessBrowser) {
+                driver.navigate().to(nextChapter);
+                String chapterContainer = currHostSettings.chapterContainer;
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(chapterContainer)));
+                WebElement chapter = driver.findElement(By.cssSelector("body"));
+                shared.saveChapterFromString(chapter.getAttribute(
+                        "innerHTML"), chapterNumber, "Chapter " + chapterNumber,
+                        currHostSettings.chapterContainer, this);
+            } else {
+                shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, currHostSettings.chapterContainer, this);
+            }
             nextChapter = nextChapterURL;
             if (nextChapter.equals(lastChapter) || (nextChapter + "/").equals(lastChapter)) {
                 chapterNumber++;
                 shared.sleep(waitTime);
                 nextChapterBtn = "NOT_SET";
-                shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, currHostSettings.chapterContainer, this);
+                if (useHeaderlessBrowser) {
+                    driver.navigate().to(nextChapter);
+                    String chapterContainer = currHostSettings.chapterContainer;
+                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(chapterContainer)));
+                    WebElement chapter = driver.findElement(By.cssSelector("body"));
+                    shared.saveChapterFromString(chapter.getAttribute(
+                            "innerHTML"), chapterNumber, "Chapter " + chapterNumber,
+                            currHostSettings.chapterContainer, this);
+                } else {
+                    shared.saveChapterWithHTML(nextChapter, chapterNumber, "Chapter " + chapterNumber, currHostSettings.chapterContainer, this);
+                }
                 break;
             }
             if (killTask) {
@@ -701,7 +721,8 @@ public class AutoNovel {
         switch (gui.autoBrowserCombobox.getSelectedItem().toString()) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
-                driver = new ChromeDriver(new ChromeOptions().setHeadless(true));
+                //new ChromeOptions().setHeadless(true)
+                driver = new ChromeDriver();
                 break;
             case "Firefox":
                 WebDriverManager.firefoxdriver().setup();

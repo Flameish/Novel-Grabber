@@ -34,13 +34,14 @@ public class HostSettings {
             "Fanfiktion"
     };
     private static String[] autoChapterToChapterWebsites = {
+            "LiberSpark",
             "Comrade Mao",
             "Zenith Novels",
-            "Translation Otaku",
-            "BoxNovel"
+            "Translation Otaku"
 
     };
     private static String[] headerlessBrowserWebsites = {
+            "BoxNovel",
             "Creative Novels",
             "Flying Lines",
             "FicFun"
@@ -49,16 +50,7 @@ public class HostSettings {
     public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
     private static String[] noHeaderlessBrowserWebsites = {
             "Wattpad", // pages broken
-            "Creative Novels", // api call
-            //"Flying Lines", // api call // browser locked chapter
-            "WordExcerpt", //browser doesnt click
             "FanFiction", // links broeken
-            "LiberSpark", //doesnt get all chapter links
-            "Wordrain", // empty chapter names
-            "Comrade Mao", // chapter
-            "Zenith Novels", // nope
-            "Translation Otaku", // chapters
-            "ISO Hungry TLS", // chapters
             "Fanfiktion"
     };
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
@@ -207,6 +199,7 @@ public class HostSettings {
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = "#autoNovel-chapters-list a.text-links";
                 chapterContainer = "#reader-content";
+                nextChapterBtn = "a:contains(Next Chapter)";
                 titleHostName = "|LiberSpark";
                 blacklistedTags = new LinkedList<>(Arrays.asList("div.ad-wrapper"));
                 bookTitleSelector = "h1[style=text-align:left]";
@@ -241,8 +234,8 @@ public class HostSettings {
             case "comrademao":
                 host = "https://comrademao.com/";
                 ordinalIndexForBaseNovel = 0;
-                chapterLinkSelecter = "";
-                chapterContainer = "article div";
+                chapterLinkSelecter = "tbody tr a";
+                chapterContainer = ".post > div:nth-child(2)";
                 nextChapterBtn = "a.btn.btn-default.btn-sm:has(i.fa-angle-right)";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("div#CollapseRaw", ".code-block"));
@@ -269,7 +262,7 @@ public class HostSettings {
             case "wordrain":
                 host = "https://wordrain69.com/";
                 ordinalIndexForBaseNovel = 5;
-                chapterLinkSelecter = ".main a:not(.has-child):not([title])";
+                chapterLinkSelecter = ".main li a";
                 chapterContainer = ".text-left";
                 nextChapterBtn = "";
                 titleHostName = "-Wordrain69";
@@ -353,7 +346,7 @@ public class HostSettings {
             case "zenithnovels":
                 host = "https://zenithnovels.com/";
                 ordinalIndexForBaseNovel = 5;
-                chapterLinkSelecter = "";
+                chapterLinkSelecter = ".lcp_catlist li a";
                 chapterContainer = ".entry";
                 nextChapterBtn = ".post-next a";
                 titleHostName = "";
@@ -367,8 +360,8 @@ public class HostSettings {
             case "translationotaku":
                 host = "https://translatinotaku.net/";
                 ordinalIndexForBaseNovel = 5;
-                chapterLinkSelecter = "";
-                chapterContainer = ".elementor-widget-container:has(p)";
+                chapterLinkSelecter = ".elementor-posts-container a";
+                chapterContainer = ".text";
                 nextChapterBtn = ".elementor-post-navigation__next a";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("div[style=float: none; margin:10px 0 10px 0; text-align:center;]"));
@@ -388,7 +381,7 @@ public class HostSettings {
                 blacklistedTags = new LinkedList<>(Arrays.asList("span.ezoic-ad", "p[style=text-align: center;]", "hr", "p:has(span[style=color: #ffffff;])"));
                 bookTitleSelector = "span[style=font-size: 24pt;]";
                 bookDescSelector = "blockquote";
-                bookCoverSelector = "img";
+                bookCoverSelector = "";
                 bookAuthorSelector = "p:contains(Translator:)";
                 bookSubjectSelector = "p:contains(Genres:)";
                 break;

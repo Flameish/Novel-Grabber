@@ -139,6 +139,7 @@ public class GUI extends JFrame {
     public JCheckBox displayChapterTitleCheckBox;
     public JCheckBox manDispalyChapterTitleCheckbox;
     public JTextField autoChapterToChapterNumberField;
+    public JCheckBox manUseHeaderlessBrowser;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
     private JButton autoEditMetadataButton;
@@ -538,9 +539,6 @@ public class GUI extends JFrame {
             } else {
                 useHeaderlessBrowserCheckBox.setEnabled(true);
             }
-            if (selection.equals("BoxNovel")) {
-                useHeaderlessBrowserCheckBox.setEnabled(true);
-            }
             if (HostSettings.autoChapterToChapterWebsitesList.contains(selection)) {
                 chapterAllCheckBox.setEnabled(false);
                 firstChapter.setEnabled(false);
@@ -573,34 +571,6 @@ public class GUI extends JFrame {
         autoEditBlacklistBtn.addActionListener(e -> autoSetBlacklistedTags.main(autoNovel));
         autoEditMetaBtn.addActionListener(e -> autoEditMetadata.main(autoNovel));
         checkForUpdatesButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::checkForNewReleases));
-        useHeaderlessBrowserCheckBox.addActionListener(e -> {
-            String selection = autoHostSelection.getSelectedItem().toString();
-            if (useHeaderlessBrowserCheckBox.isSelected()) {
-                if (selection.equals("BoxNovel")) {
-                    autoFirstChapterURL.setVisible(false);
-                    autoLastChapterURL.setVisible(false);
-                    autoFirstChapterLbl.setVisible(false);
-                    autoLastChapterLbl.setVisible(false);
-                    chapterAllCheckBox.setEnabled(true);
-                    firstChapter.setEnabled(true);
-                    lastChapter.setEnabled(true);
-                    toLastChapter.setEnabled(true);
-                    checkInvertOrder.setEnabled(true);
-                }
-            } else {
-                if (selection.equals("BoxNovel")) {
-                    autoFirstChapterURL.setVisible(true);
-                    autoLastChapterURL.setVisible(true);
-                    autoFirstChapterLbl.setVisible(true);
-                    autoLastChapterLbl.setVisible(true);
-                    chapterAllCheckBox.setEnabled(false);
-                    firstChapter.setEnabled(false);
-                    lastChapter.setEnabled(false);
-                    toLastChapter.setEnabled(false);
-                    checkInvertOrder.setEnabled(false);
-                }
-            }
-        });
         autoChapterToChapterNumberField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
