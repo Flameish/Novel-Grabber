@@ -10,6 +10,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -721,8 +722,7 @@ public class AutoNovel {
         switch (gui.autoBrowserCombobox.getSelectedItem().toString()) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
-                //new ChromeOptions().setHeadless(true)
-                driver = new ChromeDriver();
+                driver = new ChromeDriver(new ChromeOptions().setHeadless(true));
                 break;
             case "Firefox":
                 WebDriverManager.firefoxdriver().setup();

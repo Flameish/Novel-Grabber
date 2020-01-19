@@ -165,7 +165,7 @@ public class HostSettings {
                 bookDescSelector = ".brief";
                 bookCoverSelector = ".book_left img";
                 bookAuthorSelector = ".details .author";
-                bookSubjectSelector = ".autoNovel-tags span";
+                bookSubjectSelector = ".novel-tags span";
                 break;
             case "lightnovelstranslations":
                 host = "https://lightnovelstranslations.com/";
@@ -197,23 +197,23 @@ public class HostSettings {
             case "liberspark":
                 host = "https://liberspark.com/";
                 ordinalIndexForBaseNovel = 5;
-                chapterLinkSelecter = "#autoNovel-chapters-list a.text-links";
+                chapterLinkSelecter = "#novel-chapters-list a.text-links";
                 chapterContainer = "#reader-content";
                 nextChapterBtn = "a:contains(Next Chapter)";
                 titleHostName = "|LiberSpark";
                 blacklistedTags = new LinkedList<>(Arrays.asList("div.ad-wrapper"));
                 bookTitleSelector = "h1[style=text-align:left]";
-                bookDescSelector = ".autoNovel-synopsis";
+                bookDescSelector = ".novel-synopsis";
                 bookCoverSelector = "img#uploaded-cover-image";
-                bookAuthorSelector = ".autoNovel-author-info a h4";
-                bookSubjectSelector = ".autoNovel-author-info a h4";
+                bookAuthorSelector = ".novel-author-info a h4";
+                bookSubjectSelector = ".novel-author-info a h4";
                 bookSubjectSelector = "";
                 break;
             case "chrysanthemumgarden":
                 host = "https://chrysanthemumgarden.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".translated-chapters a";
-                chapterContainer = "#autoNovel-content";
+                chapterContainer = "#novel-content";
                 titleHostName = "--ChrysanthemumGarden";
                 blacklistedTags = new LinkedList<>(Arrays.asList(
                         ".netlink",
@@ -225,11 +225,11 @@ public class HostSettings {
                         ".sharedaddy",
                         ".jum"
                 ));
-                bookTitleSelector = "h1.autoNovel-title";
+                bookTitleSelector = "a[href=" + url + "]";
                 bookDescSelector = "false";
                 bookCoverSelector = "img.materialboxed";
                 bookAuthorSelector = "";
-                bookSubjectSelector = ".autoNovel-container a[href^=https://chrysanthemumgarden.com/genre/]";
+                bookSubjectSelector = ".novel-container a[href^=https://chrysanthemumgarden.com/genre/]";
                 break;
             case "comrademao":
                 host = "https://comrademao.com/";
@@ -304,14 +304,14 @@ public class HostSettings {
             case "flyinglines":
                 host = "https://flying-lines.com/";
                 ordinalIndexForBaseNovel = 5;
-                chapterLinkSelecter = ".volume-item a";
+                chapterLinkSelecter = ".volume-item li:has(i:not(.detail-chapter-locked)) a";
                 chapterContainer = "div.content";
                 nextChapterBtn = "";
                 titleHostName = "";
                 blacklistedTags = null;
                 bookTitleSelector = "div.title h2";
                 bookDescSelector = ".synopsis-detail";
-                bookCoverSelector = ".autoNovel-thumb img";
+                bookCoverSelector = ".novel-thumb img";
                 bookAuthorSelector = ".profile";
                 bookSubjectSelector = ".btn-category";
                 break;
