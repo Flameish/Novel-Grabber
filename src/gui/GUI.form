@@ -255,7 +255,7 @@
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <grid row="0" column="0" row-span="5" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                        <preferred-size width="450" height="-1"/>
+                        <preferred-size width="385" height="-1"/>
                       </grid>
                     </constraints>
                     <properties/>
@@ -652,6 +652,15 @@
                       <text value="Add chapter title"/>
                     </properties>
                   </component>
+                  <component id="b5aad" class="javax.swing.JCheckBox" binding="autoNoStyling">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Remove styling"/>
+                      <toolTipText value="Removes style attribute from all elements"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
             </children>
@@ -889,7 +898,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <grid id="5bf" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="5bf" layout-manager="GridLayoutManager" row-count="3" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -905,66 +914,9 @@
                           <text value="Get images"/>
                         </properties>
                       </component>
-                      <component id="32e32" class="javax.swing.JCheckBox" binding="manInvertOrder">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Invert chapter order"/>
-                        </properties>
-                      </component>
-                      <component id="d01a2" class="javax.swing.JCheckBox" binding="manDispalyChapterTitleCheckbox">
-                        <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Display chapter title"/>
-                        </properties>
-                      </component>
-                      <component id="d1fc9" class="javax.swing.JCheckBox" binding="manUseHeaderlessBrowser">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Use Headerless Browser"/>
-                          <toolTipText value="Novel-Grabber will visit the websites in a browser."/>
-                        </properties>
-                      </component>
-                      <component id="df9d5" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Wait time:"/>
-                        </properties>
-                      </component>
-                      <component id="36245" class="javax.swing.JTextField" binding="manWaitTime" custom-create="true">
-                        <constraints>
-                          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="100" height="-1"/>
-                          </grid>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <component id="d4414" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Export:"/>
-                        </properties>
-                      </component>
-                      <component id="8f6ce" class="javax.swing.JComboBox" binding="manExportSelection" custom-create="true">
-                        <constraints>
-                          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="100" height="-1"/>
-                          </grid>
-                        </constraints>
-                        <properties/>
-                      </component>
                       <component id="aa5bb" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text value="Browser:"/>
@@ -972,11 +924,77 @@
                       </component>
                       <component id="8c600" class="javax.swing.JComboBox" binding="manBrowserCombobox" custom-create="true">
                         <constraints>
-                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <toolTipText value="Pick your browser if you have selected 'Use Headerless Browser'"/>
                         </properties>
+                      </component>
+                      <component id="d01a2" class="javax.swing.JCheckBox" binding="manDispalyChapterTitleCheckbox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Display chapter title"/>
+                        </properties>
+                      </component>
+                      <component id="563b1" class="javax.swing.JCheckBox" binding="manNoStyling">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Remove styling"/>
+                          <toolTipText value="Removes style attribute from all elements"/>
+                        </properties>
+                      </component>
+                      <component id="32e32" class="javax.swing.JCheckBox" binding="manInvertOrder">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Invert chapter order"/>
+                        </properties>
+                      </component>
+                      <component id="d1fc9" class="javax.swing.JCheckBox" binding="manUseHeaderlessBrowser">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Use Headerless Browser"/>
+                          <toolTipText value="Novel-Grabber will visit the websites in a browser."/>
+                        </properties>
+                      </component>
+                      <component id="d4414" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Export:"/>
+                        </properties>
+                      </component>
+                      <component id="8f6ce" class="javax.swing.JComboBox" binding="manExportSelection" custom-create="true">
+                        <constraints>
+                          <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                            <preferred-size width="100" height="-1"/>
+                          </grid>
+                        </constraints>
+                        <properties/>
+                      </component>
+                      <component id="df9d5" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Wait time:"/>
+                        </properties>
+                      </component>
+                      <component id="36245" class="javax.swing.JTextField" binding="manWaitTime" custom-create="true">
+                        <constraints>
+                          <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                            <preferred-size width="100" height="-1"/>
+                          </grid>
+                        </constraints>
+                        <properties/>
                       </component>
                     </children>
                   </grid>

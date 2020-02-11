@@ -141,6 +141,8 @@ public class GUI extends JFrame {
     public JTextField autoChapterToChapterNumberField;
     public JCheckBox manUseHeaderlessBrowser;
     public JComboBox manBrowserCombobox;
+    public JCheckBox autoNoStyling;
+    public JCheckBox manNoStyling;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
     private JButton autoEditMetadataButton;
@@ -883,7 +885,7 @@ public class GUI extends JFrame {
         autoChapterToChapterNumberField = new JTextField("Number");
         autoChapterToChapterNumberField.setForeground(Color.GRAY);
 
-        autoShowBlacklistedTagsBtn = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
+        autoShowBlacklistedTagsBtn = new JButton(new ImageIcon(getClass().getResource("/images/block.png")));
         autoShowBlacklistedTagsBtn.setBorder(BorderFactory.createEmptyBorder());
         autoShowBlacklistedTagsBtn.setContentAreaFilled(false);
 
@@ -928,11 +930,11 @@ public class GUI extends JFrame {
         autoEditMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         autoEditMetadataButton.setContentAreaFilled(false);
 
-        autoEditMetaBtn = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));
+        autoEditMetaBtn = new JButton(new ImageIcon(getClass().getResource("/images/edit.png")));
         autoEditMetaBtn.setBorder(BorderFactory.createEmptyBorder());
         autoEditMetaBtn.setContentAreaFilled(false);
 
-        autoEditBlacklistBtn = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
+        autoEditBlacklistBtn = new JButton(new ImageIcon(getClass().getResource("/images/block.png")));
         autoEditBlacklistBtn.setBorder(BorderFactory.createEmptyBorder());
         autoEditBlacklistBtn.setContentAreaFilled(false);
 
@@ -958,11 +960,11 @@ public class GUI extends JFrame {
         // Manual Tab
         manBrowserCombobox = new JComboBox(browserList);
 
-        manSetMetadataButton = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));
+        manSetMetadataButton = new JButton(new ImageIcon(getClass().getResource("/images/edit.png")));
         manSetMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         manSetMetadataButton.setContentAreaFilled(false);
 
-        manBlackListedTags = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
+        manBlackListedTags = new JButton(new ImageIcon(getClass().getResource("/images/block.png")));
         manBlackListedTags.setBorder(BorderFactory.createEmptyBorder());
         manBlackListedTags.setContentAreaFilled(false);
 
