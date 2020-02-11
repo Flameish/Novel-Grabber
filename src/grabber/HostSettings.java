@@ -15,7 +15,7 @@ public class HostSettings {
             "Gravity Tales",
             "Volare Novels",
             "Creative Novels",
-            "Flying Lines",
+            //"Flying Lines",
             "TapRead",
             "WordExcerpt",
             "FanFiction",
@@ -45,7 +45,7 @@ public class HostSettings {
             "BoxNovel",
             "Creative Novels",
             "Flying Lines",
-            "FicFun",
+            //"FicFun",
             "Dreame"
     };
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
