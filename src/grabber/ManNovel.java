@@ -40,6 +40,7 @@ public class ManNovel extends AutoNovel {
         window = "manual";
         tocFileName = "Table of Contents";
         export = gui.manExportSelection.getSelectedItem().toString();
+        noStyling = gui.manNoStyling.isSelected();
         displayChapterTitle = gui.manDispalyChapterTitleCheckbox.isSelected();
         bookDesc.add(0, "");
         killTask = false;

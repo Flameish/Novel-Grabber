@@ -60,6 +60,7 @@ public class AutoNovel {
     String tocFileName;
     boolean getImages;
     boolean invertOrder;
+    boolean noStyling;
     List<String> successfulExtraPagesNames = new ArrayList<>();
     int waitTime;
     List<String> successfulExtraPagesFilenames = new ArrayList<>();
@@ -104,6 +105,7 @@ public class AutoNovel {
         invertOrder = gui.checkInvertOrder.isSelected();
         useHeaderlessBrowser = gui.useHeaderlessBrowserCheckBox.isSelected();
         displayChapterTitle = gui.displayChapterTitleCheckBox.isSelected();
+        noStyling = gui.autoNoStyling.isSelected();
         if (!gui.autoChapterToChapterNumberField.getText().equals("Number")) {
             chapterToChapterNumber = Integer.valueOf(gui.autoChapterToChapterNumberField.getText());
         } else {
@@ -326,8 +328,8 @@ public class AutoNovel {
                 chapterShow.selectByVisibleText("All");
                 break;
             case "https://creativenovels.com/":
-                driver.findElement(By.cssSelector("#tab-45344-27")).click();
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".post_box")));
+                driver.findElement(By.cssSelector("ul[role='tablist'] > li:nth-of-type(3) button")).click();
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".post_box")));
                 break;
             case "https://flying-lines.com/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".chapter-tables > span:nth-child(2)")));
