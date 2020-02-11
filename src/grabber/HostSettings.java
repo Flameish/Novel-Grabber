@@ -31,6 +31,7 @@ public class HostSettings {
             "Kuhaku Light Novel Translations",
             "Chrysanthemum Garden",
             "FicFun",
+            "Dreame",
             "Fanfiktion"
     };
     private static String[] autoChapterToChapterWebsites = {
@@ -44,7 +45,8 @@ public class HostSettings {
             "BoxNovel",
             "Creative Novels",
             "Flying Lines",
-            "FicFun"
+            "FicFun",
+            "Dreame"
     };
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
@@ -153,11 +155,23 @@ public class HostSettings {
                 bookAuthorSelector = ".author-content a";
                 bookSubjectSelector = ".genres-content a";
                 break;
-
             case "ficfun":
                 host = "https://ficfun.com/";
                 ordinalIndexForBaseNovel = 0;
                 chapterLinkSelecterButton = ".button-round-red";
+                chapterLinkSelecter = ".chapter-list a";
+                chapterContainer = "#article-content";
+                titleHostName = "";
+                bookTitleSelector = ".details .name";
+                bookDescSelector = ".brief";
+                bookCoverSelector = ".book_left img";
+                bookAuthorSelector = ".details .author";
+                bookSubjectSelector = ".novel-tags span";
+                break;
+            case "dreame":
+                host = "https://dreame.com/";
+                ordinalIndexForBaseNovel = 0;
+                chapterLinkSelecterButton = ".button-round-purple";
                 chapterLinkSelecter = ".chapter-list a";
                 chapterContainer = "#article-content";
                 titleHostName = "";

@@ -358,6 +358,9 @@ public class AutoNovel {
             case "https://ficfun.com/":
                 driver.findElement(By.cssSelector(".button-round-red")).click();
                 break;
+            case "https://dreame.com/":
+                driver.findElement(By.cssSelector(".button-round-purple")).click();
+                break;
         }
         // Parse html from headerless to Jsoup for faster interaction.
         String baseUrl = driver.getCurrentUrl().substring(0, shared.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
