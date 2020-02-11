@@ -272,9 +272,14 @@ public class shared {
             } else {
                 doc = Jsoup.connect(url).timeout(30 * 1000).get();
             }
+
+            // Remove styling
+            if (currGrab.noStyling) doc.select("[style]").removeAttr("style");
+
             // Getting the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter.
             if (!currGrab.nextChapterBtn.equals("NOT_SET"))
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
+
             Element chapterContent = doc.select(chapterContainer).first();
 
             if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
@@ -352,11 +357,15 @@ public class shared {
                     }
                 }
             }
+            // Remove styling
+            if (currGrab.noStyling) doc.select("[style]").removeAttr("style");
+
             // Getting the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter.
             if (!currGrab.nextChapterBtn.equals("NOT_SET"))
                 currGrab.nextChapterURL =
                         doc.select(currGrab.nextChapterBtn).first().absUrl("href");
             Element chapterContent = doc.select(chapterContainer).first();
+            if (currGrab.currHostSettings.host.equals("https://tapread.com/")) chapterContent = doc;
             // AutoNovel images of chapter container.
             if (currGrab.getImages) {
                 for (Element image : chapterContent.select("img")) {
