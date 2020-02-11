@@ -44,17 +44,16 @@ public class HostSettings {
     private static String[] headerlessBrowserWebsites = {
             "BoxNovel",
             "Creative Novels",
-            "Flying Lines",
-            //"FicFun",
+            "FicFun",
             "Dreame"
     };
-    public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
-    public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
     private static String[] noHeaderlessBrowserWebsites = {
             "Wattpad", // pages broken
             "FanFiction", // links broeken
             "Fanfiktion"
     };
+    public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
+    public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
 
     public String chapterLinkSelecter;
