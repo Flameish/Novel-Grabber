@@ -140,6 +140,7 @@ public class GUI extends JFrame {
     public JCheckBox manDispalyChapterTitleCheckbox;
     public JTextField autoChapterToChapterNumberField;
     public JCheckBox manUseHeaderlessBrowser;
+    public JComboBox manBrowserCombobox;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
     private JButton autoEditMetadataButton;
@@ -218,7 +219,7 @@ public class GUI extends JFrame {
                     return;
                 }
                 if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
-                        && ((Integer) lastChapter.getValue()) < (Integer) firstChapter.getValue()) {
+                        && lastChapter.getValue() < firstChapter.getValue()) {
                     showPopup("Last chapter can't be lower than first chapter.", "warning");
                     return;
                 }
@@ -955,6 +956,8 @@ public class GUI extends JFrame {
         autoBookDescScrollPane = new JScrollPane(autoBookDescArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // Manual Tab
+        manBrowserCombobox = new JComboBox(browserList);
+
         manSetMetadataButton = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));
         manSetMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         manSetMetadataButton.setContentAreaFilled(false);
