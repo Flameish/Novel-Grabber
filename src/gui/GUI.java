@@ -33,7 +33,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.3.3";
+    public static String versionNumber = "2.3.4";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -219,7 +219,7 @@ public class GUI extends JFrame {
                     return;
                 }
                 if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
-                        && lastChapter.getValue() < firstChapter.getValue()) {
+                        && ((Integer) lastChapter.getValue()) < (Integer) firstChapter.getValue()) {
                     showPopup("Last chapter can't be lower than first chapter.", "warning");
                     return;
                 }
