@@ -112,7 +112,7 @@ public class ManNovel extends AutoNovel {
 
     private static void driverSetup(GUI gui) {
         gui.appendText("manual", "[INFO]Starting headerless browser...");
-        switch (gui.autoBrowserCombobox.getSelectedItem().toString()) {
+        switch (gui.manBrowserCombobox.getSelectedItem().toString()) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
                 driver = new ChromeDriver(new ChromeOptions().setHeadless(true));
