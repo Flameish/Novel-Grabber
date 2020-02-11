@@ -19,11 +19,8 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 1. Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
 (If you can't execute the jar, try navigating to the jar location with cmd/terminal and use: `java -jar Novel-Grabber.jar`)
 2. Enter the link to the novel's Table of Contents page
-3. Pick the corresponding host
-4. Click on 'Check' to see if everything is alright with your input
-5. Select the desired chapter range
-6. Pick from various options
-7. Grab chapters
+3. Click on 'Check' to see if everything is alright with your input
+4. Grab chapters
 
 * Options:
 
@@ -31,10 +28,21 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
    
    <b>Get images</b> downloads potential images in a chapter.
    
+   <b>Add chapter title</b> will insert the chapter title at the top of the EPUB chapters.
+   
    <b>Export:</b> Currently you can export to EPUB or a Calibre <a href="#converting">compatible table of contents file</a>.
    
-   <b>Wait time</b> is the time between each chapter call in milliseconds (1000 for 1 second) (so you don't flood the host server with requests)<br>
-   ![alt text](https://i.imgur.com/5dueJeN.png)
+   <b>Remove styling</b> gets rid of all original css styling of the chapter.
+   
+   <b>Headerless Browser</b> will visit the websites with the selected browser. Use this if websites are blocked by Cloudflare or when chapters are dynamically loaded. (Some hosts are set to always use headerless)
+   
+   <b>Wait time</b> is the time between each chapter call in milliseconds (1000 for 1 second) (so you don't flood the host server with requests)
+   
+   <b>Edit metadata</b>(pen icon) lets you edit Title, Author, Tags, Description and Cover image of the novel.
+   
+   <b>Edit blacklisted tags</b>(block icon) enables you to remove specific content from a chapter by css selector. (See Manual step 3 for more info)<br>
+   
+   ![alt text](https://i.imgur.com/wRVsHx8.png)
 
 <strong>Manual:</strong>
 
