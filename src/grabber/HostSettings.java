@@ -37,8 +37,7 @@ public class HostSettings {
             "Novelfull"
     };
     private static String[] autoChapterToChapterWebsites = {
-            "Zenith Novels",
-            "Translation Otaku",
+            "Translation Otaku"
 
     };
     private static String[] headerlessBrowserWebsites = {
