@@ -32,25 +32,25 @@ public class HostSettings {
             "Chrysanthemum Garden",
             "FicFun",
             "Dreame",
-            "Fanfiktion"
+            "Fanfiktion",
+            "WuxiaWorld.online"
     };
     private static String[] autoChapterToChapterWebsites = {
             "LiberSpark",
             "Comrade Mao",
             "Zenith Novels",
-            "Translation Otaku"
+            "Translation Otaku",
 
     };
     private static String[] headerlessBrowserWebsites = {
-            "BoxNovel",
             "Creative Novels",
             "FicFun",
             "Dreame"
     };
     private static String[] noHeaderlessBrowserWebsites = {
             "Wattpad", // pages broken
-            "FanFiction", // links broeken
-            "Fanfiktion"
+            "FanFiction", // links need processing
+            "Fanfiktion" // same
     };
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
@@ -425,6 +425,20 @@ public class HostSettings {
                 bookCoverSelector = ".g_thumb img:eq(1)";
                 bookAuthorSelector = ".ell.dib.vam span";
                 bookSubjectSelector = "a[href^=/category/list?category=].c_000";
+                break;
+            case "wuxiaworld.online":
+                host = "https://wuxiaworld.online/";
+                ordinalIndexForBaseNovel = 4;
+                chapterLinkSelecter = ".chapter-list a";
+                chapterContainer = ".content-area";
+                nextChapterBtn = "a[title=Next chapter]";
+                titleHostName = "";
+                blacklistedTags = null;
+                bookTitleSelector = "h1.entry-title";
+                bookDescSelector = "#noidungm";
+                bookCoverSelector = ".truyen_info_left img";
+                bookAuthorSelector = "";
+                bookSubjectSelector = "";
                 break;
         }
     }
