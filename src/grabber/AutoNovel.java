@@ -78,6 +78,7 @@ public class AutoNovel {
     private boolean useHeaderlessBrowser;
     private int chapterToChapterNumber;
 
+    // Empty constructor for ManNovel
     AutoNovel() {
     }
 
@@ -185,7 +186,9 @@ public class AutoNovel {
         }
     }
 
-    // Gets chapters using Jsoup (static html) - faster
+    /**
+     * Gets chapters using Jsoup (static html) - faster
+      */
     private void getChaptersJsoup() throws IOException {
         Document doc = Jsoup.connect(currHostSettings.url).timeout(30 * 1000).get();
         tocDoc = doc;
@@ -194,6 +197,56 @@ public class AutoNovel {
         if (!autoChapterToChapter) {
             switch (currHostSettings.host) {
                 // Custom chapter selection
+                case "https://boxnovel.com/":
+                    chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
+                    for(Element link: chapterItems) {
+                        chapterLinks.add(link.attr("abs:href"));
+                        chaptersNames.add(link.text());
+                    }
+                    // Get href link of last (first in novel context) chapter
+                    String boxNovelFirstChapter = chapterLinks.get(chapterLinks.size()-1);
+                    System.out.println(boxNovelFirstChapter);
+                    String boxNovelbaseLinkStart = boxNovelFirstChapter.substring(0, shared.ordinalIndexOf(boxNovelFirstChapter, "/", 5) + 9);
+                    String boxNovelChapterNumberString = boxNovelFirstChapter.substring(boxNovelbaseLinkStart.length());
+                    int boxNovelChapterNumber;
+                    if(boxNovelChapterNumberString.contains("-")) {
+                        boxNovelChapterNumber = Integer.valueOf(boxNovelChapterNumberString.substring(0,boxNovelChapterNumberString.indexOf("-")));
+                    } else {
+                        boxNovelChapterNumber = Integer.valueOf(boxNovelChapterNumberString);
+
+                    }
+                    if(boxNovelChapterNumber != 1) {
+                        for(int i = boxNovelChapterNumber-1; i >= 1; i--) {
+                            chapterLinks.add(boxNovelbaseLinkStart+i);
+                            chaptersNames.add("Chapter "+i);
+                        }
+                    }
+                    break;
+                case "https://wuxiaworld.online/":
+                    chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
+                    for(Element link: chapterItems) {
+                        chapterLinks.add(link.attr("abs:href"));
+                        chaptersNames.add(link.text());
+                    }
+                    // Get href link of last (first in novel context) chapter
+                    String wuxiaonlineFirstChapter = chapterLinks.get(chapterLinks.size()-1);
+                    System.out.println(wuxiaonlineFirstChapter);
+                    String wuxiaonlinebaseLinkStart = wuxiaonlineFirstChapter.substring(0, shared.ordinalIndexOf(wuxiaonlineFirstChapter, "/", 4) + 9);
+                    String wuxiaonlineChapterNumberString = wuxiaonlineFirstChapter.substring(wuxiaonlinebaseLinkStart.length());
+                    int wuxiaonlineChapterNumber;
+                    if(wuxiaonlineChapterNumberString.contains("-")) {
+                        boxNovelChapterNumber = Integer.valueOf(wuxiaonlineChapterNumberString.substring(0,wuxiaonlineChapterNumberString.indexOf("-")));
+                    } else {
+                        boxNovelChapterNumber = Integer.valueOf(wuxiaonlineChapterNumberString);
+
+                    }
+                    if(boxNovelChapterNumber != 1) {
+                        for(int i = boxNovelChapterNumber-1; i >= 1; i--) {
+                            chapterLinks.add(wuxiaonlinebaseLinkStart+i);
+                            chaptersNames.add("Chapter "+i);
+                        }
+                    }
+                    break;
                 case "https://fanfiction.net/":
                     chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
                     String fullLink = doc.select("link[rel=canonical]").attr("abs:href");
@@ -314,14 +367,16 @@ public class AutoNovel {
         }
     }
 
-    // Gets chapters using Selenium (full browser visit of website) - slower
+    /**
+     * Gets chapters using Selenium (full browser visit of website) - slower
+      */
     private void getChaptersHeaderless() {
         driverSetup();
         wait = new WebDriverWait(driver, 30);
         driver.navigate().to(gui.chapterListURL.getText());
         // Save HTML source for metadata later on
         tocDoc = Jsoup.parse(driver.getPageSource());
-        // Manual website interactions
+        // Website interactions
         switch (currHostSettings.host) {
             case "https://royalroad.com/":
                 Select chapterShow = new Select(driver.findElement(By.name("chapters_length")));
@@ -384,19 +439,15 @@ public class AutoNovel {
         failedChapters.clear();
         imageLinks.clear();
         imageNames.clear();
-        // Reverse chapter list order if selected.
         if (invertOrder) {
             Collections.reverse(chapterLinks);
             Collections.reverse(chaptersNames);
         }
-        // To latest chapter.
         if (gui.toLastChapter.isSelected()) {
             lastChapter = chapterLinks.size();
         }
-        // Grab all chapters.
         if (allChapters) {
             processAllChapters();
-            // Grab chapters from specific range.
         } else {
             if (lastChapter > chapterLinks.size()) {
                 gui.appendText(window, "[ERROR] Novel does not have that many chapters. " +
@@ -447,13 +498,8 @@ public class AutoNovel {
             // Author
             if (!currHostSettings.bookAuthorSelector.isEmpty()) {
                 if (doc.select(currHostSettings.bookAuthorSelector) != null && !doc.select(currHostSettings.bookAuthorSelector).isEmpty()) {
-                    if (currHostSettings.host.equals("https://volarenovels.com/")) {
-                        bookAuthor = doc.select(currHostSettings.bookAuthorSelector).first().text().replace("Translated by: ", "");
-                        gui.autoAuthor.setText(bookAuthor);
-                    } else {
-                        bookAuthor = doc.select(currHostSettings.bookAuthorSelector).first().text();
-                        gui.autoAuthor.setText(bookAuthor);
-                    }
+                    bookAuthor = doc.select(currHostSettings.bookAuthorSelector).first().text();
+                    gui.autoAuthor.setText(bookAuthor);
                 } else {
                     bookAuthor = "Unknown";
                     gui.autoAuthor.setText("Unknown");
@@ -470,39 +516,25 @@ public class AutoNovel {
             if (!currHostSettings.bookSubjectSelector.isEmpty()) {
                 if (doc.select(currHostSettings.bookSubjectSelector) != null && !doc.select(currHostSettings.bookSubjectSelector).isEmpty()) {
                     Elements tags = doc.select(currHostSettings.bookSubjectSelector);
-                    if (currHostSettings.host.equals("http://gravitytales.com/")) {
-                        String allTags = doc.select(currHostSettings.bookSubjectSelector).first().text();
-                        allTags = allTags.replace("Genres:", "");
-                        bookSubjects = Arrays.asList(allTags.split(", "));
-                        for (String eachTag : bookSubjects) {
-                            gui.autoBookSubjects.setText(gui.autoBookSubjects.getText() + eachTag + ",");
-                            if (!gui.autoBookSubjects.getText().isEmpty()) {
-                                gui.autoBookSubjects.setText(
-                                        gui.autoBookSubjects.getText().substring(0,
-                                                gui.autoBookSubjects.getText().lastIndexOf(",")));
-                            }
-                        }
-                    } else {
-                        for (Element tag : tags) {
-                            bookSubjects.add(tag.text());
-                        }
+                    for (Element tag : tags) {
+                        bookSubjects.add(tag.text());
+                    }
 
-                        // Display book subjects on GUI
-                        int maxNumberOfSubjects = 0;
-                        gui.autoBookSubjects.setText("<html>");
-                        for (String eachTag : bookSubjects) {
-                            gui.autoBookSubjects.setText(gui.autoBookSubjects.getText() + eachTag + ", ");
-                            maxNumberOfSubjects++;
-                            if (maxNumberOfSubjects == 4) {
-                                maxNumberOfSubjects = 0;
-                                gui.autoBookSubjects.setText(gui.autoBookSubjects.getText() + "<br>");
-                            }
+                    // Display book subjects on GUI
+                    int maxNumberOfSubjects = 0;
+                    gui.autoBookSubjects.setText("<html>");
+                    for (String eachTag : bookSubjects) {
+                        gui.autoBookSubjects.setText(gui.autoBookSubjects.getText() + eachTag + ", ");
+                        maxNumberOfSubjects++;
+                        if (maxNumberOfSubjects == 4) {
+                            maxNumberOfSubjects = 0;
+                            gui.autoBookSubjects.setText(gui.autoBookSubjects.getText() + "<br>");
                         }
-                        if (!gui.autoBookSubjects.getText().isEmpty()) {
-                            gui.autoBookSubjects.setText(
-                                    gui.autoBookSubjects.getText().substring(0,
-                                            gui.autoBookSubjects.getText().lastIndexOf(",")));
-                        }
+                    }
+                    if (!gui.autoBookSubjects.getText().isEmpty()) {
+                        gui.autoBookSubjects.setText(
+                                gui.autoBookSubjects.getText().substring(0,
+                                        gui.autoBookSubjects.getText().lastIndexOf(",")));
                     }
                 } else {
                     bookSubjects.add("Unknown");
@@ -526,18 +558,18 @@ public class AutoNovel {
                 if (doc.select(currHostSettings.bookCoverSelector) != null && !doc.select(currHostSettings.bookCoverSelector).isEmpty()) {
                     Element coverSelect = doc.select(currHostSettings.bookCoverSelector).first();
                     if (coverSelect != null) {
-                        String coverLink;
+                        String coverLink = coverSelect.attr("abs:src");
+                        // Custom
                         if (currHostSettings.host.equals("https://wordexcerpt.com/"))
                             coverLink = coverSelect.attr("data-src");
-                        else coverLink = coverSelect.attr("src");
                         if (currHostSettings.host.equals("https://webnovel.com/")) {
                             coverLink = coverLink.replace("/300/300", "/600/600");
                         }
                         bufferedCover = shared.getBufferedCover(coverLink, this);
                         gui.setBufferedCover(bufferedCover);
                         bookCover = imageNames.get(0);
-                /* downloadImage() adds every image to Lists and this interferes with
-                   the cover image when adding images from these Lists to the epub */
+                /* downloadImage() adds every image to <Lists> and this interferes with
+                   the cover image when adding images from these <Lists> to the epub */
                         imageNames.clear();
                         imageLinks.clear();
                     }
@@ -564,6 +596,7 @@ public class AutoNovel {
             } else {
                 // Custom chapter selection
                 switch (currHostSettings.host) {
+                    // Custom
                     case "https://tapread.com/":
                         String chapterContentString = xhrRequest.tapReadGetChapterContent("bookId=" + xhrBookId + "&chapterId=" + xhrChapterIds.get(i - 1));
                         shared.saveChapterFromString(chapterContentString, i, chaptersNames.get(i - 1),
@@ -607,6 +640,7 @@ public class AutoNovel {
                         currHostSettings.chapterContainer, this);
             } else {
                 switch (currHostSettings.host) {
+                    // Custom
                     case "https://tapread.com/":
                         String chapterContentString = xhrRequest.tapReadGetChapterContent("bookId=" + xhrBookId + "&chapterId=" + xhrChapterIds.get(i - 1));
                         shared.saveChapterFromString(chapterContentString, i, chaptersNames.get(i - 1),
