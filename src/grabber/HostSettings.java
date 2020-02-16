@@ -33,7 +33,8 @@ public class HostSettings {
             "FicFun",
             "Dreame",
             "Fanfiktion",
-            "WuxiaWorld.online"
+            "WuxiaWorld.online",
+            "Novelfull"
     };
     private static String[] autoChapterToChapterWebsites = {
             "LiberSpark",
@@ -439,6 +440,20 @@ public class HostSettings {
                 bookCoverSelector = ".truyen_info_left img";
                 bookAuthorSelector = "";
                 bookSubjectSelector = "";
+                break;
+            case "novelfull":
+                host = "http://novelfull.com/";
+                ordinalIndexForBaseNovel = 4;
+                chapterLinkSelecter = ".list-chapter a";
+                chapterContainer = "#chapter-content";
+                nextChapterBtn = "#next_chap";
+                titleHostName = "";
+                blacklistedTags = new LinkedList<>(Arrays.asList("script", "ads", "div[align=left]", ".adsbygoogle", ".cha-tit p"));
+                bookTitleSelector = "h3.title";
+                bookDescSelector = "div.desc-text";
+                bookCoverSelector = ".book > img:nth-child(1)";
+                bookAuthorSelector = ".info > div:nth-child(1)";
+                bookSubjectSelector = ".info > div:nth-child(2)";
                 break;
         }
     }

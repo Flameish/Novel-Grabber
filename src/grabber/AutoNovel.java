@@ -215,21 +215,36 @@ public class AutoNovel {
                         boxNovelChapterNumber = Integer.valueOf(boxNovelChapterNumberString);
 
                     }
-                    if(boxNovelChapterNumber != 1) {
-                        for(int i = boxNovelChapterNumber-1; i >= 1; i--) {
-                            chapterLinks.add(boxNovelbaseLinkStart+i);
-                            chaptersNames.add("Chapter "+i);
+                    if (boxNovelChapterNumber != 1) {
+                        for (int i = boxNovelChapterNumber - 1; i >= 1; i--) {
+                            chapterLinks.add(boxNovelbaseLinkStart + i);
+                            chaptersNames.add("Chapter " + i);
                         }
+                    }
+                    break;
+                case "http://novelfull.com/":
+                    while (!doc.select("li.next").hasClass("disabled")) {
+                        chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
+                        for (Element link : chapterItems) {
+                            chapterLinks.add(link.attr("abs:href"));
+                            chaptersNames.add(link.text());
+                        }
+                        doc = Jsoup.connect(doc.select("li.next a").attr("abs:href")).timeout(30 * 1000).get();
+                    }
+                    chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
+                    for (Element link : chapterItems) {
+                        chapterLinks.add(link.attr("abs:href"));
+                        chaptersNames.add(link.text());
                     }
                     break;
                 case "https://wuxiaworld.online/":
                     chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
-                    for(Element link: chapterItems) {
+                    for (Element link : chapterItems) {
                         chapterLinks.add(link.attr("abs:href"));
                         chaptersNames.add(link.text());
                     }
                     // Get href link of last (first in novel context) chapter
-                    String wuxiaonlineFirstChapter = chapterLinks.get(chapterLinks.size()-1);
+                    String wuxiaonlineFirstChapter = chapterLinks.get(chapterLinks.size() - 1);
                     System.out.println(wuxiaonlineFirstChapter);
                     String wuxiaonlinebaseLinkStart = wuxiaonlineFirstChapter.substring(0, shared.ordinalIndexOf(wuxiaonlineFirstChapter, "/", 4) + 9);
                     String wuxiaonlineChapterNumberString = wuxiaonlineFirstChapter.substring(wuxiaonlinebaseLinkStart.length());
