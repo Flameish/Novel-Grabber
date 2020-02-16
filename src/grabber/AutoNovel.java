@@ -237,6 +237,22 @@ public class AutoNovel {
                         chaptersNames.add(link.text());
                     }
                     break;
+                case "https://comrademao.com/":
+                    while (!doc.select(".column a.next").attr("abs:href").isEmpty()) {
+                        chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
+                        for (Element link : chapterItems) {
+                            chapterLinks.add(link.attr("abs:href"));
+                            chaptersNames.add(link.text());
+                        }
+                        doc = Jsoup.connect(doc.select(".column a.next").attr("abs:href")).timeout(30 * 1000).get();
+
+                    }
+                    chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
+                    for (Element link : chapterItems) {
+                        chapterLinks.add(link.attr("abs:href"));
+                        chaptersNames.add(link.text());
+                    }
+                    break;
                 case "https://wuxiaworld.online/":
                     chapterItems = doc.select(currHostSettings.chapterLinkSelecter);
                     for (Element link : chapterItems) {

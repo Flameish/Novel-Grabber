@@ -38,7 +38,6 @@ public class HostSettings {
     };
     private static String[] autoChapterToChapterWebsites = {
             "LiberSpark",
-            "Comrade Mao",
             "Zenith Novels",
             "Translation Otaku",
 
@@ -248,14 +247,14 @@ public class HostSettings {
             case "comrademao":
                 host = "https://comrademao.com/";
                 ordinalIndexForBaseNovel = 0;
-                chapterLinkSelecter = "tbody tr a";
-                chapterContainer = ".post > div:nth-child(2)";
+                chapterLinkSelecter = "tbody a";
+                chapterContainer = "article.post ";
                 nextChapterBtn = "a.btn.btn-default.btn-sm:has(i.fa-angle-right)";
                 titleHostName = "";
-                blacklistedTags = new LinkedList<>(Arrays.asList("div#CollapseRaw", ".code-block"));
-                bookTitleSelector = "div.wrap-content h4";
-                bookDescSelector = ".wrap-content p";
-                bookCoverSelector = "div.wrap-thumbnail img";
+                blacklistedTags = new LinkedList<>(Arrays.asList("script", "nav", ".container--indented", ".entry-meta", "p.chinese", "button"));
+                bookTitleSelector = "h3.entry-title";
+                bookDescSelector = "#Description";
+                bookCoverSelector = "#thumbnail img";
                 bookAuthorSelector = "div.author";
                 bookSubjectSelector = "a[rel=tag]";
                 break;
