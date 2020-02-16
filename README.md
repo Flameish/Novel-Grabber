@@ -12,7 +12,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 | <b>[Chrysanthemum Garden](https://chrysanthemumgarden.com/)</b> | <b>[FanFiction](https://fanfiction.net/)</b> | <b>[BoxNovel](https://boxnovel.com/)</b>|
 | <b>[LiberSpark](https://liberspark.com/)</b> |<b>[Wordrain](https://wordrain69.com/)</b> | <b>[Comrademao](https://comrademao.com/)</b>|
 | <b>[Light Novels Translations](https://lightnovelstranslations.com/)</b> | <b>[Ebisu Translations](https://ebisutranslations.com/)</b> | <b>[Webnovel](https://webnovel.com/)</b>
-| <b>[Wattpad](https://wattpad.com/)</b> |  | 
+| <b>[Wattpad](https://wattpad.com/)</b> | <b>[WuxiaWorld.online](https://wuxiaworld.online/)</b> | 
 ## How to use
 <strong>Automatic:</strong>
 
