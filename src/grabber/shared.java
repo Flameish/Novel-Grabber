@@ -138,7 +138,9 @@ public class shared {
         }
     }
 
-    // Saves the autoNovel cover into a buffered Image
+    /**
+     * Saves the autoNovel cover into a buffered Image
+      */
     static BufferedImage getBufferedCover(String src, AutoNovel currGrab) {
         if (!currGrab.imageLinks.contains(src)) {
             // Try to set the image name
@@ -281,6 +283,7 @@ public class shared {
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
 
             Element chapterContent = doc.select(chapterContainer).first();
+            if(chapterContent == null) throw new NullPointerException("Chapter container: "+chapterContainer+" not found.");
 
             if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
                 String tempChapterText = "<div>" + doc.select("p").toString() + "</div>";
@@ -308,9 +311,7 @@ public class shared {
             // Create chapters folder if it doesn't exist.
             File dir = new File(currGrab.saveLocation + File.separator + "chapters");
             if (!dir.exists()) dir.mkdirs();
-            // Write chapter content to file.
             try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", textEncoding)) {
-                // Images
                 if (chapterContent.select("img").size() > 0) {
                     // Iterate each image in chapter content.
                     for (Element image : chapterContent.select("img")) {
@@ -345,8 +346,12 @@ public class shared {
      * Save chapter content from string
      */
     static void saveChapterFromString(String chapterContentString, int chapterNumber, String chapterName, String chapterContainer, AutoNovel currGrab) {
+
+        if(chapterContentString == null) throw new NullPointerException("Chapter container: "+chapterContainer+" not found.");
+
         //Manual grabbing got it's own file naming method
         String fileName = setFilename(chapterNumber, chapterName);
+
         try {
             Document doc = Jsoup.parse(chapterContentString);
             // Remove unwanted tags from chapter container.
@@ -364,8 +369,10 @@ public class shared {
             if (!currGrab.nextChapterBtn.equals("NOT_SET"))
                 currGrab.nextChapterURL =
                         doc.select(currGrab.nextChapterBtn).first().absUrl("href");
+
             Element chapterContent = doc.select(chapterContainer).first();
             if (currGrab.currHostSettings.host.equals("https://tapread.com/")) chapterContent = doc;
+
             // AutoNovel images of chapter container.
             if (currGrab.getImages) {
                 for (Element image : chapterContent.select("img")) {
@@ -377,9 +384,7 @@ public class shared {
             // Create chapters folder if it doesn't exist.
             File dir = new File(currGrab.saveLocation + File.separator + "chapters");
             if (!dir.exists()) dir.mkdirs();
-            // Write chapter content to file.
             try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", textEncoding)) {
-                // Images
                 if (chapterContent.select("img").size() > 0) {
                     // Iterate each image in chapter content.
                     for (Element image : chapterContent.select("img")) {
