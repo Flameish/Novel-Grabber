@@ -37,7 +37,6 @@ public class HostSettings {
             "Novelfull"
     };
     private static String[] autoChapterToChapterWebsites = {
-            "Translation Otaku"
 
     };
     private static String[] headerlessBrowserWebsites = {
@@ -371,16 +370,16 @@ public class HostSettings {
             case "translationotaku":
                 host = "https://translatinotaku.net/";
                 ordinalIndexForBaseNovel = 5;
-                chapterLinkSelecter = ".elementor-posts-container a";
-                chapterContainer = ".text";
+                chapterLinkSelecter = "section:has(nav) .elementor-posts-container a";
+                chapterContainer = ".elementor-widget-container:has(p)";
                 nextChapterBtn = ".elementor-post-navigation__next a";
                 titleHostName = "";
-                blacklistedTags = new LinkedList<>(Arrays.asList("div[style=float: none; margin:10px 0 10px 0; text-align:center;]"));
+                blacklistedTags = new LinkedList<>(Arrays.asList("script", "div[style=position:relative;text-align:center!important]", "#videoad"));
                 bookTitleSelector = ".elementor-heading-title";
                 bookDescSelector = "#editdescription";
                 bookCoverSelector = ".elementor-image img";
                 bookAuthorSelector = "";
-                bookSubjectSelector = ".elementor-text-editor p";
+                bookSubjectSelector = "";
                 break;
             case "isohungrytls":
                 host = "https://isohungrytls.com/";
