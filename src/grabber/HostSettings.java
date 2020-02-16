@@ -37,7 +37,6 @@ public class HostSettings {
             "Novelfull"
     };
     private static String[] autoChapterToChapterWebsites = {
-            "LiberSpark",
             "Zenith Novels",
             "Translation Otaku",
 
