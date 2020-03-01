@@ -462,7 +462,7 @@ public class HostSettings {
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("script", "ad"));
                 bookTitleSelector = ".post-title h3";
-                bookDescSelector = "#editdescription";
+                bookDescSelector = ".summary__content";
                 bookCoverSelector = ".summary_image img";
                 bookAuthorSelector = ".author-content";
                 bookSubjectSelector = ".genres-content a";
