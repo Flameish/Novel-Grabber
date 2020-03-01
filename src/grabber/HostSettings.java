@@ -34,7 +34,8 @@ public class HostSettings {
             "Dreame",
             "Fanfiktion",
             "WuxiaWorld.online",
-            "Novelfull"
+            "Novelfull",
+            "WuxiaWorld.site"
     };
     private static String[] autoChapterToChapterWebsites = {
 
@@ -42,7 +43,8 @@ public class HostSettings {
     private static String[] headerlessBrowserWebsites = {
             "Creative Novels",
             "FicFun",
-            "Dreame"
+            "Dreame",
+            "WuxiaWorld.site"
     };
     private static String[] noHeaderlessBrowserWebsites = {
             "Wattpad", // pages broken
@@ -450,6 +452,20 @@ public class HostSettings {
                 bookCoverSelector = ".book > img:nth-child(1)";
                 bookAuthorSelector = ".info > div:nth-child(1)";
                 bookSubjectSelector = ".info > div:nth-child(2)";
+                break;
+            case "wuxiaworld.site":
+                host = "https://wuxiaworld.site/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = ".listing-chapters_wrap a";
+                chapterContainer = ".text-left";
+                nextChapterBtn = ".btn.next_page";
+                titleHostName = "";
+                blacklistedTags = new LinkedList<>(Arrays.asList("script", "ad"));
+                bookTitleSelector = ".post-title h3";
+                bookDescSelector = "#editdescription";
+                bookCoverSelector = ".summary_image img";
+                bookAuthorSelector = ".author-content";
+                bookSubjectSelector = ".genres-content a";
                 break;
         }
     }

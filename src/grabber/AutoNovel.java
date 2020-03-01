@@ -205,7 +205,6 @@ public class AutoNovel {
                     }
                     // Get href link of last (first in novel context) chapter
                     String boxNovelFirstChapter = chapterLinks.get(chapterLinks.size()-1);
-                    System.out.println(boxNovelFirstChapter);
                     String boxNovelbaseLinkStart = boxNovelFirstChapter.substring(0, shared.ordinalIndexOf(boxNovelFirstChapter, "/", 5) + 9);
                     String boxNovelChapterNumberString = boxNovelFirstChapter.substring(boxNovelbaseLinkStart.length());
                     int boxNovelChapterNumber;
@@ -291,7 +290,6 @@ public class AutoNovel {
                     }
                     // Get href link of last (first in novel context) chapter
                     String wuxiaonlineFirstChapter = chapterLinks.get(chapterLinks.size() - 1);
-                    System.out.println(wuxiaonlineFirstChapter);
                     String wuxiaonlinebaseLinkStart = wuxiaonlineFirstChapter.substring(0, shared.ordinalIndexOf(wuxiaonlineFirstChapter, "/", 4) + 9);
                     String wuxiaonlineChapterNumberString = wuxiaonlineFirstChapter.substring(wuxiaonlinebaseLinkStart.length());
                     int wuxiaonlineChapterNumber;
@@ -479,12 +477,16 @@ public class AutoNovel {
             case "https://dreame.com/":
                 driver.findElement(By.cssSelector(".button-round-purple")).click();
                 break;
+            case "https://wuxiaworld.site/":
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(currHostSettings.chapterLinkSelecter)));
+                System.out.println(tocDoc);
+                break;
         }
         // Parse html from headerless to Jsoup for faster interaction.
         String baseUrl = driver.getCurrentUrl().substring(0, shared.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
         // baseUrl (eg. wuxiaworld.com) is needed to get full href links
-        Document doc = Jsoup.parse(driver.getPageSource(), baseUrl);
-        for (Element chapterLink : doc.select(currHostSettings.chapterLinkSelecter)) {
+        tocDoc = Jsoup.parse(driver.getPageSource(), baseUrl);
+        for (Element chapterLink : tocDoc.select(currHostSettings.chapterLinkSelecter)) {
             chapterLinks.add(chapterLink.attr("abs:href"));
             chaptersNames.add(chapterLink.text());
         }
