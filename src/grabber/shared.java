@@ -153,7 +153,6 @@ public class shared {
             //For LiberSpark
             if (src.startsWith("//")) src = src.replace("//", "https://");
             try {
-                // Connect to image source
                 URL url = new URL(src);
                 HttpURLConnection http = (HttpURLConnection) url.openConnection();
                 http.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
@@ -283,7 +282,8 @@ public class shared {
                 currGrab.nextChapterURL = doc.select(currGrab.nextChapterBtn).first().absUrl("href");
 
             Element chapterContent = doc.select(chapterContainer).first();
-            if(chapterContent == null) throw new NullPointerException("Chapter container: "+chapterContainer+" not found.");
+            if (chapterContent == null)
+                throw new NullPointerException("Chapter container (" + chapterContainer + ") not found.");
 
             if (currGrab.window.equals("auto") && currGrab.currHostSettings.host.equals("https://flying-lines.com/")) {
                 String tempChapterText = "<div>" + doc.select("p").toString() + "</div>";
@@ -347,7 +347,8 @@ public class shared {
      */
     static void saveChapterFromString(String chapterContentString, int chapterNumber, String chapterName, String chapterContainer, AutoNovel currGrab) {
 
-        if(chapterContentString == null) throw new NullPointerException("Chapter container: "+chapterContainer+" not found.");
+        if (chapterContentString == null)
+            throw new NullPointerException("Chapter container (" + chapterContainer + ") not found.");
 
         //Manual grabbing got it's own file naming method
         String fileName = setFilename(chapterNumber, chapterName);
@@ -380,7 +381,7 @@ public class shared {
                 }
             }
             // Add word count of chapter to total word count
-            currGrab.wordCount = currGrab.wordCount + getWordCount(doc.toString());
+            currGrab.wordCount = currGrab.wordCount + getWordCount(chapterContent.toString());
             // Create chapters folder if it doesn't exist.
             File dir = new File(currGrab.saveLocation + File.separator + "chapters");
             if (!dir.exists()) dir.mkdirs();
