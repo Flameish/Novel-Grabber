@@ -33,7 +33,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.3.5";
+    public static String versionNumber = "2.3.7";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -351,6 +351,7 @@ public class GUI extends JFrame {
                     ManNovel.retrieveLinks(this);
                 } catch (NullPointerException | IllegalArgumentException | IOException err) {
                     err.printStackTrace();
+                    appendText("manual", "[ERROR]" + err.getMessage());
                 } finally {
                     if (!listModelChapterLinks.isEmpty()) {
                         manRemoveLinksButton.setEnabled(true);
