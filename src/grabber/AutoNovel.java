@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 public class AutoNovel {
     private static WebDriver driver;
     static WebDriverWait wait;
-    public List<String> chapterLinks = new ArrayList<>();
     public HostSettings currHostSettings;
     public BufferedImage bufferedCover;
     public String bufferedCoverName;
@@ -69,7 +68,8 @@ public class AutoNovel {
     boolean displayChapterTitle;
     int wordCount = 0;
     private Document tocDoc;
-    private List<String> chaptersNames = new ArrayList<>();
+    public List<String> chapterLinks = new ArrayList<>();
+    public List<String> chaptersNames = new ArrayList<>();
     private List<String> xhrChapterIds = new ArrayList<>();
     private boolean allChapters;
     private int xhrBookId;
@@ -479,7 +479,6 @@ public class AutoNovel {
                 break;
             case "https://wuxiaworld.site/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(currHostSettings.chapterLinkSelecter)));
-                System.out.println(tocDoc);
                 break;
         }
         // Parse html from headerless to Jsoup for faster interaction.

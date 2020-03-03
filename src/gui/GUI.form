@@ -214,7 +214,7 @@
                                 <properties>
                                   <enabled value="false"/>
                                   <text value=""/>
-                                  <toolTipText value="Find the number of a chapter"/>
+                                  <toolTipText value="Edit chapter order"/>
                                 </properties>
                               </component>
                               <component id="541e2" class="javax.swing.JLabel" binding="pagesLbl">

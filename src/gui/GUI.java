@@ -33,7 +33,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.3.7";
+    public static String versionNumber = "2.4.0";
     public static String appdataPath = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Roaming" + File.separator + "Novel-Grabber";
     public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
     public static DefaultListModel<String> listModelCheckerLinks = new DefaultListModel<>();
@@ -318,7 +318,7 @@ public class GUI extends JFrame {
             autoNovel.killTask = true;
         });
         // Get chapter number
-        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> getChapterNumber.main(this)));
+        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> getChapterNumber.main(this, autoNovel)));
 
         chaptersFromLinksRadioButton.addActionListener(e -> {
             if (chaptersFromLinksRadioButton.isSelected()) {
