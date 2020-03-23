@@ -17,7 +17,7 @@ public class ChapterToChapter extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         setTitle("Chapter to chapter navigation");
-        ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
+        ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
         setIconImage(favicon.getImage());
         getRootPane().setDefaultButton(buttonOK);
 

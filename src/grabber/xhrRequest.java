@@ -15,7 +15,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+/**
+    xhr/AJAX interactions
+ */
 public class xhrRequest {
 
     private final String USER_AGENT = "Mozilla/5.0";

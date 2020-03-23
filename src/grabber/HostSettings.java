@@ -1,4 +1,5 @@
 package grabber;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,9 +38,6 @@ public class HostSettings {
             "Novelfull",
             "WuxiaWorld.site"
     };
-    private static String[] autoChapterToChapterWebsites = {
-
-    };
     private static String[] headerlessBrowserWebsites = {
             "Creative Novels",
             "FicFun",
@@ -52,33 +50,28 @@ public class HostSettings {
             "Fanfiktion" // same
     };
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
-    public static List<String> autoChapterToChapterWebsitesList = Arrays.asList(autoChapterToChapterWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
 
-    public String chapterLinkSelecter;
-    public String chapterLinkSelecterButton;
-    String titleHostName;
-    public String url;
-    public String host;
+    public String chapterLinkSelecter; // Table of contents chapter links
+    public String titleHostName;
+    public String url; //Website URL
     public List<String> blacklistedTags;
-    int ordinalIndexForBaseNovel;
-    String chapterContainer;
-    String nextChapterBtn;
-    String bookTitleSelector;
-    String bookDescSelector;
-    String bookAuthorSelector;
-    String bookSubjectSelector;
-    String bookCoverSelector;
+    public int ordinalIndexForBaseNovel; // To trim down string to base autoNovel url
+    public String chapterContainer; //chapter text container
+    public String bookTitleSelector; //From the tab title with whitespaces removed
+    public String bookDescSelector;
+    public String bookAuthorSelector;
+    public String bookSubjectSelector;
+    public String bookCoverSelector;
 
-    public HostSettings(String domain, String urla) {
-        url = urla;
+    public HostSettings(String domain) {
         switch (domain) {
-            case "wuxiaworld": //compared from websites[] with whitespaces removed and lowercase
-                host = "https://wuxiaworld.com/"; //Website URL
-                ordinalIndexForBaseNovel = 5; // To trim down string to base autoNovel url
-                chapterLinkSelecter = "#accordion .chapter-item a"; //Table of contents chapter links
-                chapterContainer = ".p-15 .fr-view"; //chapter text
-                titleHostName = "-WuxiaWorld"; //From the tab title with whitespaces removed
+            case "wuxiaworld": //compared to websites[] with whitespaces removed and lowercase
+                url = "https://wuxiaworld.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = "#accordion .chapter-item a";
+                chapterContainer = ".p-15 .fr-view";
+                titleHostName = "-WuxiaWorld";
                 blacklistedTags = new LinkedList<>(Arrays.asList("a.chapter-nav"));
                 bookTitleSelector = ".p-15 h4";
                 bookDescSelector = ".fr-view:not(.pt-10)";
@@ -87,7 +80,7 @@ public class HostSettings {
                 bookSubjectSelector = ".genres a";
                 break;
             case "royalroad":
-                host = "https://royalroad.com/";
+                url = "https://royalroad.com/";
                 ordinalIndexForBaseNovel = 6;
                 chapterLinkSelecter = "td:not([class]) a";
                 chapterContainer = ".chapter-content";
@@ -100,11 +93,10 @@ public class HostSettings {
                 bookSubjectSelector = ".tags span";
                 break;
             case "fanfiktion":
-                host = "https://fanfiktion.de/";
+                url = "https://fanfiktion.de/";
                 ordinalIndexForBaseNovel = 0;
                 chapterLinkSelecter = "#kA option";
                 chapterContainer = ".user-formatted-inner";
-                nextChapterBtn = "";
                 titleHostName = "|FanFiktion-de";
                 blacklistedTags = null;
                 bookTitleSelector = ".huge-font";
@@ -114,21 +106,20 @@ public class HostSettings {
                 bookSubjectSelector = "false";
                 break;
             case "gravitytales":
-                host = "http://gravitytales.com/";
+                url = "http://gravitytales.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".table td a";
                 chapterContainer = "#chapterContent";
                 titleHostName = "-Gravity-Tales";
-                url = urla + "/chapters"; //gravity tales' chapter list is at gravitytales.com/NOVEL/chapters
                 blacklistedTags = null;
-                bookTitleSelector = ".main-content h3"; //Fix
-                bookDescSelector = ".desc";
-                bookCoverSelector = "#coverImg";
+                bookTitleSelector = ".main-content h3";
+                bookDescSelector = "false";
+                bookCoverSelector = "";
                 bookAuthorSelector = ".main-content h4";
-                bookSubjectSelector = ".desc p";
+                bookSubjectSelector = "";
                 break;
             case "volarenovels":
-                host = "https://volarenovels.com/";
+                url = "https://volarenovels.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = "#accordion .chapter-item a";
                 chapterContainer = ".jfontsize_content.fr-view";
@@ -137,11 +128,11 @@ public class HostSettings {
                 bookTitleSelector = "h3.title";
                 bookDescSelector = ".description";
                 bookCoverSelector = "img.m-tb-30";
-                bookAuthorSelector = "div.p-tb-10-rl-30 p"; //Fix
+                bookAuthorSelector = "div.p-tb-10-rl-30 p";
                 bookSubjectSelector = ".tags a";
                 break;
             case "wordexcerpt":
-                host = "https://wordexcerpt.com/";
+                url = "https://wordexcerpt.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".listing-chapters_wrap a";
                 chapterContainer = ".text-left";
@@ -154,9 +145,8 @@ public class HostSettings {
                 bookSubjectSelector = ".genres-content a";
                 break;
             case "ficfun":
-                host = "https://ficfun.com/";
+                url = "https://ficfun.com/";
                 ordinalIndexForBaseNovel = 0;
-                chapterLinkSelecterButton = ".button-round-red";
                 chapterLinkSelecter = ".chapter-list a";
                 chapterContainer = "#article-content";
                 titleHostName = "";
@@ -167,9 +157,8 @@ public class HostSettings {
                 bookSubjectSelector = ".novel-tags span";
                 break;
             case "dreame":
-                host = "https://dreame.com/";
+                url = "https://dreame.com/";
                 ordinalIndexForBaseNovel = 0;
-                chapterLinkSelecterButton = ".button-round-purple";
                 chapterLinkSelecter = ".chapter-list a";
                 chapterContainer = "#article-content";
                 titleHostName = "";
@@ -180,7 +169,7 @@ public class HostSettings {
                 bookSubjectSelector = ".novel-tags span";
                 break;
             case "lightnovelstranslations":
-                host = "https://lightnovelstranslations.com/";
+                url = "https://lightnovelstranslations.com/";
                 ordinalIndexForBaseNovel = 4;
                 chapterLinkSelecter = ".su-spoiler-content a";
                 chapterContainer = ".entry-content";
@@ -193,13 +182,12 @@ public class HostSettings {
                 bookSubjectSelector = "";
                 break;
             case "boxnovel":
-                host = "https://boxnovel.com/";
+                url = "https://boxnovel.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".listing-chapters_wrap a";
                 chapterContainer = ".text-left";
-                nextChapterBtn = ".btn.next_page";
                 titleHostName = "";
-                blacklistedTags = new LinkedList<>(Arrays.asList("div.code-block"));
+                blacklistedTags = new LinkedList<>(Arrays.asList("div.code-block",".adbox"));
                 bookTitleSelector = ".post-title h3";
                 bookDescSelector = "#editdescription";
                 bookCoverSelector = ".summary_image img";
@@ -207,11 +195,10 @@ public class HostSettings {
                 bookSubjectSelector = ".genres-content a";
                 break;
             case "liberspark":
-                host = "https://liberspark.com/";
+                url = "https://liberspark.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = "#novel-chapters-list a.text-links";
                 chapterContainer = "#reader-content";
-                nextChapterBtn = "a:contains(Next Chapter)";
                 titleHostName = "|LiberSpark";
                 blacklistedTags = new LinkedList<>(Arrays.asList("div.ad-wrapper"));
                 bookTitleSelector = "h1[style=text-align:left]";
@@ -222,7 +209,7 @@ public class HostSettings {
                 bookSubjectSelector = "";
                 break;
             case "chrysanthemumgarden":
-                host = "https://chrysanthemumgarden.com/";
+                url = "https://chrysanthemumgarden.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".translated-chapters a";
                 chapterContainer = "#novel-content";
@@ -237,32 +224,30 @@ public class HostSettings {
                         ".sharedaddy",
                         ".jum"
                 ));
-                bookTitleSelector = "a[href=" + url + "]";
+                bookTitleSelector = ".chapter-item a";
                 bookDescSelector = "false";
                 bookCoverSelector = "img.materialboxed";
                 bookAuthorSelector = "";
                 bookSubjectSelector = ".novel-container a[href^=https://chrysanthemumgarden.com/genre/]";
                 break;
             case "comrademao":
-                host = "https://comrademao.com/";
-                ordinalIndexForBaseNovel = 0;
-                chapterLinkSelecter = "tbody a";
-                chapterContainer = "article.post ";
-                nextChapterBtn = "a.btn.btn-default.btn-sm:has(i.fa-angle-right)";
-                titleHostName = "";
-                blacklistedTags = new LinkedList<>(Arrays.asList("script", "nav", ".container--indented", ".entry-meta", "p.chinese", "button"));
-                bookTitleSelector = "h3.entry-title";
-                bookDescSelector = "#Description";
-                bookCoverSelector = "#thumbnail img";
+                url = "https://comrademao.com/";
+                ordinalIndexForBaseNovel = 5;
+                chapterLinkSelecter = "tbody td a";
+                chapterContainer = "section#content";
+                titleHostName = " - Comrade Mao";
+                blacklistedTags = new LinkedList<>(Arrays.asList(".hide","#advertisment","button"));
+                bookTitleSelector = "figure:nth-child(1) > h5:nth-child(1)";
+                bookDescSelector = "#recentnovels > span:nth-child(1) > div:nth-child(2) > p:nth-child(3)";
+                bookCoverSelector = "amp-img.i-amphtml-element";
                 bookAuthorSelector = "div.author";
                 bookSubjectSelector = "a[rel=tag]";
                 break;
             case "creativenovels":
-                host = "https://creativenovels.com/";
+                url = "https://creativenovels.com/";
                 ordinalIndexForBaseNovel = 0;
                 chapterLinkSelecter = ".post_box a";
                 chapterContainer = ".post";
-                nextChapterBtn = "a.x-btn.nextkey";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList(".mNS", ".support-placement"));
                 bookTitleSelector = "div.e45344-16.x-text.bK_C";
@@ -272,11 +257,10 @@ public class HostSettings {
                 bookSubjectSelector = "div.genre_novel";
                 break;
             case "wordrain":
-                host = "https://wordrain69.com/";
+                url = "https://wordrain69.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".main li a";
                 chapterContainer = ".text-left";
-                nextChapterBtn = "";
                 titleHostName = "-Wordrain69";
                 blacklistedTags = null;
                 bookTitleSelector = ".post-title h1";
@@ -286,11 +270,10 @@ public class HostSettings {
                 bookSubjectSelector = ".genres-content a";
                 break;
             case "wattpad":
-                host = "https://wattpad.com/";
+                url = "https://wattpad.com/";
                 ordinalIndexForBaseNovel = 0;
                 chapterLinkSelecter = ".table-of-contents a";
                 chapterContainer = "body";
-                nextChapterBtn = "";
                 titleHostName = "-Wattpad";
                 blacklistedTags = new LinkedList<>(Arrays.asList("span.comment-marker"));
                 bookTitleSelector = ".container h1";
@@ -300,11 +283,10 @@ public class HostSettings {
                 bookSubjectSelector = ".tag-items li div.tag-item";
                 break;
             case "fanfiction":
-                host = "https://fanfiction.net/";
+                url = "https://fanfiction.net/";
                 ordinalIndexForBaseNovel = 0;
                 chapterLinkSelecter = "#chap_select option";
                 chapterContainer = "#storytext";
-                nextChapterBtn = "";
                 titleHostName = "|FanFiction";
                 blacklistedTags = null;
                 bookTitleSelector = "#profile_top b.xcontrast_txt";
@@ -314,11 +296,10 @@ public class HostSettings {
                 bookSubjectSelector = "";
                 break;
             case "flyinglines":
-                host = "https://flying-lines.com/";
+                url = "https://flying-lines.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".volume-item li:has(i:not(.detail-chapter-locked)) a";
                 chapterContainer = "div.content";
-                nextChapterBtn = "";
                 titleHostName = "";
                 blacklistedTags = null;
                 bookTitleSelector = "div.title h2";
@@ -328,11 +309,10 @@ public class HostSettings {
                 bookSubjectSelector = ".btn-category";
                 break;
             case "tapread":
-                host = "https://tapread.com/";
+                url = "https://tapread.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".chapter-list a:not(a:has(div.item-lock))";
                 chapterContainer = ".chapter-entity";
-                nextChapterBtn = "";
                 titleHostName = "";
                 blacklistedTags = null;
                 bookTitleSelector = ".book-name";
@@ -342,11 +322,10 @@ public class HostSettings {
                 bookSubjectSelector = ".book-catalog .txt";
                 break;
             case "kuhakulightnoveltranslations":
-                host = "https://kuhakulightnoveltranslations.com/";
+                url = "https://kuhakulightnoveltranslations.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = "a.maxbutton";
                 chapterContainer = ".entry-content";
-                nextChapterBtn = "";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("p[style=text-align: center;]"));
                 bookTitleSelector = "h1.entry-title";
@@ -356,11 +335,10 @@ public class HostSettings {
                 bookSubjectSelector = "";
                 break;
             case "zenithnovels":
-                host = "https://zenithnovels.com/";
+                url = "https://zenithnovels.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".lcp_catlist li a";
                 chapterContainer = ".entry";
-                nextChapterBtn = ".post-next a";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("dl", ".code-block", "p:has(strong)", "hr"));
                 bookTitleSelector = ".name.post-title.entry-title";
@@ -370,11 +348,10 @@ public class HostSettings {
                 bookSubjectSelector = "";
                 break;
             case "translationotaku":
-                host = "https://translatinotaku.net/";
+                url = "https://translatinotaku.net/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = "section:has(nav) .elementor-posts-container a";
                 chapterContainer = ".elementor-widget-container:has(p)";
-                nextChapterBtn = ".elementor-post-navigation__next a";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("script", "div[style=position:relative;text-align:center!important]", "#videoad"));
                 bookTitleSelector = ".elementor-heading-title";
@@ -384,11 +361,10 @@ public class HostSettings {
                 bookSubjectSelector = "";
                 break;
             case "isohungrytls":
-                host = "https://isohungrytls.com/";
+                url = "https://isohungrytls.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".collapseomatic_content  a"; // there is a space in the class nam
                 chapterContainer = ".entry-content";
-                nextChapterBtn = "";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("span.ezoic-ad", "p[style=text-align: center;]", "hr", "p:has(span[style=color: #ffffff;])"));
                 bookTitleSelector = "span[style=font-size: 24pt;]";
@@ -398,11 +374,10 @@ public class HostSettings {
                 bookSubjectSelector = "p:contains(Genres:)";
                 break;
             case "ebisutranslations":
-                host = "https://ebisutranslations.com/";
+                url = "https://ebisutranslations.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".page_item a";
                 chapterContainer = "div.page-content:nth-child(4)";
-                nextChapterBtn = "";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("div:has(div[class=row])", "hr", "script", "div.widget", "span[id^=ezoic]", "span[class^=ezoic]", "#disqus_thread", ".navi-div"));
                 bookTitleSelector = "h1.content-header";
@@ -412,11 +387,10 @@ public class HostSettings {
                 bookSubjectSelector = "p:contains(GenrebookDescSelector = \"false\";s:)";
                 break;
             case "webnovel":
-                host = "https://webnovel.com/";
+                url = "https://webnovel.com/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".j_catalog_list a:not(a:has(svg))";
                 chapterContainer = "div[class^=chapter_content]";
-                nextChapterBtn = "";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("pirate", ".cha-hr", ".cha-info", ".cha-tit p", ".j_bottom_comment_area", ".user-links-wrap", ".g_ad_ph"));
                 bookTitleSelector = "p.lh24.fs16.pt24.pb24.ell.c_000 span:not(span:contains(/))";
@@ -426,11 +400,10 @@ public class HostSettings {
                 bookSubjectSelector = "a[href^=/category/list?category=].c_000";
                 break;
             case "wuxiaworld.online":
-                host = "https://wuxiaworld.online/";
+                url = "https://wuxiaworld.online/";
                 ordinalIndexForBaseNovel = 4;
                 chapterLinkSelecter = ".chapter-list a";
                 chapterContainer = ".content-area";
-                nextChapterBtn = "a[title=Next chapter]";
                 titleHostName = "";
                 blacklistedTags = null;
                 bookTitleSelector = "h1.entry-title";
@@ -440,11 +413,10 @@ public class HostSettings {
                 bookSubjectSelector = "";
                 break;
             case "novelfull":
-                host = "http://novelfull.com/";
+                url = "http://novelfull.com/";
                 ordinalIndexForBaseNovel = 4;
                 chapterLinkSelecter = ".list-chapter a";
                 chapterContainer = "#chapter-content";
-                nextChapterBtn = "#next_chap";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("script", "ads", "div[align=left]", ".adsbygoogle", ".cha-tit p"));
                 bookTitleSelector = "h3.title";
@@ -454,11 +426,10 @@ public class HostSettings {
                 bookSubjectSelector = ".info > div:nth-child(2)";
                 break;
             case "wuxiaworld.site":
-                host = "https://wuxiaworld.site/";
+                url = "https://wuxiaworld.site/";
                 ordinalIndexForBaseNovel = 5;
                 chapterLinkSelecter = ".listing-chapters_wrap a";
                 chapterContainer = ".text-left";
-                nextChapterBtn = ".btn.next_page";
                 titleHostName = "";
                 blacklistedTags = new LinkedList<>(Arrays.asList("script", "ad"));
                 bookTitleSelector = ".post-title h3";
@@ -466,6 +437,19 @@ public class HostSettings {
                 bookCoverSelector = ".summary_image img";
                 bookAuthorSelector = ".author-content";
                 bookSubjectSelector = ".genres-content a";
+                break;
+            default:
+                url = "";
+                ordinalIndexForBaseNovel = 0;
+                chapterLinkSelecter = null;
+                chapterContainer = null;
+                titleHostName = null;
+                blacklistedTags = null;
+                bookTitleSelector = null;
+                bookDescSelector = null;
+                bookCoverSelector = null;
+                bookAuthorSelector = null;
+                bookSubjectSelector = null;
                 break;
         }
     }

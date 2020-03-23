@@ -19,7 +19,7 @@ public class manSetBlacklistedTags extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         setTitle("Add blacklisted tags");
-        ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
+        ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
         setIconImage(favicon.getImage());
         getRootPane().setDefaultButton(buttonOK);
 
@@ -74,7 +74,7 @@ public class manSetBlacklistedTags extends JDialog {
         list1 = new JList(blacklistedTagsListModel);
         scrollPane1 = new JScrollPane(list1, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        setBlacklistRemoveButton = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));
+        setBlacklistRemoveButton = new JButton(new ImageIcon(getClass().getResource("/files/images/remove_icon.png")));
         setBlacklistRemoveButton.setBorder(BorderFactory.createEmptyBorder());
         setBlacklistRemoveButton.setContentAreaFilled(false);
     }

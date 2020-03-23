@@ -1,6 +1,7 @@
 package gui;
 
-import grabber.AutoNovel;
+import grabber.Chapter;
+import grabber.Novel;
 
 import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
@@ -24,15 +25,18 @@ public class getChapterNumber extends JDialog {
     private JList<String> chapterList;
     private JButton removeChapter;
     private JButton addChapter;
+    private Novel novel;
 
-    private getChapterNumber(GUI gui, AutoNovel novel) {
-        ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
+
+    private getChapterNumber(Novel novel) {
+        this.novel = novel;
+        ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
         setIconImage(favicon.getImage());
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(e -> onOK(gui, novel));
+        buttonOK.addActionListener(e -> onOK());
 
         buttonCancel.addActionListener(e -> onCancel());
 
@@ -64,32 +68,22 @@ public class getChapterNumber extends JDialog {
     }
 
 
-    static void main(GUI gui, AutoNovel novel) {
-        chapterListModel = new DefaultListModel<>();
-        for (int i = 0; i < novel.chapterLinks.size(); i++) {
-            chapterListModel.addElement(novel.chaptersNames.get(i) + "   |   " + novel.chapterLinks.get(i));
-        }
-
-        dialog = new getChapterNumber(gui, novel);
+    static void main(Novel novel) {
+        dialog = new getChapterNumber(novel);
         dialog.setTitle("Edit chapter order");
         dialog.pack();
         dialog.setVisible(true);
     }
 
-    private void onOK(GUI gui, AutoNovel novel) {
-        List<String> newNames = new ArrayList<>();
-        List<String> newLinks = new ArrayList<>();
+    private void onOK() {
+        List<Chapter> newChapters = new ArrayList<>();
         String[] substring;
         for (int i = 0; i < chapterListModel.size(); i++) {
             substring = chapterListModel.get(i).split("   \\|   ");
-            newNames.add(substring[0]);
-            newLinks.add(substring[1]);
+            newChapters.add(new Chapter(substring[0],substring[1]));
         }
-        novel.chaptersNames = newNames;
-        novel.chapterLinks = newLinks;
-        if (!novel.chapterLinks.isEmpty()) {
-            gui.autoChapterAmount.setText(String.valueOf(novel.chapterLinks.size()));
-        }
+        novel.gui.autoChapterAmount.setText(String.valueOf(newChapters.size()));
+        novel.chapters = newChapters;
         dialog.dispose();
     }
 
@@ -101,6 +95,10 @@ public class getChapterNumber extends JDialog {
         addChapter = new JButton("Add");
         removeChapter = new JButton("Remove");
 
+        chapterListModel = new DefaultListModel<>();
+        for (Chapter chapter: novel.chapters) {
+            chapterListModel.addElement(chapter.toString());
+        }
         chapterList = new JList<>(chapterListModel);
         chapterList.setDragEnabled(true);
         chapterList.setDropMode(DropMode.INSERT);
@@ -131,12 +129,12 @@ public class getChapterNumber extends JDialog {
             }
 
             @Override
-            public boolean canImport(TransferHandler.TransferSupport support) {
+            public boolean canImport(TransferSupport support) {
                 return support.isDataFlavorSupported(DataFlavor.stringFlavor);
             }
 
             @Override
-            public boolean importData(TransferHandler.TransferSupport support) {
+            public boolean importData(TransferSupport support) {
                 try {
                     String s = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
                     JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();

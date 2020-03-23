@@ -1,6 +1,6 @@
 package gui;
 
-import grabber.AutoNovel;
+import grabber.Novel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,14 +16,14 @@ public class autoSetBlacklistedTags extends JDialog {
     private JButton setBlacklistRemoveButton;
     private JList list1;
     private JScrollPane scrollPane1;
-    private AutoNovel currGrab;
+    private Novel novel;
 
-    private autoSetBlacklistedTags(AutoNovel currGrab) {
-        this.currGrab = currGrab;
+    private autoSetBlacklistedTags(Novel currGrab) {
+        this.novel = currGrab;
         setContentPane(contentPane);
         setModal(true);
         setTitle("Edit blacklisted tags");
-        ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
+        ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
         setIconImage(favicon.getImage());
         getRootPane().setDefaultButton(buttonOK);
 
@@ -40,10 +40,10 @@ public class autoSetBlacklistedTags extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!(manBlacklistField.getText() == null || manBlacklistField.getText().isEmpty())) {
-                    currGrab.currHostSettings.blacklistedTags.addAll(Arrays.asList(manBlacklistField.getText().split(",")));
+                    currGrab.host.blacklistedTags.addAll(Arrays.asList(manBlacklistField.getText().split(",")));
                 }
                 blacklistedTagsListModel.clear();
-                for (String tag : currGrab.currHostSettings.blacklistedTags) {
+                for (String tag : currGrab.host.blacklistedTags) {
                     blacklistedTagsListModel.addElement(tag);
                 }
             }
@@ -53,13 +53,13 @@ public class autoSetBlacklistedTags extends JDialog {
                 int[] indices = list1.getSelectedIndices();
                 for (int i = indices.length - 1; i >= 0; i--) {
                     blacklistedTagsListModel.removeElementAt(indices[i]);
-                    currGrab.currHostSettings.blacklistedTags.remove(indices[i]);
+                    currGrab.host.blacklistedTags.remove(indices[i]);
                 }
             }
         });
     }
 
-    static void main(AutoNovel currGrab) {
+    static void main(Novel currGrab) {
         autoSetBlacklistedTags dialog = new autoSetBlacklistedTags(currGrab);
         dialog.pack();
         dialog.setVisible(true);
@@ -70,16 +70,16 @@ public class autoSetBlacklistedTags extends JDialog {
     }
 
     private void createUIComponents() {
-        if (currGrab.currHostSettings.blacklistedTags != null) {
+        if (novel.host.blacklistedTags != null) {
             blacklistedTagsListModel = new DefaultListModel();
-            for (String tag : currGrab.currHostSettings.blacklistedTags) {
+            for (String tag : novel.host.blacklistedTags) {
                 blacklistedTagsListModel.addElement(tag);
             }
             list1 = new JList(blacklistedTagsListModel);
         }
         scrollPane1 = new JScrollPane(list1, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        setBlacklistRemoveButton = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));
+        setBlacklistRemoveButton = new JButton(new ImageIcon(getClass().getResource("/files/images/remove_icon.png")));
         setBlacklistRemoveButton.setBorder(BorderFactory.createEmptyBorder());
         setBlacklistRemoveButton.setContentAreaFilled(false);
     }

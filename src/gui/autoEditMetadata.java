@@ -1,6 +1,6 @@
 package gui;
 
-import grabber.AutoNovel;
+import grabber.Novel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -25,14 +25,14 @@ public class autoEditMetadata extends JDialog {
     private JScrollPane autoEditMetadataDescScrollPane;
     private JTextArea autoEditMetadataDescArea;
     private JCheckBox ignoreDescriptionCheckBox;
-    private AutoNovel currGrab;
+    private Novel novel;
 
-    private autoEditMetadata(AutoNovel currGrab) {
-        this.currGrab = currGrab;
+    private autoEditMetadata(Novel novel) {
+        this.novel = novel;
         setContentPane(contentPane);
         setModal(true);
         setTitle("Edit EPUB metadata");
-        ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
+        ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
         setIconImage(favicon.getImage());
         getRootPane().setDefaultButton(buttonOK);
 
@@ -60,16 +60,16 @@ public class autoEditMetadata extends JDialog {
             FileNameExtensionFilter filter = new FileNameExtensionFilter("jpg png gif", "png", "jpg", "gif");
             chooser.setFileFilter(filter);
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                currGrab.bookCover = chooser.getSelectedFile().toString();
+                novel.metadata.bookCover = chooser.getSelectedFile().toString();
                 try {
                     BufferedImage imageInput = ImageIO.read(chooser.getSelectedFile());
-                    currGrab.bufferedCover = imageInput;
-                    currGrab.bufferedCoverName = chooser.getSelectedFile().getName();
-                    currGrab.bookCover = chooser.getSelectedFile().getName();
+                    novel.metadata.bufferedCover = imageInput;
+                    novel.metadata.bufferedCoverName = chooser.getSelectedFile().getName();
+                    novel.metadata.bookCover = chooser.getSelectedFile().getName();
                 } catch (IOException e) {
-                    currGrab.gui.appendText("auto", e.getMessage());
+                    novel.gui.appendText("auto", e.getMessage());
                 }
-                manMetadataImageButton.setIcon(new ImageIcon(new ImageIcon(currGrab.bufferedCover).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
+                manMetadataImageButton.setIcon(new ImageIcon(new ImageIcon(novel.metadata.bufferedCover).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
             }
         });
         ignoreDescriptionCheckBox.addActionListener(new ActionListener() {
@@ -83,7 +83,7 @@ public class autoEditMetadata extends JDialog {
         });
     }
 
-    static void main(AutoNovel currGrab) {
+    static void main(Novel currGrab) {
         autoEditMetadata dialog = new autoEditMetadata(currGrab);
         dialog.pack();
         dialog.setVisible(true);
@@ -92,35 +92,35 @@ public class autoEditMetadata extends JDialog {
     private void onOK() {
         // Adjust the metadata on the GUI
         // Book Title
-        currGrab.bookTitle = manSetMetadataTitleField.getText();
-        currGrab.gui.autoBookTitle.setText(currGrab.bookTitle);
+        novel.metadata.bookTitle = manSetMetadataTitleField.getText();
+        novel.gui.autoBookTitle.setText(novel.metadata.bookTitle);
         // Book Description
-        currGrab.bookDesc.set(0, autoEditMetadataDescArea.getText());
+        novel.metadata.bookDesc.set(0, autoEditMetadataDescArea.getText());
         // Book Author
-        currGrab.bookAuthor = manSetMetadataAuthorField.getText();
-        currGrab.gui.autoAuthor.setText(currGrab.bookAuthor);
-        currGrab.bookSubjects = Arrays.asList(manSetMetadataTags.getText().split(","));
+        novel.metadata.bookAuthor = manSetMetadataAuthorField.getText();
+        novel.gui.autoAuthor.setText(novel.metadata.bookAuthor);
+        novel.metadata.bookSubjects = Arrays.asList(manSetMetadataTags.getText().split(","));
         // No description
-        currGrab.noDescription = ignoreDescriptionCheckBox.isSelected();
+        novel.options.noDescription = ignoreDescriptionCheckBox.isSelected();
         // Book Tags
         manSetMetadataTags.setText("");
         int maxNumberOfSubjects = 0;
-        currGrab.gui.autoBookSubjects.setText("<html>");
-        for (String eachTag : currGrab.bookSubjects) {
-            currGrab.gui.autoBookSubjects.setText(currGrab.gui.autoBookSubjects.getText() + eachTag + ", ");
+        novel.gui.autoBookSubjects.setText("<html>");
+        for (String eachTag : novel.metadata.bookSubjects) {
+            novel.gui.autoBookSubjects.setText(novel.gui.autoBookSubjects.getText() + eachTag + ", ");
             maxNumberOfSubjects++;
             if (maxNumberOfSubjects == 4) {
                 maxNumberOfSubjects = 0;
-                currGrab.gui.autoBookSubjects.setText(currGrab.gui.autoBookSubjects.getText() + "<br>");
+                novel.gui.autoBookSubjects.setText(novel.gui.autoBookSubjects.getText() + "<br>");
             }
         }
-        if (!currGrab.gui.autoBookSubjects.getText().isEmpty()) {
-            currGrab.gui.autoBookSubjects.setText(
-                    currGrab.gui.autoBookSubjects.getText().substring(0,
-                            currGrab.gui.autoBookSubjects.getText().lastIndexOf(",")));
+        if (!novel.gui.autoBookSubjects.getText().isEmpty()) {
+            novel.gui.autoBookSubjects.setText(
+                    novel.gui.autoBookSubjects.getText().substring(0,
+                            novel.gui.autoBookSubjects.getText().lastIndexOf(",")));
         }
         // Book Cover
-        if (currGrab.bufferedCover != null) currGrab.gui.setBufferedCover(currGrab.bufferedCover);
+        if (novel.metadata.bufferedCover != null) novel.gui.setBufferedCover(novel.metadata.bufferedCover);
         dispose();
     }
 
@@ -130,17 +130,17 @@ public class autoEditMetadata extends JDialog {
 
     private void createUIComponents() {
         ignoreDescriptionCheckBox = new JCheckBox();
-        ignoreDescriptionCheckBox.setSelected(currGrab.noDescription);
-        autoEditMetadataDescArea = new JTextArea(currGrab.bookDesc.get(0));
+        ignoreDescriptionCheckBox.setSelected(novel.options.noDescription);
+        autoEditMetadataDescArea = new JTextArea(novel.metadata.bookDesc.get(0).toString());
         autoEditMetadataDescArea.setLineWrap(true);
         autoEditMetadataDescArea.setWrapStyleWord(true);
         autoEditMetadataDescArea.setEnabled(!ignoreDescriptionCheckBox.isSelected());
         autoEditMetadataDescScrollPane = new JScrollPane(autoEditMetadataDescArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        if (currGrab.bookSubjects != null && currGrab.bookTitle != null && currGrab.bookAuthor != null) {
-            manSetMetadataTitleField = new JTextField(currGrab.bookTitle);
-            manSetMetadataAuthorField = new JTextField(currGrab.bookAuthor);
+        if (novel.metadata.bookSubjects != null && novel.metadata.bookTitle != null && novel.metadata.bookAuthor != null) {
+            manSetMetadataTitleField = new JTextField(novel.metadata.bookTitle);
+            manSetMetadataAuthorField = new JTextField(novel.metadata.bookAuthor);
             manSetMetadataTags = new JTextField();
-            for (String tag : currGrab.bookSubjects) {
+            for (String tag : novel.metadata.bookSubjects) {
                 manSetMetadataTags.setText(manSetMetadataTags.getText() + tag + ",");
             }
             // Removes last ',' from string
@@ -151,14 +151,14 @@ public class autoEditMetadata extends JDialog {
             }
         }
 
-        if (currGrab.bookCover == null) {
+        if (novel.metadata.bookCover == null) {
             manMetadataImageButton = new JButton();
-            manMetadataImageButton.setIcon(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
+            manMetadataImageButton.setIcon(new ImageIcon(getClass().getResource("/files/images/cover_placeholder.png")));
             manMetadataImageButton.setBorder(BorderFactory.createEmptyBorder());
             manMetadataImageButton.setContentAreaFilled(false);
         } else {
             manMetadataImageButton = new JButton();
-            manMetadataImageButton.setIcon(new ImageIcon(new ImageIcon(currGrab.bufferedCover).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
+            manMetadataImageButton.setIcon(new ImageIcon(new ImageIcon(novel.metadata.bufferedCover).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
             manMetadataImageButton.setBorder(BorderFactory.createEmptyBorder());
             manMetadataImageButton.setContentAreaFilled(false);
         }

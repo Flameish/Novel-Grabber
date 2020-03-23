@@ -27,7 +27,7 @@ public class manSetMetadata extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         setTitle("Edit EPUB metadata");
-        ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
+        ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
         setIconImage(favicon.getImage());
         getRootPane().setDefaultButton(buttonOK);
 
@@ -118,7 +118,7 @@ public class manSetMetadata extends JDialog {
         }
         if (manMetadataInfo[2].isEmpty()) {
             manMetadataImageButton = new JButton();
-            manMetadataImageButton.setIcon(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
+            manMetadataImageButton.setIcon(new ImageIcon(getClass().getResource("/files/images/cover_placeholder.png")));
             manMetadataImageButton.setBorder(BorderFactory.createEmptyBorder());
             manMetadataImageButton.setContentAreaFilled(false);
         } else {
