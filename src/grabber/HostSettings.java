@@ -73,10 +73,10 @@ public class HostSettings {
                 chapterContainer = ".p-15 .fr-view";
                 titleHostName = "-WuxiaWorld";
                 blacklistedTags = new LinkedList<>(Arrays.asList("a.chapter-nav"));
-                bookTitleSelector = ".p-15 h4";
+                bookTitleSelector = ".novel-body h2";
                 bookDescSelector = ".fr-view:not(.pt-10)";
-                bookCoverSelector = "img.media-object";
-                bookAuthorSelector = ".media-body dd";
+                bookCoverSelector = ".novel-left img";
+                bookAuthorSelector = ".novel-body dd";
                 bookSubjectSelector = ".genres a";
                 break;
             case "royalroad":
