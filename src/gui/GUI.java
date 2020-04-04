@@ -636,7 +636,7 @@ public class GUI extends JFrame {
     private void initialize() {
         add(rootPanel);
         setTitle("Novel-Grabber " + versionNumber);
-        ImageIcon favicon = new ImageIcon(getClass().getResource("/files//images/favicon.png"));
+        ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
         setIconImage(favicon.getImage());
         setMinimumSize(new Dimension(923, 683));
         Tray();
@@ -691,7 +691,7 @@ public class GUI extends JFrame {
             return;
         }
         SystemTray tray = SystemTray.getSystemTray();
-        Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/files//images/favicon.png"));
+        Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/files/images/favicon.png"));
 
         ActionListener exitListener = e -> System.exit(0);
         ActionListener openWindow = e -> setVisible(true);
@@ -832,7 +832,7 @@ public class GUI extends JFrame {
 
     public void setBufferedCover(BufferedImage bufferedImage) {
         if (bufferedImage == null)
-            coverImage.setIcon(new ImageIcon(getClass().getResource("/files//images/cover_placeholder.png")));
+            coverImage.setIcon(new ImageIcon(getClass().getResource("/files/images/cover_placeholder.png")));
         else
             coverImage.setIcon(new ImageIcon(new ImageIcon(bufferedImage).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
     }
@@ -846,11 +846,11 @@ public class GUI extends JFrame {
         autoChapterToChapterNumberField = new JTextField("Number");
         autoChapterToChapterNumberField.setForeground(Color.GRAY);
 
-        autoShowBlacklistedTagsBtn = new JButton(new ImageIcon(getClass().getResource("/files//images/block.png")));
+        autoShowBlacklistedTagsBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/block.png")));
         autoShowBlacklistedTagsBtn.setBorder(BorderFactory.createEmptyBorder());
         autoShowBlacklistedTagsBtn.setContentAreaFilled(false);
 
-        autoCheckAvailability = new JButton(new ImageIcon(getClass().getResource("/files//images/check_icon.png")));
+        autoCheckAvailability = new JButton(new ImageIcon(getClass().getResource("/files/images/check_icon.png")));
         autoCheckAvailability.setBorder(BorderFactory.createEmptyBorder());
         autoCheckAvailability.setContentAreaFilled(false);
 
@@ -874,32 +874,32 @@ public class GUI extends JFrame {
             }
         });
 
-        autoVisitButton = new JButton(new ImageIcon(getClass().getResource("/files//images/website_icon.png")));
+        autoVisitButton = new JButton(new ImageIcon(getClass().getResource("/files/images/website_icon.png")));
         autoVisitButton.setBorder(BorderFactory.createEmptyBorder());
         autoVisitButton.setContentAreaFilled(false);
 
-        autoBusyLabel = new JLabel(new ImageIcon(getClass().getResource("/files//images/busy.gif")));
+        autoBusyLabel = new JLabel(new ImageIcon(getClass().getResource("/files/images/busy.gif")));
 
-        browseButton = new JButton(new ImageIcon(getClass().getResource("/files//images/folder_icon.png")));
+        browseButton = new JButton(new ImageIcon(getClass().getResource("/files/images/folder_icon.png")));
         browseButton.setBorder(BorderFactory.createEmptyBorder());
         browseButton.setContentAreaFilled(false);
 
-        coverImage = new JLabel(new ImageIcon(getClass().getResource("/files//images/cover_placeholder.png")));
+        coverImage = new JLabel(new ImageIcon(getClass().getResource("/files/images/cover_placeholder.png")));
         coverImage.setBorder(BorderFactory.createEmptyBorder());
 
-        autoEditMetadataButton = new JButton(new ImageIcon(getClass().getResource("/files//images/settings_icon.png")));
+        autoEditMetadataButton = new JButton(new ImageIcon(getClass().getResource("/files/images/settings_icon.png")));
         autoEditMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         autoEditMetadataButton.setContentAreaFilled(false);
 
-        autoEditMetaBtn = new JButton(new ImageIcon(getClass().getResource("/files//images/edit.png")));
+        autoEditMetaBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/edit.png")));
         autoEditMetaBtn.setBorder(BorderFactory.createEmptyBorder());
         autoEditMetaBtn.setContentAreaFilled(false);
 
-        autoEditBlacklistBtn = new JButton(new ImageIcon(getClass().getResource("/files//images/block.png")));
+        autoEditBlacklistBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/block.png")));
         autoEditBlacklistBtn.setBorder(BorderFactory.createEmptyBorder());
         autoEditBlacklistBtn.setContentAreaFilled(false);
 
-        autoGetNumberButton = new JButton(new ImageIcon(getClass().getResource("/files//images/search_icon.png")));
+        autoGetNumberButton = new JButton(new ImageIcon(getClass().getResource("/files/images/search_icon.png")));
         autoGetNumberButton.setBorder(BorderFactory.createEmptyBorder());
         autoGetNumberButton.setContentAreaFilled(false);
 
@@ -919,15 +919,15 @@ public class GUI extends JFrame {
         // Manual Tab
         manBrowserCombobox = new JComboBox(browserList);
 
-        manSetMetadataButton = new JButton(new ImageIcon(getClass().getResource("/files//images/edit.png")));
+        manSetMetadataButton = new JButton(new ImageIcon(getClass().getResource("/files/images/edit.png")));
         manSetMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         manSetMetadataButton.setContentAreaFilled(false);
 
-        manBlackListedTags = new JButton(new ImageIcon(getClass().getResource("/files//images/block.png")));
+        manBlackListedTags = new JButton(new ImageIcon(getClass().getResource("/files/images/block.png")));
         manBlackListedTags.setBorder(BorderFactory.createEmptyBorder());
         manBlackListedTags.setContentAreaFilled(false);
 
-        manRemoveLinksButton = new JButton(new ImageIcon(getClass().getResource("/files//images/remove_icon.png")));
+        manRemoveLinksButton = new JButton(new ImageIcon(getClass().getResource("/files/images/remove_icon.png")));
         manRemoveLinksButton.setBorder(BorderFactory.createEmptyBorder());
         manRemoveLinksButton.setContentAreaFilled(false);
 
@@ -939,11 +939,11 @@ public class GUI extends JFrame {
         manLogArea.setWrapStyleWord(true);
         manLogScrollPane = new JScrollPane(manLogArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        manJsoupInfoButton = new JButton(new ImageIcon(getClass().getResource("/files//images/info_icon.png")));
+        manJsoupInfoButton = new JButton(new ImageIcon(getClass().getResource("/files/images/info_icon.png")));
         manJsoupInfoButton.setBorder(BorderFactory.createEmptyBorder());
         manJsoupInfoButton.setContentAreaFilled(false);
 
-        manBrowseLocationButton = new JButton(new ImageIcon(getClass().getResource("/files//images/folder_icon.png")));
+        manBrowseLocationButton = new JButton(new ImageIcon(getClass().getResource("/files/images/folder_icon.png")));
         manBrowseLocationButton.setBorder(BorderFactory.createEmptyBorder());
         manBrowseLocationButton.setContentAreaFilled(false);
 
