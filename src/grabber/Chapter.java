@@ -56,7 +56,9 @@ public class Chapter {
             return;
         }
         // Getting the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter.
-        if (!novel.nextChapterBtn.equals("NOT_SET")) novel.nextChapterURL = doc.select(novel.nextChapterBtn).first().absUrl("href");
+        if(novel.options.window.equals("manual")) {
+            if (!novel.nextChapterBtn.equals("NOT_SET")) novel.nextChapterURL = doc.select(novel.nextChapterBtn).first().absUrl("href");
+        }
 
         if (novel.options.removeStyling) chapterContent.select("[style]").removeAttr("style");
 
@@ -74,12 +76,13 @@ public class Chapter {
         }
 
         novel.metadata.wordCount = novel.metadata.wordCount + GrabberUtils.getWordCount(chapterContent.toString());
-        novel.gui.pagesCountLbl.setText(String.valueOf(novel.metadata.wordCount));
+        novel.gui.pagesCountLbl.setText(String.valueOf(novel.metadata.wordCount / 300));
 
         // Create chapters folder if it doesn't exist.
         File dir = new File(novel.options.saveLocation + File.separator + "chapters");
         if (!dir.exists()) dir.mkdirs();
-        try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", StandardCharsets.UTF_8)) {
+
+        try (PrintStream out = new PrintStream(dir.getPath() + File.separator + fileName + ".html", "UTF-8")) {
             for (Element image : chapterContent.select("img")) {
                 // Check if the image was successfully downloaded.
                 String src = image.absUrl("src");
@@ -95,9 +98,12 @@ public class Chapter {
                 } else chapterContent.select("img").remove();
             }
             // Write text content to file.
-            if (novel.options.displayChapterTitle)
+            if (novel.options.displayChapterTitle) {
                 chapterContent.prepend("<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span><br>");
+            }
+            out.print(novel.htmlHead);
             out.println(chapterContent);
+            out.println(novel.htmlFoot);
         } catch (IOException e) {
             e.printStackTrace();
             novel.gui.appendText(novel.options.window, "[ERROR]"+e.getMessage());

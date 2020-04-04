@@ -37,9 +37,15 @@ public class Novel {
     List<String> imageNames = new ArrayList<>();
 
     private static final String NL = System.getProperty("line.separator");
-    private static final String htmlHead = "<!DOCTYPE html>" + NL + "<html lang=\"en\">" + NL + "<head>" + NL
-            + "<meta charset=\"utf-8\" />" + NL + "</head>" + NL + "<body>" + NL;
-    private static final String htmlFoot = "</body>" + NL + "</html>";
+    static final String htmlHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n" +
+            "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n" +
+            "\n" +
+            "<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n" +
+            "<meta charset=\"utf-8\"/>\n" +
+            "<title></title>\n</head>\n" +
+            "<body>\n";
+    static final String htmlFoot = "</body>" + NL + "</html>";
 
     public Novel() {}
     public Novel(GUI gui) {
@@ -259,6 +265,7 @@ public class Novel {
         }
         if(options.invertOrder) Collections.reverse(chapters); // Will get un-reversed for potential re-grab in report();
         // -1 since chapter numbers start at 1
+        if(options.headless)    headless = new Driver(this);
         for(int i = options.firstChapter-1; i < options.lastChapter; i++) {
             if(killTask) {
                 // Remove already downloaded images and chapters
@@ -306,7 +313,7 @@ public class Novel {
         String filePath = options.saveLocation + File.separator + "chapters" + File.separator + fileName +".html";
         String imageName = metadata.bookCover;
         imageName = GrabberUtils.getFileName(imageName);
-        try (PrintStream out = new PrintStream(filePath, StandardCharsets.UTF_8)) {
+        try (PrintStream out = new PrintStream(filePath, "UTF-8")) {
             out.print(htmlHead + "<div class=\"cover\" style=\"padding: 0pt; margin:0pt; text-align: center; padding:0pt; margin: 0pt;\">" + NL);
             out.println("<img src=\"" + imageName + "\" class=\"cover.img\" style=\"width: 600px; height: 800px;\" />");
             out.print("</div>" + NL + htmlFoot);
@@ -320,7 +327,7 @@ public class Novel {
     public void createToc() {
         String fileName = "table_of_contents";
         String filePath = options.saveLocation + File.separator + "chapters" + File.separator + fileName+  ".html";
-        try (PrintStream out = new PrintStream(filePath , StandardCharsets.UTF_8)) {
+        try (PrintStream out = new PrintStream(filePath , "UTF-8")) {
             out.print(htmlHead + "<b>Table of Contents</b>" + NL + "<p style=\"text-indent:0pt\">" + NL);
             for (Chapter chapter: chapters) {
                 if(chapter.status == 1)
@@ -337,8 +344,8 @@ public class Novel {
     public void createDescPage() {
         String fileName = "desc_Page";
         String filePath = options.saveLocation + File.separator + "chapters" + File.separator + fileName + ".html";
-        try (PrintStream out = new PrintStream(filePath, StandardCharsets.UTF_8)) {
-            out.print(htmlHead + "<div><b>Description<b>" + NL);
+        try (PrintStream out = new PrintStream(filePath, "UTF-8")) {
+            out.print(htmlHead + "<div><b>Description</b>" + NL);
             out.println("<p>" + metadata.bookDesc.get(0) + "</p>");
             out.print("</div>" + NL + htmlFoot);
             extraPages.add(fileName);
