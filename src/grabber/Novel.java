@@ -37,14 +37,12 @@ public class Novel {
     List<String> imageNames = new ArrayList<>();
 
     private static final String NL = System.getProperty("line.separator");
-    static final String htmlHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n" +
-            "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n" +
-            "\n" +
-            "<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n" +
-            "<meta charset=\"utf-8\"/>\n" +
-            "<title></title>\n</head>\n" +
-            "<body>\n";
+    static final String htmlHead = "<!DOCTYPE html>" + NL +
+            "<html>" + NL +
+            "<head>" + NL +
+            "<title></title>" + NL +
+            "</head>" + NL +
+            "<body>" + NL;
     static final String htmlFoot = "</body>" + NL + "</html>";
 
     public Novel() {}
@@ -373,5 +371,4 @@ public class Novel {
         }
         if(options.headless) headless.close();
     }
-
 }
