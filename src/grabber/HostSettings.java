@@ -1,12 +1,13 @@
 package grabber;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-/**
- * Data class 101.
- */
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
+
 public class HostSettings {
     public static String[] websites = {
             "Wuxiaworld",
@@ -452,5 +453,196 @@ public class HostSettings {
                 bookSubjectSelector = null;
                 break;
         }
+    }
+
+    public List<Chapter> getChapterList(Novel novel) {
+        List<Chapter> chapters = new ArrayList<>();
+        try {
+        switch (novel.host.url) {
+            case "https://boxnovel.com/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                Elements chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                for(Element chapterLink: chapterLinks) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                // Get link of last chapter (first in novel context)
+                String boxNovelFirstChapter = chapters.get(chapters.size()-1).chapterURL;
+                String boxNovelbaseLinkStart = boxNovelFirstChapter.substring(0, GrabberUtils.ordinalIndexOf(boxNovelFirstChapter, "/", 5) + 9);
+                String boxNovelChapterNumberString = boxNovelFirstChapter.substring(boxNovelbaseLinkStart.length());
+                int boxNovelChapterNumber;
+                if(boxNovelChapterNumberString.contains("-")) {
+                    boxNovelChapterNumber = Integer.valueOf(boxNovelChapterNumberString.substring(0,boxNovelChapterNumberString.indexOf("-")));
+                } else {
+                    boxNovelChapterNumber = Integer.valueOf(boxNovelChapterNumberString);
+                }
+                if (boxNovelChapterNumber != 1) {
+                    for (int i = boxNovelChapterNumber - 1; i >= 1; i--) {
+                        chapters.add(new Chapter("Chapter " + i, boxNovelbaseLinkStart + i));
+                    }
+                }
+                break;
+            case "http://novelfull.com/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                while (!novel.tableOfContent.select("li.next").hasClass("disabled")) {
+                    chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                    for (Element chapterLink : chapterLinks) {
+                        chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                    }
+                    novel.tableOfContent = Jsoup.connect(novel.tableOfContent.select("li.next a").attr("abs:href")).timeout(30 * 1000).get();
+                }
+                chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                for (Element chapterLink : chapterLinks) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                break;
+            case "https://zenithnovels.com/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                while (!novel.tableOfContent.select(".lcp_paginator a.lcp_nextlink").attr("abs:href").isEmpty()) {
+                    chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                    for (Element chapterLink : chapterLinks) {
+                        chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                    }
+                    novel.tableOfContent = Jsoup.connect(novel.tableOfContent.select(".lcp_paginator a.lcp_nextlink").attr("abs:href")).timeout(30 * 1000).get();
+                }
+                chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                for (Element chapterLink : chapterLinks) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                break;
+            case "https://translatinotaku.net/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                while (!novel.tableOfContent.select("a.page-numbers.next").attr("abs:href").isEmpty()) {
+                    chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                    for (Element chapterLink : chapterLinks) {
+                        chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                    }
+                    novel.tableOfContent = Jsoup.connect(novel.tableOfContent.select("a.page-numbers.next").attr("abs:href")).timeout(30 * 1000).get();
+                }
+                chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                for (Element chapterLink : chapterLinks) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+
+                }
+                break;
+            case "https://comrademao.com/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                while (!novel.tableOfContent.select(".pagination a.next").attr("abs:href").isEmpty()) {
+                    chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                    for (Element chapterLink : chapterLinks) {
+                        chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                    }
+                    novel.tableOfContent = Jsoup.connect(novel.tableOfContent.select(".pagination a.next").attr("abs:href")).timeout(30 * 1000).get();
+                }
+                chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                for (Element chapterLink : chapterLinks) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                break;
+            case "https://wuxiaworld.online/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                for (Element chapterLink : chapterLinks) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                // Get href link of last chapter (first in novel context)
+                String wuxiaonlineFirstChapter = chapters.get(chapterLinks.size() - 1).chapterURL;
+                String wuxiaonlinebaseLinkStart = wuxiaonlineFirstChapter.substring(0, GrabberUtils.ordinalIndexOf(wuxiaonlineFirstChapter, "/", 4) + 9);
+                String wuxiaonlineChapterNumberString = wuxiaonlineFirstChapter.substring(wuxiaonlinebaseLinkStart.length());
+                int wuxiaonlineChapterNumber;
+                if(wuxiaonlineChapterNumberString.contains("-"))
+                    wuxiaonlineChapterNumber = Integer.valueOf(wuxiaonlineChapterNumberString.substring(0,wuxiaonlineChapterNumberString.indexOf("-")));
+                else
+                    wuxiaonlineChapterNumber = Integer.valueOf(wuxiaonlineChapterNumberString);
+                if(wuxiaonlineChapterNumber != 1) {
+                    for(int i = wuxiaonlineChapterNumber-1; i >= 1; i--) {
+                        chapters.add(new Chapter("Chapter "+i, wuxiaonlinebaseLinkStart+i));
+                    }
+                }
+                break;
+            case "https://fanfiction.net/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                String fullLink = novel.tableOfContent.select("link[rel=canonical]").attr("abs:href");
+                String baseLinkStart = fullLink.substring(0, GrabberUtils.ordinalIndexOf(fullLink, "/", 5) + 1);
+                String baseLinkEnd = fullLink.substring(baseLinkStart.length() + 1);
+                chapterLinks = chapterLinks.select("option[value]");
+                for(int i = 0;  i < chapterLinks.size() / 2; i++)
+                    chapters.add(new Chapter(chapterLinks.get(i).text(),baseLinkStart + chapterLinks.get(i).attr("value") + baseLinkEnd));
+                break;
+            // Is a reskin of fanction.net
+            case "https://fanfiktion.de/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelecter);
+                fullLink = novel.tableOfContent.select("link[rel=canonical]").attr("abs:href");
+                baseLinkStart = fullLink.substring(0, GrabberUtils.ordinalIndexOf(fullLink, "/", 5) + 1);
+                baseLinkEnd = fullLink.substring(baseLinkStart.length() + 1);
+                chapterLinks = chapterLinks.select("option[value]");
+                for(int i = 0;  i < chapterLinks.size(); i++)
+                    chapters.add(new Chapter(chapterLinks.get(i).text(),baseLinkStart + chapterLinks.get(i).attr("value") + baseLinkEnd));
+                break;
+            case "https://tapread.com/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                String novelURL = novel.novelLink;
+                int tapReadNovelId = Integer.parseInt(novelURL.substring(novelURL.lastIndexOf("/") + 1));
+                Map<String, String> chapterMap = xhrRequest.tapReadGetChapterList(tapReadNovelId);
+                int i = 0;
+                for (String chapterId : chapterMap.keySet()) {
+                    chapters.add(new Chapter(chapterMap.get(chapterId), "https://tapread.com/book/index/" + tapReadNovelId + "/" + chapterId));
+                    chapters.get(i).xhrBookId = tapReadNovelId;
+                    chapters.get(i).xhrChapterId = chapterId;
+                    i++;
+                }
+                break;
+            case "https://webnovel.com/":
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                String csrfToken = "null";
+                String bookId = novel.novelLink;
+                String bookTitle = novel.tableOfContent.select(novel.host.bookTitleSelector).first().text().replaceAll("[\\\\/:*?\"<>|]", "");
+                bookId = bookId.substring(GrabberUtils.ordinalIndexOf(bookId, "/", 4) + 1, GrabberUtils.ordinalIndexOf(bookId, "/", 5));
+
+                String otherParameter = "";
+                CookieManager cookieManager = new CookieManager();
+                CookieHandler.setDefault(cookieManager);
+
+                URL url = new URL(novel.novelLink);
+                URLConnection connection = url.openConnection();
+                connection.getContent();
+
+                List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
+                for (HttpCookie cookie : cookies) {
+                    if (cookie.toString().startsWith("_csrfToken")) {
+                        csrfToken = cookie.toString().substring(11);
+                    }
+                }
+                Map<String, String> webnovelChapters = xhrRequest.webnovelGetChapterList(
+                        "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken=" + csrfToken + "&bookId=" + bookId + "&_=" + otherParameter);
+                int webnovelChapterNumber = 1;
+                for (String chapterId : webnovelChapters.keySet()) {
+                    chapters.add(new Chapter("Chapter " + webnovelChapterNumber + ": " + webnovelChapters.get(chapterId), "https://www.webnovel.com/book/" + bookId + "/" + chapterId + "/"
+                            + bookTitle.replace(" ", "-") + "/" + webnovelChapters.get(chapterId).replace(" ", "-")));
+                    webnovelChapterNumber++;
+                }
+                break;
+
+            case "https://gravitytales.com/":
+                //Chapter list at gravitytales.com/Novel/chapters
+                novel.tableOfContent = Jsoup.connect(novel.novelLink+"/chapters").timeout(30 * 1000).get();
+                for (Element chapterLink : novel.tableOfContent.select(novel.host.chapterLinkSelecter)) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                // Fetch "table of contents" page for metadata
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                break;
+            default:
+                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+                for (Element chapterLink : novel.tableOfContent.select(novel.host.chapterLinkSelecter)) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                break;
+        }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return chapters;
     }
 }
