@@ -3,7 +3,6 @@ package grabber;
 import gui.GUI;
 import gui.manSetMetadata;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -13,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public class ManNovel extends Novel {
 
@@ -40,14 +38,13 @@ public class ManNovel extends Novel {
         } else {
             tableOfContent = Jsoup.connect(novelLink).get();
         }
-        chapters.clear();
-        GUI.listModelChapterLinks.removeAllElements();
+        gui.manLinkListModel.removeAllElements();
         // Add every link as a new chapter and add to gui
         Elements links = tableOfContent.select("a[href]");
         for (Element chapterLink : links) {
             if (chapterLink.attr("abs:href").startsWith("http") && !chapterLink.text().isEmpty()) {
-                chapters.add(new Chapter(chapterLink.text(),chapterLink.attr("abs:href")));
-                gui.listModelChapterLinks.addElement(chapterLink.text());
+                Chapter chapter = new Chapter(chapterLink.text(),chapterLink.attr("abs:href"));
+                gui.manLinkListModel.addElement(chapter);
             }
         }
         if (!chapters.isEmpty()) gui.appendText("manual", "[INFO]"+chapters.size() + " links retrieved.");
@@ -60,6 +57,12 @@ public class ManNovel extends Novel {
         gui.setMaxProgress(options.window, chapters.size());
         if (options.invertOrder) Collections.reverse(chapters);
         if (options.headless) headless = new Driver(this);
+
+        // Add chapters from listModel
+        chapters = new ArrayList<>();
+        for (int i = 0; i < gui.manLinkListModel.size(); i++) {
+            chapters.add(gui.manLinkListModel.get(i));
+        }
 
         for (Chapter chapter : chapters) {
             if(killTask) {
