@@ -37,8 +37,11 @@ public class Novel {
     List<String> imageNames = new ArrayList<>();
 
     private static final String NL = System.getProperty("line.separator");
-    static final String htmlHead = "<!DOCTYPE html>" + NL +
-            "<html>" + NL +
+    static final String htmlHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + NL+
+            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"" + NL +
+            "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">" + NL +
+            "\n" +
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + NL +
             "<head>" + NL +
             "<title></title>" + NL +
             "</head>" + NL +
@@ -48,7 +51,7 @@ public class Novel {
     public Novel() {}
     public Novel(GUI gui) {
         this.gui = gui;
-        String hostname = gui.autoHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", "");
+        String hostname = gui.autoHostSelection.getSelectedItem().toString();
         novelLink  = gui.chapterListURL.getText();
         host = new HostSettings(hostname);
         metadata = new Metadata(this);
