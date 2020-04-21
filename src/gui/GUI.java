@@ -25,8 +25,8 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.4.1";
-    public static DefaultListModel<String> listModelChapterLinks = new DefaultListModel<>();
+    public static String versionNumber = "2.4.2";
+    public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
     public static String[] chapterToChapterArgs = new String[3];
     public static TrayIcon trayIcon;
@@ -61,7 +61,7 @@ public class GUI extends JFrame {
     public JLabel checkStatusLbl;
     public JButton checkStopPollingBtn;
     public JLabel autoBookSubjects;
-    private JList<String> manLinkList;
+    private JList<Chapter> manLinkList;
     private JFrame window;
     private JTabbedPane tabbedPane;
     private JPanel rootPanel;
@@ -296,13 +296,9 @@ public class GUI extends JFrame {
         autoVisitButton.addActionListener(arg0 -> {
             try {
                 String toOpenHostSite;
-                if (autoHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", "").equals("isohungrytls")) {
-                    toOpenHostSite = "https://isohungrytls.com/";
-                } else {
-                    HostSettings emptyNovel = new HostSettings(
-                            Objects.requireNonNull(autoHostSelection.getSelectedItem()).toString().toLowerCase().replace(" ", ""));
-                    toOpenHostSite = emptyNovel.url;
-                }
+                HostSettings emptyNovel = new HostSettings(
+                        Objects.requireNonNull(autoHostSelection.getSelectedItem()).toString());
+                toOpenHostSite = emptyNovel.url;
                 URI uri = new URI(toOpenHostSite);
                 openWebpage(uri);
             } catch (Exception e) {
@@ -314,7 +310,7 @@ public class GUI extends JFrame {
             DefaultListModel<String> tempListModel = new DefaultListModel<>();
             JList<String> tempJList = new JList<>(tempListModel);
 
-            HostSettings tempSettings = new HostSettings(autoHostSelection.getSelectedItem().toString().toLowerCase().replace(" ", ""));
+            HostSettings tempSettings = new HostSettings(autoHostSelection.getSelectedItem().toString());
             JScrollPane tagScrollPane = new JScrollPane(tempJList);
             tagScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             tagScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -359,7 +355,7 @@ public class GUI extends JFrame {
             autoNovel.killTask = true;
         });
 
-        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> getChapterNumber.main(autoNovel)));
+        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> autoChapterOrder.main(autoNovel)));
 
         autoHostSelection.addItemListener(e -> {
             String selection = autoHostSelection.getSelectedItem().toString();
@@ -402,7 +398,7 @@ public class GUI extends JFrame {
                     err.printStackTrace();
                     appendText("manual", "[ERROR]" + err.getMessage());
                 } finally {
-                    if (!listModelChapterLinks.isEmpty()) {
+                    if (!manLinkListModel.isEmpty()) {
                         manRemoveLinksButton.setEnabled(true);
                     }
                 }
@@ -557,13 +553,12 @@ public class GUI extends JFrame {
         });
 
         manRemoveLinksButton.addActionListener(arg0 -> {
-            if (!listModelChapterLinks.isEmpty()) {
+            if (!manLinkListModel.isEmpty()) {
                 int[] indices = manLinkList.getSelectedIndices();
                 for (int i = indices.length - 1; i >= 0; i--) {
-                    listModelChapterLinks.removeElementAt(indices[i]);
-                    manNovel.chapters.remove(indices[i]);
+                    manLinkListModel.removeElementAt(indices[i]);
                 }
-                if (listModelChapterLinks.isEmpty()) {
+                if (manLinkListModel.isEmpty()) {
                     manRemoveLinksButton.setEnabled(false);
                 }
                 appendText("manual", indices.length + " links removed.");
@@ -585,7 +580,7 @@ public class GUI extends JFrame {
 
         manBlackListedTags.addActionListener(e -> manSetBlacklistedTags.main());
 
-        chapterToChapterButton.addActionListener(e -> ChapterToChapter.main());
+        chapterToChapterButton.addActionListener(e -> manChapterToChapter.main());
 
 
         manStopButton.addActionListener(e -> {
@@ -601,10 +596,16 @@ public class GUI extends JFrame {
             }
         });
 
-        manAddChapterButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-
+        manAddChapterButton.addActionListener(actionEvent -> {
+            String chapterName = JOptionPane.showInputDialog(null,
+                    "Enter chapter name:", "Add a new chapter", JOptionPane.PLAIN_MESSAGE);
+            String chapterLink = JOptionPane.showInputDialog(null,
+                    "Enter chapter URL:", "Add a new chapter", JOptionPane.PLAIN_MESSAGE);
+            if (!(chapterName == null) && !(chapterLink == null)) {
+                if (!chapterName.isEmpty() && !chapterLink.isEmpty()) {
+                    manLinkListModel.addElement(new Chapter(chapterName, chapterLink));
+                    manRemoveLinksButton.setEnabled(true);
+                }
             }
         });
 
@@ -622,6 +623,8 @@ public class GUI extends JFrame {
 
     // GUI functions
     public static void main(String[] args) {
+        // Fetch latest selectors
+        HostSettings.fetchSelectors();
         EventQueue.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -634,6 +637,7 @@ public class GUI extends JFrame {
     }
 
     private void initialize() {
+
         add(rootPanel);
         setTitle("Novel-Grabber " + versionNumber);
         ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
@@ -650,6 +654,7 @@ public class GUI extends JFrame {
                 setVisible(false);
             }
         });
+
     }
 
     private static void openWebpage(URI uri) {
@@ -839,7 +844,7 @@ public class GUI extends JFrame {
 
     private void createUIComponents() {
         // Automatic Tab
-        autoHostSelection = new JComboBox(HostSettings.websites);
+        autoHostSelection = new JComboBox(HostSettings.getWebsites());
 
         autoBrowserCombobox = new JComboBox(browserList);
 
@@ -899,7 +904,7 @@ public class GUI extends JFrame {
         autoEditBlacklistBtn.setBorder(BorderFactory.createEmptyBorder());
         autoEditBlacklistBtn.setContentAreaFilled(false);
 
-        autoGetNumberButton = new JButton(new ImageIcon(getClass().getResource("/files/images/search_icon.png")));
+        autoGetNumberButton = new JButton(new ImageIcon(getClass().getResource("/files/images/list_icon.png")));
         autoGetNumberButton.setBorder(BorderFactory.createEmptyBorder());
         autoGetNumberButton.setContentAreaFilled(false);
 
@@ -927,11 +932,19 @@ public class GUI extends JFrame {
         manBlackListedTags.setBorder(BorderFactory.createEmptyBorder());
         manBlackListedTags.setContentAreaFilled(false);
 
+        manAddChapterButton = new JButton(new ImageIcon(getClass().getResource("/files/images/add_icon.png")));
+        manAddChapterButton.setBorder(BorderFactory.createEmptyBorder());
+        manAddChapterButton.setContentAreaFilled(false);
+
         manRemoveLinksButton = new JButton(new ImageIcon(getClass().getResource("/files/images/remove_icon.png")));
         manRemoveLinksButton.setBorder(BorderFactory.createEmptyBorder());
         manRemoveLinksButton.setContentAreaFilled(false);
 
-        manLinkList = new JList<>(listModelChapterLinks);
+        manLinkList = new JList<>(manLinkListModel);
+        manLinkList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        manLinkList.setDropMode(DropMode.INSERT);
+        manLinkList.setDragEnabled(true);
+        manLinkList.setTransferHandler(new ListItemTransferHandler());
         manLinkScrollPane = new JScrollPane(manLinkList, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
         manLogArea = new JTextArea();
