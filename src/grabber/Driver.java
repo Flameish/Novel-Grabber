@@ -83,7 +83,7 @@ public class Driver {
                 break;
             case "https://wordexcerpt.com/":
                 driver.findElement(By.cssSelector("li.nav-item:nth-child(2) > a:nth-child(1)")).click();
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelecter)));
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelector)));
                 break;
             case "https://webnovel.com/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[1]/div/div/div/div[2]/div/div/div/div[1]/div/div[1]/div/ul/li[2]/a")));
@@ -96,7 +96,7 @@ public class Driver {
                 break;
             case "https://wordrain69.com/":
                 driver.findElement(By.cssSelector(".chapter-readmore")).click();
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelecter)));
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelector)));
                 break;
             case "https://ficfun.com/":
                 driver.findElement(By.cssSelector(".button-round-red")).click();
@@ -105,7 +105,7 @@ public class Driver {
                 driver.findElement(By.cssSelector(".button-round-purple")).click();
                 break;
             case "https://wuxiaworld.site/":
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelecter)));
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelector)));
                 break;
         }
         // Parse html from headerless to Jsoup for faster interaction.
@@ -114,7 +114,7 @@ public class Driver {
         novel.tableOfContent = Jsoup.parse(driver.getPageSource(), baseUrl);
 
         List<Chapter> chapters = new ArrayList<>();
-        for (Element chapterLink : novel.tableOfContent.select(novel.host.chapterLinkSelecter)) {
+        for (Element chapterLink : novel.tableOfContent.select(novel.host.chapterLinkSelector)) {
             chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
         }
         return chapters;
