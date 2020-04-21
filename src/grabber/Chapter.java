@@ -7,9 +7,9 @@ import org.jsoup.nodes.Element;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import java.io.Serializable;
 
-public class Chapter {
+public class Chapter implements Serializable {
     String name;
     String chapterURL;
     String fileName;
@@ -115,6 +115,6 @@ public class Chapter {
 
     @Override
     public String toString() {
-            return name +"   |   "+ chapterURL;
+            return name;
     }
 }
