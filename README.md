@@ -1,5 +1,5 @@
 # ![alt text](https://i.imgur.com/LrV2tLe.png)Novel-Grabber
-Novel-Grabber is a gui based web scrapper that can download and convert chapters into EPUB from various supported web/light novel sites or from any other site manually. Furthermore,  Novel-Grabber can poll a list of novels for new chapter releases and notify you with desktop notifications.
+Novel-Grabber is a gui based web scrapper that can download and convert chapters into EPUB from various supported web/light novel sites or from any other site manually.
 
 
 ## Natively supported sites
@@ -19,7 +19,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 1. Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
 (If you can't execute the jar, try navigating to the jar location with cmd/terminal and use: `java -jar Novel-Grabber.jar`)
 2. Enter the link to the novel's Table of Contents page
-3. Click on 'Check' to see if everything is alright with your input
+3. Click on 'Check' to fetch novel info and chapter list
 4. Grab chapters
 
 * Options:
@@ -28,10 +28,8 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
    
    <b>Get images</b> downloads potential images in a chapter.
    
-   <b>Add chapter title</b> will insert the chapter title at the top of the EPUB chapters.
-   
-   <b>Export:</b> Currently you can export to EPUB or a Calibre <a href="#converting">compatible table of contents file</a>.
-   
+   <b>Add chapter title</b> will insert the chapter title at the top of the chapter page.
+      
    <b>Remove styling</b> gets rid of all original css styling of the chapter.
    
    <b>Headerless Browser</b> will visit the websites with the selected browser. Use this if websites are blocked by Cloudflare or when chapters are dynamically loaded. (Some hosts are set to always use headerless)
@@ -41,6 +39,8 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
    <b>Edit metadata</b>(pen icon) lets you edit Title, Author, Tags, Description and Cover image of the novel.
    
    <b>Edit blacklisted tags</b>(block icon) enables you to remove specific content from a chapter by css selector. (See Manual step 3 for more info)<br>
+   
+   You can add, remove and rearrange chapters manually via the Chapter Order window
    
    ![alt text](https://i.imgur.com/wRVsHx8.png)
 
@@ -65,10 +65,6 @@ Using Chapter-To-Chapter navigation:
 1. Input the URL of your starting point and ending point chapter. (Inclusive)
 2. Input the selector for the "Next-Chapter" button. You want to select the `<a>` tag of it. Works exactly like the chapter-container selector of step 3.
 3. Same as the other step 3.
-
-## <span id="converting">Converting with Calibre</span>
-<small>(click to enlarge)</small><br>
-![alt text](https://i.imgur.com/DBtrXPh.gif)<br>
 
 ## Disclaimer & Warning
 Most sites prohibit the scrapping for their content. Use at your own risk. 
