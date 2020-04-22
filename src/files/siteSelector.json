@@ -436,17 +436,17 @@
     "bookSubjectSelector": ".genres-content a"
   },
   "no_domain": {
-    "url": "",
-    "ordinalIndexForBaseNovel": "",
-    "chapterLinkSelector": "",
-    "chapterContainer": "",
+    "url": " ",
+    "ordinalIndexForBaseNovel": " ",
+    "chapterLinkSelector": " ",
+    "chapterContainer": " ",
     "blacklistedTags": [
 
     ],
-    "bookTitleSelector": "",
-    "bookDescSelector": "",
-    "bookCoverSelector": "",
-    "bookAuthorSelector": "",
-    "bookSubjectSelector": ""
+    "bookTitleSelector": " ",
+    "bookDescSelector": " ",
+    "bookCoverSelector": " ",
+    "bookAuthorSelector": " ",
+    "bookSubjectSelector": " "
   }
 }
