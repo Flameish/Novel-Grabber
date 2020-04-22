@@ -176,7 +176,7 @@
       ".sharedaddy",
       ".jum"
     ],
-    "bookTitleSelector": "h1.novel-title",
+    "bookTitleSelector": "h1",
     "bookDescSelector": "null",
     "bookCoverSelector": "img.materialboxed",
     "bookAuthorSelector": "null",
