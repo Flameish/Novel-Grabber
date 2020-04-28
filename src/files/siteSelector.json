@@ -10,7 +10,7 @@
     "bookTitleSelector": ".novel-body h2",
     "bookDescSelector": ".fr-view:not(.pt-10)",
     "bookCoverSelector": ".novel-left img",
-    "bookAuthorSelector": ".novel-body dd",
+    "bookAuthorSelector": ".novel-body > dd:nth-child(6)",
     "bookSubjectSelector": ".genres a"
   },
   "RoyalRoad": {
