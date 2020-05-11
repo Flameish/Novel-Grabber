@@ -186,15 +186,15 @@
     "url": "https://comrademao.com/",
     "ordinalIndexForBaseNovel": "5",
     "chapterLinkSelector": "tbody td a",
-    "chapterContainer": "section#content",
+    "chapterContainer": "article",
     "blacklistedTags": [
-      ".hide",
-      "#advertisment",
-      "button"
+      "nav",
+      "header",
+      "script"
     ],
-    "bookTitleSelector": "figure:nth-child(1) > h5:nth-child(1)",
-    "bookDescSelector": "#recentnovels > span:nth-child(1) > div:nth-child(2) > p:nth-child(3)",
-    "bookCoverSelector": "amp-img.i-amphtml-element",
+    "bookTitleSelector": "h3.entry-title",
+    "bookDescSelector": "#Description",
+    "bookCoverSelector": "#thumbnail img",
     "bookAuthorSelector": "div.author",
     "bookSubjectSelector": "a[rel=tag]"
   },
