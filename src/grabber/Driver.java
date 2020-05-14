@@ -4,6 +4,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -68,6 +69,27 @@ public class Driver {
                 Select chapterShow = new Select(driver.findElement(By.name("chapters_length")));
                 chapterShow.selectByVisibleText("All");
                 break;
+            case "https://comrademao.com/":
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/nav/label/ul/li[3]/a")));
+                // Parse html from headerless to Jsoup for faster interaction.
+                String baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
+                // Save table of contents doc for metadata extraction later on
+                novel.tableOfContent = Jsoup.parse(driver.getPageSource(), baseUrl);
+                Elements chapterLinks;
+                List<Chapter> chapters = new ArrayList<>();
+                while (!novel.tableOfContent.select(".pagination a.next").attr("abs:href").isEmpty()) {
+                    chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelector);
+                    for (Element chapterLink : chapterLinks) {
+                        chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                    }
+                    driver.navigate().to(novel.tableOfContent.select(".pagination a.next").attr("abs:href"));
+                    novel.tableOfContent = Jsoup.parse(driver.getPageSource(), baseUrl);
+                }
+                chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelector);
+                for (Element chapterLink : chapterLinks) {
+                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                return chapters;
             case "https://creativenovels.com/":
                 driver.findElement(By.cssSelector("ul[role='tablist'] > li:nth-of-type(3) button")).click();
                 wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".post_box")));
