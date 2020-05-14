@@ -61,6 +61,8 @@ public class HostSettings {
         for (Object key: siteSelectorsJSON.keySet()){
             websitesList.add(key.toString());
         }
+        websitesList.remove("no_domain");
+        Collections.sort(websitesList);
         String[] websites = new String[websitesList.size()];
         websitesList.toArray(websites);
         return websites;
