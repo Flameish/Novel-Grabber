@@ -10,6 +10,8 @@ import java.io.PrintStream;
 import java.io.Serializable;
 
 public class Chapter implements Serializable {
+    // Used to set unique filenames
+    private static int chapterId = 0;
     String name;
     String chapterURL;
     String fileName;
@@ -21,7 +23,7 @@ public class Chapter implements Serializable {
     public Chapter(String name, String link) {
         this.name = name;
         this.chapterURL = link;
-        fileName = name.replaceAll("[^\\w]+", "-");
+        fileName = String.format("%05d", ++chapterId) + "-" + name.replaceAll("[^\\w]+", "-");
     }
 
     void saveChapter(Novel novel) {
