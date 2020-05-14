@@ -28,7 +28,7 @@ public class Novel {
 
     Document tableOfContent;
     public String novelLink;
-    String nextChapterBtn;
+    String nextChapterBtn = "NOT_SET";
     String nextChapterURL;
     public boolean killTask;
     private boolean reGrab = false;
