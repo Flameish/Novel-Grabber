@@ -69,7 +69,7 @@ public class EPUB {
                 book.addSection("Cover", resource);
                 inputStream.close();
             } else {
-                book.setCoverImage(new Resource(getClass().getResourceAsStream("/files//images/cover_placeholder.png"), "cover_placeholder.png"));
+                book.setCoverImage(new Resource(getClass().getResourceAsStream("/files/images/cover_placeholder.png"), "cover_placeholder.png"));
 
             }
             // Table of Contents
