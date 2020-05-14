@@ -125,8 +125,10 @@ public class Metadata {
                         coverLink = coverLink.replace("/300/300", "/600/600");
                     }
                     bufferedCover = GrabberUtils.getBufferedCover(coverLink, novel);
-                    novel.gui.setBufferedCover(bufferedCover);
-                    bookCover = novel.imageNames.get(0);
+                    if(!novel.imageNames.isEmpty()) {
+                        novel.gui.setBufferedCover(bufferedCover);
+                        bookCover = novel.imageNames.get(0);
+                    }
             /* downloadImage() adds every image to <Lists> and this interferes with
                the cover image when adding images from these <Lists> to the epub */
                     novel.imageNames.clear();
