@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.4.2";
+    public static String versionNumber = "2.4.5";
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
     public static String[] chapterToChapterArgs = new String[3];
