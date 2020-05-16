@@ -70,7 +70,7 @@ public class Driver {
                 chapterShow.selectByVisibleText("All");
                 break;
             case "https://comrademao.com/":
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/nav/label/ul/li[3]/a")));
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.bookDescSelector)));
                 // Parse html from headerless to Jsoup for faster interaction.
                 String baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
                 // Save table of contents doc for metadata extraction later on
@@ -91,6 +91,7 @@ public class Driver {
                 }
                 return chapters;
             case "https://creativenovels.com/":
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("ul[role='tablist'] > li:nth-of-type(3) button")));
                 driver.findElement(By.cssSelector("ul[role='tablist'] > li:nth-of-type(3) button")).click();
                 wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".post_box")));
                 break;
@@ -104,6 +105,7 @@ public class Driver {
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".chapter-list a")));
                 break;
             case "https://wordexcerpt.com/":
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("li.nav-item:nth-child(2) > a:nth-child(1)")));
                 driver.findElement(By.cssSelector("li.nav-item:nth-child(2) > a:nth-child(1)")).click();
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelector)));
                 break;
@@ -117,13 +119,16 @@ public class Driver {
                 driver.findElement(By.cssSelector(".chapter-readmore")).click();
                 break;
             case "https://wordrain69.com/":
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".chapter-readmore")));
                 driver.findElement(By.cssSelector(".chapter-readmore")).click();
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelector)));
                 break;
             case "https://ficfun.com/":
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".button-round-red")));
                 driver.findElement(By.cssSelector(".button-round-red")).click();
                 break;
             case "https://dreame.com/":
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".button-round-purple")));
                 driver.findElement(By.cssSelector(".button-round-purple")).click();
                 break;
             case "https://wuxiaworld.site/":
