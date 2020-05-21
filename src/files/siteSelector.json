@@ -1,4 +1,18 @@
 {
+  "no_domain": {
+  "url": " ",
+  "ordinalIndexForBaseNovel": " ",
+  "chapterLinkSelector": " ",
+  "chapterContainer": " ",
+  "blacklistedTags": [
+
+  ],
+  "bookTitleSelector": " ",
+  "bookDescSelector": " ",
+  "bookCoverSelector": " ",
+  "bookAuthorSelector": " ",
+  "bookSubjectSelector": " "
+},
   "Wuxiaworld": {
     "url": "https://wuxiaworld.com/",
     "ordinalIndexForBaseNovel": "5",
@@ -435,18 +449,20 @@
     "bookAuthorSelector": ".author-content",
     "bookSubjectSelector": ".genres-content a"
   },
-  "no_domain": {
-    "url": " ",
-    "ordinalIndexForBaseNovel": " ",
-    "chapterLinkSelector": " ",
-    "chapterContainer": " ",
+  "Foxaholic": {
+    "url": "https://foxaholic.com/",
+    "ordinalIndexForBaseNovel": "5",
+    "chapterLinkSelector": ".listing-chapters_wrap a",
+    "chapterContainer": ".text-left",
     "blacklistedTags": [
-
+      "center",
+      "meta",
+      "script"
     ],
-    "bookTitleSelector": " ",
-    "bookDescSelector": " ",
-    "bookCoverSelector": " ",
-    "bookAuthorSelector": " ",
-    "bookSubjectSelector": " "
+    "bookTitleSelector": ".post-title h1",
+    "bookDescSelector": ".summary__content",
+    "bookCoverSelector": "div.summary_image a img",
+    "bookAuthorSelector": ".author-content a",
+    "bookSubjectSelector": ".genres-content a"
   }
 }
