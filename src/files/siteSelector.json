@@ -457,7 +457,10 @@
     "blacklistedTags": [
       "center",
       "meta",
-      "script"
+      "script",
+      "iframe",
+      ".google-auto-placed",
+      ".sharedaddy"
     ],
     "bookTitleSelector": ".post-title h1",
     "bookDescSelector": ".summary__content",

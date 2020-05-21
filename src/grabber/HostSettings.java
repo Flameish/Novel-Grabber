@@ -14,7 +14,7 @@ import java.net.*;
 import java.util.*;
 
 public class HostSettings {
-    private static String[] headerlessBrowserWebsites = {"CreativeNovels", "FicFun", "Dreame", "WuxiaWorld.site"};
+    private static String[] headerlessBrowserWebsites = {"CreativeNovels", "FicFun", "Dreame", "WuxiaWorld.site","Foxaholic"};
     private static String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
