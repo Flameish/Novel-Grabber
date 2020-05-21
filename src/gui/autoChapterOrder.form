@@ -38,7 +38,7 @@
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="OK"/>
+                  <text value="Save"/>
                 </properties>
               </component>
               <component id="5723f" class="javax.swing.JButton" binding="buttonCancel">
@@ -59,12 +59,12 @@
               <text value="Remove"/>
             </properties>
           </component>
-          <component id="27cef" class="javax.swing.JButton" binding="addChapter" custom-create="true">
+          <component id="27cef" class="javax.swing.JButton" binding="editChapterListBtn" custom-create="true">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Add"/>
+              <text value="Edit"/>
             </properties>
           </component>
         </children>

@@ -4,11 +4,7 @@ import grabber.Chapter;
 import grabber.Novel;
 
 import javax.swing.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +13,11 @@ public class autoChapterOrder extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private static DefaultListModel<Chapter> chapterListModel;
+    static DefaultListModel<Chapter> chapterListModel;
     private JScrollPane chapterListScrollPane;
     private JList<Chapter> chapterList;
     private JButton removeChapter;
-    private JButton addChapter;
+    private JButton editChapterListBtn;
     private Novel novel;
 
 
@@ -46,24 +42,17 @@ public class autoChapterOrder extends JDialog {
 
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        // Remove chapter
+        // Remove chapters
         removeChapter.addActionListener(arg0 -> {
             int[] indices = chapterList.getSelectedIndices();
             for (int i = indices.length - 1; i >= 0; i--) {
                 chapterListModel.removeElementAt(indices[i]);
             }
         });
-
-        // Add new chapter
-        addChapter.addActionListener(arg0 -> {
-            String chapterName = JOptionPane.showInputDialog(this,
-                    "Enter chapter name:", "Add a new chapter", JOptionPane.PLAIN_MESSAGE);
-            String chapterLink = JOptionPane.showInputDialog(this,
-                    "Enter chapter URL:", "Add a new chapter", JOptionPane.PLAIN_MESSAGE);
-            if (!(chapterName == null) && !(chapterLink == null)) {
-                if (!chapterName.isEmpty() && !chapterLink.isEmpty()) {
-                    chapterListModel.addElement(new Chapter(chapterName, chapterLink));
-                }
+        editChapterListBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                editChapterList.main("auto");
             }
         });
     }
@@ -73,6 +62,7 @@ public class autoChapterOrder extends JDialog {
         dialog = new autoChapterOrder(novel);
         dialog.setTitle("Edit chapter order");
         dialog.pack();
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 
@@ -81,8 +71,9 @@ public class autoChapterOrder extends JDialog {
         for (int i = 0; i < chapterListModel.size(); i++) {
             newChapters.add(chapterListModel.get(i));
         }
-        novel.gui.autoChapterAmount.setText(String.valueOf(newChapters.size()));
         novel.chapters = newChapters;
+        // Update chapter counter label
+        novel.gui.autoChapterAmount.setText(String.valueOf(newChapters.size()));
         dialog.dispose();
     }
 
@@ -91,7 +82,7 @@ public class autoChapterOrder extends JDialog {
     }
 
     private void createUIComponents() {
-        addChapter = new JButton("Add");
+        editChapterListBtn = new JButton("Add");
         removeChapter = new JButton("Remove");
 
         chapterListModel = new DefaultListModel<>();
