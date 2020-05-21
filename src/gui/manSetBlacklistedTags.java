@@ -59,6 +59,7 @@ public class manSetBlacklistedTags extends JDialog {
     static void main() {
         manSetBlacklistedTags dialog = new manSetBlacklistedTags();
         dialog.pack();
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 

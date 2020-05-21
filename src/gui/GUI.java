@@ -14,6 +14,8 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +27,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.4.5";
+    public static String versionNumber = "2.5.0";
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
     public static String[] chapterToChapterArgs = new String[3];
@@ -467,11 +469,11 @@ public class GUI extends JFrame {
                 // Download chapters from link list
                 // input validation
             } else {
-                if (manNovelURL.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(window, "URL field is empty.", "Warning",
+                if(manLinkListModel.isEmpty()) {
+                    JOptionPane.showMessageDialog(window, "No chapter links found.", "Warning",
                             JOptionPane.WARNING_MESSAGE);
-                    manNovelURL.requestFocusInWindow();
-                } else if (manSaveLocation.getText().isEmpty()) {
+                }
+                else if (manSaveLocation.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(window, "Save directory field is empty.", "Warning",
                             JOptionPane.WARNING_MESSAGE);
                     manSaveLocation.requestFocusInWindow();
@@ -484,9 +486,9 @@ public class GUI extends JFrame {
                 } else if (!manWaitTime.getText().matches("\\d+") && !manWaitTime.getText().isEmpty()) {
                     showPopup("Wait time must contain numbers.", "warning");
                 } else if ((!manSaveLocation.getText().isEmpty())
-                        && (!manNovelURL.getText().isEmpty())
                         && (!manChapterContainer.getText().isEmpty())
-                        && (!manWaitTime.getText().isEmpty())) {
+                        && (!manWaitTime.getText().isEmpty())
+                ) {
                     manGrabChaptersButton.setEnabled(false);
                     manGrabChaptersButton.setVisible(false);
                     manStopButton.setEnabled(true);
@@ -494,6 +496,7 @@ public class GUI extends JFrame {
                     manProgressBar.setStringPainted(true);
                     try {
                         // Needed
+                        if(!chaptersFromLinksRadioButton.isSelected()) manNovel = new ManNovel(this);
                         manNovel.options.saveLocation = manSaveLocation.getText();
                         manNovel.host.chapterContainer = manChapterContainer.getText();
                         manNovel.host.blacklistedTags = GUI.blacklistedTags;
@@ -597,15 +600,9 @@ public class GUI extends JFrame {
         });
 
         manAddChapterButton.addActionListener(actionEvent -> {
-            String chapterName = JOptionPane.showInputDialog(null,
-                    "Enter chapter name:", "Add a new chapter", JOptionPane.PLAIN_MESSAGE);
-            String chapterLink = JOptionPane.showInputDialog(null,
-                    "Enter chapter URL:", "Add a new chapter", JOptionPane.PLAIN_MESSAGE);
-            if (!(chapterName == null) && !(chapterLink == null)) {
-                if (!chapterName.isEmpty() && !chapterLink.isEmpty()) {
-                    manLinkListModel.addElement(new Chapter(chapterName, chapterLink));
-                    manRemoveLinksButton.setEnabled(true);
-                }
+            editChapterList.main("manual");
+            if (!manLinkListModel.isEmpty()) {
+                manRemoveLinksButton.setEnabled(true);
             }
         });
 
@@ -618,7 +615,6 @@ public class GUI extends JFrame {
         }));
 
         checkForUpdatesButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::checkForNewReleases));
-
     }
 
     // GUI functions
@@ -629,6 +625,7 @@ public class GUI extends JFrame {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 GUI window = new GUI();
+                window.setLocationRelativeTo(null);
                 window.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -642,7 +639,7 @@ public class GUI extends JFrame {
         setTitle("Novel-Grabber " + versionNumber);
         ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
         setIconImage(favicon.getImage());
-        setMinimumSize(new Dimension(923, 683));
+        setMinimumSize(new Dimension(1000, 700));
         Tray();
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         if (!SystemTray.isSupported()) {
@@ -863,18 +860,18 @@ public class GUI extends JFrame {
         // Listen for changes in the novel link field and disable the grabbing button
         chapterListURL.getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
-                warn();
+                change();
             }
 
             public void removeUpdate(DocumentEvent e) {
-                warn();
+                change();
             }
 
             public void insertUpdate(DocumentEvent e) {
-                warn();
+                change();
             }
 
-            void warn() {
+            void change() {
                 grabChaptersButton.setEnabled(false);
             }
         });

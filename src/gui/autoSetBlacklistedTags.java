@@ -62,6 +62,7 @@ public class autoSetBlacklistedTags extends JDialog {
     static void main(Novel currGrab) {
         autoSetBlacklistedTags dialog = new autoSetBlacklistedTags(currGrab);
         dialog.pack();
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 

@@ -86,6 +86,7 @@ public class autoEditMetadata extends JDialog {
     static void main(Novel currGrab) {
         autoEditMetadata dialog = new autoEditMetadata(currGrab);
         dialog.pack();
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 
@@ -153,11 +154,13 @@ public class autoEditMetadata extends JDialog {
 
         if (novel.metadata.bookCover == null) {
             manMetadataImageButton = new JButton();
+            manMetadataImageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             manMetadataImageButton.setIcon(new ImageIcon(getClass().getResource("/files/images/cover_placeholder.png")));
             manMetadataImageButton.setBorder(BorderFactory.createEmptyBorder());
             manMetadataImageButton.setContentAreaFilled(false);
         } else {
             manMetadataImageButton = new JButton();
+            manMetadataImageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             manMetadataImageButton.setIcon(new ImageIcon(new ImageIcon(novel.metadata.bufferedCover).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
             manMetadataImageButton.setBorder(BorderFactory.createEmptyBorder());
             manMetadataImageButton.setContentAreaFilled(false);

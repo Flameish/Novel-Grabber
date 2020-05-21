@@ -86,6 +86,7 @@ public class manSetMetadata extends JDialog {
     static void main() {
         manSetMetadata dialog = new manSetMetadata();
         dialog.pack();
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 
@@ -118,11 +119,13 @@ public class manSetMetadata extends JDialog {
         }
         if (manMetadataInfo[2].isEmpty()) {
             manMetadataImageButton = new JButton();
+            manMetadataImageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             manMetadataImageButton.setIcon(new ImageIcon(getClass().getResource("/files/images/cover_placeholder.png")));
             manMetadataImageButton.setBorder(BorderFactory.createEmptyBorder());
             manMetadataImageButton.setContentAreaFilled(false);
         } else {
             manMetadataImageButton = new JButton();
+            manMetadataImageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             manMetadataImageButton.setIcon(new ImageIcon(new ImageIcon(manMetadataInfo[2]).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
             manMetadataImageButton.setBorder(BorderFactory.createEmptyBorder());
             manMetadataImageButton.setContentAreaFilled(false);

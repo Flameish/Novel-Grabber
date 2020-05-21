@@ -69,6 +69,7 @@ public class manChapterToChapter extends JDialog {
     public static void main() {
         manChapterToChapter dialog = new manChapterToChapter();
         dialog.pack();
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 
