@@ -12,8 +12,8 @@ import java.io.Serializable;
 public class Chapter implements Serializable {
     // Used to set unique filenames
     private static int chapterId = 0;
-    String name;
-    String chapterURL;
+    public String name;
+    public String chapterURL;
     String fileName;
     // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
     int status = 0;
