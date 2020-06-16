@@ -22,15 +22,6 @@ public class xhrRequest {
 
     private final String USER_AGENT = "Mozilla/5.0";
 
-    public static void main(String[] args) {
-        xhrRequest http = new xhrRequest();
-        try {
-            System.out.println(http.sendPost("https://creativenovels.com/wp-admin/admin-ajax.php", "action=crn_chapter_list&view_id=9311"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static Map<String, String> tapReadGetChapterList(int bookNumber) {
         xhrRequest http = new xhrRequest();
         JSONParser parser = new JSONParser();
@@ -68,6 +59,7 @@ public class xhrRequest {
             return null;
         }
     }
+
 
     public static Map<String, String> webnovelGetChapterList(String url) {
         xhrRequest http = new xhrRequest();
