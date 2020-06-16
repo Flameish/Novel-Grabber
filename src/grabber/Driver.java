@@ -63,6 +63,7 @@ public class Driver {
      */
     public List<Chapter> getChapterList() {
         driver.navigate().to(novel.novelLink);
+        String baseUrl;
         // These websites require manual interactions to display the chapter list
         switch (novel.host.url) {
             case "https://royalroad.com/":
@@ -72,7 +73,7 @@ public class Driver {
             case "https://comrademao.com/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.bookDescSelector)));
                 // Parse html from headerless to Jsoup for faster interaction.
-                String baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
+                baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
                 // Save table of contents doc for metadata extraction later on
                 novel.tableOfContent = Jsoup.parse(driver.getPageSource(), baseUrl);
                 Elements chapterLinks;
@@ -125,10 +126,16 @@ public class Driver {
                 break;
             case "https://ficfun.com/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".button-round-red")));
+                baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
+                // metadata and chapterlist are not on the same page
+                novel.tempPage  = Jsoup.parse(driver.getPageSource(), baseUrl);
                 driver.findElement(By.cssSelector(".button-round-red")).click();
                 break;
             case "https://dreame.com/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".button-round-purple")));
+                baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
+                // metadata and chapterlist are not on the same page
+                novel.tempPage  = Jsoup.parse(driver.getPageSource(), baseUrl);
                 driver.findElement(By.cssSelector(".button-round-purple")).click();
                 break;
             case "https://wuxiaworld.site/":
@@ -136,13 +143,22 @@ public class Driver {
                 break;
         }
         // Parse html from headerless to Jsoup for faster interaction.
-        String baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
+        baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
         // Save table of contents doc for metadata extraction later on
         novel.tableOfContent = Jsoup.parse(driver.getPageSource(), baseUrl);
 
         List<Chapter> chapters = new ArrayList<>();
         for (Element chapterLink : novel.tableOfContent.select(novel.host.chapterLinkSelector)) {
             chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+        }
+
+        switch(novel.host.url) {
+            case "https://dreame.com/":
+                novel.tableOfContent = novel.tempPage;
+                break;
+            case "https://ficfun.com/":
+                novel.tableOfContent = novel.tempPage;
+                break;
         }
         return chapters;
     }
