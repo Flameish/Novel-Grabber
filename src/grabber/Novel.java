@@ -27,6 +27,7 @@ public class Novel {
     public Driver headless;
 
     Document tableOfContent;
+    Document tempPage;
     public String novelLink;
     String nextChapterBtn = "NOT_SET";
     String nextChapterURL;
