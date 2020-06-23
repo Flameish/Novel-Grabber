@@ -467,5 +467,19 @@
     "bookCoverSelector": "div.summary_image a img",
     "bookAuthorSelector": ".author-content a",
     "bookSubjectSelector": ".genres-content a"
+  },
+  "Booklat": {
+    "url": "https://www.booklat.com.ph/",
+    "ordinalIndexForBaseNovel": "5",
+    "chapterLinkSelector": "#ddChapter option[value]",
+    "chapterContainer": "#chapter-content",
+    "blacklistedTags": [
+      "null"
+    ],
+    "bookTitleSelector": "#book-title",
+    "bookDescSelector": "#story-info",
+    "bookCoverSelector": "img#cover-image",
+    "bookAuthorSelector": "#author-name",
+    "bookSubjectSelector": "#book-category"
   }
 }
