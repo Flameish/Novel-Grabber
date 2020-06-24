@@ -41,7 +41,8 @@ public class Driver {
                 break;
             case "Firefox":
                 WebDriverManager.firefoxdriver().setup();
-                driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true));
+                //.setHeadless(true)
+                driver = new FirefoxDriver(new FirefoxOptions());
                 break;
             case "Opera":
                 WebDriverManager.operadriver().setup();
@@ -64,6 +65,7 @@ public class Driver {
     public List<Chapter> getChapterList() {
         driver.navigate().to(novel.novelLink);
         String baseUrl;
+        List<Chapter> chapters = new ArrayList<>();
         // These websites require manual interactions to display the chapter list
         switch (novel.host.url) {
             case "https://royalroad.com/":
@@ -77,7 +79,7 @@ public class Driver {
                 // Save table of contents doc for metadata extraction later on
                 novel.tableOfContent = Jsoup.parse(driver.getPageSource(), baseUrl);
                 Elements chapterLinks;
-                List<Chapter> chapters = new ArrayList<>();
+                chapters = new ArrayList<>();
                 while (!novel.tableOfContent.select(".pagination a.next").attr("abs:href").isEmpty()) {
                     chapterLinks = novel.tableOfContent.select(novel.host.chapterLinkSelector);
                     for (Element chapterLink : chapterLinks) {
@@ -138,6 +140,21 @@ public class Driver {
                 novel.tempPage  = Jsoup.parse(driver.getPageSource(), baseUrl);
                 driver.findElement(By.cssSelector(".button-round-purple")).click();
                 break;
+            case "https://www.booklat.com.ph/":
+                GrabberUtils.sleep(2000);
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#lnkRead")));
+                baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
+                novel.tempPage  = Jsoup.parse(driver.getPageSource(), baseUrl);
+                GrabberUtils.sleep(2000);
+                driver.findElement(By.cssSelector("#lnkRead")).click();
+                novel.tableOfContent = Jsoup.parse(driver.getPageSource(), baseUrl);
+                Elements chaptersLinks = novel.tableOfContent.select("#ddChapter option[value]");
+                chapters = new ArrayList<>();
+                for(Element chapterLink: chaptersLinks) {
+                    chapters.add(new Chapter(chapterLink.text(),novel.novelLink.replace("/Info/","/Read/") +"/"+chapterLink.attr("value")));
+                }
+                novel.tableOfContent = novel.tempPage;
+                return chapters;
             case "https://wuxiaworld.site/":
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterLinkSelector)));
                 break;
@@ -147,7 +164,6 @@ public class Driver {
         // Save table of contents doc for metadata extraction later on
         novel.tableOfContent = Jsoup.parse(driver.getPageSource(), baseUrl);
 
-        List<Chapter> chapters = new ArrayList<>();
         for (Element chapterLink : novel.tableOfContent.select(novel.host.chapterLinkSelector)) {
             chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
         }
@@ -159,6 +175,8 @@ public class Driver {
             case "https://ficfun.com/":
                 novel.tableOfContent = novel.tempPage;
                 break;
+            case "https://www.booklat.com.ph/":
+
         }
         return chapters;
     }
@@ -169,6 +187,27 @@ public class Driver {
         WebElement chapterElement = driver.findElement(By.cssSelector("body"));
         String baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
         return Jsoup.parse(chapterElement.getAttribute("innerHTML"), baseUrl);
+    }
+
+    public void login() {
+        switch(novel.host.url) {
+            case "https://www.booklat.com.ph/":
+                driver.navigate().to("https://www.booklat.com.ph/");
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#Email")));
+                driver.findElement(By.cssSelector("#Email")).sendKeys(Accounts.getUsername("Booklat"));
+                driver.findElement(By.cssSelector("#Password")).sendKeys(Accounts.getPassword("Booklat"));
+                driver.findElement(By.xpath("//*[@id=\"btnLogin\"]")).click();
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#login-name")));
+                break;
+            case "https://wuxiaworld.com/":
+                driver.navigate().to("https://www.wuxiaworld.com/account/login");
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#Email")));
+                driver.findElement(By.cssSelector("#Email")).sendKeys(Accounts.getUsername("Wuxiaworld"));
+                driver.findElement(By.cssSelector("#Password")).sendKeys(Accounts.getPassword("Wuxiaworld"));
+                driver.findElement(By.xpath("/html/body/div[1]/div/div/div/div/div/div/div/div/div[1]/div/form[1]/button")).click();
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("li.dropdown:nth-child(5)")));
+                break;
+        }
     }
 
     public void close() {
