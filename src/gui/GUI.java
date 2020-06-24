@@ -11,6 +11,8 @@ import org.jsoup.select.Elements;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -27,8 +29,9 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.5.1";
+    public static String versionNumber = "2.6.0";
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
+    public static DefaultListModel<String> accountWebsiteListModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
     public static String[] chapterToChapterArgs = new String[3];
     public static TrayIcon trayIcon;
@@ -133,6 +136,12 @@ public class GUI extends JFrame {
     public JCheckBox autoNoStyling;
     public JCheckBox manNoStyling;
     private JButton manAddChapterButton;
+    private JList accountWebsiteList;
+    private JTextField accountUsernameField;
+    private JTextField accountPasswordField;
+    private JButton accountAddBtn;
+    private JScrollPane accountWebsiteScrollPane;
+    public JCheckBox useAccountCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -615,26 +624,27 @@ public class GUI extends JFrame {
         }));
 
         checkForUpdatesButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::checkForNewReleases));
-    }
 
-    // GUI functions
-    public static void main(String[] args) {
-        // Fetch latest selectors
-        HostSettings.fetchSelectors();
-        EventQueue.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                GUI window = new GUI();
-                window.setLocationRelativeTo(null);
-                window.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
+        accountWebsiteList.addListSelectionListener(listSelectionEvent -> {
+            accountUsernameField.setText(Accounts.getUsername(accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex())));
+            accountPasswordField.setText(Accounts.getPassword(accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex())));
+            accountAddBtn.setVisible(true);
+            if(!accountUsernameField.getText().isEmpty()) {
+                accountAddBtn.setText("Edit");
+            } else {
+                accountAddBtn.setText("Add");
             }
         });
+        // Add or Edit an account entry
+        accountAddBtn.addActionListener(actionEvent -> Accounts.addAccount(
+                accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex()),
+                accountUsernameField.getText(),
+                accountPasswordField.getText()
+        ));
     }
 
-    private void initialize() {
 
+    private void initialize() {
         add(rootPanel);
         setTitle("Novel-Grabber " + versionNumber);
         ImageIcon favicon = new ImageIcon(getClass().getResource("/files/images/favicon.png"));
@@ -651,7 +661,6 @@ public class GUI extends JFrame {
                 setVisible(false);
             }
         });
-
     }
 
     private static void openWebpage(URI uri) {
@@ -959,6 +968,15 @@ public class GUI extends JFrame {
 
         manWaitTime = new JTextField("0");
         manWaitTime.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Account Tab
+        accountPasswordField = new JPasswordField();
+        for(String accountDomain: HostSettings.loginWebsitesList) {
+            accountWebsiteListModel.addElement(accountDomain);
+        }
+        accountWebsiteList = new JList<>(accountWebsiteListModel);
+        manLinkList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        accountWebsiteScrollPane = new JScrollPane(accountWebsiteList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // Update Tab
         updateTextArea = new JTextArea();
