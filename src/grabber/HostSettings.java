@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,10 +15,12 @@ import java.net.*;
 import java.util.*;
 
 public class HostSettings {
-    private static String[] headerlessBrowserWebsites = {"CreativeNovels", "FicFun", "Dreame", "WuxiaWorld.site","Foxaholic"};
-    private static String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
+    private static final String[] headerlessBrowserWebsites = {"CreativeNovels", "FicFun", "Dreame", "WuxiaWorld.site","Foxaholic"};
+    private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
+    private static final String[] loginWebsites = {"Booklat","Wuxiaworld"};
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
+    public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
     public static JSONObject siteSelectorsJSON;
     public String url;
     public String chapterLinkSelector;
@@ -44,10 +47,10 @@ public class HostSettings {
         bookSubjectSelector = String.valueOf(currentSite.get("bookSubjectSelector"));
     }
 
-    public static void fetchSelectors() {
+    public static void fetchSelectors(String JSON_Link) {
         try {
-            System.out.println("Fetching latest selector JSON from GitHub...");
-            String JSONLink = "https://raw.githubusercontent.com/Flameish/Novel-Grabber/master/src/files/siteSelector.json";
+            System.out.println("Fetching latest selector JSON...");
+            String JSONLink = JSON_Link;
             Document doc = Jsoup.connect(JSONLink).timeout(30 * 1000).get();
             String JSONString = doc.select("body").first().text();
             Object obj = new JSONParser().parse(JSONString);
@@ -56,6 +59,7 @@ public class HostSettings {
             e.printStackTrace();
         }
     }
+
     public static String[] getWebsites() {
         List<String> websitesList = new ArrayList<>();
         for (Object key: siteSelectorsJSON.keySet()){
@@ -246,6 +250,14 @@ public class HostSettings {
                 // Fetch "table of contents" page for metadata
                 novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
                 break;
+            case "https://www.booklat.com.ph/":
+                novel.tempPage = Jsoup.connect(novel.novelLink+"/chapters").cookies(novel.cookies).timeout(30 * 1000).get();
+                novel.tableOfContent = Jsoup.connect(novel.tempPage.select("#lnkRead").attr("abs:href")).cookies(novel.cookies).timeout(30 * 1000).get();
+                Elements chaptersLinks = novel.tableOfContent.select("#ddChapter option[value]");
+                for(Element chapterLink: chaptersLinks) {
+                    chapters.add(new Chapter(chapterLink.text(), novel.novelLink.replace("/Info/", "/Read/") + "/" + chapterLink.attr("value")));
+                }
+                novel.tableOfContent = novel.tempPage;
             default:
                 novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
                 for (Element chapterLink : novel.tableOfContent.select(chapterLinkSelector)) {
@@ -257,5 +269,56 @@ public class HostSettings {
             e.printStackTrace();
         }
         return chapters;
+    }
+
+    public Map<String, String> login() {
+        Connection.Response res;
+        Map<String, String> cookies = null;
+        Document doc;
+        switch(url) {
+            case "https://www.booklat.com.ph/":
+                try {
+                    res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
+                            .method(Connection.Method.GET)
+                            .execute();
+                    doc = res.parse();
+                    String token = doc.select("input[name=__RequestVerificationToken]").attr("value");
+                    res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
+                            .data("Email", Accounts.getUsername("Booklat"))
+                            .data("Password", Accounts.getPassword("Booklat"))
+                            .data("__RequestVerificationToken", token)
+                            .data("RememberMe", "false")
+                            .cookies(res.cookies())
+                            .method(Connection.Method.POST)
+                            .execute();
+
+                    cookies = res.cookies();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "https://wuxiaworld.com/":
+                try {
+                    res = Jsoup.connect("https://www.wuxiaworld.com/account/login")
+                            .method(Connection.Method.GET)
+                            .execute();
+                    doc = res.parse();
+                    String token = doc.select("input[name=__RequestVerificationToken]").attr("value");
+                    res = Jsoup.connect("https://www.wuxiaworld.com/account/login")
+                            .data("Email", Accounts.getUsername("Wuxiaworld"))
+                            .data("Password", Accounts.getPassword("Wuxiaworld"))
+                            .data("__RequestVerificationToken", token)
+                            .data("RememberMe", "false")
+                            .cookies(res.cookies())
+                            .method(Connection.Method.POST)
+                            .execute();
+
+                    cookies = res.cookies();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
+        return cookies;
     }
 }
