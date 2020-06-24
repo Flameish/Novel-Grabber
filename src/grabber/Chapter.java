@@ -40,7 +40,8 @@ public class Chapter implements Serializable {
                         doc = Jsoup.parse(xhrRequest.tapReadGetChapterContent("bookId=" + xhrBookId + "&chapterId=" + xhrChapterId), "https://tapread.com/");
                         break;
                     default:
-                        doc = Jsoup.connect(chapterURL).timeout(30 * 1000).get();
+                        if(novel.cookies != null) doc = Jsoup.connect(chapterURL).cookies(novel.cookies).timeout(30 * 1000).get();
+                        else doc = Jsoup.connect(chapterURL).timeout(30 * 1000).get();
                         break;
                 }
             }
