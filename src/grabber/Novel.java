@@ -25,6 +25,7 @@ public class Novel {
     public Options options;
     public HostSettings host;
     public Driver headless;
+    public Map<String, String> cookies;
 
     Document tableOfContent;
     Document tempPage;
@@ -65,10 +66,12 @@ public class Novel {
         // Headless
         if(options.headless) {
             headless = new Driver(this);
+            if(gui.useAccountCheckBox.isSelected()) headless.login();
             chapters = headless.getChapterList();
             // Static
         } else {
             // Custom chapter selection
+            if(gui.useAccountCheckBox.isSelected()) cookies = host.login();
             chapters = host.getChapterList(this);
         }
     }
@@ -81,7 +84,11 @@ public class Novel {
         }
         if(options.invertOrder) Collections.reverse(chapters); // Will get un-reversed for potential re-grab in report();
         // -1 since chapter numbers start at 1
-        if(options.headless)    headless = new Driver(this);
+        if(options.headless) {
+            if(headless == null) {
+                headless = new Driver(this);
+            }
+        }
         for(int i = options.firstChapter-1; i < options.lastChapter; i++) {
             if(killTask) {
                 // Remove already downloaded images and chapters
