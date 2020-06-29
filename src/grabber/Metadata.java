@@ -2,6 +2,7 @@ package grabber;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import system.init;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -21,25 +22,35 @@ public class Metadata {
     public Metadata(Novel novel) {
         this.novel = novel;
         // Reset info on GUI
-        novel.gui.autoBookTitle.setText("");
-        novel.gui.autoAuthor.setText("");
-        novel.gui.autoChapterAmount.setText("");
-        novel.gui.setBufferedCover(null);
-        novel.gui.autoBookSubjects.setText("");
+        if(init.window != null) {
+            init.window.autoBookTitle.setText("");
+            init.window.autoAuthor.setText("");
+            init.window.autoChapterAmount.setText("");
+            init.window.setBufferedCover(null);
+            init.window.autoBookSubjects.setText("");
+        }
+
     }
 
     void getTitle() {
         if (!novel.host.bookTitleSelector.isEmpty()) {
             if (novel.tableOfContent.select(novel.host.bookTitleSelector) != null && !novel.tableOfContent.select(novel.host.bookTitleSelector).isEmpty()) {
                 bookTitle = novel.tableOfContent.select(novel.host.bookTitleSelector).first().text().replaceAll("[\\\\/:*?\"<>|]", "");
-                novel.gui.autoBookTitle.setText(bookTitle);
+                if(init.window != null) {
+                    init.window.autoBookTitle.setText(bookTitle);
+                }
             } else {
                 bookTitle = "Unknown";
-                novel.gui.autoBookTitle.setText("Unknown");
+                if(init.window != null) {
+                    init.window.autoBookTitle.setText("Unknown");
+
+                }
             }
         } else {
             bookTitle = "Unknown";
-            novel.gui.autoBookTitle.setText("Unknown");
+            if(init.window != null) {
+                init.window.autoBookTitle.setText("Unknown");
+            }
         }
     }
 
@@ -60,14 +71,20 @@ public class Metadata {
         if (!novel.host.bookAuthorSelector.isEmpty()) {
             if (novel.tableOfContent.select(novel.host.bookAuthorSelector) != null && !novel.tableOfContent.select(novel.host.bookAuthorSelector).isEmpty()) {
                 bookAuthor = novel.tableOfContent.select(novel.host.bookAuthorSelector).first().text();
-                novel.gui.autoAuthor.setText(bookAuthor);
+                if(init.window != null) {
+                    init.window.autoAuthor.setText(bookAuthor);
+                }
             } else {
                 bookAuthor = "Unknown";
-                novel.gui.autoAuthor.setText("Unknown");
+                if(init.window != null) {
+                    init.window.autoAuthor.setText("Unknown");
+                }
             }
         } else {
             bookAuthor = "Unknown";
-            novel.gui.autoAuthor.setText("Unknown");
+            if(init.window != null) {
+                init.window.autoAuthor.setText("Unknown");
+            }
         }
     }
 
@@ -81,34 +98,43 @@ public class Metadata {
 
                 // Display book subjects on GUI
                 int maxNumberOfSubjects = 0;
-                novel.gui.autoBookSubjects.setText("<html>");
-                for (String eachTag : bookSubjects) {
-                    novel.gui.autoBookSubjects.setText(novel.gui.autoBookSubjects.getText() + eachTag + ", ");
-                    maxNumberOfSubjects++;
-                    if (maxNumberOfSubjects == 4) {
-                        maxNumberOfSubjects = 0;
-                        novel.gui.autoBookSubjects.setText(novel.gui.autoBookSubjects.getText() + "<br>");
+                if(init.window != null) {
+                    init.window.autoBookSubjects.setText("<html>");
+                    for (String eachTag : bookSubjects) {
+                        init.window.autoBookSubjects.setText(init.window.autoBookSubjects.getText() + eachTag + ", ");
+                        maxNumberOfSubjects++;
+                        if (maxNumberOfSubjects == 4) {
+                            maxNumberOfSubjects = 0;
+                            init.window.autoBookSubjects.setText(init.window.autoBookSubjects.getText() + "<br>");
+                        }
                     }
-                }
-                if (!novel.gui.autoBookSubjects.getText().isEmpty()) {
-                    novel.gui.autoBookSubjects.setText(
-                            novel.gui.autoBookSubjects.getText().substring(0,
-                                    novel.gui.autoBookSubjects.getText().lastIndexOf(",")));
+                    if (!init.window.autoBookSubjects.getText().isEmpty()) {
+                        init.window.autoBookSubjects.setText(
+                                init.window.autoBookSubjects.getText().substring(0,
+                                        init.window.autoBookSubjects.getText().lastIndexOf(",")));
+                    }
                 }
             } else {
                 bookSubjects.add("Unknown");
-                novel.gui.autoBookSubjects.setText("Unknown");
+                if(init.window != null) {
+                    init.window.autoBookSubjects.setText("Unknown");
+
+                }
             }
         } else {
             bookSubjects.add("Unknown");
-            novel.gui.autoBookSubjects.setText("Unknown");
+            if(init.window != null) {
+                init.window.autoBookSubjects.setText("Unknown");
+            }
         }
     }
 
     void getChapterNumber() {
         if (!novel.chapters.isEmpty()) {
-            novel.gui.autoChapterAmount.setText(String.valueOf(novel.chapters.size()));
-            novel.gui.autoGetNumberButton.setEnabled(true);
+            if(init.window != null) {
+                init.window.autoChapterAmount.setText(String.valueOf(novel.chapters.size()));
+                init.window.autoGetNumberButton.setEnabled(true);
+            }
         }
     }
 
@@ -126,7 +152,9 @@ public class Metadata {
                     }
                     bufferedCover = GrabberUtils.getBufferedCover(coverLink, novel);
                     if(!novel.imageNames.isEmpty()) {
-                        novel.gui.setBufferedCover(bufferedCover);
+                        if(init.window != null) {
+                            init.window.setBufferedCover(bufferedCover);
+                        }
                         bookCover = novel.imageNames.get(0);
                     }
             /* downloadImage() adds every image to <Lists> and this interferes with

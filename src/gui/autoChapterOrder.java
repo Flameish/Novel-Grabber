@@ -2,6 +2,7 @@ package gui;
 
 import grabber.Chapter;
 import grabber.Novel;
+import system.init;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -73,7 +74,7 @@ public class autoChapterOrder extends JDialog {
         }
         novel.chapters = newChapters;
         // Update chapter counter label
-        novel.gui.autoChapterAmount.setText(String.valueOf(newChapters.size()));
+        init.window.autoChapterAmount.setText(String.valueOf(newChapters.size()));
         dialog.dispose();
     }
 
@@ -95,7 +96,6 @@ public class autoChapterOrder extends JDialog {
         chapterList.setDropMode(DropMode.INSERT);
         chapterList.setDragEnabled(true);
         chapterList.setTransferHandler(new ListItemTransferHandler());
-
         chapterListScrollPane = new JScrollPane(chapterList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     }
 }

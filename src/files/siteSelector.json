@@ -55,20 +55,6 @@
     "bookAuthorSelector": "a.no-wrap",
     "bookSubjectSelector": "null"
   },
-  "GravityTales": {
-    "url": "http://gravitytales.com/",
-    "ordinalIndexForBaseNovel": "5",
-    "chapterLinkSelector": ".table td a",
-    "chapterContainer": "#chapterContent",
-    "blacklistedTags": [
-      "null"
-    ],
-    "bookTitleSelector": ".main-content h3",
-    "bookDescSelector": "null",
-    "bookCoverSelector": "null",
-    "bookAuthorSelector": ".main-content h4",
-    "bookSubjectSelector": "null"
-  },
   "VolareNovels": {
     "url": "https://volarenovels.com/",
     "ordinalIndexForBaseNovel": "5",
@@ -469,7 +455,7 @@
     "bookSubjectSelector": ".genres-content a"
   },
   "Booklat": {
-    "url": "https://www.booklat.com.ph/",
+    "url": "https://booklat.com.ph/",
     "ordinalIndexForBaseNovel": "5",
     "chapterLinkSelector": "#ddChapter option[value]",
     "chapterContainer": "#chapter-content",
@@ -481,5 +467,19 @@
     "bookCoverSelector": "img#cover-image",
     "bookAuthorSelector": "#author-name",
     "bookSubjectSelector": "#book-category"
+  },
+  "FoxTeller": {
+    "url": "https://foxteller.com/",
+    "ordinalIndexForBaseNovel": "5",
+    "chapterLinkSelector": "#accordion a",
+    "chapterContainer": "#chapter-content",
+    "blacklistedTags": [
+      "span",".in-article"
+    ],
+    "bookTitleSelector": ".novel-title",
+    "bookDescSelector": ".novel-description",
+    "bookCoverSelector": ".novel-featureimg img",
+    "bookAuthorSelector": "",
+    "bookSubjectSelector": ".novel-tags"
   }
 }

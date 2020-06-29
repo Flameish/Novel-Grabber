@@ -1,8 +1,10 @@
 package grabber;
 
+import gui.GUI;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import system.init;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +49,9 @@ public class Chapter implements Serializable {
             }
         } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
-            novel.gui.appendText(novel.options.window,"[ERROR]"+e.getMessage());
+            if(init.window != null) {
+                init.window.appendText(novel.options.window,"[ERROR]"+e.getMessage());
+            }
             status = 2;
             return;
         }
@@ -55,7 +59,9 @@ public class Chapter implements Serializable {
         if (novel.host.url.equals("https://tapread.com/")) chapterContent = doc;
 
         if (chapterContent == null) {
-            novel.gui.appendText(novel.options.window,"[ERROR]Chapter container (" + novel.host.chapterContainer + ") not found.");
+            if(init.window != null) {
+                init.window.appendText(novel.options.window,"[ERROR]Chapter container (" + novel.host.chapterContainer + ") not found.");
+            }
             return;
         }
         // Getting the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter.
@@ -79,7 +85,9 @@ public class Chapter implements Serializable {
         }
 
         novel.metadata.wordCount = novel.metadata.wordCount + GrabberUtils.getWordCount(chapterContent.toString());
-        novel.gui.pagesCountLbl.setText(String.valueOf(novel.metadata.wordCount / 300));
+        if(init.window != null) {
+            init.window.pagesCountLbl.setText(String.valueOf(novel.metadata.wordCount / 300));
+        }
 
         // Create chapters folder if it doesn't exist.
         File dir = new File(novel.options.saveLocation + File.separator + "chapters");
@@ -109,10 +117,15 @@ public class Chapter implements Serializable {
             out.println(novel.htmlFoot);
         } catch (IOException e) {
             e.printStackTrace();
-            novel.gui.appendText(novel.options.window, "[ERROR]"+e.getMessage());
+            if(init.window != null) {
+                init.window.appendText(novel.options.window, "[ERROR]"+e.getMessage());
+            }
         } finally {
             status = 1;
-            novel.gui.appendText(novel.options.window, "[INFO]"+name+" saved.");
+            if(init.window != null) {
+                init.window.appendText(novel.options.window, "[INFO]"+name+" saved.");
+            }
+            System.out.println("[INFO]"+name+" saved.");
         }
     }
 

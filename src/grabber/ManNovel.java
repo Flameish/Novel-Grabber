@@ -14,12 +14,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class ManNovel extends Novel {
+    private GUI gui;
 
     public ManNovel(GUI myGUI) {
         gui = myGUI;
         host = new HostSettings("no_domain");
         metadata = new Metadata(this);
-        options = new Options();
+        options = new NovelOptions();
         chapters = new ArrayList();
     }
 

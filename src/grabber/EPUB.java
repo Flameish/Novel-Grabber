@@ -5,6 +5,7 @@ import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Metadata;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubWriter;
+import system.init;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -21,7 +22,9 @@ public class EPUB {
 
     private void writeEpub(Novel novel) {
         try {
-            novel.gui.appendText(novel.options.window, "[INFO]Writing epub...");
+            if(init.window != null) {
+                init.window.appendText(novel.options.window, "[INFO]Writing epub...");
+            }
             Book book = new Book();
             Metadata metadata = book.getMetadata();
             // Title
@@ -114,7 +117,8 @@ public class EPUB {
             // Create EpubWriter
             EpubWriter epubWriter = new EpubWriter();
             // Write the Book as Epub
-            epubWriter.write(book, new FileOutputStream(novel.options.saveLocation + File.separator + novel.metadata.bookTitle + ".epub"));
+            epubWriter.write(book, new FileOutputStream(novel.options.saveLocation +
+                    File.separator + novel.metadata.bookAuthor + " - " + novel.metadata.bookTitle + ".epub"));
             //novel.gui.appendText(novel.window, "[INFO]Epub successfully created.");
 
             // Delete image and chapter files

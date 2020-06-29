@@ -1,6 +1,6 @@
 package grabber;
 // Dataclass for better readability
-public class Options {
+public class NovelOptions {
     public boolean removeStyling = false;
     public boolean getImages = false;
     public boolean displayChapterTitle = false;
@@ -13,7 +13,10 @@ public class Options {
     public String saveLocation;
     public String window;
     public String browser;
+    public String hostname;
+    public String novelLink;
+    public boolean useAccount;
 
-    public Options() {
+    public NovelOptions() {
     }
 }

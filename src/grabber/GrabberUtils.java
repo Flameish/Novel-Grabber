@@ -2,6 +2,7 @@ package grabber;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import system.init;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -106,7 +107,9 @@ public class GrabberUtils {
                 //General catch
             } catch (Throwable e) {
                 e.printStackTrace();
-                novel.gui.appendText("auto", "[ERROR]Failed to get" + name);
+                if(init.window != null) {
+                    init.window.appendText("auto", "[ERROR]Failed to get" + name);
+                }
             }
         }
         return null;
@@ -137,7 +140,7 @@ public class GrabberUtils {
         });
     }
 
-    static int ordinalIndexOf(String str, String substr, int n) {
+    public static int ordinalIndexOf(String str, String substr, int n) {
         int pos = str.indexOf(substr);
         while (--n > 0 && pos != -1)
             pos = str.indexOf(substr, pos + 1);

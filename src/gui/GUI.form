@@ -800,6 +800,7 @@
                                 <constraints/>
                                 <properties>
                                   <layoutOrientation value="1"/>
+                                  <selectionMode value="2"/>
                                   <visibleRowCount value="0"/>
                                 </properties>
                               </component>

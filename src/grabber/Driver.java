@@ -18,6 +18,7 @@ import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import system.init;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,9 @@ public class Driver {
     }
 
     private void driverSetup() {
-        novel.gui.appendText(novel.options.window, "[INFO]Starting headerless browser...");
+        if(init.window != null) {
+            init.window.appendText(novel.options.window, "[INFO]Starting headerless browser...");
+        }
         switch (novel.options.browser) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
@@ -41,8 +44,7 @@ public class Driver {
                 break;
             case "Firefox":
                 WebDriverManager.firefoxdriver().setup();
-                //.setHeadless(true)
-                driver = new FirefoxDriver(new FirefoxOptions());
+                driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true));
                 break;
             case "Opera":
                 WebDriverManager.operadriver().setup();
@@ -140,7 +142,7 @@ public class Driver {
                 novel.tempPage  = Jsoup.parse(driver.getPageSource(), baseUrl);
                 driver.findElement(By.cssSelector(".button-round-purple")).click();
                 break;
-            case "https://www.booklat.com.ph/":
+            case "https://booklat.com.ph/":
                 GrabberUtils.sleep(2000);
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#lnkRead")));
                 baseUrl = driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(driver.getCurrentUrl(), "/", 3) + 1);
@@ -175,7 +177,7 @@ public class Driver {
             case "https://ficfun.com/":
                 novel.tableOfContent = novel.tempPage;
                 break;
-            case "https://www.booklat.com.ph/":
+            case "https://booklat.com.ph/":
 
         }
         return chapters;
@@ -191,8 +193,8 @@ public class Driver {
 
     public void login() {
         switch(novel.host.url) {
-            case "https://www.booklat.com.ph/":
-                driver.navigate().to("https://www.booklat.com.ph/");
+            case "https://booklat.com.ph/":
+                driver.navigate().to("https://booklat.com.ph/");
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#Email")));
                 driver.findElement(By.cssSelector("#Email")).sendKeys(Accounts.getUsername("Booklat"));
                 driver.findElement(By.cssSelector("#Password")).sendKeys(Accounts.getPassword("Booklat"));

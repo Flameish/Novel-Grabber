@@ -1,15 +1,10 @@
 package grabber;
 
-import gui.GUI;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import system.init;
 
 import javax.imageio.ImageIO;
 import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 public class Novel {
-    public GUI gui;
+    //public GUI gui;
     public List<Chapter> chapters;
     public Metadata metadata;
-    public Options options;
+    public NovelOptions options;
     public HostSettings host;
     public Driver headless;
     public Map<String, String> cookies;
@@ -50,34 +45,39 @@ public class Novel {
             "<body>" + NL;
     static final String htmlFoot = "</body>" + NL + "</html>";
 
-    public Novel() {}
-    public Novel(GUI gui) {
-        this.gui = gui;
-        String hostname = gui.autoHostSelection.getSelectedItem().toString();
-        novelLink  = gui.chapterListURL.getText();
-        host = new HostSettings(hostname);
-        metadata = new Metadata(this);
-        options = new Options();
-        chapters = new ArrayList();
+    public Novel() {
     }
 
+    public Novel(NovelOptions novelOptions) {
+        novelLink  = novelOptions.novelLink;
+        host = new HostSettings(novelOptions.hostname);
+        metadata = new Metadata(this);
+        options = novelOptions;
+        chapters = new ArrayList();
+    }
     public void getChapterList() {
-        gui.appendText("auto", "[INFO]Fetching novel info...");
+        System.out.println("[INFO]Fetching chapterlist...");
+        if(init.window != null) {
+            init.window.appendText(options.window, "[INFO]Fetching novel info...");
+        }
         // Headless
         if(options.headless) {
             headless = new Driver(this);
-            if(gui.useAccountCheckBox.isSelected()) headless.login();
+            if(options.useAccount) headless.login();
             chapters = headless.getChapterList();
             // Static
         } else {
             // Custom chapter selection
-            if(gui.useAccountCheckBox.isSelected()) cookies = host.login();
+            if(options.useAccount) cookies = host.login();
             chapters = host.getChapterList(this);
         }
     }
 
     public void downloadChapters() throws Exception {
-        gui.setMaxProgress(options.window, options.lastChapter-options.firstChapter+1);
+        System.out.println("[INFO]Starting download...");
+        if(init.window != null) {
+            init.window.setMaxProgress(options.window, options.lastChapter-options.firstChapter+1);
+        }
         if(reGrab) {
             metadata.wordCount = 0;
             for(Chapter chapter: chapters) chapter.status = 0;
@@ -98,12 +98,16 @@ public class Novel {
                     if (Files.exists(imagesFolder)) GrabberUtils.deleteFolderAndItsContent(imagesFolder);
                     if (Files.exists(chaptersFolder)) GrabberUtils.deleteFolderAndItsContent(chaptersFolder);
                 } catch (IOException e) {
-                    gui.appendText(options.window, e.getMessage());
+                    if(init.window != null) {
+                        init.window.appendText(options.window, e.getMessage());
+                    }
                 }
-                throw new Exception("Grabbing stopped.");
+                throw new Exception("[INFO]Grabbing stopped.");
             }
             chapters.get(i).saveChapter(this);
-            gui.updateProgress(options.window);
+            if(init.window != null) {
+                init.window.updateProgress(options.window);
+            }
             GrabberUtils.sleep(options.waitTime);
         }
         reGrab = true;
@@ -129,7 +133,9 @@ public class Novel {
                 if (!outputfile.exists()) outputfile.mkdirs();
                 ImageIO.write(metadata.bufferedCover, metadata.bufferedCoverName.substring(metadata.bufferedCoverName.lastIndexOf(".") + 1), outputfile);
             } catch (IOException e) {
-                gui.appendText(options.window, "[ERROR]Could not write cover image to file.");
+                if(init.window != null) {
+                    init.window.appendText(options.window, "[ERROR]Could not write cover image to file.");
+                }
             }
         }
         String fileName = "cover_Page";
@@ -142,7 +148,10 @@ public class Novel {
             out.print("</div>" + NL + htmlFoot);
             extraPages.add(fileName);
         } catch (IOException e) {
-            gui.appendText(options.window, e.getMessage());
+            if(init.window != null) {
+                init.window.appendText(options.window,e.getMessage());
+
+            }
             e.printStackTrace();
         }
     }
@@ -159,7 +168,10 @@ public class Novel {
             out.print("</p>" + NL + htmlFoot);
             extraPages.add(fileName);
         } catch (IOException e) {
-            gui.appendText(options.window, e.getMessage());
+            if(init.window != null) {
+                init.window.appendText(options.window,e.getMessage());
+
+            }
             e.printStackTrace();
         }
     }
@@ -173,7 +185,9 @@ public class Novel {
             out.print("</div>" + NL + htmlFoot);
             extraPages.add(fileName);
         } catch (IOException e) {
-            gui.appendText(options.window, e.getMessage());
+            if(init.window != null) {
+                init.window.appendText(options.window,e.getMessage());
+            }
             e.printStackTrace();
         }
     }
@@ -187,12 +201,16 @@ public class Novel {
      and closes the headless driver if used.
      */
     public void report() {
-        gui.appendText(options.window, "[INFO]Finished.");
+        if(init.window != null) {
+            init.window.appendText(options.window,"[INFO]Finished.");
+        }
         if(options.invertOrder) Collections.reverse(chapters);
         // Print failed chapters
         for(Chapter chapter: chapters) {
             if(chapter.status == 2)
-                gui.appendText(options.window,"[WARN]Failed to grab: " +chapter.name);
+                if(init.window != null) {
+                    init.window.appendText(options.window,"[WARN]Failed to grab: " +chapter.name);
+                }
         }
         if(options.headless) headless.close();
     }

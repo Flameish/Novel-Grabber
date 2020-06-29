@@ -1,6 +1,7 @@
 package gui;
 
 import grabber.Novel;
+import system.init;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -67,7 +68,7 @@ public class autoEditMetadata extends JDialog {
                     novel.metadata.bufferedCoverName = chooser.getSelectedFile().getName();
                     novel.metadata.bookCover = chooser.getSelectedFile().getName();
                 } catch (IOException e) {
-                    novel.gui.appendText("auto", e.getMessage());
+                    init.window.appendText("auto", e.getMessage());
                 }
                 manMetadataImageButton.setIcon(new ImageIcon(new ImageIcon(novel.metadata.bufferedCover).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
             }
@@ -94,34 +95,34 @@ public class autoEditMetadata extends JDialog {
         // Adjust the metadata on the GUI
         // Book Title
         novel.metadata.bookTitle = manSetMetadataTitleField.getText();
-        novel.gui.autoBookTitle.setText(novel.metadata.bookTitle);
+        init.window.autoBookTitle.setText(novel.metadata.bookTitle);
         // Book Description
         novel.metadata.bookDesc.set(0, autoEditMetadataDescArea.getText());
         // Book Author
         novel.metadata.bookAuthor = manSetMetadataAuthorField.getText();
-        novel.gui.autoAuthor.setText(novel.metadata.bookAuthor);
+        init.window.autoAuthor.setText(novel.metadata.bookAuthor);
         novel.metadata.bookSubjects = Arrays.asList(manSetMetadataTags.getText().split(","));
         // No description
         novel.options.noDescription = ignoreDescriptionCheckBox.isSelected();
         // Book Tags
         manSetMetadataTags.setText("");
         int maxNumberOfSubjects = 0;
-        novel.gui.autoBookSubjects.setText("<html>");
+        init.window.autoBookSubjects.setText("<html>");
         for (String eachTag : novel.metadata.bookSubjects) {
-            novel.gui.autoBookSubjects.setText(novel.gui.autoBookSubjects.getText() + eachTag + ", ");
+            init.window.autoBookSubjects.setText(init.window.autoBookSubjects.getText() + eachTag + ", ");
             maxNumberOfSubjects++;
             if (maxNumberOfSubjects == 4) {
                 maxNumberOfSubjects = 0;
-                novel.gui.autoBookSubjects.setText(novel.gui.autoBookSubjects.getText() + "<br>");
+                init.window.autoBookSubjects.setText(init.window.autoBookSubjects.getText() + "<br>");
             }
         }
-        if (!novel.gui.autoBookSubjects.getText().isEmpty()) {
-            novel.gui.autoBookSubjects.setText(
-                    novel.gui.autoBookSubjects.getText().substring(0,
-                            novel.gui.autoBookSubjects.getText().lastIndexOf(",")));
+        if (!init.window.autoBookSubjects.getText().isEmpty()) {
+            init.window.autoBookSubjects.setText(
+                    init.window.autoBookSubjects.getText().substring(0,
+                            init.window.autoBookSubjects.getText().lastIndexOf(",")));
         }
         // Book Cover
-        if (novel.metadata.bufferedCover != null) novel.gui.setBufferedCover(novel.metadata.bufferedCover);
+        if (novel.metadata.bufferedCover != null) init.window.setBufferedCover(novel.metadata.bufferedCover);
         dispose();
     }
 

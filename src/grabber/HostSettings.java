@@ -9,19 +9,19 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import system.init;
 
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
 public class HostSettings {
-    private static final String[] headerlessBrowserWebsites = {"CreativeNovels", "FicFun", "Dreame", "WuxiaWorld.site","Foxaholic"};
+    private static final String[] headerlessBrowserWebsites = {"CreativeNovels", "FicFun", "Dreame", "WuxiaWorld.site","Foxaholic","FoxTeller"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     private static final String[] loginWebsites = {"Booklat","Wuxiaworld"};
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
     public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
-    public static JSONObject siteSelectorsJSON;
     public String url;
     public String chapterLinkSelector;
     public String chapterContainer;
@@ -33,7 +33,7 @@ public class HostSettings {
     public String bookCoverSelector;
 
     public HostSettings(String domain) {
-        JSONObject currentSite = (JSONObject) siteSelectorsJSON.get(domain);
+        JSONObject currentSite = (JSONObject) Config.siteSelectorsJSON.get(domain);
         url = String.valueOf(currentSite.get("url"));
         chapterLinkSelector = String.valueOf(currentSite.get("chapterLinkSelector"));
         chapterContainer = String.valueOf(currentSite.get("chapterContainer"));
@@ -47,30 +47,6 @@ public class HostSettings {
         bookSubjectSelector = String.valueOf(currentSite.get("bookSubjectSelector"));
     }
 
-    public static void fetchSelectors(String JSON_Link) {
-        try {
-            System.out.println("Fetching latest selector JSON...");
-            String JSONLink = JSON_Link;
-            Document doc = Jsoup.connect(JSONLink).timeout(30 * 1000).get();
-            String JSONString = doc.select("body").first().text();
-            Object obj = new JSONParser().parse(JSONString);
-            siteSelectorsJSON = (JSONObject) obj;
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String[] getWebsites() {
-        List<String> websitesList = new ArrayList<>();
-        for (Object key: siteSelectorsJSON.keySet()){
-            websitesList.add(key.toString());
-        }
-        websitesList.remove("no_domain");
-        Collections.sort(websitesList);
-        String[] websites = new String[websitesList.size()];
-        websitesList.toArray(websites);
-        return websites;
-    }
 
     public List<Chapter> getChapterList(Novel novel) {
         List<Chapter> chapters = new ArrayList<>();
@@ -250,7 +226,7 @@ public class HostSettings {
                 // Fetch "table of contents" page for metadata
                 novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
                 break;
-            case "https://www.booklat.com.ph/":
+            case "https://booklat.com.ph/":
                 novel.tempPage = Jsoup.connect(novel.novelLink+"/chapters").cookies(novel.cookies).timeout(30 * 1000).get();
                 novel.tableOfContent = Jsoup.connect(novel.tempPage.select("#lnkRead").attr("abs:href")).cookies(novel.cookies).timeout(30 * 1000).get();
                 Elements chaptersLinks = novel.tableOfContent.select("#ddChapter option[value]");
@@ -275,15 +251,17 @@ public class HostSettings {
         Connection.Response res;
         Map<String, String> cookies = null;
         Document doc;
+        System.out.println("[INFO]Login...");
+        if(init.window != null) init.window.appendText("auto","[INFO]Login...");
         switch(url) {
-            case "https://www.booklat.com.ph/":
+            case "https://booklat.com.ph/":
                 try {
-                    res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
+                    res = Jsoup.connect("https://booklat.com.ph/Account/Login")
                             .method(Connection.Method.GET)
                             .execute();
                     doc = res.parse();
                     String token = doc.select("input[name=__RequestVerificationToken]").attr("value");
-                    res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
+                    res = Jsoup.connect("https://booklat.com.ph/Account/Login")
                             .data("Email", Accounts.getUsername("Booklat"))
                             .data("Password", Accounts.getPassword("Booklat"))
                             .data("__RequestVerificationToken", token)

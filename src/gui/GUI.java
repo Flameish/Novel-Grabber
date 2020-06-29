@@ -24,12 +24,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.6.0";
+    public static String versionNumber = "2.7.0";
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static DefaultListModel<String> accountWebsiteListModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
@@ -159,11 +160,17 @@ public class GUI extends JFrame {
             if (!chapterListURL.getText().isEmpty()) {
                 autoBusyLabel.setVisible(true);
 
-                autoNovel = new Novel(this);
+                NovelOptions options = new NovelOptions();
+                options.hostname = autoHostSelection.getSelectedItem().toString();
+                options.headless = useHeaderlessBrowserCheckBox.isSelected();
+                options.window = "auto";
+                options.browser = autoBrowserCombobox.getSelectedItem().toString();
+                options.hostname = autoHostSelection.getSelectedItem().toString();
+                options.novelLink = chapterListURL.getText();
+                options.useAccount = useAccountCheckBox.isSelected();
+                autoNovel = new Novel(options);
                 // Needed
-                autoNovel.options.headless = useHeaderlessBrowserCheckBox.isSelected();
-                autoNovel.options.window = "auto";
-                autoNovel.options.browser = autoBrowserCombobox.getSelectedItem().toString();
+
                 autoNovel.getChapterList();
                 autoNovel.getMetadata();
                 if (!autoNovel.chapters.isEmpty()) {
@@ -237,6 +244,7 @@ public class GUI extends JFrame {
                 // Was set on "checking" but needs to be set again for potential changes
                 autoNovel.options.headless = useHeaderlessBrowserCheckBox.isSelected();
                 autoNovel.options.browser = autoBrowserCombobox.getSelectedItem().toString();
+                autoNovel.options.useAccount = useAccountCheckBox.isSelected();
                 // Set chapter range
                 if(chapterAllCheckBox.isSelected()) {
                     autoNovel.options.firstChapter = 1;
@@ -404,6 +412,9 @@ public class GUI extends JFrame {
                 try {
                     manNovel = new ManNovel(this);
                     manNovel.novelLink = manNovelURL.getText();
+                    manNovel.options.headless = manUseHeaderlessBrowser.isSelected();
+                    manNovel.options.window = "manual";
+                    manNovel.options.browser = manBrowserCombobox.getSelectedItem().toString();
                     manNovel.retrieveLinks();
                 } catch (NullPointerException | IllegalArgumentException | IOException err) {
                     err.printStackTrace();
@@ -811,6 +822,18 @@ public class GUI extends JFrame {
         }
     }
 
+    public static String[] getWebsites() {
+        List<String> websitesList = new ArrayList<>();
+        for (Object key: Config.siteSelectorsJSON.keySet()){
+            websitesList.add(key.toString());
+        }
+        websitesList.remove("no_domain");
+        Collections.sort(websitesList);
+        String[] websites = new String[websitesList.size()];
+        websitesList.toArray(websites);
+        return websites;
+    }
+
     private void checkForNewReleases() {
         updaterStatus.setVisible(true);
         updaterStatus.setText("Checking for new releases...");
@@ -850,7 +873,7 @@ public class GUI extends JFrame {
 
     private void createUIComponents() {
         // Automatic Tab
-        autoHostSelection = new JComboBox(HostSettings.getWebsites());
+        autoHostSelection = new JComboBox(getWebsites());
 
         autoBrowserCombobox = new JComboBox(browserList);
 
