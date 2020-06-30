@@ -13,6 +13,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 | <b>[LiberSpark](https://liberspark.com/)</b> |<b>[Wordrain](https://wordrain69.com/)</b> | <b>[Comrademao](https://comrademao.com/)</b>|
 | <b>[Light Novels Translations](https://lightnovelstranslations.com/)</b> | <b>[Ebisu Translations](https://ebisutranslations.com/)</b> | <b>[Webnovel](https://webnovel.com/)</b>
 | <b>[Wattpad](https://wattpad.com/)</b> | <b>[WuxiaWorld.online](https://wuxiaworld.online/)</b> | <b>[Booklat](https://booklat.com.ph/)</b>
+| <b>[FoxTeller](https://foxteller.com/)</b> |  | 
 ## How to use
 <strong>Automatic:</strong>
 
