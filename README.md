@@ -71,6 +71,25 @@ Using Chapter-To-Chapter navigation:
 2. Input the selector for the "Next-Chapter" button. You want to select the `<a>` tag of it. Works exactly like the chapter-container selector of step 3.
 3. Same as the other step 3.
 
+<strong>CLI:</strong>
+
+Usage:
+[] = optional paramaters 
+{} = arguments for paramater
+
+| Parameter | Arguments | Description |
+| :--- | :---: | :---|
+-gui / `none` | | Starts the Graphical User Interface.
+-link | {novel_URL} | URL to the novel's table of contents page. Starts download.
+[-wait] | {miliseconds} | Time between each chapter grab.
+[-headless] | {chrome/firefox/opera/edge/IE} | Visit the website in your browser. Executes javascript etc.
+[-chapters] | {all}, {5 27}, {12 last}	| Specify which chapters to download.
+[-path] | {directory_path} | Output directory for the EPUB.
+[-account] | {username password} | Logs you in on supported sites.
+[-displayTitle]| | Write the chapter title at the top of each chapter text.
+[-invertOrder] | | Invert the chapter order.
+-help | | Shows the help page.
+
 ## Disclaimer & Warning
 Most sites prohibit the scrapping for their content. Use at your own risk. 
 Please use with appropriate wait times. Downloaded chapters are for private use only.
