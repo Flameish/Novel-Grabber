@@ -4,7 +4,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 
 ## Natively supported sites
 
-| [Wuxiaworld](https://wuxiaworld.com/) | [Royalroad](https://royalroad.com/) | [Gravitytales](https://gravitytales.com/)|
+| [Wuxiaworld](https://wuxiaworld.com/) | [Royalroad](https://royalroad.com/) | [FoxTeller](https://foxteller.com/)|
 | :--- | :--- | :--- |
 | <b>[Volarenovels](https://volarenovels.com/)</b>| <b>[Creative Novels](https://https://creativenovels.com/.com/)</b> | <b>[WordExcerpt](https://wordexcerpt.com/)</b>|
 | <b>[Dreame](https://dreame.com/)</b> | <b>[TapRead](https://www.tapread.com/)</b> | <b>[Zenith Novels](https://zenithnovels.com/)</b>|
@@ -13,7 +13,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 | <b>[LiberSpark](https://liberspark.com/)</b> |<b>[Wordrain](https://wordrain69.com/)</b> | <b>[Comrademao](https://comrademao.com/)</b>|
 | <b>[Light Novels Translations](https://lightnovelstranslations.com/)</b> | <b>[Ebisu Translations](https://ebisutranslations.com/)</b> | <b>[Webnovel](https://webnovel.com/)</b>
 | <b>[Wattpad](https://wattpad.com/)</b> | <b>[WuxiaWorld.online](https://wuxiaworld.online/)</b> | <b>[Booklat](https://booklat.com.ph/)</b>
-| <b>[FoxTeller](https://foxteller.com/)</b> |  | 
+
 ## How to use
 <strong>Automatic:</strong>
 
