@@ -85,7 +85,11 @@ Usage:
 [-headless] | {chrome/firefox/opera/edge/IE} | Visit the website in your browser. Executes javascript etc.
 [-chapters] | {all}, {5 27}, {12 last}	| Specify which chapters to download.
 [-path] | {directory_path} | Output directory for the EPUB.
-[-account] | {username password} | Logs you in on supported sites.
+[-account] | {username password} | Add a new account for the host.
+[-login] | | Log in on website with saved account. -account is not needed if an account for this domain was added previously.
+[-noDesc] | | Don't create a description page.
+[-removeStyle] | | Remove all styling in chapter body.
+[-getImages] | | Grab images from chapter body as well.
 [-displayTitle]| | Write the chapter title at the top of each chapter text.
 [-invertOrder] | | Invert the chapter order.
 -help | | Shows the help page.
