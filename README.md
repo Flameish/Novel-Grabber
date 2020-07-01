@@ -88,7 +88,7 @@ Usage:
 [-account] | {username password} | Add a new account for the host.
 [-login] | | Log in on website with saved account. -account is not needed if an account for this domain was added previously.
 [-noDesc] | | Don't create a description page.
-[-removeStyle] | | Remove all styling in chapter body.
+[-removeStyle] | | Remove all styling from chapter body.
 [-getImages] | | Grab images from chapter body as well.
 [-displayTitle]| | Write the chapter title at the top of each chapter text.
 [-invertOrder] | | Invert the chapter order.
