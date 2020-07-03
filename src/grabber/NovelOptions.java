@@ -1,5 +1,5 @@
 package grabber;
-// Dataclass for better readability
+
 public class NovelOptions {
     public boolean removeStyling = false;
     public boolean getImages = false;
@@ -7,6 +7,8 @@ public class NovelOptions {
     public boolean noDescription = false;
     public boolean invertOrder = false;
     public boolean headless = false;
+    public boolean headlessGUI = false;
+    public boolean useAccount = false;
     public int waitTime = 0;
     public int firstChapter;
     public int lastChapter;
@@ -15,7 +17,6 @@ public class NovelOptions {
     public String browser;
     public String hostname;
     public String novelLink;
-    public boolean useAccount;
 
     public NovelOptions() {
     }
