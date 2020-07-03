@@ -3,8 +3,12 @@ package grabber;
 import org.jsoup.nodes.Document;
 import system.init;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -128,16 +132,33 @@ public class Novel {
     public void createCoverPage() {
         // Write buffered cover to save location
         if (metadata.bufferedCover != null && metadata.bookCover != null) {
+            File dir = new File(options.saveLocation + File.separator + "images");
+            if(!dir.exists()) dir.mkdirs();
+            File coverFile = new File(dir + File.separator + metadata.bufferedCoverName);
+            String imgExt = metadata.bufferedCoverName.substring(metadata.bufferedCoverName.lastIndexOf(".") + 1);
             try {
-                File outputfile = new File(options.saveLocation + File.separator + "images" + File.separator + metadata.bufferedCoverName);
-                if (!outputfile.exists()) outputfile.mkdirs();
-                ImageIO.write(metadata.bufferedCover, metadata.bufferedCoverName.substring(metadata.bufferedCoverName.lastIndexOf(".") + 1), outputfile);
+                if(coverFile.createNewFile()) ImageIO.write(metadata.bufferedCover, imgExt, coverFile);
+            } catch (IIOException e) {
+                try {
+                    int width = metadata.bufferedCover.getWidth();
+                    int height = metadata.bufferedCover.getHeight();
+                    BufferedImage output = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+                    int px[] = new int[width * height];
+                    metadata.bufferedCover.getRGB(0, 0, width, height, px, 0, width);
+                    output.setRGB(0, 0, width, height, px, 0, width);
+                    ImageIO.write(output, imgExt, coverFile);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("[ERROR]Could not write cover image to file.");
                 if(init.window != null) {
                     init.window.appendText(options.window, "[ERROR]Could not write cover image to file.");
                 }
             }
         }
+        // Create Cover page
         String fileName = "cover_Page";
         String filePath = options.saveLocation + File.separator + "chapters" + File.separator + fileName +".html";
         String imageName = metadata.bookCover;
@@ -201,6 +222,7 @@ public class Novel {
      and closes the headless driver if used.
      */
     public void report() {
+        System.out.println("[INFO]Output: "+options.saveLocation + " " + metadata.bookAuthor + " - " + metadata.bookTitle + ".epub");
         if(init.window != null) {
             init.window.appendText(options.window,"[INFO]Finished.");
         }
