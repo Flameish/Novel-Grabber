@@ -8,6 +8,8 @@ import org.jsoup.nodes.Element;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -84,7 +86,9 @@ public class Updater {
 
     private static void downloadFileFromGitHub(String URL) throws Throwable {
         String link = URL;
-        String fileName = "Novel-Grabber.jar";
+        Path currentRelativePath = Paths.get("");
+        currentRelativePath.toAbsolutePath().toString();
+        String fileName = currentRelativePath.toAbsolutePath().toString() + File.separator + "Novel-Grabber.jar";
         java.net.URL url = new URL(link);
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
         Map<String, List<String>> header = http.getHeaderFields();
