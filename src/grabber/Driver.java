@@ -40,11 +40,21 @@ public class Driver {
         switch (novel.options.browser) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
-                driver = new ChromeDriver(new ChromeOptions().setHeadless(true));
+                if(novel.options.headlessGUI) {
+                    driver = new ChromeDriver();
+                } else {
+                    driver = new ChromeDriver(new ChromeOptions().setHeadless(true));
+                }
+
                 break;
             case "Firefox":
+                //
                 WebDriverManager.firefoxdriver().setup();
-                driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true));
+                if(novel.options.headlessGUI) {
+                    driver = new FirefoxDriver();
+                } else {
+                    driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true));
+                }
                 break;
             case "Opera":
                 WebDriverManager.operadriver().setup();
