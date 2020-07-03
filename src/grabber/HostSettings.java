@@ -13,6 +13,9 @@ import system.init;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class HostSettings {
@@ -216,16 +219,6 @@ public class HostSettings {
                     webnovelChapterNumber++;
                 }
                 break;
-
-            case "https://gravitytales.com/":
-                //Chapter list at gravitytales.com/Novel/chapters
-                novel.tableOfContent = Jsoup.connect(novel.novelLink+"/chapters").timeout(30 * 1000).get();
-                for (Element chapterLink : novel.tableOfContent.select(chapterLinkSelector)) {
-                    chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
-                }
-                // Fetch "table of contents" page for metadata
-                novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
-                break;
             case "https://booklat.com.ph/":
                 novel.tempPage = Jsoup.connect(novel.novelLink+"/chapters").cookies(novel.cookies).timeout(30 * 1000).get();
                 novel.tableOfContent = Jsoup.connect(novel.tempPage.select("#lnkRead").attr("abs:href")).cookies(novel.cookies).timeout(30 * 1000).get();
@@ -256,18 +249,20 @@ public class HostSettings {
         switch(url) {
             case "https://booklat.com.ph/":
                 try {
-                    res = Jsoup.connect("https://booklat.com.ph/Account/Login")
+                    res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
                             .method(Connection.Method.GET)
+                            .timeout(30 * 1000)
                             .execute();
                     doc = res.parse();
                     String token = doc.select("input[name=__RequestVerificationToken]").attr("value");
-                    res = Jsoup.connect("https://booklat.com.ph/Account/Login")
+                    res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
                             .data("Email", Accounts.getUsername("Booklat"))
                             .data("Password", Accounts.getPassword("Booklat"))
                             .data("__RequestVerificationToken", token)
                             .data("RememberMe", "false")
                             .cookies(res.cookies())
                             .method(Connection.Method.POST)
+                            .timeout(30 * 1000)
                             .execute();
 
                     cookies = res.cookies();
@@ -279,6 +274,7 @@ public class HostSettings {
                 try {
                     res = Jsoup.connect("https://www.wuxiaworld.com/account/login")
                             .method(Connection.Method.GET)
+                            .timeout(30 * 1000)
                             .execute();
                     doc = res.parse();
                     String token = doc.select("input[name=__RequestVerificationToken]").attr("value");
@@ -288,6 +284,7 @@ public class HostSettings {
                             .data("__RequestVerificationToken", token)
                             .data("RememberMe", "false")
                             .cookies(res.cookies())
+                            .timeout(30 * 1000)
                             .method(Connection.Method.POST)
                             .execute();
 
