@@ -202,12 +202,12 @@
     "url": "https://creativenovels.com/",
     "ordinalIndexForBaseNovel": "0",
     "chapterLinkSelector": ".post_box a",
-    "chapterContainer": ".post",
+    "chapterContainer": ".entry-content.content",
     "blacklistedTags": [
       ".mNS",
       ".support-placement"
     ],
-    "bookTitleSelector": "div.e45344-16.x-text.bK_C",
+    "bookTitleSelector": ".e45344-12.x-text.bK_C",
     "bookDescSelector": ".novel_page_synopsis",
     "bookCoverSelector": "img.book_cover",
     "bookAuthorSelector": "div.e45344-17.x-text.bK_C a",
