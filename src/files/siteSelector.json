@@ -82,11 +82,11 @@
       "meta",
       "script"
     ],
-    "bookTitleSelector": ".post-title h1",
+    "bookTitleSelector": ".c-manga-title",
     "bookDescSelector": ".summary__content",
-    "bookCoverSelector": "div.summary_image a img",
-    "bookAuthorSelector": ".author-content a",
-    "bookSubjectSelector": ".genres-content a"
+    "bookCoverSelector": ".c-manga-thumbnail-bg",
+    "bookAuthorSelector": ".summary-content.uppercase:contains(author) a",
+    "bookSubjectSelector": ".summary-content.uppercase:contains(genre) a"
   },
   "FicFun": {
     "url": "https://ficfun.com/",
