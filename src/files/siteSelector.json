@@ -59,7 +59,7 @@
     "url": "https://volarenovels.com/",
     "ordinalIndexForBaseNovel": "5",
     "chapterLinkSelector": "#accordion .chapter-item a",
-    "chapterContainer": "jfontsize_content.fr-view",
+    "chapterContainer": ".jfontsize_content.fr-view",
     "blacklistedTags": [
       "a.chapter-nav",
       "div[id^=div-gpt-ad]",
