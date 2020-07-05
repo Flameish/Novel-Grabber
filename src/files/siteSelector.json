@@ -351,7 +351,7 @@
     "url": "https://ebisutranslations.com/",
     "ordinalIndexForBaseNovel": "5",
     "chapterLinkSelector": ".page_item a",
-    "chapterContainer": "div.page-content:nth-child(4)",
+    "chapterContainer": "div.page-content:nth-child(5)",
     "blacklistedTags": [
       "div:has(div[class=row])",
       "hr",
