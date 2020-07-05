@@ -255,20 +255,6 @@
     "bookAuthorSelector": "#profile_top a.xcontrast_txt",
     "bookSubjectSelector": "null"
   },
-  "FlyingLines": {
-    "url": "https://flying-lines.com/",
-    "ordinalIndexForBaseNovel": "5",
-    "chapterLinkSelector": ".volume-item li:has(i:not(.detail-chapter-locked)) a",
-    "chapterContainer": "div.content",
-    "blacklistedTags": [
-      "null"
-    ],
-    "bookTitleSelector": "div.title h2",
-    "bookDescSelector": ".synopsis-detail",
-    "bookCoverSelector": ".novel-thumb img",
-    "bookAuthorSelector": ".profile",
-    "bookSubjectSelector": ".btn-category"
-  },
   "TapRead": {
     "url": "https://tapread.com/",
     "ordinalIndexForBaseNovel": "5",
