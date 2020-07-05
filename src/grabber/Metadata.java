@@ -145,8 +145,10 @@ public class Metadata {
                 if (coverSelect != null) {
                     String coverLink = coverSelect.attr("abs:src");
                     // Custom
-                    if (novel.host.url.equals("https://wordexcerpt.com/"))
-                        coverLink = coverSelect.attr("data-src");
+                    if (novel.host.url.equals("https://wordexcerpt.com/")) {
+                        coverLink = coverSelect.attr("style");
+                        coverLink = coverLink.substring(coverLink.indexOf("'")+1, coverLink.lastIndexOf("'"));
+                    }
                     if (novel.host.url.equals("https://webnovel.com/")) {
                         coverLink = coverLink.replace("/300/300", "/600/600");
                     }
