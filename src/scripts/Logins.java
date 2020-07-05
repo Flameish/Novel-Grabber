@@ -4,7 +4,6 @@ import system.Accounts;
 import grabber.Novel;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import system.init;
 
 import java.io.IOException;
@@ -22,6 +21,9 @@ public class Logins {
                 case "https://booklat.com.ph/":
                     novel.cookies = booklat();
                     break;
+                case "https://wattpad.com/":
+                    novel.cookies = wattpad();
+                    break;
                 case "https://wuxiaworld.com/":
                     novel.cookies = wuxiaworld();
                     break;
@@ -36,8 +38,7 @@ public class Logins {
                 .method(Connection.Method.GET)
                 .timeout(30 * 1000)
                 .execute();
-        Document doc = res.parse();
-        String token = doc.select("input[name=__RequestVerificationToken]").attr("value");
+        String token = res.parse().select("input[name=__RequestVerificationToken]").attr("value");
         res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
                 .data("Email", Accounts.getUsername("Booklat"))
                 .data("Password", Accounts.getPassword("Booklat"))
@@ -50,13 +51,27 @@ public class Logins {
         return res.cookies();
     }
 
+    private static Map<String, String> wattpad() throws IOException {
+        Connection.Response res = Jsoup.connect("https://www.wattpad.com/")
+                .method(Connection.Method.GET)
+                .timeout(30 * 1000)
+                .execute();
+        res = Jsoup.connect("https://www.wattpad.com/login")
+                .data("username", Accounts.getUsername("WattPad"))
+                .data("password", Accounts.getPassword("WattPad"))
+                .cookies(res.cookies())
+                .method(Connection.Method.POST)
+                .timeout(30 * 1000)
+                .execute();
+        return res.cookies();
+    }
+
     private static Map<String, String> wuxiaworld() throws IOException {
         Connection.Response res = Jsoup.connect("https://www.wuxiaworld.com/account/login")
                 .method(Connection.Method.GET)
                 .timeout(30 * 1000)
                 .execute();
-        Document doc = res.parse();
-        String token = doc.select("input[name=__RequestVerificationToken]").attr("value");
+        String token = res.parse().select("input[name=__RequestVerificationToken]").attr("value");
         res = Jsoup.connect("https://www.wuxiaworld.com/account/login")
                 .data("Email", Accounts.getUsername("Wuxiaworld"))
                 .data("Password", Accounts.getPassword("Wuxiaworld"))

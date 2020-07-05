@@ -29,7 +29,7 @@ public class GUI extends JFrame {
     public static String versionNumber = "2.7.1";
     private static final String[] headerlessBrowserWebsites = {"FicFun", "Dreame", "WuxiaWorld.site","FoxTeller"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
-    private static final String[] loginWebsites = {"Booklat","Wuxiaworld"};
+    private static final String[] loginWebsites = {"Booklat","Wuxiaworld", "WattPad"};
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
     public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
