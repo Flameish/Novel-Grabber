@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.7.1";
+    public static String versionNumber = "2.7.2";
     private static final String[] headerlessBrowserWebsites = {"FicFun", "Dreame", "WuxiaWorld.site","FoxTeller"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     private static final String[] loginWebsites = {"Booklat","Wuxiaworld", "WattPad"};
