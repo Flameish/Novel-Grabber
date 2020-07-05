@@ -424,7 +424,7 @@
   "Foxaholic": {
     "url": "https://foxaholic.com/",
     "ordinalIndexForBaseNovel": "5",
-    "chapterLinkSelector": ".listing-chapters_wrap a",
+    "chapterLinkSelector": ".listing-chapters_wrap a:not(a[title])",
     "chapterContainer": ".text-left",
     "blacklistedTags": [
       "center",
