@@ -269,20 +269,6 @@
     "bookAuthorSelector": ".person-info .author .name",
     "bookSubjectSelector": ".book-catalog .txt"
   },
-  "KuhakuLightNovelsTranslations": {
-    "url": "https://kuhakulightnoveltranslations.com/",
-    "ordinalIndexForBaseNovel": "5",
-    "chapterLinkSelector": "a.maxbutton",
-    "chapterContainer": ".entry-content",
-    "blacklistedTags": [
-      "p[style=text-align: center;]"
-    ],
-    "bookTitleSelector": "h1.entry-title",
-    "bookDescSelector": "#editdescription",
-    "bookCoverSelector": "null",
-    "bookAuthorSelector": "null",
-    "bookSubjectSelector": "null"
-  },
   "ZenithNovels": {
     "url": "https://zenithnovels.com/",
     "ordinalIndexForBaseNovel": "5",
