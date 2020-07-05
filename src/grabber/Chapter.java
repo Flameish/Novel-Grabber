@@ -4,6 +4,9 @@ import gui.GUI;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import system.init;
 
 import java.io.File;
@@ -19,8 +22,8 @@ public class Chapter implements Serializable {
     String fileName;
     // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
     int status = 0;
-    String xhrChapterId;
-    int xhrBookId;
+    public String xhrChapterId;
+    public int xhrBookId;
 
     public Chapter(String name, String link) {
         this.name = name;
@@ -29,10 +32,14 @@ public class Chapter implements Serializable {
     }
 
     void saveChapter(Novel novel) {
-        Document doc = null;
+        Document doc;
         try {
             if(novel.options.headless) {
-                doc = novel.headless.getChapterContent(chapterURL);
+                novel.headless.driver.navigate().to(chapterURL);
+                novel.headless.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.host.chapterContainer)));
+                WebElement chapterElement = novel.headless.driver.findElement(By.cssSelector("body"));
+                String baseUrl = novel.headless.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headless.driver.getCurrentUrl(), "/", 3) + 1);
+                doc = Jsoup.parse(chapterElement.getAttribute("innerHTML"), baseUrl);
             } else {
                 switch(novel.host.url) {
                     case "https://wattpad.com/":
@@ -42,7 +49,11 @@ public class Chapter implements Serializable {
                         doc = Jsoup.parse(xhrRequest.tapReadGetChapterContent("bookId=" + xhrBookId + "&chapterId=" + xhrChapterId), "https://tapread.com/");
                         break;
                     default:
-                        if(novel.cookies != null) doc = Jsoup.connect(chapterURL).cookies(novel.cookies).timeout(30 * 1000).get();
+                        if(novel.cookies != null) doc = Jsoup.connect(chapterURL)
+                                .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0")
+                                .cookies(novel.cookies)
+                                .timeout(30 * 1000)
+                                .get();
                         else doc = Jsoup.connect(chapterURL).timeout(30 * 1000).get();
                         break;
                 }
@@ -112,9 +123,9 @@ public class Chapter implements Serializable {
             if (novel.options.displayChapterTitle) {
                 chapterContent.prepend("<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span><br>");
             }
-            out.print(novel.htmlHead);
+            out.print(EPUB.htmlHead);
             out.println(chapterContent);
-            out.println(novel.htmlFoot);
+            out.println(EPUB.htmlFoot);
         } catch (IOException e) {
             e.printStackTrace();
             if(init.window != null) {

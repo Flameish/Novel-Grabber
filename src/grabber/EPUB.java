@@ -7,20 +7,35 @@ import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubWriter;
 import system.init;
 
+import javax.imageio.IIOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class EPUB {
+    private static final String NL = System.getProperty("line.separator");
+    static final String htmlHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + NL+
+            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"" + NL +
+            "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">" + NL +
+            "\n" +
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + NL +
+            "<head>" + NL +
+            "<title></title>" + NL +
+            "</head>" + NL +
+            "<body>" + NL;
+    static final String htmlFoot = "</body>" + NL + "</html>";
+    private Novel novel;
     private FileInputStream inputStream;
     private Resource resource;
 
-    EPUB(Novel currGrab) {
-        writeEpub(currGrab);
+    public EPUB(Novel novel) {
+        this.novel = novel;
     }
 
-    private void writeEpub(Novel novel) {
+    public void writeEpub() {
         try {
             if(init.window != null) {
                 init.window.appendText(novel.options.window, "[INFO]Writing epub...");
@@ -132,6 +147,94 @@ public class EPUB {
             //novel.gui.appendText(novel.window, "[ERROR]" + e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Extra pages for EPUB
+     */
+
+    public void createCoverPage() {
+        // Write buffered cover to save location
+        if (novel.metadata.bufferedCover != null && novel.metadata.bookCover != null) {
+            File dir = new File(novel.options.saveLocation + File.separator + "images");
+            if(!dir.exists()) dir.mkdirs();
+            File coverFile = new File(dir + File.separator + novel.metadata.bufferedCoverName);
+            String imgExt = novel.metadata.bufferedCoverName.substring(novel.metadata.bufferedCoverName.lastIndexOf(".") + 1);
+            try {
+                if(coverFile.createNewFile()) ImageIO.write(novel.metadata.bufferedCover, imgExt, coverFile);
+            } catch (IIOException e) {
+                try {
+                    int width = novel.metadata.bufferedCover.getWidth();
+                    int height = novel.metadata.bufferedCover.getHeight();
+                    BufferedImage output = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+                    int px[] = new int[width * height];
+                    novel.metadata.bufferedCover.getRGB(0, 0, width, height, px, 0, width);
+                    output.setRGB(0, 0, width, height, px, 0, width);
+                    ImageIO.write(output, imgExt, coverFile);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("[ERROR]Could not write cover image to file.");
+                if(init.window != null) {
+                    init.window.appendText(novel.options.window, "[ERROR]Could not write cover image to file.");
+                }
+            }
+        }
+        // Create Cover page
+        String fileName = "cover_Page";
+        String filePath = novel.options.saveLocation + File.separator + "chapters" + File.separator + fileName +".html";
+        String imageName = novel.metadata.bookCover;
+        imageName = GrabberUtils.getFileName(imageName);
+        try (PrintStream out = new PrintStream(filePath, "UTF-8")) {
+            out.print(htmlHead + "<div class=\"cover\" style=\"padding: 0pt; margin:0pt; text-align: center; padding:0pt; margin: 0pt;\">" + NL);
+            out.println("<img src=\"" + imageName + "\" class=\"cover.img\" style=\"width: 600px; height: 800px;\" />");
+            out.print("</div>" + NL + htmlFoot);
+            novel.extraPages.add(fileName);
+        } catch (IOException e) {
+            if(init.window != null) {
+                init.window.appendText(novel.options.window,e.getMessage());
+
+            }
+            e.printStackTrace();
+        }
+    }
+
+    public void createToc() {
+        String fileName = "table_of_contents";
+        String filePath = novel.options.saveLocation + File.separator + "chapters" + File.separator + fileName+  ".html";
+        try (PrintStream out = new PrintStream(filePath , "UTF-8")) {
+            out.print(htmlHead + "<b>Table of Contents</b>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+            for (Chapter chapter: novel.chapters) {
+                if(chapter.status == 1)
+                    out.println("<a href=\"" + chapter.fileName + ".html\">" + chapter.name + "</a><br/>");
+            }
+            out.print("</p>" + NL + htmlFoot);
+            novel.extraPages.add(fileName);
+        } catch (IOException e) {
+            if(init.window != null) {
+                init.window.appendText(novel.options.window,e.getMessage());
+
+            }
+            e.printStackTrace();
+        }
+    }
+
+    public void createDescPage() {
+        String fileName = "desc_Page";
+        String filePath = novel.options.saveLocation + File.separator + "chapters" + File.separator + fileName + ".html";
+        try (PrintStream out = new PrintStream(filePath, "UTF-8")) {
+            out.print(htmlHead + "<div><b>Description</b>" + NL);
+            out.println("<p>" + novel.metadata.bookDesc.get(0) + "</p>");
+            out.print("</div>" + NL + htmlFoot);
+            novel.extraPages.add(fileName);
+        } catch (IOException e) {
+            if(init.window != null) {
+                init.window.appendText(novel.options.window,e.getMessage());
+            }
             e.printStackTrace();
         }
     }

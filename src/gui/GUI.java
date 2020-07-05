@@ -1,6 +1,8 @@
 package gui;
 
 import grabber.*;
+import system.Accounts;
+import system.Config;
 import updater.Updater;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,26 +13,26 @@ import org.jsoup.select.Elements;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
     public static String versionNumber = "2.7.1";
+    private static final String[] headerlessBrowserWebsites = {"FicFun", "Dreame", "WuxiaWorld.site","FoxTeller"};
+    private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
+    private static final String[] loginWebsites = {"Booklat","Wuxiaworld"};
+    public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
+    public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
+    public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static DefaultListModel<String> accountWebsiteListModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
@@ -258,10 +260,11 @@ public class GUI extends JFrame {
                     }
                 }
                 autoNovel.downloadChapters(); // Throws exception if grabbing was stopped
-                autoNovel.createCoverPage();
-                autoNovel.createToc();
-                autoNovel.createDescPage();
-                autoNovel.createEPUB();
+                EPUB epub = new EPUB(autoNovel);
+                epub.createCoverPage();
+                epub.createToc();
+                epub.createDescPage();
+                epub.writeEpub();
                 autoNovel.report();
             } catch (Exception  err) {
                 appendText("auto", "[ERROR]"+err.getMessage());
@@ -378,7 +381,7 @@ public class GUI extends JFrame {
 
         autoHostSelection.addItemListener(e -> {
             String selection = autoHostSelection.getSelectedItem().toString();
-            if (HostSettings.headerlessBrowserWebsitesList.contains(selection)) {
+            if (headerlessBrowserWebsitesList.contains(selection)) {
                 useHeaderlessBrowserCheckBox.setSelected(true);
                 useHeaderlessBrowserCheckBox.setEnabled(false);
             } else {
@@ -394,7 +397,7 @@ public class GUI extends JFrame {
             autoFirstChapterURL.setVisible(false);
             autoLastChapterLbl.setVisible(false);
             autoLastChapterURL.setVisible(false);
-            if (HostSettings.noHeaderlessBrowserWebsitesList.contains(selection)) {
+            if (noHeaderlessBrowserWebsitesList.contains(selection)) {
                 useHeaderlessBrowserCheckBox.setSelected(false);
                 useHeaderlessBrowserCheckBox.setEnabled(false);
             }
@@ -468,10 +471,12 @@ public class GUI extends JFrame {
                         manNovel.manGetMetadata();
                         manNovel.processChaptersToChapters(chapterToChapterArgs);
 
-                        manNovel.createCoverPage();
-                        manNovel.createToc();
-                        manNovel.createDescPage();
-                        manNovel.createEPUB();
+                        EPUB epub = new EPUB(manNovel);
+                        epub.createCoverPage();
+                        epub.createToc();
+                        epub.createDescPage();
+                        epub.writeEpub();
+
                         manNovel.report();
                     } catch (Exception err) {
                         appendText("manual", "[ERROR]"+err.getMessage());
@@ -532,10 +537,12 @@ public class GUI extends JFrame {
                         manNovel.manGetMetadata();
                         manNovel.processChaptersFromList();
 
-                        manNovel.createCoverPage();
-                        manNovel.createToc();
-                        manNovel.createDescPage();
-                        manNovel.createEPUB();
+                        EPUB epub = new EPUB(manNovel);
+                        epub.createCoverPage();
+                        epub.createToc();
+                        epub.createDescPage();
+                        epub.writeEpub();
+
                         manNovel.report();
                     } catch (Exception err) {
                         appendText("manual", "[ERROR]"+err.getMessage());
@@ -994,7 +1001,7 @@ public class GUI extends JFrame {
 
         // Account Tab
         accountPasswordField = new JPasswordField();
-        for(String accountDomain: HostSettings.loginWebsitesList) {
+        for(String accountDomain: loginWebsitesList) {
             accountWebsiteListModel.addElement(accountDomain);
         }
         accountWebsiteList = new JList<>(accountWebsiteListModel);

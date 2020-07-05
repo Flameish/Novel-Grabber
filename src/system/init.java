@@ -1,18 +1,17 @@
 package system;
 import grabber.*;
 import gui.GUI;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+
+import static grabber.GrabberUtils.getDomain;
 
 public class init {
     public static GUI window;
@@ -39,71 +38,15 @@ public class init {
         processParams(params);
     }
 
-
-    private static void startGUI() {
-        // Start gui
-        EventQueue.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                window = new GUI();
-                window.setLocationRelativeTo(null);
-                window.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private static void getConfigs() {
-        try {
-            Config.checkConfigFolder();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            Accounts.readAccounts();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        // Fetch latest selectors
-        Config.fetchSelectors();
-    }
-
-    public static String getDomain(String url) {
-        for(Object key: Config.siteSelectorsJSON.keySet()) {
-            Object keyvalue = Config.siteSelectorsJSON.get(key);
-            String keyUrl = ((JSONObject) keyvalue).get("url").toString();
-            if(!keyUrl.trim().isEmpty()) {
-                if(getDomainName(url).equals(getDomainName(keyUrl)))
-                    return key.toString();
-            }
-        }
-        return null;
-    }
-
-    public static String getDomainName(String url)  {
-        URI uri = null;
-        try {
-            uri = new URI(url);
-        } catch (URISyntaxException e) {
-            System.out.println(url);
-            e.printStackTrace();
-        }
-        String domain = uri.getHost();
-        return domain.startsWith("www.") ? domain.substring(4) : domain;
-    }
-
     private static void processParams(Map<String, List<String>> params) {
+        getConfigs();
         if(params.containsKey("gui") || params.isEmpty()) {
-            getConfigs();
             startGUI();
         }
         else if(params.containsKey("help")) {
             printHelp();
         } else {
             if(!params.get("link").get(0).isEmpty()) {
-                getConfigs();
-
                 NovelOptions novelOptions = new NovelOptions();
                 novelOptions.novelLink = params.get("link").get(0);
                 novelOptions.hostname = getDomain(params.get("link").get(0).
@@ -132,7 +75,9 @@ public class init {
                             novelOptions.browser = "IE";
                             break;
                     }
-                    novelOptions.headlessGUI = params.get("headless").get(1).toLowerCase().equals("gui");
+                    if(params.get("headless").size() > 1) {
+                        novelOptions.headlessGUI = params.get("headless").get(1).toLowerCase().equals("gui");
+                    }
                 }
 
                 if(params.containsKey("path")) {
@@ -184,15 +129,49 @@ public class init {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                autoNovel.createCoverPage();
-                autoNovel.createToc();
-                autoNovel.createDescPage();
-                autoNovel.createEPUB();
+
+                EPUB epub = new EPUB(autoNovel);
+                epub.createCoverPage();
+                epub.createToc();
+                epub.createDescPage();
+                epub.writeEpub();
+
                 autoNovel.report();
             } else {
                 System.out.println("No novel link.");
             }
         }
+    }
+
+
+
+    private static void startGUI() {
+        // Start gui
+        EventQueue.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                window = new GUI();
+                window.setLocationRelativeTo(null);
+                window.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private static void getConfigs() {
+        try {
+            Config.checkConfigFolder();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            Accounts.readAccounts();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        // Fetch latest selectors
+        Config.fetchSelectors();
     }
 
     private static void printHelp() {

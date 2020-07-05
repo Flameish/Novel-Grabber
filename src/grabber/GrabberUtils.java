@@ -1,13 +1,17 @@
 package grabber;
 
+import org.json.simple.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import system.Config;
 import system.init;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -48,15 +52,19 @@ public class GrabberUtils {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    //currGrab.gui.appendText(currGrab.window, e.getMessage());
                 }
                 currGrab.imageLinks.add(src);
                 currGrab.imageNames.add(name);
-                //currGrab.gui.appendText(currGrab.window, "[INFO]" + name + " saved.");
+
+                if(init.window != null) {
+                    init.window.appendText(currGrab.options.window, "[INFO]" + name + " saved.");
+                }
                 //General catch
             } catch (Throwable e) {
                 e.printStackTrace();
-                //currGrab.gui.appendText(currGrab.window, "[ERROR]Failed to save " + name);
+                if(init.window != null) {
+                    init.window.appendText(currGrab.options.window, "[ERROR]Failed to save " + name);
+                }
             }
         }
     }
@@ -164,5 +172,29 @@ public class GrabberUtils {
         if (imageName != null && imageName.contains("\\"))
             imageName = imageName.substring(imageName.lastIndexOf("\\") + 1);
         return imageName;
+    }
+
+    public static String getDomain(String url) {
+        for(Object key: Config.siteSelectorsJSON.keySet()) {
+            Object keyvalue = Config.siteSelectorsJSON.get(key);
+            String keyUrl = ((JSONObject) keyvalue).get("url").toString();
+            if(!keyUrl.trim().isEmpty()) {
+                if(getDomainName(url).equals(getDomainName(keyUrl)))
+                    return key.toString();
+            }
+        }
+        return null;
+    }
+
+    public static String getDomainName(String url)  {
+        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            System.out.println(url);
+            e.printStackTrace();
+        }
+        String domain = uri.getHost();
+        return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
 }
