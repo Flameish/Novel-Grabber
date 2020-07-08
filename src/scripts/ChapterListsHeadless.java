@@ -20,7 +20,7 @@ import java.util.Map;
 public class ChapterListsHeadless {
     public static void getList(Novel novel) {
         System.out.println("[INFO]Fetching chapterlist...");
-        if(init.window != null) {
+        if(init.window != null && !novel.options.window.equals("checker")) {
             init.window.appendText(novel.options.window, "[INFO]Fetching novel info...");
         }
 

@@ -1,10 +1,10 @@
 package scripts;
 
-import system.Accounts;
 import grabber.Novel;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import system.init;
+import system.persistent.Accounts;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class Logins {
     public static void getLoginCookies(Novel novel) {
         System.out.println("[INFO]Login...");
-        if(init.window != null) {
+        if(init.window != null && !novel.options.window.equals("checker")) {
             init.window.appendText("auto","[INFO]Login...");
         }
 

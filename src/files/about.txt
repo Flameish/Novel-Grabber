@@ -24,8 +24,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 CREDITS:
- - json.simple https://code.google.com/archive/p/json-simple/
- - jsoup https://jsoup.org/
- - webdrivermanager https://github.com/bonigarcia/webdrivermanager
- - selenium https://selenium.dev/
- - Images https://icons8.com/
+ * [jsoup](https://www.jsoup.org/)
+ * [json-simple](https://code.google.com/archive/p/json-simple/)
+ * [epublib](https://github.com/psiegman/epublib)
+ * [webdrivermanager](https://github.com/bonigarcia/webdrivermanager)
+ * [selenium ](https://selenium.dev/)
+ * [Simple Java Mail ](https://github.com/bbottema/simple-java-mail/)

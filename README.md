@@ -108,3 +108,5 @@ Novel Grabber was build in java with: <br>
  * [epublib](https://github.com/psiegman/epublib)
  * [webdrivermanager](https://github.com/bonigarcia/webdrivermanager)
  * [selenium ](https://selenium.dev/)
+ * [Simple Java Mail ](https://github.com/bbottema/simple-java-mail/)
+ 

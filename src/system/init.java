@@ -1,7 +1,9 @@
 package system;
 import grabber.*;
 import gui.GUI;
+import library.LibrarySystem;
 import org.json.simple.parser.ParseException;
+import system.persistent.Accounts;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,13 +19,19 @@ public class init {
     public static GUI window;
 
     public static void main(String[] args) {
+        final Map<String, List<String>> params = getParamsFromString(args);
+        getConfigs();
+        processParams(params);
+    }
+
+    public static Map<String, List<String>> getParamsFromString(String[] args) {
         final Map<String, List<String>> params = new HashMap<>();
         List<String> options = null;
         for (final String a : args) {
             if (a.charAt(0) == '-') {
                 if (a.length() < 2) {
                     System.err.println("Error at argument " + a);
-                    return;
+                    return null;
                 }
 
                 options = new ArrayList<>();
@@ -32,14 +40,13 @@ public class init {
                 options.add(a);
             } else {
                 System.err.println("Illegal parameter usage");
-                return;
+                return null;
             }
         }
-        processParams(params);
+        return params;
     }
 
-    private static void processParams(Map<String, List<String>> params) {
-        getConfigs();
+    public static Novel processParams(Map<String, List<String>> params) {
         if(params.containsKey("gui") || params.isEmpty()) {
             startGUI();
         }
@@ -89,8 +96,11 @@ public class init {
                 if(params.containsKey("wait")) {
                     novelOptions.waitTime =  Integer.parseInt(params.get("wait").get(0));
                 }
-                if(params.containsKey("getImages")) {
+                if(params.containsKey("autoGetImages")) {
                     novelOptions.getImages =  true;
+                }
+                if(params.containsKey("window")) {
+                    novelOptions.window =  params.get("window").get(0);
                 }
                 if(params.containsKey("removeStyle")) {
                     novelOptions.removeStyling =  true;
@@ -102,7 +112,7 @@ public class init {
                     novelOptions.useAccount = true;
                 }
                 if(params.containsKey("account")) {
-                    Accounts.addAccount(novelOptions.hostname, params.get("account").get(0), params.get("account").get(1));
+                    Accounts.setAccount(novelOptions.hostname, params.get("account").get(0), params.get("account").get(1));
                 }
 
                 Novel autoNovel = new Novel(novelOptions);
@@ -125,6 +135,11 @@ public class init {
                     autoNovel.options.lastChapter = autoNovel.chapters.size();
                 }
                 try {
+                    if(autoNovel.options.window.equals("checker")) {
+                        autoNovel.metadata.bookTitle = autoNovel.options.firstChapter
+                                +"-"+ autoNovel.options.lastChapter
+                                +"-"+ autoNovel.metadata.bookTitle;
+                    }
                     autoNovel.downloadChapters();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -137,10 +152,12 @@ public class init {
                 epub.writeEpub();
 
                 autoNovel.report();
+                return autoNovel;
             } else {
                 System.out.println("No novel link.");
             }
         }
+        return null;
     }
 
 
@@ -153,6 +170,7 @@ public class init {
                 window = new GUI();
                 window.setLocationRelativeTo(null);
                 window.setVisible(true);
+                LibrarySystem.startPolling();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -162,15 +180,10 @@ public class init {
     private static void getConfigs() {
         try {
             Config.checkConfigFolder();
-        } catch (IOException e) {
+            Config.readConfig();
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
-        try {
-            Accounts.readAccounts();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        // Fetch latest selectors
         Config.fetchSelectors();
     }
 
@@ -192,7 +205,7 @@ public class init {
                 "  [-displayTitle]\t\t\t\tWrite the chapter title at the top of each chapter text.\n" +
                 "  [-invertOrder]\t\t\t\tInvert the chapter order.\n" +
                 "  [-noDesc]\t\t\t\t\tDon't create a description page.\n" +
-                "  [-getImages]\t\t\t\t\tGrab images from chapter.\n" +
+                "  [-autoGetImages]\t\t\t\t\tGrab images from chapter.\n" +
                 "  [-removeStyle]\t\t\t\tRemove css styling from chapter.\n" +
                 "  \n" +
                 "Examples:\n" +

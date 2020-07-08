@@ -56,13 +56,13 @@ public class GrabberUtils {
                 currGrab.imageLinks.add(src);
                 currGrab.imageNames.add(name);
 
-                if(init.window != null) {
+                if(init.window != null && !currGrab.options.window.equals("checker")) {
                     init.window.appendText(currGrab.options.window, "[INFO]" + name + " saved.");
                 }
                 //General catch
             } catch (Throwable e) {
                 e.printStackTrace();
-                if(init.window != null) {
+                if(init.window != null && !currGrab.options.window.equals("checker")) {
                     init.window.appendText(currGrab.options.window, "[ERROR]Failed to save " + name);
                 }
             }
@@ -115,7 +115,7 @@ public class GrabberUtils {
                 //General catch
             } catch (Throwable e) {
                 e.printStackTrace();
-                if(init.window != null) {
+                if(init.window != null && !novel.options.window.equals("checker")) {
                     init.window.appendText("auto", "[ERROR]Failed to get" + name);
                 }
             }
@@ -158,7 +158,7 @@ public class GrabberUtils {
     /**
      * Freeze thread for selected wait time.
      */
-    static void sleep(int waitTime) {
+    public static void sleep(int waitTime) {
         try {
             Thread.sleep(waitTime);
         } catch (InterruptedException ex) {

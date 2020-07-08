@@ -33,7 +33,7 @@ public class Novel {
     List<String> extraPages = new ArrayList<>();
     List<String> imageLinks = new ArrayList<>();
     List<String> imageNames = new ArrayList<>();
-
+    public String epubFilename;
     public Novel() {
     }
 
@@ -59,7 +59,7 @@ public class Novel {
 
     public void downloadChapters() throws Exception {
         System.out.println("[INFO]Starting download...");
-        if(init.window != null) {
+        if(init.window != null && !options.window.equals("checker")) {
             init.window.setMaxProgress(options.window, options.lastChapter-options.firstChapter+1);
         }
         if(reGrab) {
@@ -85,7 +85,7 @@ public class Novel {
                     if (Files.exists(chaptersFolder)) GrabberUtils.deleteFolderAndItsContent(chaptersFolder);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    if(init.window != null) {
+                    if(init.window != null && !options.window.equals("checker")) {
                         init.window.appendText(options.window, e.getMessage());
                     }
                 }
@@ -93,7 +93,7 @@ public class Novel {
             }
             chapters.get(i).saveChapter(this);
 
-            if(init.window != null) {
+            if(init.window != null && !options.window.equals("checker")) {
                 init.window.updateProgress(options.window);
             }
 
@@ -117,14 +117,14 @@ public class Novel {
      */
     public void report() {
         System.out.println("[INFO]Output: "+options.saveLocation + " " + metadata.bookAuthor + " - " + metadata.bookTitle + ".epub");
-        if(init.window != null) {
+        if(init.window != null && !options.window.equals("checker")) {
             init.window.appendText(options.window,"[INFO]Finished.");
         }
         if(options.invertOrder) Collections.reverse(chapters);
         // Print failed chapters
         for(Chapter chapter: chapters) {
             if(chapter.status == 2)
-                if(init.window != null) {
+                if(init.window != null && !options.window.equals("checker")) {
                     init.window.appendText(options.window,"[WARN]Failed to grab: " +chapter.name);
                 }
         }

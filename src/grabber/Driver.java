@@ -24,7 +24,7 @@ public class Driver {
     }
 
     private void driverSetup() {
-        if(init.window != null) {
+        if(init.window != null && !novel.options.window.equals("checker")) {
             init.window.appendText(novel.options.window, "[INFO]Starting headerless browser...");
         }
         switch (novel.options.browser) {

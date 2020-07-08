@@ -6,6 +6,7 @@ import nl.siegmann.epublib.domain.Metadata;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubWriter;
 import system.init;
+import system.persistent.Settings;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -37,7 +38,7 @@ public class EPUB {
 
     public void writeEpub() {
         try {
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.appendText(novel.options.window, "[INFO]Writing epub...");
             }
             Book book = new Book();
@@ -64,7 +65,7 @@ public class EPUB {
             }
             // Set cover image & page
             if (novel.metadata.bookCover != null && !novel.metadata.bookCover.isEmpty()) {
-                if (novel.options.window.equals("auto")) {
+                if (novel.options.window.equals("auto") || novel.options.window.equals("checker")) {
                     // Add cover image as a resource
                     inputStream = new FileInputStream(novel.options.saveLocation + "/images/" + novel.metadata.bookCover);
                     resource = new Resource(inputStream, novel.metadata.bookCover);
@@ -132,10 +133,30 @@ public class EPUB {
             // Create EpubWriter
             EpubWriter epubWriter = new EpubWriter();
             // Write the Book as Epub
-            epubWriter.write(book, new FileOutputStream(novel.options.saveLocation +
-                    File.separator + novel.metadata.bookAuthor + " - " + novel.metadata.bookTitle + ".epub"));
-            //novel.gui.appendText(novel.window, "[INFO]Epub successfully created.");
-
+            String epubFilename;
+            switch (Settings.getEPUBOutputFormat()) {
+                case 0:
+                    epubFilename = (novel.metadata.bookAuthor + " - " + novel.metadata.bookTitle + ".epub").replaceAll(" ","");
+                    epubWriter.write(book, new FileOutputStream(novel.options.saveLocation
+                            + "/" + epubFilename));
+                    break;
+                case 1:
+                    epubFilename = (novel.metadata.bookTitle + " - " + novel.metadata.bookAuthor + ".epub").replaceAll(" ","");
+                    epubWriter.write(book, new FileOutputStream(novel.options.saveLocation
+                            + "/" + epubFilename));
+                    break;
+                case 2:
+                    epubFilename = (novel.metadata.bookTitle + ".epub").replaceAll(" ", "");
+                    epubWriter.write(book, new FileOutputStream(novel.options.saveLocation
+                            + "/" + epubFilename));
+                    break;
+                default:
+                    epubFilename = (novel.metadata.bookAuthor + " - " + novel.metadata.bookTitle + ".epub").replaceAll(" ","");
+                    epubWriter.write(book, new FileOutputStream(novel.options.saveLocation
+                            + "/" + epubFilename));
+                    break;
+            }
+            novel.epubFilename = epubFilename;
             // Delete image and chapter files
             Path chaptersFolder = Paths.get(novel.options.saveLocation + "/chapters");
             Path imagesFolder = Paths.get(novel.options.saveLocation + "/images");
@@ -179,7 +200,7 @@ public class EPUB {
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("[ERROR]Could not write cover image to file.");
-                if(init.window != null) {
+                if(init.window != null && !novel.options.window.equals("checker")) {
                     init.window.appendText(novel.options.window, "[ERROR]Could not write cover image to file.");
                 }
             }
@@ -195,7 +216,7 @@ public class EPUB {
             out.print("</div>" + NL + htmlFoot);
             novel.extraPages.add(fileName);
         } catch (IOException e) {
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.appendText(novel.options.window,e.getMessage());
 
             }
@@ -215,7 +236,7 @@ public class EPUB {
             out.print("</p>" + NL + htmlFoot);
             novel.extraPages.add(fileName);
         } catch (IOException e) {
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.appendText(novel.options.window,e.getMessage());
 
             }
@@ -232,7 +253,7 @@ public class EPUB {
             out.print("</div>" + NL + htmlFoot);
             novel.extraPages.add(fileName);
         } catch (IOException e) {
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.appendText(novel.options.window,e.getMessage());
             }
             e.printStackTrace();

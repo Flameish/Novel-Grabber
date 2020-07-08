@@ -36,19 +36,18 @@ public class Metadata {
         if (!novel.host.bookTitleSelector.isEmpty()) {
             if (novel.tableOfContent.select(novel.host.bookTitleSelector) != null && !novel.tableOfContent.select(novel.host.bookTitleSelector).isEmpty()) {
                 bookTitle = novel.tableOfContent.select(novel.host.bookTitleSelector).first().text().replaceAll("[\\\\/:*?\"<>|]", "");
-                if(init.window != null) {
+                if(init.window != null && !novel.options.window.equals("checker")) {
                     init.window.autoBookTitle.setText(bookTitle);
                 }
             } else {
                 bookTitle = "Unknown";
-                if(init.window != null) {
+                if(init.window != null && !novel.options.window.equals("checker")) {
                     init.window.autoBookTitle.setText("Unknown");
-
                 }
             }
         } else {
             bookTitle = "Unknown";
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.autoBookTitle.setText("Unknown");
             }
         }
@@ -71,18 +70,18 @@ public class Metadata {
         if (!novel.host.bookAuthorSelector.isEmpty()) {
             if (novel.tableOfContent.select(novel.host.bookAuthorSelector) != null && !novel.tableOfContent.select(novel.host.bookAuthorSelector).isEmpty()) {
                 bookAuthor = novel.tableOfContent.select(novel.host.bookAuthorSelector).first().text();
-                if(init.window != null) {
+                if(init.window != null && !novel.options.window.equals("checker")) {
                     init.window.autoAuthor.setText(bookAuthor);
                 }
             } else {
                 bookAuthor = "Unknown";
-                if(init.window != null) {
+                if(init.window != null && !novel.options.window.equals("checker")) {
                     init.window.autoAuthor.setText("Unknown");
                 }
             }
         } else {
             bookAuthor = "Unknown";
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.autoAuthor.setText("Unknown");
             }
         }
@@ -98,7 +97,7 @@ public class Metadata {
 
                 // Display book subjects on GUI
                 int maxNumberOfSubjects = 0;
-                if(init.window != null) {
+                if(init.window != null && !novel.options.window.equals("checker")) {
                     init.window.autoBookSubjects.setText("<html>");
                     for (String eachTag : bookSubjects) {
                         init.window.autoBookSubjects.setText(init.window.autoBookSubjects.getText() + eachTag + ", ");
@@ -116,14 +115,14 @@ public class Metadata {
                 }
             } else {
                 bookSubjects.add("Unknown");
-                if(init.window != null) {
+                if(init.window != null && !novel.options.window.equals("checker")) {
                     init.window.autoBookSubjects.setText("Unknown");
 
                 }
             }
         } else {
             bookSubjects.add("Unknown");
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.autoBookSubjects.setText("Unknown");
             }
         }
@@ -131,7 +130,7 @@ public class Metadata {
 
     void getChapterNumber() {
         if (!novel.chapters.isEmpty()) {
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.autoChapterAmount.setText(String.valueOf(novel.chapters.size()));
                 init.window.autoGetNumberButton.setEnabled(true);
             }
@@ -154,7 +153,7 @@ public class Metadata {
                     }
                     bufferedCover = GrabberUtils.getBufferedCover(coverLink, novel);
                     if(!novel.imageNames.isEmpty()) {
-                        if(init.window != null) {
+                        if(init.window != null && !novel.options.window.equals("checker")) {
                             init.window.setBufferedCover(bufferedCover);
                         }
                         bookCover = novel.imageNames.get(0);

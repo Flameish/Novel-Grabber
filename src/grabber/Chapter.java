@@ -60,7 +60,7 @@ public class Chapter implements Serializable {
             }
         } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.appendText(novel.options.window,"[ERROR]"+e.getMessage());
             }
             status = 2;
@@ -70,7 +70,7 @@ public class Chapter implements Serializable {
         if (novel.host.url.equals("https://tapread.com/")) chapterContent = doc;
 
         if (chapterContent == null) {
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.appendText(novel.options.window,"[ERROR]Chapter container (" + novel.host.chapterContainer + ") not found.");
             }
             return;
@@ -96,7 +96,7 @@ public class Chapter implements Serializable {
         }
 
         novel.metadata.wordCount = novel.metadata.wordCount + GrabberUtils.getWordCount(chapterContent.toString());
-        if(init.window != null) {
+        if(init.window != null && !novel.options.window.equals("checker")) {
             init.window.pagesCountLbl.setText(String.valueOf(novel.metadata.wordCount / 300));
         }
 
@@ -128,12 +128,12 @@ public class Chapter implements Serializable {
             out.println(EPUB.htmlFoot);
         } catch (IOException e) {
             e.printStackTrace();
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.appendText(novel.options.window, "[ERROR]"+e.getMessage());
             }
         } finally {
             status = 1;
-            if(init.window != null) {
+            if(init.window != null && !novel.options.window.equals("checker")) {
                 init.window.appendText(novel.options.window, "[INFO]"+name+" saved.");
             }
             System.out.println("[INFO]"+name+" saved.");

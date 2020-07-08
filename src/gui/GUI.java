@@ -1,8 +1,12 @@
 package gui;
 
 import grabber.*;
-import system.Accounts;
 import system.Config;
+import system.init;
+import system.persistent.Accounts;
+import system.persistent.EmailConfig;
+import system.persistent.Library;
+import system.persistent.Settings;
 import updater.Updater;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,6 +17,7 @@ import org.jsoup.select.Elements;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultFormatter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -26,32 +31,36 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "2.7.2";
+    public static String versionNumber = "2.8.0";
     private static final String[] headerlessBrowserWebsites = {"FicFun", "Dreame", "WuxiaWorld.site","FoxTeller"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     private static final String[] loginWebsites = {"Booklat","Wuxiaworld", "WattPad"};
+    private static final String[] settingsMenus = {"Accounts","General", "Email", "Update"};
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
     public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static DefaultListModel<String> accountWebsiteListModel = new DefaultListModel<>();
+    public static DefaultListModel<String> settingsMenuModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
     public static String[] chapterToChapterArgs = new String[3];
     public static TrayIcon trayIcon;
     public static Integer chapterToChapterNumber = 1;
     private static String[] browserList = {"Chrome", "Firefox", "Edge", "Opera", "IE"};
+    private static String[] epubFilenameFormats = {"<author> - <title>", "<title> - <author>", "<title>"};
+    private static String[] sslList = {"SMTP","SMTPS","SMTP TLS",};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");
     public static Novel autoNovel = null;
     public static ManNovel manNovel = null;
     public JComboBox autoHostSelection;
     public JTextField chapterListURL;
-    public JTextField saveLocation;
+    public JTextField autoSaveLocation;
     public JCheckBox chapterAllCheckBox;
     public JSpinner firstChapter;
     public JSpinner lastChapter;
     public JCheckBox toLastChapter;
-    public JCheckBox getImages;
+    public JCheckBox autoGetImages;
     public JCheckBox checkInvertOrder;
     public JTextField waitTime;
     public JProgressBar progressBar;
@@ -99,7 +108,6 @@ public class GUI extends JFrame {
     private JScrollPane updateScrollPane;
     private JProgressBar manProgressBar;
     private JLabel updateStatusLbl;
-    private JPanel updateTab;
     private JLabel updateLogLbl;
     private JButton manGrabChaptersButton;
     private JButton manBlackListedTags;
@@ -136,7 +144,7 @@ public class GUI extends JFrame {
     public JTextField autoChapterToChapterNumberField;
     public JCheckBox manUseHeaderlessBrowser;
     public JComboBox manBrowserCombobox;
-    public JCheckBox autoNoStyling;
+    public JCheckBox autoRemoveStyling;
     public JCheckBox manNoStyling;
     private JButton manAddChapterButton;
     private JList accountWebsiteList;
@@ -145,6 +153,34 @@ public class GUI extends JFrame {
     private JButton accountAddBtn;
     private JScrollPane accountWebsiteScrollPane;
     public JCheckBox useAccountCheckBox;
+    private JList settingsMenuList;
+    private JScrollPane settingsMenuScrollPane;
+    private JPanel settingsAccountsPanel;
+    private JPanel settingsHeadlessPanel;
+    private JPanel settingsUpdatePanel;
+    private JCheckBox browserGUICheckBox;
+    private JButton emailSaveBtn;
+    private JComboBox settingsOutputFormatComboBox;
+    private JPanel settingsGeneralPanel;
+    private JCheckBox settingsAlwaysGetImagesCheckBox;
+    private JCheckBox settingsAlwaysRemoveStylingCheckBox;
+    private JTextField settingsSavelocationField;
+    private JButton settingsBrowseSaveLocationBtn;
+    private JCheckBox standardSaveLocationCheckBox;
+    private JButton autoStarredBtn;
+    private JPanel settingsTab;
+    private JPanel libraryTab;
+    private JPanel libraryPanel;
+    private JScrollPane libraryScrollPane;
+    private JPanel settingsEmailPanel;
+    private JTextField emailHostField;
+    private JTextField emailPortField;
+    private JTextField emailUserField;
+    private JTextField emailPasswordField;
+    private JComboBox emailSLLComboBox;
+    private JCheckBox sendNewChapterNotificationsCheckBox;
+    private JTextField emailReceiver;
+    private JCheckBox sendEPUBAsAttachmentCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -170,6 +206,7 @@ public class GUI extends JFrame {
                 options.hostname = autoHostSelection.getSelectedItem().toString();
                 options.novelLink = chapterListURL.getText();
                 options.useAccount = useAccountCheckBox.isSelected();
+                options.headlessGUI = browserGUICheckBox.isSelected();
                 autoNovel = new Novel(options);
                 // Needed
 
@@ -183,6 +220,15 @@ public class GUI extends JFrame {
                     pagesCountLbl.setText("");
                     pagesCountLbl.setVisible(false);
                     pagesLbl.setVisible(false);
+                    if(Library.isStarred(autoNovel.novelLink)) {
+                        autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/files/images/starred_icon.png")));
+                        autoStarredBtn.setEnabled(true);
+                        autoStarredBtn.setToolTipText("Remove novel from library");
+                    } else {
+                        autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/files/images/unstarred_icon.png")));
+                        autoStarredBtn.setEnabled(true);
+                        autoStarredBtn.setToolTipText("Add novel to library");
+                    }
                 }
                 autoBusyLabel.setVisible(false);
             }
@@ -196,9 +242,9 @@ public class GUI extends JFrame {
                 chapterListURL.requestFocusInWindow();
                 return;
             }
-            if (saveLocation.getText().isEmpty()) {
+            if (autoSaveLocation.getText().isEmpty()) {
                 showPopup("Save directory field is empty.", "warning");
-                saveLocation.requestFocusInWindow();
+                autoSaveLocation.requestFocusInWindow();
                 return;
             }
             if ((!chapterAllCheckBox.isSelected()) && (!toLastChapter.isSelected())
@@ -238,7 +284,7 @@ public class GUI extends JFrame {
             stopButton.setVisible(true);
             try {
                 // Needed
-                autoNovel.options.saveLocation = saveLocation.getText();
+                autoNovel.options.saveLocation = autoSaveLocation.getText();
                 //Optional
                 autoNovel.options.waitTime =  Integer.parseInt(waitTime.getText());
                 autoNovel.options.displayChapterTitle = displayChapterTitleCheckBox.isSelected();
@@ -247,6 +293,7 @@ public class GUI extends JFrame {
                 autoNovel.options.headless = useHeaderlessBrowserCheckBox.isSelected();
                 autoNovel.options.browser = autoBrowserCombobox.getSelectedItem().toString();
                 autoNovel.options.useAccount = useAccountCheckBox.isSelected();
+                autoNovel.options.headlessGUI = browserGUICheckBox.isSelected();
                 // Set chapter range
                 if(chapterAllCheckBox.isSelected()) {
                     autoNovel.options.firstChapter = 1;
@@ -288,7 +335,7 @@ public class GUI extends JFrame {
             chooser.setAcceptAllFileFilterUsed(false);
 
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                saveLocation.setText(chooser.getSelectedFile().toString());
+                autoSaveLocation.setText(chooser.getSelectedFile().toString());
             }
         });
 
@@ -654,13 +701,282 @@ public class GUI extends JFrame {
             }
         });
         // Add or Edit an account entry
-        accountAddBtn.addActionListener(actionEvent -> Accounts.addAccount(
+        accountAddBtn.addActionListener(actionEvent -> Accounts.setAccount(
                 accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex()),
                 accountUsernameField.getText(),
                 accountPasswordField.getText()
         ));
+        settingsMenuList.addListSelectionListener(listSelectionEvent -> {
+            String selectedMenu = settingsMenuModel.get(settingsMenuList.getSelectedIndex());
+            settingsAccountsPanel.setVisible(false);
+            settingsHeadlessPanel.setVisible(false);
+            settingsUpdatePanel.setVisible(false);
+            settingsGeneralPanel.setVisible(false);
+            if(selectedMenu.equals("Accounts")) settingsAccountsPanel.setVisible(true);
+            if(selectedMenu.equals("Update")) settingsUpdatePanel.setVisible(true);
+            if(selectedMenu.equals("Email")) settingsEmailPanel.setVisible(true);
+            if(selectedMenu.equals("General")) {
+                settingsGeneralPanel.setVisible(true);
+                settingsHeadlessPanel.setVisible(true);
+            }
+        });
+        browserGUICheckBox.addActionListener(actionEvent -> {
+            Settings.setHeadlessSettings(autoBrowserCombobox.getSelectedItem().toString(), browserGUICheckBox.isSelected());
+
+        });
+        autoBrowserCombobox.addActionListener(actionEvent -> {
+            Settings.setHeadlessSettings(autoBrowserCombobox.getSelectedItem().toString(), browserGUICheckBox.isSelected());
+
+        });
+        settingsAlwaysGetImagesCheckBox.addActionListener(actionEvent -> {
+            Settings.setGeneralSettings(
+                    settingsAlwaysGetImagesCheckBox.isSelected(),
+                    settingsAlwaysRemoveStylingCheckBox.isSelected(),
+                    settingsOutputFormatComboBox.getSelectedIndex(),
+                    settingsSavelocationField.getText(),
+                    standardSaveLocationCheckBox.isSelected()
+            );
+        });
+        settingsAlwaysRemoveStylingCheckBox.addActionListener(actionEvent -> {
+            Settings.setGeneralSettings(
+                    settingsAlwaysGetImagesCheckBox.isSelected(),
+                    settingsAlwaysRemoveStylingCheckBox.isSelected(),
+                    settingsOutputFormatComboBox.getSelectedIndex(),
+                    settingsSavelocationField.getText(),
+                    standardSaveLocationCheckBox.isSelected()
+                    );
+        });
+        settingsOutputFormatComboBox.addActionListener(actionEvent -> {
+            Settings.setGeneralSettings(
+                    settingsAlwaysGetImagesCheckBox.isSelected(),
+                    settingsAlwaysRemoveStylingCheckBox.isSelected(),
+                    settingsOutputFormatComboBox.getSelectedIndex(),
+                    settingsSavelocationField.getText(),
+                    standardSaveLocationCheckBox.isSelected()
+            );
+        });
+        standardSaveLocationCheckBox.addActionListener(actionEvent -> {
+            Settings.setGeneralSettings(
+                    settingsAlwaysGetImagesCheckBox.isSelected(),
+                    settingsAlwaysRemoveStylingCheckBox.isSelected(),
+                    settingsOutputFormatComboBox.getSelectedIndex(),
+                    settingsSavelocationField.getText(),
+                    standardSaveLocationCheckBox.isSelected()
+            );
+
+        });
+        settingsBrowseSaveLocationBtn.addActionListener(actionEvent -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new File("."));
+            chooser.setDialogTitle("Choose destination directory");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                settingsSavelocationField.setText(chooser.getSelectedFile().toString());
+            }
+        });
+        autoStarredBtn.addActionListener(actionEvent -> {
+            if(Library.isStarred(autoNovel.novelLink)) {
+                Library.removeStarred(autoNovel.novelLink);
+                autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/files/images/unstarred_icon.png")));
+            } else {
+                Library.setStarred(autoNovel);
+                autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/files/images/starred_icon.png")));
+            }
+        });
+        tabbedPane.addChangeListener(e -> {
+            if(tabbedPane.getSelectedIndex() == 2) {
+                buildLibrary();
+            }
+        });
+        emailSaveBtn.addActionListener(actionEvent -> {
+            EmailConfig.saveEmailSettings(
+                    emailHostField.getText(),
+                    emailUserField.getText(),
+                    emailPasswordField.getText(),
+                    emailReceiver.getText(),
+                    Integer.parseInt(emailPortField.getText()),
+                    emailSLLComboBox.getSelectedIndex()
+            );
+        });
+        sendNewChapterNotificationsCheckBox.addActionListener(actionEvent -> EmailConfig.setNotifications(sendNewChapterNotificationsCheckBox.isSelected()));
+        sendEPUBAsAttachmentCheckBox.addActionListener(actionEvent -> EmailConfig.setUseAttachment(sendEPUBAsAttachmentCheckBox.isSelected()));
     }
 
+
+    public void buildLibrary() {
+        libraryPanel.setVisible(false);
+        libraryPanel.removeAll();
+        libraryPanel.setVisible(true);
+        int gridRow = 0;
+        int gridCol = 0;
+        for(String novelUrl: Library.getLibrary()) {
+            JPanel novelPane = new JPanel();
+            novelPane.setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+
+            JPanel infoPanel = new JPanel();
+
+            infoPanel.setLayout(new GridBagLayout());
+            JLabel novelTitle = new JLabel(Library.getNovelTitle(novelUrl));
+            novelTitle.setFont(new Font("Calibri", Font.BOLD, 17));
+
+            JLabel thresholdLbl = new JLabel("Threshold:");
+            JSpinner thresholdSpinner = new JSpinner();
+            thresholdSpinner.setValue(Library.getThreshold(novelUrl));
+            JComponent comp = thresholdSpinner.getEditor();
+            JFormattedTextField field = (JFormattedTextField) comp.getComponent(0);
+            field.setColumns(4);
+            DefaultFormatter formatter = (DefaultFormatter) field.getFormatter();
+            formatter.setCommitsOnValidEdit(true);
+            thresholdSpinner.addChangeListener(e -> Library.setThreshold(novelUrl, (Integer) thresholdSpinner.getValue()));
+
+            JCheckBox autoGrabbingCheckbox = new JCheckBox("Grab new chapters");
+            autoGrabbingCheckbox.setSelected(Library.getAutoDownload(novelUrl));
+            autoGrabbingCheckbox.setToolTipText("Automatically download chapters when threshold of new releases is met");
+            autoGrabbingCheckbox.addActionListener(actionEvent -> {
+                Library.setAutoDownload(novelUrl, autoGrabbingCheckbox.isSelected());
+            });
+            JLabel lastChapter = new JLabel("Last chapter: "+ Library.getLastChapter(novelUrl));
+            JLabel newestChapter = new JLabel("Newest chapter: "+ Library.getNewestChapter(novelUrl));
+
+            JButton changeCLIBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/settings_icon.png")));
+            changeCLIBtn.setBorder(BorderFactory.createEmptyBorder());
+            changeCLIBtn.setContentAreaFilled(false);
+            changeCLIBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            changeCLIBtn.setToolTipText("Change the CLI command to adjust download parameters");
+            changeCLIBtn.addActionListener(actionEvent -> {
+                String cli = JOptionPane.showInputDialog("Change cli command:",Library.getCLICommand(novelUrl));
+                if(cli != null) {
+                    Library.setCLICommand(novelUrl, cli);
+                }
+            });
+
+            JButton removeFromFavBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/remove_icon.png")));
+            removeFromFavBtn.setBorder(BorderFactory.createEmptyBorder());
+            removeFromFavBtn.setContentAreaFilled(false);
+            removeFromFavBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            removeFromFavBtn.setToolTipText("Remove novel from library");
+            removeFromFavBtn.addActionListener(actionEvent -> {
+                Library.removeStarred(novelUrl);
+                buildLibrary();
+            });
+
+            JButton getLatestChapterBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/download_icon.png")));
+            getLatestChapterBtn.setBorder(BorderFactory.createEmptyBorder());
+            getLatestChapterBtn.setContentAreaFilled(false);
+            getLatestChapterBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            getLatestChapterBtn.setToolTipText("Download chapters from last downloaded to latest");
+            getLatestChapterBtn.addActionListener(actionEvent -> {
+                int lastDownloadedChapter = Integer.parseInt(lastChapter.getText().substring(lastChapter.getText().lastIndexOf(" ")+1));
+                int lastestChapter = Integer.parseInt(newestChapter.getText().substring(newestChapter.getText().lastIndexOf(" ")+1));
+                if(lastDownloadedChapter != lastestChapter) {
+                    String cliString = Library.getCLICommand(novelUrl)+" -window checker -chapters "+(lastDownloadedChapter+1)+" "+lastestChapter;
+                    String[] cliParams = cliString.split(" ");
+                    init.processParams(init.getParamsFromString(cliParams));
+                    Library.setLastChapter(novelUrl, lastestChapter);
+                    buildLibrary();
+                }
+            });
+
+            JPanel imagePanel = new JPanel();
+            imagePanel.setLayout(new GridBagLayout());
+
+            JLabel novelImage;
+            String novelCover = Config.home_path+ "/" + Config.home_folder +
+                    "/"+ Library.getNovelTitle(novelUrl)+"/"
+                    + Library.getBookCover(novelUrl);
+            if(novelCover.isEmpty()) {
+                novelImage = new JLabel(new ImageIcon(getClass().getResource("/files/images/cover_placeholder.png")));
+            } else {
+                ImageIcon imageIcon = new ImageIcon(novelCover); // load the image to a imageIcon
+                Image image = imageIcon.getImage(); // transform it
+                Image newimg = image.getScaledInstance(100, 133,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+                imageIcon = new ImageIcon(newimg);  // transform it back
+                novelImage = new JLabel(imageIcon);
+            }
+            novelImage.setBorder(BorderFactory.createEmptyBorder());
+            imagePanel.add(novelImage);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            infoPanel.add(novelTitle, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.NORTHEAST;
+            gbc.gridx = 1;
+            gbc.gridy = 0;
+            infoPanel.add(getLatestChapterBtn, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.NORTHEAST;
+            gbc.gridx = 2;
+            gbc.gridy = 0;
+            infoPanel.add(changeCLIBtn, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.NORTHEAST;
+            gbc.gridx = 3;
+            gbc.gridy = 0;
+            infoPanel.add(removeFromFavBtn, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            infoPanel.add(lastChapter, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            infoPanel.add(newestChapter, gbc);
+
+            gbc.fill = GridBagConstraints.VERTICAL;
+            gbc.anchor = GridBagConstraints.SOUTHWEST;
+            gbc.gridx = 0;
+            gbc.gridy = 3;
+            infoPanel.add(autoGrabbingCheckbox, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.SOUTHWEST;
+            gbc.gridx = 0;
+            gbc.gridy = 4;
+            infoPanel.add(thresholdLbl, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.SOUTHWEST;
+            gbc.gridx = 1;
+            gbc.gridy = 4;
+            infoPanel.add(thresholdSpinner, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            //gbc.anchor = GridBagConstraints.WEST;
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            novelPane.add(imagePanel, gbc);
+
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.gridx = 1;
+            gbc.gridy = 0;
+            gbc.insets = new Insets( 0, 10, 0, 0);
+            novelPane.add(infoPanel, gbc);
+
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.gridx = gridCol++ % 2 == 0 ? 0 : 1;
+            gbc.gridy = gridRow++ % 2 == 0 ? gridRow : gridRow-1;
+            gbc.weightx = 1.0;
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.weighty = 1;
+            gbc.insets = new Insets( 10, 10, 10, 10);
+            libraryPanel.add(novelPane, gbc);
+            //libraryPanel.add(novelPane);
+        }
+    }
 
     private void initialize() {
         add(rootPanel);
@@ -776,8 +1092,7 @@ public class GUI extends JFrame {
                 manLogArea.setCaretPosition(manLogArea.getText().length());
                 break;
             case "checker":
-                checkerLogArea.append(logMsg + NL);
-                checkerLogArea.setCaretPosition(checkerLogArea.getText().length());
+                System.out.println(logMsg);
                 break;
             case "update":
                 updateTextArea.append(" - " + logMsg + NL);
@@ -883,6 +1198,15 @@ public class GUI extends JFrame {
         autoHostSelection = new JComboBox(getWebsites());
 
         autoBrowserCombobox = new JComboBox(browserList);
+        autoBrowserCombobox.setSelectedItem(Settings.getBrowser());
+
+        autoGetImages = new JCheckBox();
+        autoGetImages.setSelected(Settings.getImages());
+
+        autoRemoveStyling = new JCheckBox();
+        autoRemoveStyling.setSelected(Settings.getRemoveStyling());
+
+        autoSaveLocation = new JTextField();
 
         autoChapterToChapterNumberField = new JTextField("Number");
         autoChapterToChapterNumberField.setForeground(Color.GRAY);
@@ -890,6 +1214,10 @@ public class GUI extends JFrame {
         autoShowBlacklistedTagsBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/block.png")));
         autoShowBlacklistedTagsBtn.setBorder(BorderFactory.createEmptyBorder());
         autoShowBlacklistedTagsBtn.setContentAreaFilled(false);
+
+        autoStarredBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/unstarred_icon.png")));
+        autoStarredBtn.setBorder(BorderFactory.createEmptyBorder());
+        autoStarredBtn.setContentAreaFilled(false);
 
         autoCheckAvailability = new JButton(new ImageIcon(getClass().getResource("/files/images/check_icon.png")));
         autoCheckAvailability.setBorder(BorderFactory.createEmptyBorder());
@@ -999,14 +1327,60 @@ public class GUI extends JFrame {
         manWaitTime = new JTextField("0");
         manWaitTime.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Account Tab
+        // Settins Tab
+        for(String settingsMenu: settingsMenus) {
+            settingsMenuModel.addElement(settingsMenu);
+        }
+        settingsMenuList = new JList<>(settingsMenuModel);
+        settingsMenuList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        settingsMenuScrollPane = new JScrollPane(settingsMenuList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        browserGUICheckBox = new JCheckBox();
+        browserGUICheckBox.setSelected(Settings.getBrowserShowGUI());
+
+        settingsAlwaysGetImagesCheckBox = new JCheckBox();
+        settingsAlwaysGetImagesCheckBox.setSelected(Settings.getImages());
+
+        settingsAlwaysRemoveStylingCheckBox = new JCheckBox();
+        settingsAlwaysRemoveStylingCheckBox.setSelected(Settings.getRemoveStyling());
+
+        standardSaveLocationCheckBox = new JCheckBox();
+        standardSaveLocationCheckBox.setSelected(Settings.getUseStandardLocation());
+
+        if(Settings.getUseStandardLocation()) {
+            autoSaveLocation.setText(Settings.getSavelocation());
+        }
+
+        settingsSavelocationField = new JTextField();
+        settingsSavelocationField.setText(Settings.getSavelocation());
+
+        settingsBrowseSaveLocationBtn = new JButton(new ImageIcon(getClass().getResource("/files/images/folder_icon.png")));
+        settingsBrowseSaveLocationBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsBrowseSaveLocationBtn.setContentAreaFilled(false);
+
+        settingsOutputFormatComboBox = new JComboBox(epubFilenameFormats);
+        settingsOutputFormatComboBox.setSelectedIndex(Settings.getEPUBOutputFormat());
+
         accountPasswordField = new JPasswordField();
         for(String accountDomain: loginWebsitesList) {
             accountWebsiteListModel.addElement(accountDomain);
         }
         accountWebsiteList = new JList<>(accountWebsiteListModel);
-        manLinkList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        accountWebsiteList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         accountWebsiteScrollPane = new JScrollPane(accountWebsiteList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        // Email settings
+        emailHostField = new JTextField(EmailConfig.getHost());
+        emailUserField = new JTextField(EmailConfig.getUsername());
+        emailReceiver = new JTextField(EmailConfig.getReceiverEmail());
+        emailPasswordField = new JPasswordField(EmailConfig.getPassword());
+        emailPortField = new JTextField(String.valueOf(EmailConfig.getPort()));
+        emailSLLComboBox = new JComboBox(sslList);
+        emailSLLComboBox.setSelectedIndex(EmailConfig.getSSL());
+        sendNewChapterNotificationsCheckBox = new JCheckBox();
+        sendNewChapterNotificationsCheckBox.setSelected(EmailConfig.useNotifications());
+        sendEPUBAsAttachmentCheckBox = new JCheckBox();
+        sendEPUBAsAttachmentCheckBox.setSelected(EmailConfig.useAttachment());
 
         // Update Tab
         updateTextArea = new JTextArea();
