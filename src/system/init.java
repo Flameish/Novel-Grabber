@@ -134,7 +134,9 @@ public class init {
                     autoNovel.options.firstChapter = 1;
                     autoNovel.options.lastChapter = autoNovel.chapters.size();
                 }
+                String oldBookTitle = autoNovel.metadata.bookTitle;
                 try {
+                    // Change bookTitle temporarily to include chapter names when creating the EPUB for library auto grabs
                     if(autoNovel.options.window.equals("checker")) {
                         autoNovel.metadata.bookTitle = autoNovel.options.firstChapter
                                 +"-"+ autoNovel.options.lastChapter
@@ -150,7 +152,10 @@ public class init {
                 epub.createToc();
                 epub.createDescPage();
                 epub.writeEpub();
-
+                // Change book title back to show up in emails correctly
+                if(autoNovel.options.window.equals("checker")) {
+                    autoNovel.metadata.bookTitle = oldBookTitle;
+                }
                 autoNovel.report();
                 return autoNovel;
             } else {
