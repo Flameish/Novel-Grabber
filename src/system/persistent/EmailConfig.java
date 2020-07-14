@@ -37,38 +37,10 @@ public class EmailConfig {
         return Integer.parseInt(String.valueOf(email.get("ssl")));
     }
 
-    public static boolean useNotifications() {
-        JSONObject email = (JSONObject) Config.data.get("email");
-        if(email == null || !email.containsKey("useNotifications")) return false;
-        return (boolean) email.get("useNotifications");
-    }
-
-    public static boolean useAttachment() {
-        JSONObject email = (JSONObject) Config.data.get("email");
-        if(email == null || !email.containsKey("useAttachment")) return false;
-        return (boolean) email.get("useAttachment");
-    }
-
     public static String getReceiverEmail() {
         JSONObject email = (JSONObject) Config.data.get("email");
         if(email == null || !email.containsKey("receiverEmail")) return "";
         return (String) email.get("receiverEmail");
-    }
-
-    public static void setNotifications(boolean useNotifications) {
-        JSONObject email = (JSONObject) Config.data.get("email");
-        if(email == null) email = new JSONObject();
-        email.put("useNotifications", useNotifications);
-        Config.data.put("email", email);
-        Config.saveConfig();
-    }
-
-    public static void setUseAttachment(boolean useAttachment) {
-        JSONObject email = (JSONObject) Config.data.get("email");
-        if(email == null) email = new JSONObject();
-        email.put("useAttachment", useAttachment);
-        Config.data.put("email", email);
-        Config.saveConfig();
     }
 
     public static void saveEmailSettings(String host, String username, String password, String receiverEmail, int port, int SSL) {

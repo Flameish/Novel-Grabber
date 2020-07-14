@@ -157,6 +157,34 @@ public class Library {
         Config.saveConfig();
     }
 
+    public static void setNotifications(boolean useNotifications) {
+        JSONObject email = (JSONObject) Config.data.get("librarySettings");
+        if(email == null) email = new JSONObject();
+        email.put("useNotifications", useNotifications);
+        Config.data.put("librarySettings", email);
+        Config.saveConfig();
+    }
+
+    public static boolean useAttachment() {
+        JSONObject email = (JSONObject) Config.data.get("librarySettings");
+        if(email == null || !email.containsKey("useAttachment")) return false;
+        return (boolean) email.get("useAttachment");
+    }
+
+    public static void setUseAttachment(boolean useAttachment) {
+        JSONObject email = (JSONObject) Config.data.get("librarySettings");
+        if(email == null) email = new JSONObject();
+        email.put("useAttachment", useAttachment);
+        Config.data.put("librarySettings", email);
+        Config.saveConfig();
+    }
+
+    public static boolean useNotifications() {
+        JSONObject email = (JSONObject) Config.data.get("librarySettings");
+        if(email == null || !email.containsKey("useNotifications")) return false;
+        return (boolean) email.get("useNotifications");
+    }
+
     public static void setPolling(boolean pollingEnabled) {
         JSONObject librarySettings = (JSONObject) Config.data.get("librarySettings");
         if(librarySettings == null) librarySettings = new JSONObject();

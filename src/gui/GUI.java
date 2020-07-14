@@ -808,15 +808,15 @@ public class GUI extends JFrame {
             );
         });
         sendNewChapterNotificationsCheckBox.addActionListener(actionEvent -> {
-            EmailConfig.setNotifications(sendNewChapterNotificationsCheckBox.isSelected());
+            Library.setNotifications(sendNewChapterNotificationsCheckBox.isSelected());
             sendEPUBAsAttachmentCheckBox.setSelected(false);
-            EmailConfig.setUseAttachment(sendEPUBAsAttachmentCheckBox.isSelected());
+            Library.setUseAttachment(sendEPUBAsAttachmentCheckBox.isSelected());
 
         });
         sendEPUBAsAttachmentCheckBox.addActionListener(actionEvent -> {
-            EmailConfig.setUseAttachment(sendEPUBAsAttachmentCheckBox.isSelected());
+            Library.setUseAttachment(sendEPUBAsAttachmentCheckBox.isSelected());
             sendNewChapterNotificationsCheckBox.setSelected(false);
-            EmailConfig.setNotifications(sendNewChapterNotificationsCheckBox.isSelected());
+            Library.setNotifications(sendNewChapterNotificationsCheckBox.isSelected());
             updateLastChapterNumberCheckBox.setSelected(false);
             Library.setUpdateLast(updateLastChapterNumberCheckBox.isSelected());
 
@@ -1408,9 +1408,9 @@ public class GUI extends JFrame {
         emailSLLComboBox = new JComboBox(sslList);
         emailSLLComboBox.setSelectedIndex(EmailConfig.getSSL());
         sendNewChapterNotificationsCheckBox = new JCheckBox();
-        sendNewChapterNotificationsCheckBox.setSelected(EmailConfig.useNotifications());
+        sendNewChapterNotificationsCheckBox.setSelected(Library.useNotifications());
         sendEPUBAsAttachmentCheckBox = new JCheckBox();
-        sendEPUBAsAttachmentCheckBox.setSelected(EmailConfig.useAttachment());
+        sendEPUBAsAttachmentCheckBox.setSelected(Library.useAttachment());
 
         // Library
         enableCheckingCheckBox = new JCheckBox();

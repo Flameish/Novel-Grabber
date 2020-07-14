@@ -45,14 +45,14 @@ public class LibrarySystem {
                         String[] cliParams = cliString.split(" ");
                         autoNovel = init.processParams(init.getParamsFromString(cliParams));
                         Library.setLastChapter(novelUrl, Library.getNewestChapter(novelUrl));
-                        if(EmailConfig.useAttachment() && !EmailConfig.getHost().isEmpty()) {
+                        if(Library.useAttachment() && !EmailConfig.getHost().isEmpty()) {
                             mailer.sendAttachment(autoNovel);
                             System.out.println("[INFO]Email with attachment send.");
                         }
                     }
                 }
                 // Notification
-                if(EmailConfig.useNotifications() && chapterDifference > 0 && !EmailConfig.getHost().isEmpty()) {
+                if(Library.useNotifications() && chapterDifference > 0 && !EmailConfig.getHost().isEmpty()) {
                     mailer.sendNotification(autoNovel);
                     System.out.println("[INFO]Notification send.");
                     // Adjust last downloaded chapter to newest
