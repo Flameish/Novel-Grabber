@@ -70,6 +70,9 @@ public class ChapterLists {
                 case "https://foxaholic.com/":
                     novel.chapters = ChapterLists.foxaholic(novel);
                     break;
+                case "https://scribblehub.com/":
+                    novel.chapters = ChapterLists.scribblehub(novel);
+                    break;
                 default:
                     novel.chapters = ChapterLists.defaults(novel);
                     break;
@@ -77,6 +80,15 @@ public class ChapterLists {
         } catch(IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static List<Chapter> scribblehub(Novel novel) throws IOException {
+        novel.tableOfContent = Jsoup.connect(novel.novelLink).cookie("toc_show","9999").timeout(30 * 1000).get();
+        List<Chapter> chapters = new ArrayList<>();
+        for (Element chapterLink : novel.tableOfContent.select(novel.host.chapterLinkSelector)) {
+            chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+        }
+        return chapters;
     }
 
     private static List<Chapter> creativenovels(Novel novel) throws IOException {

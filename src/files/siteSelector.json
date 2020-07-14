@@ -453,5 +453,20 @@
     "bookCoverSelector": ".novel-featureimg img",
     "bookAuthorSelector": "",
     "bookSubjectSelector": ".novel-tags"
+  },
+
+  "ScribbleHub": {
+    "url": "https://scribblehub.com/",
+    "ordinalIndexForBaseNovel": "5",
+    "chapterLinkSelector": "a.toc_a",
+    "chapterContainer": "#chp_raw",
+    "blacklistedTags": [
+      "null"
+    ],
+    "bookTitleSelector": ".fic_title",
+    "bookDescSelector": ".wi_fic_desc",
+    "bookCoverSelector": ".fic_image img",
+    "bookAuthorSelector": ".auth_name_fic",
+    "bookSubjectSelector": ".wi_fic_genre a"
   }
 }
