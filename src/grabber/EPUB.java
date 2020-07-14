@@ -133,25 +133,23 @@ public class EPUB {
             // Create EpubWriter
             EpubWriter epubWriter = new EpubWriter();
             // Write the Book as Epub
-            String epubFilename;
+            String epubFilename = "Something-Went-Wrong.epub";
             switch (Settings.getEPUBOutputFormat()) {
                 case 0:
-                    epubFilename = (novel.metadata.bookAuthor + " - " + novel.metadata.bookTitle + ".epub").replaceAll(" ","");
+                    epubFilename = novel.metadata.bookAuthor + " - " + novel.metadata.bookTitle + ".epub";
+                    if(novel.options.window.equals("checker")) epubFilename = epubFilename.replaceAll(" ","-");
                     epubWriter.write(book, new FileOutputStream(novel.options.saveLocation
                             + "/" + epubFilename));
                     break;
                 case 1:
-                    epubFilename = (novel.metadata.bookTitle + " - " + novel.metadata.bookAuthor + ".epub").replaceAll(" ","");
+                    epubFilename = novel.metadata.bookTitle + " - " + novel.metadata.bookAuthor + ".epub";
+                    if(novel.options.window.equals("checker")) epubFilename = epubFilename.replaceAll(" ","-");
                     epubWriter.write(book, new FileOutputStream(novel.options.saveLocation
                             + "/" + epubFilename));
                     break;
                 case 2:
-                    epubFilename = (novel.metadata.bookTitle + ".epub").replaceAll(" ", "");
-                    epubWriter.write(book, new FileOutputStream(novel.options.saveLocation
-                            + "/" + epubFilename));
-                    break;
-                default:
-                    epubFilename = (novel.metadata.bookAuthor + " - " + novel.metadata.bookTitle + ".epub").replaceAll(" ","");
+                    epubFilename = novel.metadata.bookTitle + ".epub";
+                    if(novel.options.window.equals("checker")) epubFilename = epubFilename.replaceAll(" ","-");
                     epubWriter.write(book, new FileOutputStream(novel.options.saveLocation
                             + "/" + epubFilename));
                     break;
