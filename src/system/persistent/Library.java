@@ -86,6 +86,25 @@ public class Library {
         return (boolean) ((JSONObject) library.get(novelUrl)).get("autoDownload");
     }
 
+
+    public static boolean getPolling() {
+        JSONObject librarySettings = (JSONObject) Config.data.get("librarySettings");
+        if(librarySettings == null || librarySettings.get("pollingEnabled") == null) return true;
+        return (boolean) librarySettings.get("pollingEnabled");
+    }
+
+    public static boolean getUpdateLast() {
+        JSONObject librarySettings = (JSONObject) Config.data.get("librarySettings");
+        if(librarySettings == null || librarySettings.get("updateLast") == null) return false;
+        return (boolean) librarySettings.get("updateLast");
+    }
+
+    public static int getFrequency() {
+        JSONObject librarySettings = (JSONObject) Config.data.get("librarySettings");
+        if(librarySettings == null || librarySettings.get("frequency") == null) return 20;
+        return Integer.parseInt(String.valueOf(librarySettings.get("frequency")));
+    }
+
     public static List<String> getLibrary() {
         JSONObject library = (JSONObject) Config.data.get("library");
         if(library == null || library.isEmpty()) return new ArrayList<>();
@@ -138,6 +157,30 @@ public class Library {
         Config.saveConfig();
     }
 
+    public static void setPolling(boolean pollingEnabled) {
+        JSONObject librarySettings = (JSONObject) Config.data.get("librarySettings");
+        if(librarySettings == null) librarySettings = new JSONObject();
+        librarySettings.put("pollingEnabled", pollingEnabled);
+        Config.data.put("librarySettings", librarySettings);
+        Config.saveConfig();
+    }
+
+    public static void setUpdateLast(boolean updateLast) {
+        JSONObject librarySettings = (JSONObject) Config.data.get("librarySettings");
+        if(librarySettings == null) librarySettings = new JSONObject();
+        librarySettings.put("updateLast", updateLast);
+        Config.data.put("librarySettings", librarySettings);
+        Config.saveConfig();
+    }
+
+    public static void setFrequency(int frequency) {
+        JSONObject librarySettings = (JSONObject) Config.data.get("librarySettings");
+        if(librarySettings == null) librarySettings = new JSONObject();
+        librarySettings.put("frequency", frequency);
+        Config.data.put("librarySettings", librarySettings);
+        Config.saveConfig();
+    }
+
     public static void setCLICommand(String novelUrl, String cliCommand) {
         JSONObject library = (JSONObject) Config.data.get("library");
         JSONObject novel = (JSONObject) library.get(novelUrl);
@@ -160,8 +203,8 @@ public class Library {
         newNovel.put("headless", novel.options.headless);
         newNovel.put("host", novel.options.hostname);
         newNovel.put("useAccount", novel.options.useAccount);
-        newNovel.put("saveLocation", Config.home_path+ "/" + Config.home_folder + "/"+novel.metadata.bookTitle);
-        String cliCommand = "-link "+novel.novelLink +" -path "+Config.home_path+ "/" + Config.home_folder + "/"+novel.metadata.bookTitle+"/";
+        newNovel.put("saveLocation", Config.home_path+ "/" + Config.home_folder + "/"+novel.metadata.bookTitle+"/");
+        String cliCommand = "-link "+novel.novelLink +" -path "+(Config.home_path+ "/" + Config.home_folder + "/"+novel.metadata.bookTitle+"/").replaceAll(" ","-");
         if(novel.options.headless) {
             cliCommand = cliCommand+ " -headless " +Settings.getBrowser();
         }
@@ -172,7 +215,7 @@ public class Library {
 
         library.put(novel.novelLink, newNovel);
         Config.data.put("library", library);
-        File outputfile = new File(Config.home_path+ "/" + Config.home_folder + "/"+novel.metadata.bookTitle+"/"+novel.metadata.bookCover);
+        File outputfile = new File((Config.home_path+ "/" + Config.home_folder + "/"+novel.metadata.bookTitle+"/").replaceAll(" ","-")+novel.metadata.bookCover);
         outputfile.mkdirs();
         try {
             ImageIO.write(novel.metadata.bufferedCover, novel.metadata.bookCover.substring(novel.metadata.bookCover.lastIndexOf(".")+1), outputfile);
