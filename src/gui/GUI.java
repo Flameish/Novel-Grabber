@@ -35,7 +35,7 @@ public class GUI extends JFrame {
     private static final String[] headerlessBrowserWebsites = {"FicFun", "Dreame", "WuxiaWorld.site","FoxTeller"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     private static final String[] loginWebsites = {"Booklat","Wuxiaworld", "WattPad"};
-    private static final String[] settingsMenus = {"Accounts","General", "Email", "Update"};
+    private static final String[] settingsMenus = {"Accounts","General", "Library", "Email", "Update"};
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
     public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
@@ -181,6 +181,10 @@ public class GUI extends JFrame {
     private JCheckBox sendNewChapterNotificationsCheckBox;
     private JTextField emailReceiver;
     private JCheckBox sendEPUBAsAttachmentCheckBox;
+    private JPanel settingsLibraryPanel;
+    private JCheckBox enableCheckingCheckBox;
+    private JSpinner libraryFrequencySpinner;
+    private JCheckBox updateLastChapterNumberCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -712,8 +716,11 @@ public class GUI extends JFrame {
             settingsHeadlessPanel.setVisible(false);
             settingsUpdatePanel.setVisible(false);
             settingsGeneralPanel.setVisible(false);
+            settingsEmailPanel.setVisible(false);
+            settingsLibraryPanel.setVisible(false);
             if(selectedMenu.equals("Accounts")) settingsAccountsPanel.setVisible(true);
             if(selectedMenu.equals("Update")) settingsUpdatePanel.setVisible(true);
+            if(selectedMenu.equals("Library")) settingsLibraryPanel.setVisible(true);
             if(selectedMenu.equals("Email")) settingsEmailPanel.setVisible(true);
             if(selectedMenu.equals("General")) {
                 settingsGeneralPanel.setVisible(true);
@@ -800,8 +807,31 @@ public class GUI extends JFrame {
                     emailSLLComboBox.getSelectedIndex()
             );
         });
-        sendNewChapterNotificationsCheckBox.addActionListener(actionEvent -> EmailConfig.setNotifications(sendNewChapterNotificationsCheckBox.isSelected()));
-        sendEPUBAsAttachmentCheckBox.addActionListener(actionEvent -> EmailConfig.setUseAttachment(sendEPUBAsAttachmentCheckBox.isSelected()));
+        sendNewChapterNotificationsCheckBox.addActionListener(actionEvent -> {
+            EmailConfig.setNotifications(sendNewChapterNotificationsCheckBox.isSelected());
+            sendEPUBAsAttachmentCheckBox.setSelected(false);
+            EmailConfig.setUseAttachment(sendEPUBAsAttachmentCheckBox.isSelected());
+
+        });
+        sendEPUBAsAttachmentCheckBox.addActionListener(actionEvent -> {
+            EmailConfig.setUseAttachment(sendEPUBAsAttachmentCheckBox.isSelected());
+            sendNewChapterNotificationsCheckBox.setSelected(false);
+            EmailConfig.setNotifications(sendNewChapterNotificationsCheckBox.isSelected());
+            updateLastChapterNumberCheckBox.setSelected(false);
+            Library.setUpdateLast(updateLastChapterNumberCheckBox.isSelected());
+
+        });
+        enableCheckingCheckBox.addActionListener(actionEvent -> {
+            Library.setPolling(enableCheckingCheckBox.isSelected());
+            if(!enableCheckingCheckBox.isSelected()) {
+                libraryFrequencySpinner.setEnabled(false);
+            } else {
+                libraryFrequencySpinner.setEnabled(true);
+            }
+        });
+        updateLastChapterNumberCheckBox.addActionListener(actionEvent -> {
+            Library.setUpdateLast(updateLastChapterNumberCheckBox.isSelected());
+        });
     }
 
 
@@ -884,8 +914,8 @@ public class GUI extends JFrame {
             imagePanel.setLayout(new GridBagLayout());
 
             JLabel novelImage;
-            String novelCover = Config.home_path+ "/" + Config.home_folder +
-                    "/"+ Library.getNovelTitle(novelUrl)+"/"
+            String novelCover = (Config.home_path+ "/" + Config.home_folder +
+                    "/"+ Library.getNovelTitle(novelUrl)+"/").replaceAll(" ","-")
                     + Library.getBookCover(novelUrl);
             if(novelCover.isEmpty()) {
                 novelImage = new JLabel(new ImageIcon(getClass().getResource("/files/images/cover_placeholder.png")));
@@ -1382,6 +1412,24 @@ public class GUI extends JFrame {
         sendEPUBAsAttachmentCheckBox = new JCheckBox();
         sendEPUBAsAttachmentCheckBox.setSelected(EmailConfig.useAttachment());
 
+        // Library
+        enableCheckingCheckBox = new JCheckBox();
+        enableCheckingCheckBox.setSelected(Library.getPolling());
+
+        libraryFrequencySpinner = new JSpinner();
+        libraryFrequencySpinner.setValue(Library.getFrequency());
+        libraryFrequencySpinner = new JSpinner();
+        libraryFrequencySpinner.setValue(Library.getFrequency());
+        JComponent comp = libraryFrequencySpinner.getEditor();
+        JFormattedTextField field = (JFormattedTextField) comp.getComponent(0);
+        field.setColumns(4);
+        DefaultFormatter formatter = (DefaultFormatter) field.getFormatter();
+        formatter.setCommitsOnValidEdit(true);
+        libraryFrequencySpinner.addChangeListener(e -> Library.setFrequency((Integer) libraryFrequencySpinner.getValue()));
+
+
+        updateLastChapterNumberCheckBox = new JCheckBox();
+        updateLastChapterNumberCheckBox.setSelected(Library.getUpdateLast());
         // Update Tab
         updateTextArea = new JTextArea();
         updateTextArea.setLineWrap(true);
