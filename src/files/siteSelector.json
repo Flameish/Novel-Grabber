@@ -13,6 +13,20 @@
   "bookAuthorSelector": " ",
   "bookSubjectSelector": " "
 },
+ "MTLNovel": {
+    "url": "https://www.mtlnovel.com/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": "#panelchapterlist a",
+    "chapterContainer": ".p-15 .fr-view",
+    "blacklistedTags": [
+      "amp-iframe",".ads"
+    ],
+    "bookTitleSelector": ".entry-title",
+    "bookDescSelector": ".desc",
+    "bookCoverSelector": ".nov-head img",
+    "bookAuthorSelector": ".info tr:contains(Author) a",
+    "bookSubjectSelector": ".info tr:contains(Genre) a"
+  },
   "Wuxiaworld": {
     "url": "https://wuxiaworld.com/",
     "ordinalIndexForBaseNovel": "5",
