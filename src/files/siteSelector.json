@@ -479,7 +479,7 @@
     ],
     "bookTitleSelector": ".entry-title",
     "bookDescSelector": ".desc",
-    "bookCoverSelector": ".nov-head img",
+    "bookCoverSelector": "amp-img",
     "bookAuthorSelector": ".info tr:contains(Author) a",
     "bookSubjectSelector": ".info tr:contains(Genre) a"
   },
