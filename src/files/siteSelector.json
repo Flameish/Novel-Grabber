@@ -16,7 +16,7 @@
  "MTLNovel": {
     "url": "https://www.mtlnovel.com/",
     "ordinalIndexForBaseNovel": "3",
-    "chapterLinkSelector": "#panelchapterlist a",
+    "chapterLinkSelector": ".ch-link",
     "chapterContainer": ".p-15 .fr-view",
     "blacklistedTags": [
       "amp-iframe",".ads"
