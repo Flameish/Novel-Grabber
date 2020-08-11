@@ -13,20 +13,6 @@
   "bookAuthorSelector": " ",
   "bookSubjectSelector": " "
 },
- "MTLNovel": {
-    "url": "https://www.mtlnovel.com/",
-    "ordinalIndexForBaseNovel": "3",
-    "chapterLinkSelector": ".ch-link",
-    "chapterContainer": ".par",
-    "blacklistedTags": [
-      "amp-iframe",".ads"
-    ],
-    "bookTitleSelector": ".entry-title",
-    "bookDescSelector": ".desc",
-    "bookCoverSelector": ".nov-head img",
-    "bookAuthorSelector": ".info tr:contains(Author) a",
-    "bookSubjectSelector": ".info tr:contains(Genre) a"
-  },
   "Wuxiaworld": {
     "url": "https://wuxiaworld.com/",
     "ordinalIndexForBaseNovel": "5",
@@ -482,5 +468,19 @@
     "bookCoverSelector": ".fic_image img",
     "bookAuthorSelector": ".auth_name_fic",
     "bookSubjectSelector": ".wi_fic_genre a"
-  }
+  } ,
+  "MTLNovel": {
+    "url": "https://www.mtlnovel.com/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": ".ch-link",
+    "chapterContainer": ".par",
+    "blacklistedTags": [
+      "amp-iframe",".ads"
+    ],
+    "bookTitleSelector": ".entry-title",
+    "bookDescSelector": ".desc",
+    "bookCoverSelector": ".nov-head img",
+    "bookAuthorSelector": ".info tr:contains(Author) a",
+    "bookSubjectSelector": ".info tr:contains(Genre) a"
+  },
 }
