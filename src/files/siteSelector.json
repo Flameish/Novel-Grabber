@@ -423,7 +423,7 @@
     ],
     "bookTitleSelector": ".post-title h1",
     "bookDescSelector": ".summary__content",
-    "bookCoverSelector": "div.summary_image a img",
+    "bookCoverSelector": ".summary_image img",
     "bookAuthorSelector": ".author-content a",
     "bookSubjectSelector": ".genres-content a"
   },
