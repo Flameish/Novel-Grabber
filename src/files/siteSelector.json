@@ -303,21 +303,21 @@
     "bookAuthorSelector": "null",
     "bookSubjectSelector": "null"
   },
-  "ISOHungryTLS": {
-    "url": "https://isohungrytls.com/",
+  "ISOTranslations": {
+    "url": "https://isotls.com/",
     "ordinalIndexForBaseNovel": "5",
-    "chapterLinkSelector": ".collapseomatic_content  a",
-    "chapterContainer": ".entry-content",
+    "chapterLinkSelector": ".toc-releases a",
+    "chapterContainer": ".post-content",
     "blacklistedTags": [
       "span.ezoic-ad",
       "p[style=text-align: center;]",
       "hr",
       "p:has(span[style=color: #ffffff;])"
     ],
-    "bookTitleSelector": "span[style=font-size: 24pt;]",
-    "bookDescSelector": "blockquote",
-    "bookCoverSelector": "null",
-    "bookAuthorSelector": "p:contains(Translator:)",
+    "bookTitleSelector": "title",
+    "bookDescSelector": ".project-body",
+    "bookCoverSelector": ".cover-image img",
+    "bookAuthorSelector": "p:contains(Translated)",
     "bookSubjectSelector": "p:contains(Genres:)"
   },
   "EbisuTranslations": {
