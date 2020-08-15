@@ -98,7 +98,7 @@
     ],
     "bookTitleSelector": ".details .name",
     "bookDescSelector": ".brief",
-    "bookCoverSelector": ".book_left img",
+    "bookCoverSelector": ".js-cover.img",
     "bookAuthorSelector": ".details .author",
     "bookSubjectSelector": ".novel-tags span"
   },
@@ -112,7 +112,7 @@
     ],
     "bookTitleSelector": ".details .name",
     "bookDescSelector": ".brief",
-    "bookCoverSelector": ".book_left img",
+    "bookCoverSelector": ".js-cover.img",
     "bookAuthorSelector": ".details .author",
     "bookSubjectSelector": ".novel-tags span"
   },
