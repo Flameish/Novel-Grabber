@@ -190,7 +190,8 @@
     "blacklistedTags": [
       "nav",
       "header",
-      "script"
+      ".chinese",
+      "button"
     ],
     "bookTitleSelector": "h3.entry-title",
     "bookDescSelector": "#Description",
