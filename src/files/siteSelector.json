@@ -470,7 +470,7 @@
     "bookSubjectSelector": ".wi_fic_genre a"
   } ,
   "MTLNovel": {
-    "url": "https://www.mtlnovel.com/",
+    "url": "https://mtlnovel.com/",
     "ordinalIndexForBaseNovel": "3",
     "chapterLinkSelector": ".ch-link",
     "chapterContainer": ".par",
@@ -484,7 +484,7 @@
     "bookSubjectSelector": ".info tr:contains(Genre) a"
   },
     "NovelUpdates": {
-    "url": "https://www.novelupdates.com/",
+    "url": "https://novelupdates.com/",
     "ordinalIndexForBaseNovel": "3",
     "chapterLinkSelector": ".sp_chp a:not(a:has(i))",
     "chapterContainer": "",
