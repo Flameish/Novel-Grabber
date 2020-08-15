@@ -486,7 +486,7 @@
     "NovelUpdates": {
     "url": "https://novelupdates.com/",
     "ordinalIndexForBaseNovel": "3",
-    "chapterLinkSelector": "li a:not(a[title])",
+    "chapterLinkSelector": "li a:not([title])",
     "chapterContainer": "",
     "blacklistedTags": [
       "null"
