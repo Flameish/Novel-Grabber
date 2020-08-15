@@ -8,7 +8,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 | :--- | :--- | :--- |
 | <b>[Volarenovels](https://volarenovels.com/)</b>| <b>[Creative Novels](https://https://creativenovels.com/.com/)</b> | <b>[WordExcerpt](https://wordexcerpt.com/)</b>|
 | <b>[Dreame](https://dreame.com/)</b> | <b>[TapRead](https://www.tapread.com/)</b> | <b>[Zenith Novels](https://zenithnovels.com/)</b>|
-| <b>[Kuhaku Light Novel Translations](https://kuhakulightnoveltranslations.com/)</b> | <b>[Translation Otaku](https://translatinotaku.net/)</b> | <b>[ISO Hungry TLS](https://isohungrytls.com/)</b>|
+| <b>[Kuhaku Light Novel Translations](https://kuhakulightnoveltranslations.com/)</b> | <b>[Translation Otaku](https://translatinotaku.net/)</b> | <b>[ISO Translations](https://isotls.com/)</b>|
 | <b>[Chrysanthemum Garden](https://chrysanthemumgarden.com/)</b> | <b>[FanFiction](https://fanfiction.net/)</b> | <b>[BoxNovel](https://boxnovel.com/)</b>|
 | <b>[LiberSpark](https://liberspark.com/)</b> |<b>[Wordrain](https://wordrain69.com/)</b> | <b>[Comrade Mao](https://comrademao.com/)</b>|
 | <b>[Light Novels Translations](https://lightnovelstranslations.com/)</b> | <b>[Ebisu Translations](https://ebisutranslations.com/)</b> | <b>[Webnovel](https://webnovel.com/)</b>
