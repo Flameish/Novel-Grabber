@@ -483,4 +483,18 @@
     "bookAuthorSelector": ".info tr:contains(Author) a",
     "bookSubjectSelector": ".info tr:contains(Genre) a"
   },
+    "NovelUpdates": {
+    "url": "https://www.novelupdates.com/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": ".sp_chp a:not(a:has(i))",
+    "chapterContainer": "",
+    "blacklistedTags": [
+      "null"
+    ],
+    "bookTitleSelector": ".seriestitlenu",
+    "bookDescSelector": "#editdescription",
+    "bookCoverSelector": ".seriesimg img",
+    "bookAuthorSelector": "#authtag",
+    "bookSubjectSelector": "#seriesgenre a"
+  },
 }
