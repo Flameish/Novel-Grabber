@@ -358,7 +358,7 @@
     "bookTitleSelector": "p.lh24.fs16.pt24.pb24.ell.c_000 span:not(span:contains(/))",
     "bookDescSelector": ".j_synopsis",
     "bookCoverSelector": ".g_thumb img:eq(1)",
-    "bookAuthorSelector": ".ell.dib.vam span",
+    "bookAuthorSelector": ".ell.dib.vam a",
     "bookSubjectSelector": "a[href^=/category/list?category=].c_000"
   },
   "NovelFull": {
