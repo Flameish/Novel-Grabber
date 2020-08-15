@@ -217,10 +217,15 @@
   "WordRain": {
     "url": "https://wordrain69.com/",
     "ordinalIndexForBaseNovel": "5",
-    "chapterLinkSelector": ".main li a",
+    "chapterLinkSelector": ".listing-chapters_wrap a:not(a[title])",
     "chapterContainer": ".text-left",
     "blacklistedTags": [
-      "null"
+      "center",
+      "meta",
+      "script",
+      "iframe",
+      ".google-auto-placed",
+      ".sharedaddy"
     ],
     "bookTitleSelector": ".post-title h1",
     "bookDescSelector": ".summary__content",
