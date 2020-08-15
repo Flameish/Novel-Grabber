@@ -15,7 +15,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 | <b>[Wattpad](https://wattpad.com/)</b> | <b>[WuxiaWorld.online](https://wuxiaworld.online/)</b> | <b>[Booklat](https://booklat.com.ph/)</b>
 | <b>[WuxiaWorld.site](https://wuxiaworld.site/)</b> | <b>[FicFun](https://ficfun.com/)</b> | <b>[Novel Full](http://novelfull.com/)</b> 
 | <b>[Foxaholic](https://foxaholic.com/)</b> | <b>[FanFiktion](https://fanfiktion.de/)</b> | <b>[Scribble Hub](https://scribblehub.com/)</b>
-
+| <b>[NovelUpdates](https://novelupdates.com/)</b> | <b>[MTL Novel](https://www.mtlnovel.com/)</b> | 
 ## How to use
 <strong>Automatic:</strong>
 
