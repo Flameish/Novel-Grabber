@@ -208,10 +208,10 @@
       ".mNS",
       ".support-placement"
     ],
-    "bookTitleSelector": ".e45344-12.x-text.bK_C",
+    "bookTitleSelector": ".e45344-14",
     "bookDescSelector": ".novel_page_synopsis",
     "bookCoverSelector": "img.book_cover",
-    "bookAuthorSelector": "div.e45344-17.x-text.bK_C a",
+    "bookAuthorSelector": ".e45344-16 > a:nth-child(1)",
     "bookSubjectSelector": "div.genre_novel"
   },
   "WordRain": {
