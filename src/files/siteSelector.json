@@ -452,7 +452,7 @@
     "bookTitleSelector": ".novel-title",
     "bookDescSelector": ".novel-description",
     "bookCoverSelector": ".novel-featureimg img",
-    "bookAuthorSelector": "",
+    "bookAuthorSelector": "p:contains(Translator:)",
     "bookSubjectSelector": ".novel-tags"
   },
 
