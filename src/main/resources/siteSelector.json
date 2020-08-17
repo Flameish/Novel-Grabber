@@ -518,7 +518,8 @@
       "div[style=margin:0 auto;width:100px]",
       ".prevPageLink",
       ".nextPageLink",
-      "a:contains(Next)"
+      "a:contains(Next)",
+      "table:has(span[style=font-size:8pt;color:#999999])"
     ],
     "bookTitleSelector": ".entry-title",
     "bookDescSelector": "false",
