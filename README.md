@@ -31,13 +31,13 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 
 ## Screenshots
 
-![Automatic Tab](https://imgur.com/dcEC1uk)
+![Automatic Tab](https://i.imgur.com/dcEC1uk.png)
 
-![Manual Tab](https://imgur.com/xNAQsB0)
+![Manual Tab](https://i.imgur.com/xNAQsB0.png)
 
-![Library Tab](https://imgur.com/p1thlXJ)
+![Library Tab](https://i.imgur.com/p1thlXJ.png)
 
-![Settings Tab](https://imgur.com/cM9LtVl)
+![Settings Tab](https://i.imgur.com/cM9LtVl.png)
 
 ## How to use
 <strong>Automatic:</strong>
