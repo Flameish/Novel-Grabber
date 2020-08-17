@@ -25,7 +25,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 - EPUB metadata
 - Desktop and email notifications for new chapter releases of followed novels
 - Automatic chapter detection (Able to download via NovelUpdates)
-- Headless browser grabbing
+- Headless browser support
 - Login support for certain host sites
 - CLI 
 
@@ -45,15 +45,14 @@ Using a table of content:
 1. Enter the URL to the novel's "table of contents" page and retrieve all links on the site.
 2. Remove all unwanted links from the selection window.
 3. Input the chapter container the site uses. 
-I strongly suggest using "Auto detect" function, it generally works well and enables grabbing from different sites at once.
-<br>You can also specify a CSS selector manually.
+I strongly suggest using the "auto detect" function, it generally works well and enables grabbing from different sites.
+<br>Or you can specify a CSS selector manually.
 4. You can remove unwanted content from the chapter via the "blacklisted tags" window (flag icon at the top).
  <br>Don't forget to set title, author, cover etc.
  
 Using Chapter-To-Chapter navigation:
 1. Input the URL of your starting point and ending point chapter. (Inclusive)
 2. Input the selector for the "Next-Chapter" button. You want to select the `<a>` tag of it. (via css selector)
-3. Same as the other step 3.
 
 <br>
 <strong>CLI:</strong>
