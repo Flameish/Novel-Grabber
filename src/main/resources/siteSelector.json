@@ -521,7 +521,9 @@
       "a:contains(Next)",
       "a:contains(Previous)",
       "table:has(span[style=font-size:8pt;color:#999999])",
-      "h2:contains(References)"
+      "h2:contains(References)",
+      "table#fixed",
+      "a:contains(Index)"
     ],
     "bookTitleSelector": ".entry-title",
     "bookDescSelector": "false",
