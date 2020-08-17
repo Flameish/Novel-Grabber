@@ -44,11 +44,8 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 
 1. Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
 <br>(If you can't execute the jar, try navigating to the jar location with cmd/terminal and use: `java -jar Novel-Grabber.jar`)
-
 2. Enter the link to the novel's Table of Contents page
-
 3. Click on 'Check' to fetch novel info and chapter list
-
 4. Grab chapters
 
 <br>
@@ -56,9 +53,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 
 Using a table of content:
 1. Enter the URL to the novel's "table of contents" page and retrieve all links on the site.
-
 2. Remove all unwanted links from the selection window.
-
 3. Input the chapter container the site uses. 
 I strongly suggest using "Auto detect" function, it generally works well and enables grabbing from different sites at once.
 <br>You can also specify a CSS selector manually.
@@ -70,6 +65,7 @@ Using Chapter-To-Chapter navigation:
 2. Input the selector for the "Next-Chapter" button. You want to select the `<a>` tag of it. (via css selector)
 3. Same as the other step 3.
 
+<br>
 <strong>CLI:</strong>
 
 Usage:
