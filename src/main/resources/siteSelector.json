@@ -502,5 +502,25 @@
     "bookCoverSelector": ".seriesimg img",
     "bookAuthorSelector": "#authtag",
     "bookSubjectSelector": "#seriesgenre a"
+  },
+  "Re:Library": {
+    "url": "https://re-library.com/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": ".su-accordion a",
+    "chapterContainer": ".entry-content",
+    "blacklistedTags": [
+      ".sharedaddy",
+      ".code-block",
+      ".ezoic-adpicker-ad",
+      "div[style=margin:0 auto;width:100px]",
+      ".prevPageLink",
+      ".nextPageLink",
+      ""
+    ],
+    "bookTitleSelector": ".entry-title h1",
+    "bookDescSelector": "false",
+    "bookCoverSelector": ".seriesimg img",
+    "bookAuthorSelector": "false",
+    "bookSubjectSelector": "false"
   }
 }
