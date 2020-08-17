@@ -512,9 +512,13 @@
       ".sharedaddy",
       ".code-block",
       ".ezoic-adpicker-ad",
+      ".ezoic-ad",
+      ".su-button",
+      "table:has(a[href])",
       "div[style=margin:0 auto;width:100px]",
       ".prevPageLink",
       ".nextPageLink",
+      "a:contains(Next)"
     ],
     "bookTitleSelector": ".entry-title",
     "bookDescSelector": "false",
