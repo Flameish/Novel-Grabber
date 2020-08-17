@@ -29,16 +29,6 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 - Login support for certain host sites
 - CLI 
 
-## Screenshots
-
-![Automatic Tab](https://i.imgur.com/dcEC1uk.png)
-
-![Manual Tab](https://i.imgur.com/xNAQsB0.png)
-
-![Library Tab](https://i.imgur.com/p1thlXJ.png)
-
-![Settings Tab](https://i.imgur.com/cM9LtVl.png)
-
 ## How to use
 <strong>Automatic:</strong>
 
@@ -88,6 +78,14 @@ Usage:
 [-displayTitle]| | Write the chapter title at the top of each chapter text.
 [-invertOrder] | | Invert the chapter order.
 -help | | Shows the help page.
+
+## Screenshots
+
+![Automatic Tab](https://i.imgur.com/dcEC1uk.png)
+
+![Manual Tab](https://i.imgur.com/xNAQsB0.png)
+
+![Library Tab](https://i.imgur.com/p1thlXJ.png)
 
 ## Disclaimer & Warning
 Most sites prohibit the scrapping for their content. Use at your own risk. 
