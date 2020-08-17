@@ -515,11 +515,10 @@
       "div[style=margin:0 auto;width:100px]",
       ".prevPageLink",
       ".nextPageLink",
-      ""
     ],
-    "bookTitleSelector": ".entry-title h1",
+    "bookTitleSelector": ".entry-title",
     "bookDescSelector": "false",
-    "bookCoverSelector": ".seriesimg img",
+    "bookCoverSelector": "img.rounded",
     "bookAuthorSelector": "false",
     "bookSubjectSelector": "false"
   }
