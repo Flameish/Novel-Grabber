@@ -174,7 +174,7 @@
       "p[style=height:1px;margin:0;padding:0;overflow:hidden]",
       "span[style=height:1px;width:0;overflow:hidden;display:inline-block]",
       ".sharedaddy",
-      ".jum"
+      "p[style=height:1px;width:0;overflow:hidden;display:inline-block]"
     ],
     "bookTitleSelector": "h1",
     "bookDescSelector": "null",
