@@ -36,7 +36,7 @@ public class LibraryNovel {
         title = novel.bookTitle;
         cover = novel.bookCover;
         lastChapter = novel.chapterList.size();
-
+        newestChapter = lastChapter;
         // Build cli command
         String tempCli = "-link "+novel.novelLink +" -path \""+ Config.getInstance().home_path+ "/"
                 + Config.getInstance().home_folder + "/"+novel.bookTitle+"/\"";
