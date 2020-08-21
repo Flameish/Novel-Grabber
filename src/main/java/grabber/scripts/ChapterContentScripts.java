@@ -98,7 +98,7 @@ public class ChapterContentScripts {
                         .select("#contentTpl")
                         .html();
             }
-            String decodedChapter = new String(Base64.getMimeDecoder().decode(encodedChapter));
+            String decodedChapter = new String(Base64.getMimeDecoder().decode(encodedChapter), "UTF-8");
             chapter.doc = Jsoup.parse(decodedChapter);
             chapter.chapterContent = chapter.doc;
         } catch (IOException e) {
