@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "3.0.0";
+    public static String versionNumber = "3.0.1";
     private static final String[] headerlessBrowserWebsites = {"FoxTeller"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     private static final String[] loginWebsites = {"Booklat","Wuxiaworld", "WattPad"};
