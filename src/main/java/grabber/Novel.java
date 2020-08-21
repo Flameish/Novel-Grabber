@@ -304,7 +304,7 @@ public class Novel {
      */
     public void manSetMetadata() {
         if (manSetMetadata.manMetadataInfo[0] != null && !manSetMetadata.manMetadataInfo[0].isEmpty()) {
-            bookTitle = manSetMetadata.manMetadataInfo[0].replaceAll("[\\\\/:*?\"<>|]", "");
+            bookTitle = manSetMetadata.manMetadataInfo[0];
         } else bookTitle = "Unknown";
         if (manSetMetadata.manMetadataInfo[1] != null && !manSetMetadata.manMetadataInfo[1].isEmpty()) {
             bookAuthor = manSetMetadata.manMetadataInfo[1];
@@ -355,7 +355,7 @@ public class Novel {
      */
     void setTitle() {
         if (tableOfContent.select(bookTitleSelector) != null && !tableOfContent.select(bookTitleSelector).isEmpty()) {
-            bookTitle = tableOfContent.select(bookTitleSelector).first().text().replaceAll("[\\\\/:*?\"<>|]", "");
+            bookTitle = tableOfContent.select(bookTitleSelector).first().text();
             if(init.gui != null && window.equals("auto")) {
                 init.gui.autoBookTitle.setText(bookTitle);
             }
