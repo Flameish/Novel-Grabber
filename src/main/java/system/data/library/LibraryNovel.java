@@ -37,14 +37,20 @@ public class LibraryNovel {
         cover = novel.bookCover;
         lastChapter = novel.chapterList.size();
         newestChapter = lastChapter;
-        // Build cli command
+
         String tempCli = "-link "+novel.novelLink +" -path \""+ Config.getInstance().home_path+ "/"
                 + Config.getInstance().home_folder + "/"+novel.bookTitle+"/\"";
+
+        if(Settings.getInstance().isUseStandardLocation()) {
+            tempCli = "-link "+novel.novelLink +" -path \"" + Settings.getInstance().getSaveLocation() + "/"+novel.bookTitle+"/\"";
+        }
+        // Build cli command
+
         if(novel.useHeadless) {
-            tempCli = tempCli+ " -headless " + Settings.getInstance().getBrowser();
+            tempCli = tempCli + " -headless " + Settings.getInstance().getBrowser();
         }
         if(novel.useAccount) {
-            tempCli = tempCli+ " -login";
+            tempCli = tempCli + " -login";
         }
         cliString = tempCli;
 
@@ -103,7 +109,6 @@ public class LibraryNovel {
                 + "/"+ novel.bookTitle+"/"+ novel.bookCover);
         outputfile.mkdirs();
         try {
-            System.out.println(novel.bookCover);
             // cover name + file extension
             ImageIO.write(novel.bufferedCover, novel.bookCover.substring(novel.bookCover.lastIndexOf(".")+1), outputfile);
         } catch (IOException e) {
