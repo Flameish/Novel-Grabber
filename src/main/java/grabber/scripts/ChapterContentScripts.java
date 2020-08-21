@@ -11,6 +11,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -30,6 +32,9 @@ public class ChapterContentScripts {
             case "https://wattpad.com/":
                 wattpad(novel, chapter);
                 break;
+            case "https://chrysanthemumgarden.com/":
+                CG(novel, chapter);
+                break;
             case "https://ficfun.com/":
             case "https://dreame.com/":
                 dreame(novel, chapter);
@@ -40,6 +45,49 @@ public class ChapterContentScripts {
             default:
                 defaults(novel, chapter);
                 break;
+        }
+    }
+
+
+    private static void CG(Novel novel, Chapter chapter) {
+        try {
+            // Fetching the chapter page
+            if(novel.useHeadless) { // Headless Browser
+                novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
+                if(novel.chapterContainer.isEmpty()) { // Wait 5 seconds for everything to finish loading
+                    novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+                } else { // Wait until chapter container is located
+                    novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.chapterContainer)));
+                }
+                WebElement chapterElement = novel.headlessDriver.driver.findElement(By.cssSelector("body"));
+                String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
+                chapter.doc = Jsoup.parse(chapterElement.getAttribute("innerHTML"), baseUrl);
+            } else { // Static JSoup
+                if(novel.cookies != null) {
+                    chapter.doc = Jsoup.connect(chapter.chapterURL)
+                            .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0")
+                            .cookies(novel.cookies)
+                            .timeout(30 * 1000)
+                            .get();
+                } else {
+                    chapter.doc = Jsoup.connect(chapter.chapterURL)
+                            .timeout(30 * 1000)
+                            .get();
+                }
+            }
+            Elements encodedStrings = chapter.doc.select(".jum");
+
+            for(Element string: encodedStrings) {
+                string.text(CGShift.getInstance().decrypt(string.text()));
+            }
+
+            chapter.chapterContent = chapter.doc.select(novel.chapterContainer).first();
+        } catch (IOException e) {
+            e.printStackTrace();
+            if(init.gui != null && !novel.window.equals("checker")) {
+                init.gui.appendText(novel.window,"[GRABBER]"+e.getMessage());
+            }
+            chapter.status = 2;
         }
     }
 
