@@ -5,6 +5,7 @@ import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Entities;
 import system.init;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -160,11 +161,18 @@ public class Chapter implements Serializable {
         CleanerProperties props = cleaner.getProperties();
         props.setTranslateSpecialEntities(true);
         props.setTransResCharsToNCR(true);
+        props.setTransSpecialEntitiesToNCR(true);
         props.setOmitComments(true);
-        TagNode tagNode = cleaner.clean(chapterContent.toString());
+
+        Document.OutputSettings outputSettings = new Document.OutputSettings();
+        outputSettings.syntax(Document.OutputSettings.Syntax.xml);
+        outputSettings.escapeMode(Entities.EscapeMode.xhtml);
+
+        String chapter = chapterContent.toString().replaceAll("<br>", "\n");
+        TagNode tagNode = cleaner.clean(chapter);
 
         String html = "<" + tagNode.getName() + ">" + cleaner.getInnerHtml(tagNode) + "</" + tagNode.getName() + ">";
-        chapterContent = Jsoup.parse(html);
+        chapterContent = Jsoup.parse(html).outputSettings(outputSettings);
 
     }
 
