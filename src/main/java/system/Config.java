@@ -19,7 +19,7 @@ public class Config {
     public JSONObject siteSelectorsJSON;
     public String home_path = System.getProperty("user.home");
     public String home_folder = "Novel-Grabber";
-    public String JSON_Link = "https://raw.githubusercontent.com/Flameish/Novel-Grabber/master/src/files/siteSelector.json";
+    public String JSON_Link = "https://raw.githubusercontent.com/Flameish/Novel-Grabber/master/src/main/resources/siteSelector.json";
     public String settings_file_path = home_path + "/" + home_folder + "/" + "settings.json";
     public String library_file_path = home_path + "/" + home_folder + "/" + "library.json";
     public String accounts_file_path = home_path + "/" + home_folder + "/" + "accounts.json";
