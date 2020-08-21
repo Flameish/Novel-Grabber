@@ -100,7 +100,7 @@ public class EPUB {
                         novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
                 break;
         }
-        return epubFilename;
+        return epubFilename.replaceAll("[\\\\/:*?\"<>|]", "");
     }
 
     private void addMetadata() {
