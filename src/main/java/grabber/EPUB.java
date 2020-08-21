@@ -86,15 +86,18 @@ public class EPUB {
         switch (Settings.getInstance().getFilenameFormat()) {
             case 0:
                 epubFilename = novel.bookAuthor + " - " + novel.bookTitle + ".epub";
-                if(novel.window.equals("checker")) epubFilename = epubFilename.replaceAll(" ","-");
+                if(novel.window.equals("checker")) epubFilename =
+                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
                 break;
             case 1:
                 epubFilename = novel.bookTitle + " - " + novel.bookAuthor + ".epub";
-                if(novel.window.equals("checker")) epubFilename = epubFilename.replaceAll(" ","-");
+                if(novel.window.equals("checker")) epubFilename =
+                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
                 break;
             case 2:
                 epubFilename = novel.bookTitle + ".epub";
-                if(novel.window.equals("checker")) epubFilename = epubFilename.replaceAll(" ","-");
+                if(novel.window.equals("checker")) epubFilename =
+                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
                 break;
         }
         return epubFilename;
