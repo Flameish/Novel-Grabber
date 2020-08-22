@@ -460,7 +460,6 @@
     "bookAuthorSelector": "p:contains(Translator:)",
     "bookSubjectSelector": ".novel-tags"
   },
-
   "ScribbleHub": {
     "url": "https://scribblehub.com/",
     "ordinalIndexForBaseNovel": "5",
@@ -579,7 +578,7 @@
     "chapterLinkSelector": "#toc a:has(h3)",
     "chapterContainer": "#content",
     "blacklistedTags": [
-      "span.icon"
+      "null"
     ],
     "bookTitleSelector": "h1.card-header-title",
     "bookDescSelector": "#syn > div:nth-child(1) > div:nth-child(1)",
@@ -590,10 +589,10 @@
   "Tapas": {
     "url": "https://tapas.io/",
     "ordinalIndexForBaseNovel": "3",
-    "chapterLinkSelector": ".episode-item",
+    "chapterLinkSelector": "li",
     "chapterContainer": ".ep-epub-content .body",
     "blacklistedTags": [
-      "span.icon"
+      "null"
     ],
     "bookTitleSelector": "a.title",
     "bookDescSelector": ".description",
