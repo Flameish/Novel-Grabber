@@ -572,5 +572,19 @@
     "bookCoverSelector": ".wrap-img-novel-mask img",
     "bookAuthorSelector": "#wrap-novel-info span.text-underline",
     "bookSubjectSelector": "#wrap-novel-info span.label"
+  },
+  "MoonQuill": {
+    "url": "https://www.moonquill.com/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": "#toc a:has(h3)",
+    "chapterContainer": "#content",
+    "blacklistedTags": [
+      "span.icon"
+    ],
+    "bookTitleSelector": "h1.card-header-title",
+    "bookDescSelector": "#syn > div:nth-child(1) > div:nth-child(1)",
+    "bookCoverSelector": "img.w-100",
+    "bookAuthorSelector": "h2.card-title:nth-child(2) > a:nth-child(1)",
+    "bookSubjectSelector": "span.badge-primary"
   }
 }
