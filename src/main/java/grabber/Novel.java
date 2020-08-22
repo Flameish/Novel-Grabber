@@ -467,6 +467,10 @@ public class Novel {
             if (url.equals("https://mtlnovel.com/")) {
                 coverLink = coverLink.substring(0, coverLink.indexOf(".webp"));
             }
+            if (url.equals("https://www.inkitt.com/")) {
+                String backgroundimageUrl = coverSelect.select(".story-horizontal-cover__front").attr("style");
+                coverLink = backgroundimageUrl.substring(backgroundimageUrl.indexOf("https://"), backgroundimageUrl.indexOf(")")-1);
+            }
             if (url.equals("https://foxaholic.com/") || url.equals("https://wordrain69.com/") ) {
                 coverLink = coverSelect.attr("abs:data-src");
             }
