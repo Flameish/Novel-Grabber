@@ -534,14 +534,14 @@
   "Inkitt": {
     "url": "https://www.inkitt.com/",
     "ordinalIndexForBaseNovel": "3",
-    "chapterLinkSelector": ".chapter-link a",
+    "chapterLinkSelector": ".chapter-link",
     "chapterContainer": ".story-page-text",
     "blacklistedTags": [
       "null"
     ],
     "bookTitleSelector": ".story-title",
     "bookDescSelector": ".story-summary",
-    "bookCoverSelector": "img.rounded",
+    "bookCoverSelector": ".story-horizontal-cover",
     "bookAuthorSelector": ".author-link span",
     "bookSubjectSelector": ".genres"
   }
