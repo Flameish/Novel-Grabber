@@ -590,7 +590,7 @@
     "url": "https://tapas.io/",
     "ordinalIndexForBaseNovel": "3",
     "chapterLinkSelector": "li",
-    "chapterContainer": ".ep-epub-content .body",
+    "chapterContainer": "article",
     "blacklistedTags": [
       "null"
     ],
