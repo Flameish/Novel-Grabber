@@ -553,8 +553,8 @@
     "blacklistedTags": [
       "null"
     ],
-    "bookTitleSelector": ".story_text h1",
-    "bookDescSelector": ".story-summary",
+    "bookTitleSelector": "title",
+    "bookDescSelector": "#qdesct",
     "bookCoverSelector": ".logo",
     "bookAuthorSelector": "a[rel=author]",
     "bookSubjectSelector": ".genres"
