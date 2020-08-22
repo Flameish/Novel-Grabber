@@ -80,6 +80,9 @@ public class ChapterListScripts {
                 case "https://scribblehub.com/":
                     novel.chapterList = scribblehub(novel);
                     break;
+                case "https://tapas.io/":
+                    novel.chapterList = tapas(novel);
+                    break;
                 case "https://novelupdates.com/":
                     novel.chapterList = novelupdates(novel);
                     break;
@@ -100,6 +103,31 @@ public class ChapterListScripts {
             chapters.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
         }
         Collections.reverse(chapters);
+        return chapters;
+    }
+
+    private static List<Chapter> tapas(Novel novel) throws IOException {
+        List<Chapter> chapters = new ArrayList<>();
+        novel.tableOfContent = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+        String seriesId = novel.tableOfContent.select("meta[property=al:android:url]").attr("content");
+        seriesId = seriesId.substring(seriesId.indexOf("eries/")+6,seriesId.indexOf("/info"));
+        System.out.println("https://tapas.io/series/"+seriesId+"/episodes?page=1&sort=OLDEST&max_limit=9999");
+        try {
+            JSONParser tapreadParser = new JSONParser();
+            String json = Jsoup.connect("https://tapas.io/series/"+seriesId+"/episodes?page=1&sort=OLDEST&max_limit=9999")
+                    .ignoreContentType(true)
+                    .method(Connection.Method.GET)
+                    .execute().body();
+            Object obj = tapreadParser.parse(json);
+            JSONObject jsonObject = (JSONObject) obj;
+            JSONObject data = (JSONObject) jsonObject.get("data");
+            String body = (String) data.get("body");
+            for (Element chapterLink : Jsoup.parse(body).select(novel.chapterLinkSelector)) {
+                chapters.add(new Chapter(chapterLink.select("a.info__title").text(), "https://tapas.io"+chapterLink.attr("data-href")));
+            }
+        } catch (ParseException | IOException e) {
+            e.printStackTrace();
+        }
         return chapters;
     }
 
