@@ -558,5 +558,19 @@
     "bookCoverSelector": ".logo",
     "bookAuthorSelector": "a[rel=author]",
     "bookSubjectSelector": ".genres"
+  },
+  "Honeyfeed": {
+    "url": "https://www.honeyfeed.fm/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": ".list-group-item",
+    "chapterContainer": ".wrap-body > div:nth-child(1)",
+    "blacklistedTags": [
+      "span.icon"
+    ],
+    "bookTitleSelector": "#wrap-novel h1",
+    "bookDescSelector": "#wrap-synopsis",
+    "bookCoverSelector": ".wrap-img-novel-mask img",
+    "bookAuthorSelector": "false",
+    "bookSubjectSelector": "false"
   }
 }
