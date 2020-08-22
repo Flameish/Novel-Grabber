@@ -553,7 +553,7 @@
     "blacklistedTags": [
       "null"
     ],
-    "bookTitleSelector": "title",
+    "bookTitleSelector": ".navHeaderTitle span",
     "bookDescSelector": "#qdesct",
     "bookCoverSelector": ".logo",
     "bookAuthorSelector": "a[rel=author]",
