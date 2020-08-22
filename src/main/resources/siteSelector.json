@@ -544,5 +544,33 @@
     "bookCoverSelector": ".story-horizontal-cover",
     "bookAuthorSelector": ".author-link span",
     "bookSubjectSelector": ".genres"
+  },
+  "Neovel": {
+    "url": "https://neoread.neovel.io/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": ".chapter-link",
+    "chapterContainer": ".story-page-text",
+    "blacklistedTags": [
+      "null"
+    ],
+    "bookTitleSelector": ".story-title",
+    "bookDescSelector": ".story-summary",
+    "bookCoverSelector": ".story-horizontal-cover",
+    "bookAuthorSelector": ".author-link span",
+    "bookSubjectSelector": ".genres"
+  },
+  "Quotev": {
+    "url": "https://www.quotev.com/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": "#rselectList a",
+    "chapterContainer": "#rescontent",
+    "blacklistedTags": [
+      "null"
+    ],
+    "bookTitleSelector": ".story_text h1",
+    "bookDescSelector": ".story-summary",
+    "bookCoverSelector": ".logo",
+    "bookAuthorSelector": "a[rel=author]",
+    "bookSubjectSelector": ".genres"
   }
 }
