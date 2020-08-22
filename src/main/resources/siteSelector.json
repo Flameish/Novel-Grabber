@@ -570,7 +570,7 @@
     "bookTitleSelector": "#wrap-novel h1",
     "bookDescSelector": "#wrap-synopsis",
     "bookCoverSelector": ".wrap-img-novel-mask img",
-    "bookAuthorSelector": "false",
-    "bookSubjectSelector": "false"
+    "bookAuthorSelector": "#wrap-novel-info span.text-underline",
+    "bookSubjectSelector": "#wrap-novel-info span.label"
   }
 }
