@@ -586,5 +586,19 @@
     "bookCoverSelector": "img.w-100",
     "bookAuthorSelector": "h2.card-title:nth-child(2) > a:nth-child(1)",
     "bookSubjectSelector": "span.badge-primary"
+  },
+  "Tapas": {
+    "url": "https://tapas.io/",
+    "ordinalIndexForBaseNovel": "3",
+    "chapterLinkSelector": ".episode-item",
+    "chapterContainer": ".ep-epub-content .body",
+    "blacklistedTags": [
+      "span.icon"
+    ],
+    "bookTitleSelector": "a.title",
+    "bookDescSelector": ".description",
+    "bookCoverSelector": ".thumb img",
+    "bookAuthorSelector": ".creator",
+    "bookSubjectSelector": ".info-detail__row a"
   }
 }
