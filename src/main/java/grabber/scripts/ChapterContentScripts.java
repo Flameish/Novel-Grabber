@@ -17,10 +17,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import system.init;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
@@ -37,9 +34,6 @@ public class ChapterContentScripts {
             case "https://chrysanthemumgarden.com/":
                 CG(novel, chapter);
                 break;
-            case "https://www.moonquill.com/":
-                moonquill(novel, chapter);
-                break;
             case "https://ficfun.com/":
             case "https://dreame.com/":
                 dreame(novel, chapter);
@@ -52,54 +46,6 @@ public class ChapterContentScripts {
                 break;
         }
     }
-
-    private static void moonquill(Novel novel, Chapter chapter) {
-        try {
-            // Fetching the chapter page
-            if(novel.useHeadless) { // Headless Browser
-                novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
-                if(novel.chapterContainer.isEmpty()) { // Wait 5 seconds for everything to finish loading
-                    novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
-                } else { // Wait until chapter container is located
-                    novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(novel.chapterContainer)));
-                }
-                WebElement chapterElement = novel.headlessDriver.driver.findElement(By.cssSelector("body"));
-                String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
-                chapter.doc = Jsoup.parse(chapterElement.getAttribute("innerHTML"), baseUrl);
-            } else { // Static JSoup
-                if(novel.cookies != null) {
-                    chapter.doc = Jsoup.connect(chapter.chapterURL)
-                            .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0")
-                            .cookies(novel.cookies)
-                            .timeout(30 * 1000)
-                            .get();
-                } else {
-                    chapter.doc = Jsoup.connect(chapter.chapterURL)
-                            .timeout(30 * 1000)
-                            .get();
-                }
-            }
-            String scriptText = chapter.doc.select(".card > script").toString();
-            String chapterText = scriptText.substring(scriptText.indexOf("ert\":\"")+6, scriptText.indexOf("\"}]});")).replace("\\n","\n");
-            BufferedReader bufReader = new BufferedReader(new StringReader(chapterText));
-            StringBuilder fixedText = new StringBuilder();
-            fixedText.append("<div>");
-            String line=null;
-            while((line=bufReader.readLine()) != null ) {
-                fixedText.append("<p>").append(line).append("</p>");
-            }
-            fixedText.append("</div>");
-            System.out.println(fixedText.toString());
-            chapter.chapterContent = Jsoup.parse(fixedText.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-            if(init.gui != null && !novel.window.equals("checker")) {
-                init.gui.appendText(novel.window,"[GRABBER]"+e.getMessage());
-            }
-            chapter.status = 2;
-        }
-    }
-
 
     private static void CG(Novel novel, Chapter chapter) {
         try {
@@ -283,7 +229,7 @@ public class ChapterContentScripts {
                 Article article = readability4J.parse();
                 String extractedContentHtml = article.getContent();
                 chapter.chapterContent = Jsoup.parse(extractedContentHtml);
-                //novel.chapterContainer = readability4J.
+
             } else {
                 chapter.chapterContent = chapter.doc.select(novel.chapterContainer).first();
             }
