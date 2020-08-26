@@ -29,11 +29,10 @@ public class NotificationHandler {
 
     public void sendNotifications(LibraryNovel libraryNovel, Novel autoNovel) {
         if(libraryNovel.isSendEmailNotification()) sendMailNotification(autoNovel);
-        if(libraryNovel.isSendDesktopNotification()) {
-            sendDesktopNotification(libraryNovel, autoNovel);
-        }
         if(init.gui != null) {
-
+            if(libraryNovel.isSendDesktopNotification()) {
+                sendDesktopNotification(libraryNovel, autoNovel);
+            }
         }
     }
 
