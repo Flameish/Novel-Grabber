@@ -99,7 +99,7 @@ public class Chapter implements Serializable {
     private void removeUnwantedTags(Novel novel) {
         // Always remove <script>
         chapterContent.select("script").remove();
-
+        chapterContent.select("style").remove();
         if (novel.removeStyling) {
             chapterContent.select("[style]").removeAttr("style");
         }
