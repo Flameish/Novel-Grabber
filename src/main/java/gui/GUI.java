@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "3.0.1";
-    private static final String[] headerlessBrowserWebsites = {"FoxTeller"};
+    public static String versionNumber = "3.0.2";
+    private static final String[] headerlessBrowserWebsites = {"FoxTeller","MoonQuill"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     private static final String[] loginWebsites = {"Booklat","Wuxiaworld", "WattPad"};
     private static final String[] settingsMenus = {"Accounts","General", "Library", "Email", "Update"};
