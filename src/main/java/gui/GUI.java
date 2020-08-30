@@ -44,7 +44,6 @@ public class GUI extends JFrame {
     public static DefaultListModel<String> accountWebsiteListModel = new DefaultListModel<>();
     public static DefaultListModel<String> settingsMenuModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
-    public static String[] chapterToChapterArgs = new String[3];
     public static TrayIcon trayIcon;
     public static Integer chapterToChapterNumber = 1;
     private static String[] browserList = {"Chrome", "Firefox", "Edge", "Opera", "IE"};
@@ -57,7 +56,7 @@ public class GUI extends JFrame {
     private static final Library library = Library.getInstance();
     private static final EmailConfig emailConfig = EmailConfig.getInstance();
     public static Novel autoNovel = null;
-    public static Novel manNovel = null;
+    public static Novel manNovel = new Novel();
     public JComboBox autoHostSelection;
     public JTextField chapterListURL;
     public JTextField autoSaveLocation;
@@ -106,7 +105,6 @@ public class GUI extends JFrame {
     private JScrollPane manLinkScrollPane;
     private JTextArea manLogArea;
     private JScrollPane manLogScrollPane;
-    private JButton chapterToChapterButton;
     private JButton manSetMetadataButton;
     private JButton updateButton;
     private JTextArea updateTextArea;
@@ -192,6 +190,14 @@ public class GUI extends JFrame {
     private JButton settingsSaveBtn;
     private JButton librarySaveBtn;
     private JCheckBox manDetectChapterContainerCheckBox;
+    private JButton manDetectChaptersBtn;
+    private JButton manChapterPreviewBtn;
+    private JTextField firstChapterField;
+    private JTextField lastChapterField;
+    private JTextField nextChapterButtonField;
+    private JTextField manChapterToChapterNumberField;
+    private JPanel chapterToChapterPanel;
+    private JPanel chapterFromListPanel;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -351,8 +357,8 @@ public class GUI extends JFrame {
                 autoSaveLocation.setText(chooser.getSelectedFile().toString());
             }
         });
-        autoEditBlacklistBtn.addActionListener(e -> autoSetBlacklistedTags.main(autoNovel));
-        autoEditMetaBtn.addActionListener(e -> autoEditMetadata.main(autoNovel));
+        autoEditBlacklistBtn.addActionListener(e -> editBlacklistedTags.main(autoNovel));
+        autoEditMetaBtn.addActionListener(e -> editMetadata.main(autoNovel));
         autoChapterToChapterNumberField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -440,7 +446,7 @@ public class GUI extends JFrame {
             }
             if (!manNovelURL.getText().isEmpty()) {
                 try {
-                    manNovel = Novel.builder()
+                    manNovel = Novel.modifier(manNovel)
                             .novelLink(manNovelURL.getText())
                             .window("manual")
                             .useHeadless(manUseHeaderlessBrowser.isSelected())
@@ -453,6 +459,8 @@ public class GUI extends JFrame {
                 } finally {
                     if (!manLinkListModel.isEmpty()) {
                         manRemoveLinksButton.setEnabled(true);
+                        manChapterPreviewBtn.setEnabled(true);
+                        manDetectChaptersBtn.setEnabled(true);
                     }
                 }
             }
@@ -483,7 +491,7 @@ public class GUI extends JFrame {
                     manStopButton.setVisible(true);
                     manProgressBar.setStringPainted(true);
                     try {
-                        manNovel = Novel.builder()
+                        manNovel = Novel.modifier(manNovel)
                                 .window("manual")
                                 .useHeadless(manUseHeaderlessBrowser.isSelected())
                                 .browser(settings.getBrowser())
@@ -498,7 +506,7 @@ public class GUI extends JFrame {
                                 .saveLocation(manSaveLocation.getText())
                                 .build();
                         manNovel.getMetadata();
-                        manNovel.processChaptersToChapters(chapterToChapterArgs);
+                        manNovel.processChaptersToChapters(firstChapterField.getText(), lastChapterField.getText(), nextChapterButtonField.getText(), manChapterToChapterNumberField.getText());
                         manNovel.writeEpub();
                         manNovel.report();
                     } catch (Exception err) {
@@ -576,26 +584,25 @@ public class GUI extends JFrame {
                 }
             }
         }));
+
         chaptersFromLinksRadioButton.addActionListener(e -> {
             if (chaptersFromLinksRadioButton.isSelected()) {
                 chapterToChapterRadioButton.setSelected(false);
-                manNovelURL.setVisible(true);
-                getLinksButton.setVisible(true);
-                manTocURLlbl.setVisible(true);
-                chapterToChapterButton.setVisible(false);
+                chapterToChapterPanel.setVisible(false);
+                chapterFromListPanel.setVisible(true);
                 manInvertOrder.setEnabled(true);
             }
         });
+
         chapterToChapterRadioButton.addActionListener(e -> {
             if (chapterToChapterRadioButton.isSelected()) {
                 chaptersFromLinksRadioButton.setSelected(false);
-                manNovelURL.setVisible(false);
-                getLinksButton.setVisible(false);
-                manTocURLlbl.setVisible(false);
-                chapterToChapterButton.setVisible(true);
+                chapterToChapterPanel.setVisible(true);
+                chapterFromListPanel.setVisible(false);
                 manInvertOrder.setEnabled(false);
             }
         });
+
         manRemoveLinksButton.addActionListener(arg0 -> {
             if (!manLinkListModel.isEmpty()) {
                 int[] indices = manLinkList.getSelectedIndices();
@@ -604,10 +611,13 @@ public class GUI extends JFrame {
                 }
                 if (manLinkListModel.isEmpty()) {
                     manRemoveLinksButton.setEnabled(false);
+                    manChapterPreviewBtn.setEnabled(false);
+                    manDetectChaptersBtn.setEnabled(false);
                 }
                 appendText("manual", indices.length + " links removed.");
             }
         });
+
         manBrowseLocationButton.addActionListener(arg0 -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -619,13 +629,16 @@ public class GUI extends JFrame {
                 manSaveLocation.setText(chooser.getSelectedFile().toString());
             }
         });
-        manSetMetadataButton.addActionListener(arg0 -> manSetMetadata.main());
-        manBlackListedTags.addActionListener(e -> manSetBlacklistedTags.main());
-        chapterToChapterButton.addActionListener(e -> manChapterToChapter.main());
+
+        manSetMetadataButton.addActionListener(arg0 -> editMetadata.main(manNovel));
+
+        manBlackListedTags.addActionListener(e -> editBlacklistedTags.main(manNovel));
+
         manStopButton.addActionListener(e -> {
             manStopButton.setEnabled(false);
             manNovel.killTask = true;
         });
+
         manJsoupInfoButton.addActionListener(e -> {
             try {
                 GrabberUtils.openWebpage(new URI("https://jsoup.org/cookbook/extracting-data/selector-syntax"));
@@ -633,12 +646,31 @@ public class GUI extends JFrame {
                 ex.printStackTrace();
             }
         });
+
         manAddChapterButton.addActionListener(actionEvent -> {
             editChapterList.main("manual");
             if (!manLinkListModel.isEmpty()) {
                 manRemoveLinksButton.setEnabled(true);
             }
         });
+
+        manDetectChaptersBtn.addActionListener(actionEvent -> {
+            manNovel.getMostLikelyChapters();
+        });
+
+        manChapterPreviewBtn.addActionListener(actionEvent -> {
+            if(manLinkList.getSelectedIndex() >= 0) {
+                if(!manDetectChapterContainerCheckBox.isSelected()) {
+                    Novel.modifier(manNovel).chapterContainer(manChapterContainer.getText()).build();
+                }
+                Chapter chapter = manLinkListModel.getElementAt(manLinkList.getSelectedIndex());
+                chapter.saveChapter(manNovel);
+                Element chapterContent = chapter.chapterContent;
+                chapterPreview.main(chapterContent);
+            }
+        });
+
+
         updateButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             updaterStatus.setVisible(true);
             updateButton.setVisible(false);
@@ -744,6 +776,7 @@ public class GUI extends JFrame {
             library.setPollingEnabled(enableCheckingCheckBox.isSelected());
             library.save();
         });
+
     }
 
     public void buildLibrary() {
@@ -1094,14 +1127,17 @@ public class GUI extends JFrame {
         autoShowBlacklistedTagsBtn = new JButton(new ImageIcon(getClass().getResource("/images/block.png")));
         autoShowBlacklistedTagsBtn.setBorder(BorderFactory.createEmptyBorder());
         autoShowBlacklistedTagsBtn.setContentAreaFilled(false);
+        autoShowBlacklistedTagsBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         autoStarredBtn = new JButton(new ImageIcon(getClass().getResource("/images/unstarred_icon.png")));
         autoStarredBtn.setBorder(BorderFactory.createEmptyBorder());
         autoStarredBtn.setContentAreaFilled(false);
+        autoStarredBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         autoCheckAvailability = new JButton(new ImageIcon(getClass().getResource("/images/check_icon.png")));
         autoCheckAvailability.setBorder(BorderFactory.createEmptyBorder());
         autoCheckAvailability.setContentAreaFilled(false);
+        autoCheckAvailability.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         chapterListURL = new JTextField();
         // Listen for changes in the novel link field and disable the grabbing button
@@ -1126,12 +1162,14 @@ public class GUI extends JFrame {
         autoVisitButton = new JButton(new ImageIcon(getClass().getResource("/images/website_icon.png")));
         autoVisitButton.setBorder(BorderFactory.createEmptyBorder());
         autoVisitButton.setContentAreaFilled(false);
+        autoVisitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         autoBusyLabel = new JLabel(new ImageIcon(getClass().getResource("/images/busy.gif")));
 
         browseButton = new JButton(new ImageIcon(getClass().getResource("/images/folder_icon.png")));
         browseButton.setBorder(BorderFactory.createEmptyBorder());
         browseButton.setContentAreaFilled(false);
+        browseButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         coverImage = new JLabel(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
         coverImage.setBorder(BorderFactory.createEmptyBorder());
@@ -1139,18 +1177,22 @@ public class GUI extends JFrame {
         autoEditMetadataButton = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));
         autoEditMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         autoEditMetadataButton.setContentAreaFilled(false);
+        autoEditMetadataButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         autoEditMetaBtn = new JButton(new ImageIcon(getClass().getResource("/images/edit.png")));
         autoEditMetaBtn.setBorder(BorderFactory.createEmptyBorder());
         autoEditMetaBtn.setContentAreaFilled(false);
+        autoEditMetaBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         autoEditBlacklistBtn = new JButton(new ImageIcon(getClass().getResource("/images/block.png")));
         autoEditBlacklistBtn.setBorder(BorderFactory.createEmptyBorder());
         autoEditBlacklistBtn.setContentAreaFilled(false);
+        autoEditBlacklistBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         autoGetNumberButton = new JButton(new ImageIcon(getClass().getResource("/images/list_icon.png")));
         autoGetNumberButton.setBorder(BorderFactory.createEmptyBorder());
         autoGetNumberButton.setContentAreaFilled(false);
+        autoGetNumberButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         waitTime = new JTextField("0");
         waitTime.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1171,18 +1213,32 @@ public class GUI extends JFrame {
         manSetMetadataButton = new JButton(new ImageIcon(getClass().getResource("/images/edit.png")));
         manSetMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         manSetMetadataButton.setContentAreaFilled(false);
+        manSetMetadataButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         manBlackListedTags = new JButton(new ImageIcon(getClass().getResource("/images/block.png")));
         manBlackListedTags.setBorder(BorderFactory.createEmptyBorder());
         manBlackListedTags.setContentAreaFilled(false);
+        manBlackListedTags.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         manAddChapterButton = new JButton(new ImageIcon(getClass().getResource("/images/add_icon.png")));
         manAddChapterButton.setBorder(BorderFactory.createEmptyBorder());
         manAddChapterButton.setContentAreaFilled(false);
+        manAddChapterButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         manRemoveLinksButton = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));
         manRemoveLinksButton.setBorder(BorderFactory.createEmptyBorder());
         manRemoveLinksButton.setContentAreaFilled(false);
+        manRemoveLinksButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        manDetectChaptersBtn = new JButton(new ImageIcon(getClass().getResource("/images/smart_icon.png")));
+        manDetectChaptersBtn.setBorder(BorderFactory.createEmptyBorder());
+        manDetectChaptersBtn.setContentAreaFilled(false);
+        manDetectChaptersBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        manChapterPreviewBtn = new JButton(new ImageIcon(getClass().getResource("/images/preview_icon.png")));
+        manChapterPreviewBtn.setBorder(BorderFactory.createEmptyBorder());
+        manChapterPreviewBtn.setContentAreaFilled(false);
+        manChapterPreviewBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         manLinkList = new JList<>(manLinkListModel);
         manLinkList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -1199,10 +1255,14 @@ public class GUI extends JFrame {
         manJsoupInfoButton = new JButton(new ImageIcon(getClass().getResource("/images/info_icon.png")));
         manJsoupInfoButton.setBorder(BorderFactory.createEmptyBorder());
         manJsoupInfoButton.setContentAreaFilled(false);
+        manJsoupInfoButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        manSaveLocation = new JTextField();
 
         manBrowseLocationButton = new JButton(new ImageIcon(getClass().getResource("/images/folder_icon.png")));
         manBrowseLocationButton.setBorder(BorderFactory.createEmptyBorder());
         manBrowseLocationButton.setContentAreaFilled(false);
+        manBrowseLocationButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         manWaitTime = new JTextField("0");
         manWaitTime.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1226,6 +1286,7 @@ public class GUI extends JFrame {
 
         if(settings.isUseStandardLocation()) {
             autoSaveLocation.setText(settings.getSaveLocation());
+            manSaveLocation.setText(settings.getSaveLocation());
         }
 
         settingsSavelocationField = new JTextField();
@@ -1234,6 +1295,7 @@ public class GUI extends JFrame {
         settingsBrowseSaveLocationBtn = new JButton(new ImageIcon(getClass().getResource("/images/folder_icon.png")));
         settingsBrowseSaveLocationBtn.setBorder(BorderFactory.createEmptyBorder());
         settingsBrowseSaveLocationBtn.setContentAreaFilled(false);
+        settingsBrowseSaveLocationBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         settingsOutputFormatComboBox = new JComboBox(epubFilenameFormats);
         settingsOutputFormatComboBox.setSelectedIndex(settings.getFilenameFormat());

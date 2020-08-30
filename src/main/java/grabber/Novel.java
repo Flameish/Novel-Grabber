@@ -1,7 +1,6 @@
 package grabber;
 
 import gui.GUI;
-import gui.manSetMetadata;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.jsoup.Jsoup;
@@ -14,10 +13,8 @@ import system.Config;
 import system.init;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -52,13 +49,13 @@ public class Novel {
     public String nextChapterBtn = "NOT_SET";
     public String nextChapterURL;
     public String epubFilename;
-    public String bookTitle;
-    public String bookAuthor;
+    public String bookTitle = "Unknown";
+    public String bookAuthor = "Unknown";
     public List<String> bookSubjects = new ArrayList();
-    public String bookDesc;
+    public String bookDesc = "";
     public BufferedImage bufferedCover;
     public String bufferedCoverName;
-    public String bookCover;
+    public String bookCover = "";
     public String url;
     public String chapterLinkSelector;
     public String chapterContainer;
@@ -223,16 +220,40 @@ public class Novel {
                 e.printStackTrace();
             }
         }
-        init.gui.manLinkListModel.removeAllElements();
+        GUI.manLinkListModel.removeAllElements();
         // Add every link as a new chapter and add to gui
         Elements links = tableOfContent.select("a[href]");
         for (Element chapterLink : links) {
             if (chapterLink.attr("abs:href").startsWith("http") && !chapterLink.text().isEmpty()) {
                 Chapter chapter = new Chapter(chapterLink.text(),chapterLink.attr("abs:href"));
-                init.gui.manLinkListModel.addElement(chapter);
+                GUI.manLinkListModel.addElement(chapter);
             }
         }
         init.gui.appendText("manual", "[GRABBER]"+ links.size() + " links retrieved.");
+    }
+
+    /**
+     * Tries to find the container which contains chapter links.
+     */
+    public void getMostLikelyChapters() {
+        GUI.manLinkListModel.removeAllElements();
+        init.gui.appendText("manual", "[GRABBER]Trying to detect chapters.");
+        Element mostLikely = tableOfContent.select("body").first().child(0);
+
+        // Set the container with the most direct children as most likely candidate;
+        for(Element el: tableOfContent.select("body").select("*")) {
+            if(mostLikely.childrenSize() < el.childrenSize()) {
+                if(!el.select("a").isEmpty()) mostLikely = el;
+            }
+        }
+
+        // Add links as chapters from most likely container
+        for (Element chapterLink : mostLikely.select("a[href]")) {
+            if (chapterLink.attr("abs:href").startsWith("http") && !chapterLink.text().isEmpty()) {
+                Chapter chapter = new Chapter(chapterLink.text(),chapterLink.attr("abs:href"));
+                GUI.manLinkListModel.addElement(chapter);
+            }
+        }
     }
 
     /**
@@ -241,8 +262,8 @@ public class Novel {
     public void processChaptersFromList() throws Exception {
         // Add chapters from listModel
         chapterList = new ArrayList<>();
-        for (int i = 0; i < init.gui.manLinkListModel.size(); i++) {
-            chapterList.add(init.gui.manLinkListModel.get(i));
+        for (int i = 0; i < GUI.manLinkListModel.size(); i++) {
+            chapterList.add(GUI.manLinkListModel.get(i));
         }
         if (reverseOrder) Collections.reverse(chapterList);
         if (useHeadless) headlessDriver = new Driver(this);
@@ -262,14 +283,14 @@ public class Novel {
     /**
      * Follows the chapters via a "next chapter button".
      */
-    public void processChaptersToChapters(String[] args) throws Exception {
+    public void processChaptersToChapters(String firstChapterURL, String lastChapterURL, String nextChapterBtn, String chapterNumberString) throws Exception {
         init.gui.appendText(window, "[GRABBER]Connecting...");
         init.gui.setMaxProgress(window, 9001);
 
-        nextChapterURL = args[0];
-        String lastChapterURL = args[1];
-        nextChapterBtn = args[2];
-        int chapterNumber = GUI.chapterToChapterNumber;
+        nextChapterURL = firstChapterURL;
+        this.nextChapterBtn = nextChapterBtn;
+        int chapterNumber = 1;
+        if(chapterNumberString != null && !chapterNumberString.isEmpty()) chapterNumber = Integer.parseInt(chapterNumberString);
 
         if (useHeadless) headlessDriver = new Driver(this);
 
@@ -288,7 +309,7 @@ public class Novel {
             // Reached final chapter
             if (nextChapterURL.equals(lastChapterURL) || (nextChapterURL + "/").equals(lastChapterURL)) {
                 GrabberUtils.sleep(waitTime);
-                nextChapterBtn = "NOT_SET";
+                this.nextChapterBtn = "NOT_SET";
                 currentChapter = new Chapter("Chapter " + chapterNumber++, nextChapterURL);
                 chapterList.add(currentChapter);
                 currentChapter.saveChapter(this);
@@ -297,30 +318,6 @@ public class Novel {
             }
             GrabberUtils.sleep(waitTime);
         }
-    }
-
-    /**
-     * Set metadata specified in metadata GUI dialog
-     */
-    public void manSetMetadata() {
-        if (manSetMetadata.manMetadataInfo[0] != null && !manSetMetadata.manMetadataInfo[0].isEmpty()) {
-            bookTitle = manSetMetadata.manMetadataInfo[0];
-        } else bookTitle = "Unknown";
-        if (manSetMetadata.manMetadataInfo[1] != null && !manSetMetadata.manMetadataInfo[1].isEmpty()) {
-            bookAuthor = manSetMetadata.manMetadataInfo[1];
-        } else bookAuthor = "Unknown";
-        if (manSetMetadata.manMetadataInfo[2] != null && !manSetMetadata.manMetadataInfo[2].isEmpty()) {
-            bookCover = manSetMetadata.manMetadataInfo[2];
-        }
-        if (manSetMetadata.manMetadataInfo[3] != null && !manSetMetadata.manMetadataInfo[3].isEmpty()) {
-            bookDesc = manSetMetadata.manMetadataInfo[3];
-        } else {
-            bookDesc = "";
-        }
-        if (manSetMetadata.manMetadataTags != null && !manSetMetadata.manMetadataTags.isEmpty()) {
-            bookSubjects = manSetMetadata.manMetadataTags;
-        }
-        noDescription = manSetMetadata.noDescription;
     }
 
     /**
@@ -343,9 +340,6 @@ public class Novel {
             setChapterNumber();
             setCover();
         }
-        if(window.equals("manual")) {
-            manSetMetadata();
-        }
     }
 
     /**
@@ -360,7 +354,6 @@ public class Novel {
                 init.gui.autoBookTitle.setText(bookTitle);
             }
         } else {
-            bookTitle = "Unknown";
             if(init.gui != null && window.equals("auto")) {
                 init.gui.autoBookTitle.setText("Unknown");
             }
@@ -374,13 +367,11 @@ public class Novel {
     void setDesc() {
         if (tableOfContent.select(bookDescSelector) != null && !tableOfContent.select(bookDescSelector).isEmpty()) {
             bookDesc = tableOfContent.select(bookDescSelector).first().text();
-        } else {
-            bookDesc = "";
         }
     }
 
     /**
-     * Sets the book auhtor via host selector.
+     * Sets the book author via host selector.
      * Updates GUI with author.
      */
     void setAuthor() {
@@ -390,7 +381,6 @@ public class Novel {
                 init.gui.autoAuthor.setText(bookAuthor);
             }
         } else {
-            bookAuthor = "Unknown";
             if(init.gui != null && window.equals("auto")) {
                 init.gui.autoAuthor.setText("Unknown");
             }
@@ -468,8 +458,8 @@ public class Novel {
                 coverLink = coverLink.substring(0, coverLink.indexOf(".webp"));
             }
             if (url.equals("https://www.inkitt.com/")) {
-                String backgroundimageUrl = coverSelect.select(".story-horizontal-cover__front").attr("style");
-                coverLink = backgroundimageUrl.substring(backgroundimageUrl.indexOf("https://"), backgroundimageUrl.indexOf(")")-1);
+                String backgroundImageUrl = coverSelect.select(".story-horizontal-cover__front").attr("style");
+                coverLink = backgroundImageUrl.substring(backgroundImageUrl.indexOf("https://"), backgroundImageUrl.indexOf(")")-1);
             }
             if (url.equals("https://foxaholic.com/") || url.equals("https://wordrain69.com/") ) {
                 coverLink = coverSelect.attr("abs:data-src");
