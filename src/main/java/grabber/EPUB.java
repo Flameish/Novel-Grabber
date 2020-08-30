@@ -27,12 +27,11 @@ public class EPUB {
             "<body>" + NL;
     static final String htmlFoot = "</body>" + NL + "</html>";
 
-    private Novel novel;
-    private Book book;
+    private final Novel novel;
+    private final Book book = new Book();
 
     public EPUB(Novel novel) {
         this.novel = novel;
-        book = new Book();
     }
 
     public void writeEpub() {
@@ -40,9 +39,10 @@ public class EPUB {
             addMetadata();
             addCover();
             addToc();
-            if(!novel.noDescription || !novel.bookDesc.isEmpty()) addDesc();
-            if (novel.getImages) addImages();
             addChapters();
+            if(!novel.noDescription && !novel.bookDesc.isEmpty()) addDesc();
+            if (novel.getImages) addImages();
+
             book.getResources().add(new Resource(getClass().getResourceAsStream("/default.css"), "default.css"));
             EpubWriter epubWriter = new EpubWriter();
             String epubFilename = setFilename();
@@ -57,7 +57,6 @@ public class EPUB {
     private void addImages() throws IOException {
         for (Map.Entry<String, BufferedImage> entry : novel.images.entrySet()) {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            System.out.println(entry.getValue());
             ImageIO.write(entry.getValue(), GrabberUtils.getFileExtension(entry.getKey()), os);
             try (InputStream inputStream = new ByteArrayInputStream(os.toByteArray())) {
                 Resource resource = new Resource(inputStream, entry.getKey());
@@ -78,7 +77,9 @@ public class EPUB {
                 book.addSection(chapter.name, resource);
             }
         }
-        inputStream.close();
+        if (inputStream != null) {
+            inputStream.close();
+        }
     }
 
     private String setFilename() {
@@ -129,7 +130,7 @@ public class EPUB {
 
     public void addCover() {
         try {
-            if(novel.bookCover != null) {
+            if(novel.bookCover != null && !novel.bookCover.isEmpty()) {
                 // Add BufferedImage as a resource to EPUB
                 if(novel.window.equals("auto") || novel.window.equals("checker")) {
                     ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -157,14 +158,14 @@ public class EPUB {
     }
 
     public void addToc() {
-        String tocString = htmlHead + "<b>Table of Contents</b>" + NL + "<p style=\"text-indent:0pt\">" + NL;
+        StringBuilder tocString = new StringBuilder(htmlHead + "<b>Table of Contents</b>" + NL + "<p style=\"text-indent:0pt\">" + NL);
         for (Chapter chapter: novel.chapterList) {
             if(chapter.status == 1)
-               tocString += "<a href=\"" + chapter.fileName + ".html\">" + chapter.name + "</a><br/>" + NL;
+               tocString.append("<a href=\"").append(chapter.fileName).append(".html\">").append(chapter.name).append("</a><br/>").append(NL);
         }
-        tocString += "</p>" + NL + htmlFoot;
+        tocString.append("</p>").append(NL).append(htmlFoot);
 
-        try (InputStream inputStream = new ByteArrayInputStream(tocString.getBytes(StandardCharsets.UTF_8))) {
+        try (InputStream inputStream = new ByteArrayInputStream(tocString.toString().getBytes(StandardCharsets.UTF_8))) {
             Resource resource = new Resource(inputStream, "table_of_contents.html");
             book.addSection("Table of Contents", resource);
         } catch (IOException e) {
