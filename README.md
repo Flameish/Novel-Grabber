@@ -99,4 +99,7 @@ Novel Grabber was build in java with: <br>
  * [webdrivermanager](https://github.com/bonigarcia/webdrivermanager)
  * [selenium ](https://selenium.dev/)
  * [Simple Java Mail ](https://github.com/bbottema/simple-java-mail/)
+ * [Readability4J](https://github.com/dankito/Readability4J)
+ * [Notify](https://github.com/dorkbox/Notify)
+ * [icons8](https://icons8.com)
  
