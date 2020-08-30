@@ -68,7 +68,7 @@ public class Config {
             Object obj = new JSONParser().parse(JSONString);
             siteSelectorsJSON = (JSONObject) obj;
         } catch (ParseException | IOException e) {
-            System.out.println("[CONFIG]Could not fetch selectors from: " + JSON_Link);
+            System.out.println("[CONFIG-ERROR]Could not fetch selectors from: " + JSON_Link);
             e.printStackTrace();
         }
     }
