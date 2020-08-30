@@ -222,7 +222,7 @@ public class ChapterContentScripts {
                             .get();
                 }
             }
-            if(novel.autoDetectContainer || novel.chapterContainer.isEmpty()) {
+            if(novel.autoDetectContainer || novel.chapterContainer == null || novel.chapterContainer.isEmpty()) {
                 String url = chapter.chapterURL;
                 String html = chapter.doc.html();
                 Readability4J readability4J = new Readability4JExtended(url, html);
