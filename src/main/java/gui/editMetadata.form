@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="gui.manSetMetadata">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="gui.editMetadata">
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
@@ -57,7 +57,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="1460b" class="javax.swing.JButton" binding="manMetadataImageButton" custom-create="true">
+          <component id="1460b" class="javax.swing.JButton" binding="coverBtn" custom-create="true">
             <constraints>
               <grid row="0" column="0" row-span="5" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="1" use-parent-layout="false">
                 <preferred-size width="100" height="133"/>
@@ -84,7 +84,7 @@
               <text value="Author:"/>
             </properties>
           </component>
-          <component id="767b9" class="javax.swing.JTextField" binding="manSetMetadataTitleField" custom-create="true">
+          <component id="767b9" class="javax.swing.JTextField" binding="titleField" custom-create="true">
             <constraints>
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="250" height="-1"/>
@@ -94,7 +94,7 @@
               <toolTipText value="Set novel title"/>
             </properties>
           </component>
-          <component id="22295" class="javax.swing.JTextField" binding="manSetMetadataAuthorField" custom-create="true">
+          <component id="22295" class="javax.swing.JTextField" binding="authorField" custom-create="true">
             <constraints>
               <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="250" height="-1"/>
@@ -117,7 +117,7 @@
               <text value="Tags:"/>
             </properties>
           </component>
-          <component id="64208" class="javax.swing.JTextField" binding="manSetMetadataTags" custom-create="true">
+          <component id="64208" class="javax.swing.JTextField" binding="subjectsField" custom-create="true">
             <constraints>
               <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="250" height="-1"/>
@@ -143,7 +143,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <scrollpane id="44493" binding="autoEditMetadataDescScrollPane" custom-create="true">
+          <scrollpane id="44493" binding="descScrollPane" custom-create="true">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="7" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
                 <preferred-size width="500" height="250"/>
@@ -152,7 +152,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="fd850" class="javax.swing.JTextArea" binding="autoEditMetadataDescArea" custom-create="true">
+              <component id="fd850" class="javax.swing.JTextArea" binding="descArea" custom-create="true">
                 <constraints/>
                 <properties/>
               </component>
@@ -166,17 +166,9 @@
               <text value="Description:"/>
             </properties>
           </component>
-          <component id="90a82" class="javax.swing.JCheckBox" binding="ignoreDescriptionCheckBox" custom-create="true" default-binding="true">
-            <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Ignore description"/>
-            </properties>
-          </component>
           <hspacer id="b0310">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
         </children>

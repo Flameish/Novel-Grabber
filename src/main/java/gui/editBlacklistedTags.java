@@ -7,7 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
-public class autoSetBlacklistedTags extends JDialog {
+public class editBlacklistedTags extends JDialog {
     DefaultListModel blacklistedTagsListModel;
     private JPanel contentPane;
     private JButton buttonOK;
@@ -18,8 +18,8 @@ public class autoSetBlacklistedTags extends JDialog {
     private JScrollPane scrollPane1;
     private Novel novel;
 
-    private autoSetBlacklistedTags(Novel currGrab) {
-        this.novel = currGrab;
+    private editBlacklistedTags(Novel novel) {
+        this.novel = novel;
         setContentPane(contentPane);
         setModal(true);
         setTitle("Edit blacklisted tags");
@@ -27,25 +27,18 @@ public class autoSetBlacklistedTags extends JDialog {
         setIconImage(favicon.getImage());
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        buttonOK.addActionListener(e -> onOK());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!(manBlacklistField.getText() == null || manBlacklistField.getText().isEmpty())) {
-                    currGrab.blacklistedTags.addAll(Arrays.asList(manBlacklistField.getText().split(",")));
-                }
-                blacklistedTagsListModel.clear();
-                for (String tag : currGrab.blacklistedTags) {
-                    blacklistedTagsListModel.addElement(tag);
-                }
+        addButton.addActionListener(e -> {
+            if (!(manBlacklistField.getText() == null || manBlacklistField.getText().isEmpty())) {
+                novel.blacklistedTags.addAll(Arrays.asList(manBlacklistField.getText().split(",")));
+            }
+            blacklistedTagsListModel.clear();
+            for (String tag : novel.blacklistedTags) {
+                blacklistedTagsListModel.addElement(tag);
             }
         });
         setBlacklistRemoveButton.addActionListener(arg1 -> {
@@ -53,14 +46,14 @@ public class autoSetBlacklistedTags extends JDialog {
                 int[] indices = list1.getSelectedIndices();
                 for (int i = indices.length - 1; i >= 0; i--) {
                     blacklistedTagsListModel.removeElementAt(indices[i]);
-                    currGrab.blacklistedTags.remove(indices[i]);
+                    novel.blacklistedTags.remove(indices[i]);
                 }
             }
         });
     }
 
-    static void main(Novel currGrab) {
-        autoSetBlacklistedTags dialog = new autoSetBlacklistedTags(currGrab);
+    static void main(Novel novel) {
+        editBlacklistedTags dialog = new editBlacklistedTags(novel);
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);

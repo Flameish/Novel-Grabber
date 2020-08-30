@@ -16,48 +16,41 @@ public class editChapterList extends JDialog {
     private JButton buttonClose;
     private JTextArea chapterNamesArea;
     private JTextArea chapterLinksArea;
-    private static String currWindow;
+    private String window;
 
-    public editChapterList() {
+    public editChapterList(String window) {
+        this.window = window;
         ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
         setIconImage(favicon.getImage());
         setContentPane(contentPane);
         setModal(true);
 
-        buttonSave.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                // Remove empty lines from textAreas
-                chapterNamesArea.setText(chapterNamesArea.getText().replaceAll("(?m)^\\s+$", ""));
-                chapterLinksArea.setText(chapterLinksArea.getText().replaceAll("(?m)^\\s+$", ""));
-                List<String> chapterNames = new ArrayList<>(Arrays.asList(chapterNamesArea.getText().split("\\n")));
-                List<String> chapterLinks = new ArrayList<>(Arrays.asList(chapterLinksArea.getText().split("\\n")));
-                if(chapterNames.size() == chapterLinks.size()) {
-                    if(currWindow.equals("auto")) {
-                        autoChapterOrder.chapterListModel.clear();
-                        for(int i = 0; i < chapterNames.size(); i++) {
-                            autoChapterOrder.chapterListModel.addElement(new Chapter(chapterNames.get(i), chapterLinks.get(i)));
-                        }
+        buttonSave.addActionListener(actionEvent -> {
+            // Remove empty lines from textAreas
+            chapterNamesArea.setText(chapterNamesArea.getText().replaceAll("(?m)^\\s+$", ""));
+            chapterLinksArea.setText(chapterLinksArea.getText().replaceAll("(?m)^\\s+$", ""));
+            List<String> chapterNames = new ArrayList<>(Arrays.asList(chapterNamesArea.getText().split("\\n")));
+            List<String> chapterLinks = new ArrayList<>(Arrays.asList(chapterLinksArea.getText().split("\\n")));
+            if(chapterNames.size() == chapterLinks.size()) {
+                if(window.equals("auto")) {
+                    autoChapterOrder.chapterListModel.clear();
+                    for(int i = 0; i < chapterNames.size(); i++) {
+                        autoChapterOrder.chapterListModel.addElement(new Chapter(chapterNames.get(i), chapterLinks.get(i)));
                     }
-                    else {
-                        GUI.manLinkListModel.clear();
-                        for(int i = 0; i < chapterNames.size(); i++) {
-                            GUI.manLinkListModel.addElement(new Chapter(chapterNames.get(i), chapterLinks.get(i)));
-                        }
-                    }
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(contentPane, "Lists are not the same length.", "Warning", JOptionPane.WARNING_MESSAGE);
                 }
+                else {
+                    GUI.manLinkListModel.clear();
+                    for(int i = 0; i < chapterNames.size(); i++) {
+                        GUI.manLinkListModel.addElement(new Chapter(chapterNames.get(i), chapterLinks.get(i)));
+                    }
+                }
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(contentPane, "Lists are not the same length.", "Warning", JOptionPane.WARNING_MESSAGE);
             }
         });
 
-        buttonClose.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                onCancel();
-            }
-        });
+        buttonClose.addActionListener(actionEvent -> onCancel());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -68,11 +61,7 @@ public class editChapterList extends JDialog {
         });
 
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onCancel() {
@@ -80,8 +69,7 @@ public class editChapterList extends JDialog {
     }
 
     public static void main(String window) {
-        currWindow = window;
-        editChapterList dialog = new editChapterList();
+        editChapterList dialog = new editChapterList(window);
         dialog.setTitle("Edit chapter list");
         dialog.pack();
         dialog.setLocationRelativeTo(null);
@@ -92,7 +80,7 @@ public class editChapterList extends JDialog {
         chapterNamesArea = new JTextArea();
         chapterLinksArea = new JTextArea();
 
-        if(currWindow.equals("auto")) {
+        if(window.equals("auto")) {
             for(int i = 0; i < autoChapterOrder.chapterListModel.size(); i++) {
                 chapterNamesArea.append(autoChapterOrder.chapterListModel.get(i).name + "\n");
                 chapterLinksArea.append(autoChapterOrder.chapterListModel.get(i).chapterURL + "\n");
@@ -103,6 +91,5 @@ public class editChapterList extends JDialog {
                 chapterLinksArea.append(GUI.manLinkListModel.get(i).chapterURL + "\n");
             }
         }
-
     }
 }
