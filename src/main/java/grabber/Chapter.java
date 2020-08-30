@@ -13,6 +13,7 @@ import org.jsoup.nodes.Element;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Stores chapter information.
@@ -43,7 +44,7 @@ public class Chapter implements Serializable {
      * Adds html header/footer to chapter text.
      * @param novel
      */
-    void saveChapter(Novel novel) {
+    public void saveChapter(Novel novel) {
         ChapterContentScripts.fetchContent(novel, this);
 
         // Check for empty content
@@ -100,6 +101,11 @@ public class Chapter implements Serializable {
         // Always remove <script>
         chapterContent.select("script").remove();
         chapterContent.select("style").remove();
+        // Try to remove navigation links
+        String[] blacklistedWords = new String[] {"next","previous","table","index","back","chapter","home"};
+        for(Element link: chapterContent.select("a[href]")) {
+            if(Arrays.stream(blacklistedWords).anyMatch(link.text().toLowerCase()::contains)) link.remove();
+        }
         if (novel.removeStyling) {
             chapterContent.select("[style]").removeAttr("style");
         }
@@ -133,8 +139,8 @@ public class Chapter implements Serializable {
         for (Element image : chapterContent.select("img")) {
             try {
                 String imageURL = image.absUrl("src");
-                BufferedImage bufferedImage = GrabberUtils.getImage(imageURL);
                 String imageFilename = GrabberUtils.getFilenameFromUrl(imageURL);
+                BufferedImage bufferedImage = GrabberUtils.getImage(imageURL);
                 if(imageFilename != null && bufferedImage != null) {
                     novel.images.put(imageFilename, bufferedImage);
                     image.attr("src", imageFilename);
@@ -145,9 +151,9 @@ public class Chapter implements Serializable {
                 } else {
                     image.remove();
                     if(init.gui != null && !novel.window.equals("checker")) {
-                        init.gui.appendText(novel.window, "[CHAPTER]Could not save image: "+ imageFilename);
+                        init.gui.appendText(novel.window, "[CHAPTER-ERROR]Could not save image: "+ imageFilename);
                     }
-                    System.out.println("[CHAPTER]Could not save image: "+ imageFilename);
+                    System.out.println("[CHAPTER-ERROR]Could not save image: "+ imageFilename);
                 }
             } catch (IOException e) {
                 image.remove();
