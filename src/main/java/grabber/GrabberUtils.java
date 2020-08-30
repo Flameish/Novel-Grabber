@@ -58,7 +58,7 @@ public class GrabberUtils {
         String fileName = new File(filename).getName();
         if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
             return fileName.substring(fileName.lastIndexOf(".")+1);
-        else return "";
+        else return null;
     }
     public static void sleep(int waitTime) {
         try {
