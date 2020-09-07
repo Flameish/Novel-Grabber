@@ -198,6 +198,8 @@ public class GUI extends JFrame {
     private JTextField manChapterToChapterNumberField;
     private JPanel chapterToChapterPanel;
     private JPanel chapterFromListPanel;
+    public JLabel manPageCounter;
+    private JLabel manPageLbl;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -485,6 +487,9 @@ public class GUI extends JFrame {
                 } else if ((!manSaveLocation.getText().isEmpty())
                         && (!manChapterContainer.getText().isEmpty() || manDetectChapterContainerCheckBox.isSelected())
                         && (!manWaitTime.getText().isEmpty())) {
+                    manPageCounter.setText("");
+                    manPageCounter.setVisible(true);
+                    manPageLbl.setVisible(true);
                     manGrabChaptersButton.setEnabled(false);
                     manGrabChaptersButton.setVisible(false);
                     manStopButton.setEnabled(true);
@@ -545,6 +550,9 @@ public class GUI extends JFrame {
                         && (!manChapterContainer.getText().isEmpty() || manDetectChapterContainerCheckBox.isSelected())
                         && (!manWaitTime.getText().isEmpty())
                 ) {
+                    manPageCounter.setText("");
+                    manPageCounter.setVisible(true);
+                    manPageLbl.setVisible(true);
                     manGrabChaptersButton.setEnabled(false);
                     manGrabChaptersButton.setVisible(false);
                     manStopButton.setEnabled(true);

@@ -131,7 +131,12 @@ public class Chapter implements Serializable {
     private void updatePageCount(Novel novel) {
         novel.wordCount = novel.wordCount + GrabberUtils.getWordCount(chapterContainer.toString());
         if(init.gui != null && !novel.window.equals("checker")) {
-            init.gui.pagesCountLbl.setText(String.valueOf(novel.wordCount / 300));
+            if(novel.window.equals("auto")) {
+                init.gui.pagesCountLbl.setText(String.valueOf(novel.wordCount / 300));
+            }
+            if(novel.window.equals("manual")) {
+                init.gui.manPageCounter.setText(String.valueOf(novel.wordCount / 300));
+            }
         }
     }
 
