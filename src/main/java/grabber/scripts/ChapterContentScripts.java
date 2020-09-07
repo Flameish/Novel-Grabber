@@ -79,7 +79,7 @@ public class ChapterContentScripts {
                 string.text(CGShift.getInstance().decrypt(string.text()));
             }
 
-            chapter.chapterContent = chapter.doc.select(novel.chapterContainer).first();
+            chapter.chapterContainer = chapter.doc.select(novel.chapterContainer).first();
         } catch (IOException e) {
             e.printStackTrace();
             if(init.gui != null && !novel.window.equals("checker")) {
@@ -117,7 +117,7 @@ public class ChapterContentScripts {
             String content = (String) results.get("content");
 
             chapter.doc = Jsoup.parse(content);
-            chapter.chapterContent = chapter.doc;
+            chapter.chapterContainer = chapter.doc;
         } catch (ParseException | IOException e) {
             e.printStackTrace();
             if(init.gui != null && !novel.window.equals("checker")) {
@@ -146,7 +146,7 @@ public class ChapterContentScripts {
             }
             String decodedChapter = new String(Base64.getMimeDecoder().decode(encodedChapter), "UTF-8");
             chapter.doc = Jsoup.parse(decodedChapter);
-            chapter.chapterContent = chapter.doc;
+            chapter.chapterContainer = chapter.doc;
         } catch (IOException e) {
             e.printStackTrace();
             if(init.gui != null && !novel.window.equals("checker")) {
@@ -186,7 +186,7 @@ public class ChapterContentScripts {
                         .timeout(30 * 1000)
                         .get();
             }
-            chapter.chapterContent = chapter.doc.select(novel.chapterContainer).first();
+            chapter.chapterContainer = chapter.doc.select(novel.chapterContainer).first();
         } catch (ParseException | IOException e) {
             e.printStackTrace();
             if(init.gui != null && !novel.window.equals("checker")) {
@@ -228,10 +228,10 @@ public class ChapterContentScripts {
                 Readability4J readability4J = new Readability4JExtended(url, html);
                 Article article = readability4J.parse();
                 String extractedContentHtml = article.getContent();
-                chapter.chapterContent = Jsoup.parse(extractedContentHtml);
+                chapter.chapterContainer = Jsoup.parse(extractedContentHtml);
 
             } else {
-                chapter.chapterContent = chapter.doc.select(novel.chapterContainer).first();
+                chapter.chapterContainer = chapter.doc.select(novel.chapterContainer).first();
             }
         } catch (IOException e) {
             e.printStackTrace();

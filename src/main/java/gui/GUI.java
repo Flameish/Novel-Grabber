@@ -665,7 +665,7 @@ public class GUI extends JFrame {
                 }
                 Chapter chapter = manLinkListModel.getElementAt(manLinkList.getSelectedIndex());
                 chapter.saveChapter(manNovel);
-                Element chapterContent = chapter.chapterContent;
+                Element chapterContent = chapter.chapterContainer;
                 chapterPreview.main(chapterContent);
             }
         });
