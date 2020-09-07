@@ -39,10 +39,9 @@ public class EPUB {
             addMetadata();
             addCover();
             addToc();
-            addChapters();
             if(!novel.noDescription && !novel.bookDesc.isEmpty()) addDesc();
             if (novel.getImages) addImages();
-
+            addChapters();
             book.getResources().add(new Resource(getClass().getResourceAsStream("/default.css"), "default.css"));
             EpubWriter epubWriter = new EpubWriter();
             String epubFilename = setFilename();
