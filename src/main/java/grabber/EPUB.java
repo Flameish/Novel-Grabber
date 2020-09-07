@@ -69,7 +69,7 @@ public class EPUB {
         for(Chapter chapter: novel.chapterList) {
             if(chapter.status == 1) {
                 inputStream = new ByteArrayInputStream(
-                        chapter.chapterContent.toString()
+                        chapter.chapterContent
                                 .getBytes(StandardCharsets.UTF_8)
                 );
                 Resource resource = new Resource(inputStream, chapter.fileName + ".html");

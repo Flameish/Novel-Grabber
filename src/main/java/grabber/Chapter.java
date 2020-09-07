@@ -21,7 +21,8 @@ import java.util.Arrays;
  */
 public class Chapter implements Serializable {
     private static int chapterId = 0;  // Used to set unique filenames
-    public Element chapterContent;
+    public Element chapterContainer;
+    public String chapterContent;
     public Document doc;
     public String name;
     public String chapterURL;
@@ -48,7 +49,7 @@ public class Chapter implements Serializable {
         ChapterContentScripts.fetchContent(novel, this);
 
         // Check for empty content
-        if (chapterContent == null) {
+        if (chapterContainer == null) {
             if(init.gui != null) {
                 init.gui.appendText(novel.window,
                         "[GRABBER]Chapter container (" + novel.chapterContainer + ") not found.");
@@ -64,7 +65,6 @@ public class Chapter implements Serializable {
                 novel.nextChapterURL = doc.select(novel.nextChapterBtn).first().absUrl("href");
             }
         }
-
         removeUnwantedTags(novel);
 
         if (novel.getImages) {
@@ -72,15 +72,15 @@ public class Chapter implements Serializable {
         // Remove <img> tags.
         // Images would be loaded from the host via original href links on the eReader if left in.
         } else {
-            chapterContent.select("img").remove();
+            chapterContainer.select("img").remove();
         }
 
         if (novel.displayChapterTitle) {
-           chapterContent.prepend(
+           chapterContainer.prepend(
                    "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span><br>" + EPUB.NL);
         }
-        chapterContent.prepend(EPUB.htmlHead);
-        chapterContent.append( EPUB.NL+EPUB.htmlFoot);
+        chapterContainer.prepend(EPUB.htmlHead);
+        chapterContainer.append( EPUB.NL+EPUB.htmlFoot);
 
         cleanHtml();
 
@@ -91,6 +91,10 @@ public class Chapter implements Serializable {
         }
         System.out.println("[GRABBER]Saved chapter: "+ name);
         status = 1;
+        // Improve GC
+        chapterContent = chapterContainer.toString();
+        doc = null;
+        chapterContainer = null;
     }
 
     /**
@@ -99,21 +103,21 @@ public class Chapter implements Serializable {
      */
     private void removeUnwantedTags(Novel novel) {
         // Always remove <script>
-        chapterContent.select("script").remove();
-        chapterContent.select("style").remove();
+        chapterContainer.select("script").remove();
+        chapterContainer.select("style").remove();
         // Try to remove navigation links
         String[] blacklistedWords = new String[] {"next","previous","table","index","back","chapter","home"};
-        for(Element link: chapterContent.select("a[href]")) {
+        for(Element link: chapterContainer.select("a[href]")) {
             if(Arrays.stream(blacklistedWords).anyMatch(link.text().toLowerCase()::contains)) link.remove();
         }
         if (novel.removeStyling) {
-            chapterContent.select("[style]").removeAttr("style");
+            chapterContainer.select("[style]").removeAttr("style");
         }
 
         if (novel.blacklistedTags != null && !novel.blacklistedTags.isEmpty()) {
             for (String tag : novel.blacklistedTags) {
-                if (!chapterContent.select(tag).isEmpty()) {
-                    chapterContent.select(tag).remove();
+                if (!chapterContainer.select(tag).isEmpty()) {
+                    chapterContainer.select(tag).remove();
                 }
             }
         }
@@ -125,7 +129,7 @@ public class Chapter implements Serializable {
      * @param novel
      */
     private void updatePageCount(Novel novel) {
-        novel.wordCount = novel.wordCount + GrabberUtils.getWordCount(chapterContent.toString());
+        novel.wordCount = novel.wordCount + GrabberUtils.getWordCount(chapterContainer.toString());
         if(init.gui != null && !novel.window.equals("checker")) {
             init.gui.pagesCountLbl.setText(String.valueOf(novel.wordCount / 300));
         }
@@ -136,7 +140,7 @@ public class Chapter implements Serializable {
      * @param novel
      */
     private void getImages(Novel novel) {
-        for (Element image : chapterContent.select("img")) {
+        for (Element image : chapterContainer.select("img")) {
             try {
                 String imageURL = image.absUrl("src");
                 String imageFilename = GrabberUtils.getFilenameFromUrl(imageURL);
@@ -174,11 +178,11 @@ public class Chapter implements Serializable {
         outputSettings.syntax(Document.OutputSettings.Syntax.xml);
         outputSettings.escapeMode(Entities.EscapeMode.xhtml);
 
-        String chapter = chapterContent.toString().replaceAll("<br>", "\n");
+        String chapter = chapterContainer.toString().replaceAll("<br>", "\n");
         TagNode tagNode = cleaner.clean(chapter);
 
         String html = "<" + tagNode.getName() + ">" + cleaner.getInnerHtml(tagNode) + "</" + tagNode.getName() + ">";
-        chapterContent = Jsoup.parse(html).outputSettings(outputSettings);
+        chapterContainer = Jsoup.parse(html).outputSettings(outputSettings);
 
     }
 
