@@ -151,8 +151,11 @@ public class Chapter implements Serializable {
                 String imageFilename = GrabberUtils.getFilenameFromUrl(imageURL);
                 BufferedImage bufferedImage = GrabberUtils.getImage(imageURL);
                 if(imageFilename != null && bufferedImage != null) {
-                    novel.images.put(imageFilename, bufferedImage);
+                    // Check if image has file extension. If not set as png.
+                    if(GrabberUtils.getFileExtension(imageFilename) == null) imageFilename += ".png";
+                    // Modify href of image src to downloaded image
                     image.attr("src", imageFilename);
+                    novel.images.put(imageFilename, bufferedImage);
                     if(init.gui != null && !novel.window.equals("checker")) {
                         init.gui.appendText(novel.window, "[CHAPTER]Saved image: "+ imageFilename);
                     }
