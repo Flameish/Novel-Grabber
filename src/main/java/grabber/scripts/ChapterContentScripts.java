@@ -229,14 +229,20 @@ public class ChapterContentScripts {
                 Article article = readability4J.parse();
                 String extractedContentHtml = article.getContent();
                 chapter.chapterContainer = Jsoup.parse(extractedContentHtml);
-
             } else {
                 chapter.chapterContainer = chapter.doc.select(novel.chapterContainer).first();
             }
         } catch (IOException e) {
             e.printStackTrace();
             if(init.gui != null && !novel.window.equals("checker")) {
-                init.gui.appendText(novel.window,"[GRABBER]"+e.getMessage());
+                init.gui.appendText(novel.window,"[GRABBER-ERROR]Could not connect to webpage. "+"("+e.getMessage()+")");
+            }
+            chapter.status = 2;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            if(init.gui != null && !novel.window.equals("checker")) {
+                init.gui.appendText(novel.window,"[GRABBER-ERROR]Could not detect chapter on: "
+                        + chapter.chapterURL+"("+e.getMessage()+")");
             }
             chapter.status = 2;
         }
