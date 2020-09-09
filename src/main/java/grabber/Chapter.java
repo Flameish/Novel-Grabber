@@ -47,14 +47,15 @@ public class Chapter implements Serializable {
      */
     public void saveChapter(Novel novel) {
         ChapterContentScripts.fetchContent(novel, this);
+        if(status == 2) return;
 
         // Check for empty content
         if (chapterContainer == null) {
             if(init.gui != null) {
                 init.gui.appendText(novel.window,
-                        "[GRABBER]Chapter container (" + novel.chapterContainer + ") not found.");
+                        "[CHAPTER-ERROR]Chapter container (" + novel.chapterContainer + ") not found.");
             }
-            System.out.println("[GRABBER]Chapter container (" + novel.chapterContainer + ") not found.");
+            System.out.println("[CHAPTER-ERROR]Chapter container (" + novel.chapterContainer + ") not found.");
             status = 2;
             return;
         }
