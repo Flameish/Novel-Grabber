@@ -1,15 +1,18 @@
 package grabber;
 
-import org.json.simple.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import system.Config;
+import org.jsoup.nodes.Element;
+import system.init;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Collection of shared utility methods
@@ -41,6 +44,30 @@ public class GrabberUtils {
         return ImageIO.read(connection.getInputStream());
     }
 
+    /**
+     * Tries to find the container which contains chapter links.
+     */
+    public static java.util.List<Chapter> getMostLikelyChapters(Document doc) {
+        System.out.println("[GRABBER]Trying to detect chapters.");
+        Element mostLikely = doc.select("body").first().child(0);
+
+        // Set the container with the most direct children as most likely candidate;
+        for(Element el: doc.select("body").select("*")) {
+            if(mostLikely.childrenSize() < el.childrenSize()) {
+                if(!el.select("a").isEmpty()) mostLikely = el;
+            }
+        }
+        List chapterList = new ArrayList<>();
+        // Add links as chapters from most likely container
+        for (Element chapterLink : mostLikely.select("a[href]")) {
+            if (chapterLink.attr("abs:href").startsWith("http") && !chapterLink.text().isEmpty()) {
+                Chapter chapter = new Chapter(chapterLink.text(),chapterLink.attr("abs:href"));
+                chapterList.add(chapter);
+            }
+        }
+        return chapterList;
+    }
+
     static int getWordCount(String html) {
         Document dom = Jsoup.parse(html);
         String text = dom.text();
@@ -60,6 +87,7 @@ public class GrabberUtils {
             return fileName.substring(fileName.lastIndexOf(".")+1);
         else return null;
     }
+
     public static void sleep(int waitTime) {
         try {
             Thread.sleep(waitTime);
@@ -76,28 +104,18 @@ public class GrabberUtils {
         return imageName;
     }
 
-    public static String getDomain(String url) {
-        for(Object key: Config.getInstance().siteSelectorsJSON.keySet()) {
-            Object keyvalue = Config.getInstance().siteSelectorsJSON.get(key);
-            String keyUrl = ((JSONObject) keyvalue).get("url").toString();
-            if(!keyUrl.trim().isEmpty()) {
-                if(getDomainName(url).equals(getDomainName(keyUrl)))
-                    return key.toString();
+    public static String getDomainName(String url)  {
+        try {
+            URI uri = new URI(url);
+            String domain = uri.getHost();
+            return domain.startsWith("www.") ? domain.substring(4) : domain;
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            if (init.gui != null) {
+                init.gui.showPopup("Malformed URL: " +e.getReason(), "error");
             }
         }
         return null;
-    }
-
-    public static String getDomainName(String url)  {
-        URI uri = null;
-        try {
-            uri = new URI(url);
-        } catch (URISyntaxException e) {
-            System.out.println(url);
-            e.printStackTrace();
-        }
-        String domain = uri.getHost();
-        return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
 
     public static void openWebpage(URI uri) {

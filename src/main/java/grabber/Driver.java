@@ -12,40 +12,41 @@ import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import system.init;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Selenium driver handler
  */
 public class Driver {
     public WebDriver driver;
     public WebDriverWait wait;
-    Novel novel;
 
-    public Driver(Novel novel) {
-        this.novel = novel;
-        if(novel.browser == null) {
-            init.gui.appendText(novel.window, "[HEADLESS]No browser selected. Set your browser in Settings -> General -> Browser");
-            System.out.println("[HEADLESS]No browser selected. Set your browser in Settings -> General -> Browser");
-            return;
-        }
-        driverSetup();
+    public Driver(String window, String browser) {
+        driverSetup(window, browser);
         wait = new WebDriverWait(driver, 30);
     }
 
     /**
      * Selenium driver creation for selected browser.
      */
-    private void driverSetup() {
-        if(init.gui != null && !novel.window.equals("checker")) {
-            init.gui.appendText(novel.window, "[HEADLESS]Starting browser...");
+    private void driverSetup(String window, String browser) {
+        if(init.gui != null && !window.equals("checker")) {
+            init.gui.appendText(window, "[HEADLESS]Starting browser...");
         }
-        switch (novel.browser) {
+        switch (browser) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
-                driver = new ChromeDriver(new ChromeOptions().setHeadless(true));
+                ChromeOptions chromeOptions = new ChromeOptions();
+                chromeOptions.setHeadless(true);
+                driver = new ChromeDriver(chromeOptions);
                 break;
             case "Firefox":
                 WebDriverManager.firefoxdriver().setup();
-                driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true));
+                FirefoxOptions firefoxOptions = new FirefoxOptions();
+                //firefoxOptions.setHeadless(true);
+                driver = new FirefoxDriver(firefoxOptions);
                 break;
             case "Opera":
                 WebDriverManager.operadriver().setup();

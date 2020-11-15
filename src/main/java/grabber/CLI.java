@@ -6,52 +6,51 @@ import java.util.List;
 import java.util.Map;
 
 public class CLI {
+
     /**
      * Downloads a novel fully automatic based on CLI input.
-     * @param params
      */
     public static void downloadNovel(Map<String, List<String>> params) {
-        Novel autoNovel = new NovelBuilder().fromCLI(params).build();
-        autoNovel.fetchChapterList();
-        autoNovel.getMetadata();
-        // Change bookTitle temporarily to include chapter names
-        // when creating the EPUB for system.library auto grabs
-        String oldBookTitle = autoNovel.bookTitle;
-        if(autoNovel.window.equals("checker")) {
-            autoNovel.bookTitle = autoNovel.firstChapter
-                    +"-"+ autoNovel.lastChapter
-                    +"-"+ autoNovel.bookTitle;
-        }
+        Novel novel = new NovelBuilder().fromCLI(params).build();
+        novel.check();
+        NovelMetadata metadata = novel.metadata;
 
-        // Chapter range needs to be set AFTER fetching the chapter list
+
+        // Chapter range needs to be set after fetching the chapter list
         if(params.containsKey("chapters")) {
             if(params.get("chapters").get(0).equals("all")) {
-                autoNovel.firstChapter = 1;
-                autoNovel.lastChapter = autoNovel.chapterList.size();
+                novel.firstChapter = 1;
+                novel.lastChapter = novel.chapterList.size();
             } else {
-                autoNovel.firstChapter = Integer.parseInt(params.get("chapters").get(0));
+                novel.firstChapter = Integer.parseInt(params.get("chapters").get(0));
                 if(params.get("chapters").get(1).equals("last")) {
-                    autoNovel.lastChapter = autoNovel.chapterList.size();
+                    novel.lastChapter = novel.chapterList.size();
                 } else {
-                    autoNovel.lastChapter = Integer.parseInt(params.get("chapters").get(1));
+                    novel.lastChapter = Integer.parseInt(params.get("chapters").get(1));
                 }
             }
         } else {
-            autoNovel.firstChapter = 1;
-            autoNovel.lastChapter = autoNovel.chapterList.size();
+            novel.firstChapter = 1;
+            novel.lastChapter = novel.chapterList.size();
         }
 
         try {
-            autoNovel.downloadChapters();
+            novel.downloadChapters();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        autoNovel.writeEpub();
-        // Change book title back to show up in emails correctly
-        if(autoNovel.window.equals("checker")) {
-            autoNovel.bookTitle = oldBookTitle;
+        // Change bookTitle temporarily to include chapter names
+        // when creating the EPUB for system.library auto grabs
+        String oldBookTitle = metadata.getTitle();
+        if(novel.window.equals("checker")) {
+            metadata.setTitle(novel.firstChapter +"-"+ novel.lastChapter +"-"+ metadata.getTitle());
         }
-        autoNovel.report();
+        novel.output();
+        // Change book title back to show up in emails correctly
+        if(novel.window.equals("checker")) {
+            metadata.setTitle(oldBookTitle);
+        }
+
     }
 
     public static Map<String, List<String>> createParamsFromArgs(String[] args) {

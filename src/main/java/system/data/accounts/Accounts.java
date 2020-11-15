@@ -4,13 +4,15 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import system.Config;
+import system.init;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Accounts {
+    private static String accountsFile;
     private static Accounts accounts;
     private List<Account> accountList = new ArrayList<>();
 
@@ -19,6 +21,12 @@ public class Accounts {
     public static Accounts getInstance() {
         if(accounts == null) {
             accounts = new Accounts();
+            try {
+                accountsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/../accounts.ini";
+            } catch (URISyntaxException e) {
+                accountsFile = "accounts.ini";
+                e.printStackTrace();
+            }
             accounts.load();
         }
         return accounts;
@@ -28,7 +36,7 @@ public class Accounts {
      * Reads accounts file(JSON) and creates Accounts object.
      */
     private void load() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(Config.getInstance().accounts_file_path))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(accountsFile))) {
             JSONArray accounts = (JSONArray) new JSONParser().parse(reader);
             for (Object loadedAccount: accounts) {
                 accountList.add(new Account((JSONObject) loadedAccount));
@@ -44,7 +52,7 @@ public class Accounts {
      * Saves accounts as JSON file.
      */
     public void save() {
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(Config.getInstance().accounts_file_path))) {
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(accountsFile))) {
             // Create JSON array from starred novels
             JSONArray accountArray = new JSONArray();
             for(Account account: accountList) {

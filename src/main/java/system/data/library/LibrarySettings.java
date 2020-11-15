@@ -4,36 +4,43 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import system.Config;
+import system.init;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Library {
-    private static Library library;
+public class LibrarySettings {
+    private static String libraryFile;
+    public static String libraryFolder;
+    private static LibrarySettings librarySettings;
     private List<LibraryNovel> starredNovels = new ArrayList<>();
-    private int frequency = 20;
-    private boolean pollingEnabled = true;
 
-    private Library() { }
+    private LibrarySettings() { }
 
-    public static Library getInstance() {
-        if(library == null) {
-            library = new Library();
-            library.load();
+    public static LibrarySettings getInstance() {
+        if(librarySettings == null) {
+            librarySettings = new LibrarySettings();
+            try {
+                libraryFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/../library.json";
+                libraryFolder = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/../Novels";
+            } catch (URISyntaxException e) {
+                libraryFile = "library.json";
+                libraryFolder = "Novels";
+                e.printStackTrace();
+            }
+            librarySettings.load();
         }
-        return library;
+        return librarySettings;
     }
 
     /**
      * Reads system.library file(JSON) and creates Library object.
      */
     private void load() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(Config.getInstance().library_file_path))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(libraryFile))) {
             JSONObject libraryObj = (JSONObject) new JSONParser().parse(reader);
-            setFrequency(((Long) libraryObj.get("frequency")).intValue());
-            setPollingEnabled((boolean) libraryObj.get("pollingEnabled"));
             // Create starred novels from json objects
             JSONArray libraryNovels = (JSONArray) libraryObj.get("starredNovels");
             for (Object loadedNovel: libraryNovels) {
@@ -50,10 +57,8 @@ public class Library {
      * Saves system.library as JSON file.
      */
     public void save() {
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(Config.getInstance().library_file_path))) {
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(libraryFile))) {
             JSONObject libraryObj = new JSONObject();
-            libraryObj.put("frequency", getFrequency());
-            libraryObj.put("pollingEnabled", isPollingEnabled());
             // Create JSON array from starred novels
             JSONArray libraryNovels = new JSONArray();
             for(LibraryNovel libraryNovel: starredNovels) {
@@ -76,22 +81,6 @@ public class Library {
             if (currNovel.getNovelUrl().equals(novelUrl)) return currNovel;
         }
         return null;
-    }
-
-    public int getFrequency() {
-        return frequency;
-    }
-
-    public void setFrequency(int frequency) {
-        this.frequency = frequency;
-    }
-
-    public boolean isPollingEnabled() {
-        return pollingEnabled;
-    }
-
-    public void setPollingEnabled(boolean pollingEnabled) {
-        this.pollingEnabled = pollingEnabled;
     }
 
     public boolean isStarred(String novelUrl) {

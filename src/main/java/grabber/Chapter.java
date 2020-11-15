@@ -1,6 +1,5 @@
 package grabber;
 
-import grabber.scripts.ChapterContentScripts;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
@@ -14,22 +13,17 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
-/**
- * Stores chapter information.
- * Saves chapter as HTML file.
- */
 public class Chapter implements Serializable {
     private static int chapterId = 0;  // Used to set unique filenames
     public Element chapterContainer;
     public String chapterContent;
-    public Document doc;
     public String name;
     public String chapterURL;
     public String fileName;
-    public String xhrChapterId;
     public int status = 0; // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
-    public int xhrBookId;
 
     public Chapter(String name, String link) {
         this.name = name;
@@ -41,68 +35,49 @@ public class Chapter implements Serializable {
      * Fetches chapter content from host.
      * Modifies content of chapter based on selected options.
      * Downloads images if selected.
+     * Cleans broken HTML
      * Updates page count on GUI.
      * Adds html header/footer to chapter text.
-     * @param novel
      */
     public void saveChapter(Novel novel) {
-        ChapterContentScripts.fetchContent(novel, this);
-        if(status == 2) return;
-
-        // Check for empty content
+        chapterContainer = novel.source.getChapterContent(this);
         if (chapterContainer == null) {
+            System.err.println("[ERROR]Chapter container not found.");
             if(init.gui != null) {
                 init.gui.appendText(novel.window,
-                        "[CHAPTER-ERROR]Chapter container (" + novel.chapterContainer + ") not found.");
+                        "[ERROR]Chapter container not found.");
             }
-            System.out.println("[CHAPTER-ERROR]Chapter container (" + novel.chapterContainer + ") not found.");
-            status = 2;
+            status = 2; // Chapter was NOT downloaded
             return;
         }
 
-        // Get the next chapter URL from the "nextChapterBtn" href for Chapter-To-Chapter grabbing.
-        if(novel.window.equals("manual")) {
-            if (!novel.nextChapterBtn.equals("NOT_SET")) {
-                novel.nextChapterURL = doc.select(novel.nextChapterBtn).first().absUrl("href");
-            }
-        }
-        removeUnwantedTags(novel);
+        removeUnwantedTags(novel.removeStyling, novel.blacklistedTags);
 
         if (novel.getImages) {
-            getImages(novel);
-        // Remove <img> tags.
-        // Images would be loaded from the host via original href links on the eReader if left in.
-        } else {
+            getImages(novel.window, novel.images);
+        } else {  // Remove <img> tags.
+            // Images would be loaded from the internet from the original links inside the eReader if left unchanged
             chapterContainer.select("img").remove();
         }
 
-        if (novel.displayChapterTitle) {
-           chapterContainer.prepend(
-                   "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span><br>" + EPUB.NL);
-        }
-        chapterContainer.prepend(EPUB.htmlHead);
-        chapterContainer.append( EPUB.NL+EPUB.htmlFoot);
+        fixHTML(novel.displayChapterTitle);
 
-        cleanHtml();
-
-        updatePageCount(novel);
-
-        if(init.gui != null && !novel.window.equals("checker")) {
-            init.gui.appendText(novel.window, "[GRABBER]Saved chapter: "+ name);
-        }
+        novel.wordCount = novel.wordCount + GrabberUtils.getWordCount(chapterContainer.toString());
         System.out.println("[GRABBER]Saved chapter: "+ name);
-        status = 1;
-        // Improve GC
+        if(init.gui != null) {
+            init.gui.appendText(novel.window, "[GRABBER]Saved chapter: "+ name);
+            init.gui.updatePageCount(novel.window, novel.wordCount);
+        }
+
         chapterContent = chapterContainer.toString();
-        doc = null;
         chapterContainer = null;
+        status = 1; // Chapter was successfully downloaded
     }
 
     /**
      * Removes general and specified blacklisted tags from chapter body.
-     * @param novel
      */
-    private void removeUnwantedTags(Novel novel) {
+    private void removeUnwantedTags(boolean removeStyling, List<String> blacklistedTags) {
         // Always remove <script>
         chapterContainer.select("script").remove();
         chapterContainer.select("style").remove();
@@ -111,41 +86,20 @@ public class Chapter implements Serializable {
         for(Element link: chapterContainer.select("a[href]")) {
             if(Arrays.stream(blacklistedWords).anyMatch(link.text().toLowerCase()::contains)) link.remove();
         }
-        if (novel.removeStyling) {
+        if (removeStyling) {
             chapterContainer.select("[style]").removeAttr("style");
         }
 
-        if (novel.blacklistedTags != null && !novel.blacklistedTags.isEmpty()) {
-            for (String tag : novel.blacklistedTags) {
-                if (!chapterContainer.select(tag).isEmpty()) {
-                    chapterContainer.select(tag).remove();
-                }
-            }
+        for (String tag : blacklistedTags) {
+            chapterContainer.select(tag).remove();
         }
     }
 
-    /**
-     * Updates word counter of novel and page counter on GUI.
-     * (300 words per page)
-     * @param novel
-     */
-    private void updatePageCount(Novel novel) {
-        novel.wordCount = novel.wordCount + GrabberUtils.getWordCount(chapterContainer.toString());
-        if(init.gui != null && !novel.window.equals("checker")) {
-            if(novel.window.equals("auto")) {
-                init.gui.pagesCountLbl.setText(String.valueOf(novel.wordCount / 300));
-            }
-            if(novel.window.equals("manual")) {
-                init.gui.manPageCounter.setText(String.valueOf(novel.wordCount / 300));
-            }
-        }
-    }
 
     /**
-     * Saves images w/ filenames in HashMap
-     * @param novel
+     * Saves images with filenames in HashMap
      */
-    private void getImages(Novel novel) {
+    private void getImages(String window, HashMap<String, BufferedImage> images) {
         for (Element image : chapterContainer.select("img")) {
             try {
                 String imageURL = image.absUrl("src");
@@ -156,15 +110,15 @@ public class Chapter implements Serializable {
                     if(GrabberUtils.getFileExtension(imageFilename) == null) imageFilename += ".png";
                     // Modify href of image src to downloaded image
                     image.attr("src", imageFilename);
-                    novel.images.put(imageFilename, bufferedImage);
-                    if(init.gui != null && !novel.window.equals("checker")) {
-                        init.gui.appendText(novel.window, "[CHAPTER]Saved image: "+ imageFilename);
+                    images.put(imageFilename, bufferedImage);
+                    if(init.gui != null) {
+                        init.gui.appendText(window, "[CHAPTER]Saved image: "+ imageFilename);
                     }
                     System.out.println("[CHAPTER]Saved image: "+ imageFilename);
                 } else {
                     image.remove();
-                    if(init.gui != null && !novel.window.equals("checker")) {
-                        init.gui.appendText(novel.window, "[CHAPTER-ERROR]Could not save image: "+ imageFilename);
+                    if(init.gui != null) {
+                        init.gui.appendText(window, "[CHAPTER-ERROR]Could not save image: "+ imageFilename);
                     }
                     System.out.println("[CHAPTER-ERROR]Could not save image: "+ imageFilename);
                 }
@@ -175,7 +129,11 @@ public class Chapter implements Serializable {
         }
     }
 
-    private void cleanHtml() {
+    /**
+     * Cleans HTML tags and adds header & footer
+     * Add chapter title optionally
+     */
+    private void fixHTML(boolean displayChapterTitle) {
         HtmlCleaner cleaner = new HtmlCleaner();
         CleanerProperties props = cleaner.getProperties();
         props.setTranslateSpecialEntities(true);
@@ -192,6 +150,12 @@ public class Chapter implements Serializable {
 
         String html = "<" + tagNode.getName() + ">" + cleaner.getInnerHtml(tagNode) + "</" + tagNode.getName() + ">";
         chapterContainer = Jsoup.parse(html).outputSettings(outputSettings);
+        if (displayChapterTitle) {
+            chapterContainer.prepend(
+                    "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span><br>" + EPUB.NL);
+        }
+        chapterContainer.prepend(EPUB.htmlHead);
+        chapterContainer.append(EPUB.NL+EPUB.htmlFoot);
 
     }
 

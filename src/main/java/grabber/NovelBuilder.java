@@ -1,14 +1,18 @@
 package grabber;
 
+import grabber.sources.Source;
 import system.data.accounts.Account;
 import system.data.accounts.Accounts;
+import system.init;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import static grabber.GrabberUtils.getDomain;
 
 /**
  * Novel builder and modifier.
@@ -26,12 +30,9 @@ public class NovelBuilder {
 
     /**
      * Set novel options from a given CLI string.
-     * @param params
-     * @return
      */
     public NovelBuilder fromCLI(Map<String, List<String>> params) {
         novel.novelLink = params.get("link").get(0);
-        novel.hostname = getDomain(novel.novelLink.substring(0, GrabberUtils.ordinalIndexOf(novel.novelLink, "/", 3) + 1));
         novel.window = "auto";
         novel.displayChapterTitle = params.containsKey("displayTitle");
         novel.reverseOrder = params.containsKey("invertOrder");
@@ -92,12 +93,11 @@ public class NovelBuilder {
     }
 
     public Novel build() {
-        novel.setHostSelectors();
+        setSource();
         return novel;
     }
     public NovelBuilder novelLink(String novelLink) {
         novel.novelLink = novelLink;
-        novel.hostname = getDomain(novelLink.substring(0, GrabberUtils.ordinalIndexOf(novelLink, "/", 3) + 1));
         return this;
     }
     public NovelBuilder window(String window) {
@@ -124,16 +124,8 @@ public class NovelBuilder {
         novel.displayChapterTitle = displayChapterTitle;
         return this;
     }
-    public NovelBuilder reverseOrder(boolean reverseOrder) {
-        novel.reverseOrder = reverseOrder;
-        return this;
-    }
     public NovelBuilder useHeadless(boolean useHeadless) {
         novel.useHeadless = useHeadless;
-        return this;
-    }
-    public NovelBuilder headlessGUI(boolean headlessGUI) {
-        novel.headlessGUI = headlessGUI;
         return this;
     }
     public NovelBuilder useAccount(boolean useAccount) {
@@ -160,8 +152,29 @@ public class NovelBuilder {
         novel.blacklistedTags = blacklistedTags;
         return this;
     }
-    public NovelBuilder chapterContainer(String chapterContainer) {
-        novel.chapterContainer = chapterContainer;
-        return this;
+
+    private void setSource() {
+        try {
+            String sourcesFolder = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/sources";
+            File dir = new File(sourcesFolder);
+            URL loadPath = dir.toURI().toURL();
+            URL[] urls = new URL[]{loadPath};
+            URLClassLoader classLoader = new URLClassLoader(urls);
+
+            if(novel.window.equals("manual")) {
+                novel.source = (Source) classLoader.loadClass("grabber.sources.manualSource").getConstructor(Novel.class).newInstance(novel);
+            }
+            if(novel.window.equals("auto") || novel.window.equals("checker")) {
+                String domain = GrabberUtils.getDomainName(novel.novelLink).replaceAll("[^A-Za-z0-9]", "_");
+                novel.source = (Source) classLoader.loadClass("grabber.sources."+domain).getConstructor(Novel.class).newInstance(novel);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("[ERROR]Host not supported: "+ e.getMessage() + " not found.");
+            if(init.gui != null) {
+                init.gui.appendText(novel.window,"[ERROR]Host not supported: "+ e.getMessage()+ " not found.");
+            }
+            novel.source = null;
+        }
     }
 }

@@ -1,6 +1,6 @@
 package gui;
 
-import system.data.library.Library;
+import system.data.library.LibrarySettings;
 import system.data.library.LibraryNovel;
 
 import javax.swing.*;
@@ -50,7 +50,7 @@ public class libraryNovelSettings extends JDialog {
         libraryNovel.setSendEmailNotification(emailNotificationCheckBox.isSelected());
         libraryNovel.setSendDesktopNotification(desktopNotificationCheckBox.isSelected());
         libraryNovel.setThreshold((Integer) tresholdSpinner.getValue());
-        Library.getInstance().save();
+        LibrarySettings.getInstance().save();
         dispose();
     }
 

@@ -1,13 +1,15 @@
 package system.data.library;
 
 import grabber.Novel;
+import grabber.NovelMetadata;
 import org.json.simple.JSONObject;
-import system.Config;
 import system.data.Settings;
+import system.init;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * Followed novel in system.library.
@@ -15,7 +17,7 @@ import java.io.IOException;
 public class LibraryNovel {
     private String novelUrl;
     private String title;
-    private String cover;
+    private String coverName;
     private boolean autoDownloadEnabled;
     private boolean sendEmailNotification;
     private boolean sendDesktopNotification;
@@ -29,22 +31,21 @@ public class LibraryNovel {
     /**
      * Creates a new system.library novel.
      * Writes the cover to file.
-     * @param novel
      */
     public LibraryNovel(Novel novel) {
+        NovelMetadata metadata = novel.metadata;
         novelUrl = novel.novelLink;
-        title = novel.bookTitle;
-        cover = novel.bookCover;
+        title = metadata.getTitle();
+        coverName = "cover."+metadata.getCoverFormat();
         lastChapter = novel.chapterList.size();
         newestChapter = lastChapter;
 
-        String tempCli = "-link "+novel.novelLink +" -path \""+ Config.getInstance().home_path+ "/"
-                + Config.getInstance().home_folder + "/"+novel.bookTitle+"/\"";
+        // Build cli command
+        String tempCli = "-link "+novel.novelLink +" -path \""+ LibrarySettings.libraryFolder+ "/" + title +"/\"";
 
         if(Settings.getInstance().isUseStandardLocation()) {
-            tempCli = "-link "+novel.novelLink +" -path \"" + Settings.getInstance().getSaveLocation() + "/"+novel.bookTitle+"/\"";
+            tempCli = "-link "+novel.novelLink +" -path \"" + Settings.getInstance().getSaveLocation() + "/"+ title +"/\"";
         }
-        // Build cli command
 
         if(novel.useHeadless) {
             tempCli = tempCli + " -headless " + Settings.getInstance().getBrowser();
@@ -54,7 +55,7 @@ public class LibraryNovel {
         }
         cliString = tempCli;
 
-        saveCover(novel);
+        saveCover(metadata);
     }
 
 
@@ -62,12 +63,11 @@ public class LibraryNovel {
      * Creates a library novel from a JSON object.
      * Doesn't write cover to file.
      * This method is called for already existing novels.
-     * @param libNovel
      */
     public LibraryNovel(JSONObject libNovel) {
         novelUrl = (String) libNovel.get("novelUrl");
         title = (String) libNovel.get("title");
-        cover = (String) libNovel.get("cover");
+        coverName = (String) libNovel.get("cover");
         cliString = (String) libNovel.get("cliString");
         autoDownloadEnabled = (boolean) libNovel.get("autoDownloadEnabled");
         sendEmailNotification = (boolean) libNovel.get("sendEmailNotification");
@@ -93,24 +93,22 @@ public class LibraryNovel {
         libraryNovel.put("sendDesktopNotification", isSendDesktopNotification());
         libraryNovel.put("sendAttachmentEnabled", isSendAttachmentEnabled());
         libraryNovel.put("updateLast", isUpdateLast());
-        libraryNovel.put("lastChapter", getLastChapter());
-        libraryNovel.put("newestChapter", getNewestChapter());
+        libraryNovel.put("lastChapter", getLastLocalChapterNumber());
+        libraryNovel.put("newestChapter", getNewestChapterNumber());
         libraryNovel.put("threshold", getThreshold());
         return libraryNovel;
     }
 
     /**
      * Writes BufferedCover to file.
-     * @param novel
      */
-    private void saveCover(Novel novel) {
+    private void saveCover(NovelMetadata metadata) {
         // Save cover
-        File outputfile = new File(Config.getInstance().home_path+ "/" + Config.getInstance().home_folder
-                + "/"+ novel.bookTitle+"/"+ novel.bookCover);
+        File outputfile = new File(LibrarySettings.libraryFolder + "/"+ metadata.getTitle() + "/" + coverName);
         outputfile.mkdirs();
         try {
             // cover name + file extension
-            ImageIO.write(novel.bufferedCover, novel.bookCover.substring(novel.bookCover.lastIndexOf(".")+1), outputfile);
+            ImageIO.write(metadata.getBufferedCover(), metadata.getCoverFormat(), outputfile);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("[ERROR]Could not save cover.");
@@ -134,11 +132,11 @@ public class LibraryNovel {
     }
 
     public String getCover() {
-        return cover;
+        return coverName;
     }
 
     public void setCover(String cover) {
-        this.cover = cover;
+        this.coverName = cover;
     }
 
     public boolean isAutoDownloadEnabled() {
@@ -157,7 +155,7 @@ public class LibraryNovel {
         this.cliString = cliString;
     }
 
-    public int getLastChapter() {
+    public int getLastLocalChapterNumber() {
         return lastChapter;
     }
 
@@ -165,7 +163,7 @@ public class LibraryNovel {
         this.lastChapter = lastChapter;
     }
 
-    public int getNewestChapter() {
+    public int getNewestChapterNumber() {
         return newestChapter;
     }
 

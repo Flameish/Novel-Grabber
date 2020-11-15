@@ -1,30 +1,19 @@
 package grabber;
 
-import gui.GUI;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.jsoup.Jsoup;
+import grabber.sources.Source;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import grabber.scripts.ChapterListScripts;
-import grabber.scripts.LoginScripts;
-import system.Config;
 import system.init;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class Novel {
+    public Source source;
     public Driver headlessDriver;
     public Document tableOfContent;
-    public Document tempPage;
     public Map<String, String> cookies;
     public List<Chapter> chapterList;
-    public List<String> blacklistedTags = new ArrayList<>();
+    public NovelMetadata metadata;
+    public List<String> blacklistedTags;
     public HashMap<String, BufferedImage> images = new HashMap<>();
     public boolean killTask;
     public boolean reGrab = false;
@@ -49,21 +38,6 @@ public class Novel {
     public String nextChapterBtn = "NOT_SET";
     public String nextChapterURL;
     public String epubFilename;
-    public String bookTitle = "Unknown";
-    public String bookAuthor = "Unknown";
-    public List<String> bookSubjects = new ArrayList();
-    public String bookDesc = "";
-    public BufferedImage bufferedCover;
-    public String bufferedCoverName;
-    public String bookCover = "";
-    public String url;
-    public String chapterLinkSelector;
-    public String chapterContainer;
-    public String bookTitleSelector;
-    public String bookDescSelector;
-    public String bookAuthorSelector;
-    public String bookSubjectSelector;
-    public String bookCoverSelector;
 
     /**
      * Main novel download handling object.
@@ -74,7 +48,6 @@ public class Novel {
 
     /**
      * Builder methods to create a novel object from various download settings.
-     * @return
      */
     public static NovelBuilder builder() {
         return new NovelBuilder();
@@ -82,208 +55,71 @@ public class Novel {
 
     /**
      * Modifies an existing Novel object without creating a new one.
-     * @param novel
-     * @return
      */
     public static NovelBuilder modifier(Novel novel) {
         return new NovelBuilder(novel);
     }
 
     /**
-     * Fetches the chapter list of novel.
-     * Gets potential login cookies for host site.
-     * Create potential headless driver if selected.
+     * Fetches metadata, blacklisted tags, chapter list.
      */
-    public void fetchChapterList() {
-        if(useAccount) {
-            LoginScripts.getLoginCookies(this);
+    public void check() {
+        if(source != null) {
+            if(useAccount) {
+                try {
+                    cookies = source.getLoginCookies();
+                } catch (UnsupportedOperationException e) {
+                    System.err.println("[ERROR]Source does not support login.");
+                    if(init.gui != null) {
+                        init.gui.appendText(window,"[ERROR]Source does not support login.");
+                    }
+                }
+            }
+            chapterList = source.getChapterList();
+            // Are created in GUI for manual
+            if(!window.equals("manual")) {
+                blacklistedTags = source.getBlacklistedTags();
+                metadata = source.getMetadata();
+            }
         }
-        if(useHeadless) {
-            headlessDriver = new Driver(this);
-        }
-        ChapterListScripts.getList(this);
     }
 
     /**
-     * Downloads chapters to file.
-     * Updates download progress on GUI.
+     * Downloads chapters from list.
      * @throws Exception on stopped grabbing.
      */
     public void downloadChapters() throws Exception {
         System.out.println("[GRABBER]Starting download...");
-
+        // Preparation
         if(init.gui != null) {
             init.gui.setMaxProgress(window, lastChapter-firstChapter+1);
         }
-
-        // Reset information if re-grab
         if(reGrab) {
             wordCount = 0;
-            // Reset download status of chapters
-            for(Chapter chapter: chapterList) chapter.status = 0;
+            for(Chapter chapter: chapterList) chapter.status = 0; // Reset download status of chapters
         }
-
         if(reverseOrder) Collections.reverse(chapterList);
-
-        // Create headless driver if it wasn't previously created during chapter list fetching
-        if(useHeadless && headlessDriver == null) {
-            headlessDriver = new Driver(this);
-        }
-
+        // Download handling
         for(int i = firstChapter-1; i < lastChapter; i++) { // -1 since chapter numbers start at 1
             if(killTask) {
-                throw new Exception("[GRABBER]Stopped.");
+                throw new Exception("[GRABBER]Download stopped.");
             }
             chapterList.get(i).saveChapter(this);
-
             if(init.gui != null) {
                 init.gui.updateProgress(window);
             }
-
             GrabberUtils.sleep(waitTime);
         }
-
         reGrab = true;
-    }
-
-    public void writeEpub() {
-        EPUB epub = new EPUB(this);
-        epub.writeEpub();
-    }
-
-    /**
-     * Prints potential failed chapters.
-     * Reverses the chapter order for next grabbing. (If grabbing was stopped with this option selected)
-     * Closes headless driver if used.
-     */
-    public void report() {
-        // Print finishing information
-        System.out.println("[GRABBER]Output: " + saveLocation + epubFilename);
-        if(init.gui != null) {
-            init.gui.appendText(window,"[GRABBER]Finished."); // GUI doesn't need save location displaying
-        }
-
-        // Reverse chapter order if needed for potential re-grabbing
-        if(reverseOrder) Collections.reverse(chapterList);
-
-        // Print failed chapters
-        for(Chapter chapter: chapterList) {
-            if(chapter.status == 2) // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
-                if(init.gui != null) {
-                    init.gui.appendText(window,"[GRABBER]Failed to download: " +chapter.name);
-                }
-        }
-
-        // Close headless browser
-        if(useHeadless) headlessDriver.close();
-    }
-
-    /**
-     * Set CSS selectors from fetched config file for this host.
-     */
-    void setHostSelectors() {
-        JSONObject currentSite = (JSONObject) Config.getInstance().siteSelectorsJSON.get(hostname);
-        if(currentSite != null) {
-            url = String.valueOf(currentSite.get("url"));
-            chapterLinkSelector = String.valueOf(currentSite.get("chapterLinkSelector"));
-            chapterContainer = String.valueOf(currentSite.get("chapterContainer"));
-            for(Object tagObject: (JSONArray) currentSite.get("blacklistedTags")) {
-                blacklistedTags.add(tagObject.toString());
-            }
-            bookTitleSelector = String.valueOf(currentSite.get("bookTitleSelector"));
-            bookDescSelector = String.valueOf(currentSite.get("bookDescSelector"));
-            bookCoverSelector = String.valueOf(currentSite.get("bookCoverSelector"));
-            bookAuthorSelector = String.valueOf(currentSite.get("bookAuthorSelector"));
-            bookSubjectSelector = String.valueOf(currentSite.get("bookSubjectSelector"));
-        } else {
-            url = "";
-        }
-    }
-
-    /**
-     * Stores all hyperlinks from the given URL and displays them on the gui.
-     */
-    public void retrieveLinks() {
-        init.gui.appendText(window, "Retrieving links from: " + novelLink);
-        // Fetch webpage
-        if (useHeadless) {
-            headlessDriver = new Driver(this);
-            headlessDriver.driver.navigate().to(novelLink);
-            headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
-            String baseUrl = headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
-            tableOfContent = Jsoup.parse(headlessDriver.driver.getPageSource(), baseUrl);
-            headlessDriver.close();
-        } else {
-            try {
-                tableOfContent = Jsoup.connect(novelLink).get();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        GUI.manLinkListModel.removeAllElements();
-        // Add every link as a new chapter and add to gui
-        Elements links = tableOfContent.select("a[href]");
-        for (Element chapterLink : links) {
-            if (chapterLink.attr("abs:href").startsWith("http") && !chapterLink.text().isEmpty()) {
-                Chapter chapter = new Chapter(chapterLink.text(),chapterLink.attr("abs:href"));
-                GUI.manLinkListModel.addElement(chapter);
-            }
-        }
-        init.gui.appendText("manual", "[GRABBER]"+ links.size() + " links retrieved.");
-    }
-
-    /**
-     * Tries to find the container which contains chapter links.
-     */
-    public void getMostLikelyChapters() {
-        GUI.manLinkListModel.removeAllElements();
-        init.gui.appendText("manual", "[GRABBER]Trying to detect chapters.");
-        Element mostLikely = tableOfContent.select("body").first().child(0);
-
-        // Set the container with the most direct children as most likely candidate;
-        for(Element el: tableOfContent.select("body").select("*")) {
-            if(mostLikely.childrenSize() < el.childrenSize()) {
-                if(!el.select("a").isEmpty()) mostLikely = el;
-            }
-        }
-
-        // Add links as chapters from most likely container
-        for (Element chapterLink : mostLikely.select("a[href]")) {
-            if (chapterLink.attr("abs:href").startsWith("http") && !chapterLink.text().isEmpty()) {
-                Chapter chapter = new Chapter(chapterLink.text(),chapterLink.attr("abs:href"));
-                GUI.manLinkListModel.addElement(chapter);
-            }
-        }
-    }
-
-    /**
-     * Handles downloading chapters of a provided list.
-     */
-    public void processChaptersFromList() throws Exception {
-        // Add chapters from listModel
-        chapterList = new ArrayList<>();
-        for (int i = 0; i < GUI.manLinkListModel.size(); i++) {
-            chapterList.add(GUI.manLinkListModel.get(i));
-        }
-        if (reverseOrder) Collections.reverse(chapterList);
-        if (useHeadless) headlessDriver = new Driver(this);
-        init.gui.setMaxProgress(window, chapterList.size());
-        for (Chapter chapter : chapterList) {
-            if(killTask) {
-                throw new Exception("Grabbing stopped.");
-            }
-            chapter.saveChapter(this);
-            init.gui.updateProgress(window);
-            GrabberUtils.sleep(waitTime);
-        }
-
-        if (useHeadless) headlessDriver.close();
     }
 
     /**
      * Follows the chapters via a "next chapter button".
      */
-    public void processChaptersToChapters(String firstChapterURL, String lastChapterURL, String nextChapterBtn, String chapterNumberString) throws Exception {
+    public void processChaptersToChapters(String firstChapterURL,
+                                          String lastChapterURL,
+                                          String nextChapterBtn,
+                                          String chapterNumberString) throws Exception {
         init.gui.appendText(window, "[GRABBER]Connecting...");
         init.gui.setMaxProgress(window, 9001);
 
@@ -292,7 +128,7 @@ public class Novel {
         int chapterNumber = 1;
         if(chapterNumberString != null && !chapterNumberString.isEmpty()) chapterNumber = Integer.parseInt(chapterNumberString);
 
-        if (useHeadless) headlessDriver = new Driver(this);
+        if (useHeadless) headlessDriver = new Driver(window, browser);
 
         chapterList = new ArrayList<>();
         while (true) {
@@ -321,171 +157,33 @@ public class Novel {
     }
 
     /**
-     * Resets GUI for current grabbing.
-     * Sets various metadata for this novel.
+     * Prints potential failed chapters.
+     * Reverses the chapter order for next grabbing. (If grabbing was stopped with this option selected)
+     * Closes headless driver if used.
+     * Writes EPUB
      */
-    public void getMetadata() {
-        if(window.equals("auto") || window.equals("checker")) {
-            if(init.gui != null) {
-                init.gui.autoBookTitle.setText("");
-                init.gui.autoAuthor.setText("");
-                init.gui.autoChapterAmount.setText("");
-                init.gui.setBufferedCover(null);
-                init.gui.autoBookSubjects.setText("");
-            }
-            setTitle();
-            setDesc();
-            setAuthor();
-            setTags();
-            setChapterNumber();
-            setCover();
+    public void output() {
+        // Print finishing information
+        if(init.gui != null) {
+            init.gui.appendText(window,"[GRABBER]Finished.\n"); // GUI doesn't need save location displaying
         }
-    }
 
-    /**
-     * Will try to fetch the book title via host selectors or set it as "Unknown".
-     * Removes special characters: regex: [\\/:*?"<>|]
-     * Updates GUI with title.
-     */
-    void setTitle() {
-        if (tableOfContent.select(bookTitleSelector) != null && !tableOfContent.select(bookTitleSelector).isEmpty()) {
-            bookTitle = tableOfContent.select(bookTitleSelector).first().text();
-            if(init.gui != null && window.equals("auto")) {
-                init.gui.autoBookTitle.setText(bookTitle);
-            }
-        } else {
-            if(init.gui != null && window.equals("auto")) {
-                init.gui.autoBookTitle.setText("Unknown");
-            }
-        }
-    }
+        // Reverse chapter order if needed for potential re-grabbing
+        if(reverseOrder) Collections.reverse(chapterList);
 
-    /**
-     * Sets the book description via host selector.
-     * Updates GUI with description.
-     */
-    void setDesc() {
-        if (tableOfContent.select(bookDescSelector) != null && !tableOfContent.select(bookDescSelector).isEmpty()) {
-            bookDesc = tableOfContent.select(bookDescSelector).first().text();
-        }
-    }
-
-    /**
-     * Sets the book author via host selector.
-     * Updates GUI with author.
-     */
-    void setAuthor() {
-        if (tableOfContent.select(bookAuthorSelector) != null && !tableOfContent.select(bookAuthorSelector).isEmpty()) {
-            bookAuthor = tableOfContent.select(bookAuthorSelector).first().text();
-            if(init.gui != null && window.equals("auto")) {
-                init.gui.autoAuthor.setText(bookAuthor);
-            }
-        } else {
-            if(init.gui != null && window.equals("auto")) {
-                init.gui.autoAuthor.setText("Unknown");
-            }
-        }
-    }
-    /**
-     * Sets the book tags via host selector.
-     * Updates GUI with tags.
-     */
-    void setTags() {
-        if (tableOfContent.select(bookSubjectSelector) != null && !tableOfContent.select(bookSubjectSelector).isEmpty()) {
-            Elements tags = tableOfContent.select(bookSubjectSelector);
-            for (Element tag : tags) {
-                bookSubjects.add(tag.text());
-            }
-
-            // Display book subjects on GUI
-            int maxNumberOfSubjects = 0;
-            if(init.gui != null && window.equals("auto")) {
-                init.gui.autoBookSubjects.setText("<html>");
-                for (String eachTag : bookSubjects) {
-                    init.gui.autoBookSubjects.setText(init.gui.autoBookSubjects.getText() + eachTag + ", ");
-                    maxNumberOfSubjects++;
-                    if (maxNumberOfSubjects == 4) {
-                        maxNumberOfSubjects = 0;
-                        init.gui.autoBookSubjects.setText(init.gui.autoBookSubjects.getText() + "<br>");
-                    }
+        // Print failed chapters
+        for(Chapter chapter: chapterList) {
+            if(chapter.status == 2) // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
+                if(init.gui != null) {
+                    init.gui.appendText(window,"[GRABBER]Failed to download: " +chapter.name);
                 }
-                if (!init.gui.autoBookSubjects.getText().isEmpty()) {
-                    init.gui.autoBookSubjects.setText(
-                            init.gui.autoBookSubjects.getText().substring(0,
-                                    init.gui.autoBookSubjects.getText().lastIndexOf(",")));
-                }
-            }
-        } else {
-            bookSubjects.add("Unknown");
-            if(init.gui != null && window.equals("auto")) {
-                init.gui.autoBookSubjects.setText("Unknown");
-            }
         }
-    }
 
-    /**
-     * Updates GUI with chapter numbers.
-     */
-    void setChapterNumber() {
-        if (!chapterList.isEmpty()) {
-            if(init.gui != null && window.equals("auto")) {
-                init.gui.autoChapterAmount.setText(String.valueOf(chapterList.size()));
-                init.gui.autoGetNumberButton.setEnabled(true);
-            }
-        }
-    }
+        // Close headless browser
+        if(useHeadless) headlessDriver.close();
 
-    /**
-     * Will set the book cover as a BufferedCover via host selectors.
-     * Updates GUI with fetched cover.
-     */
-    void setCover() {
-        Element coverSelect = tableOfContent.select(bookCoverSelector).first();
-        if (coverSelect != null) {
-            String coverLink = coverSelect.attr("abs:src");
-            // Custom
-            if (url.equals("https://wordexcerpt.com/")) {
-                coverLink = coverSelect.attr("style");
-                coverLink = coverLink.substring(coverLink.indexOf("'")+1, coverLink.lastIndexOf("'"));
-            }
-            if (url.equals("https://webnovel.com/")) {
-                coverLink = coverLink.replace("/300/300", "/600/600");
-            }
-            if (url.equals("https://dreame.com/") || url.equals("https://ficfun.com/") ) {
-                coverLink = coverSelect.select(".js-cover.img").attr("abs:data-cover");
-            }
-            if (url.equals("https://mtlnovel.com/")) {
-                coverLink = coverLink.substring(0, coverLink.indexOf(".webp"));
-            }
-            if (url.equals("https://www.inkitt.com/")) {
-                String backgroundImageUrl = coverSelect.select(".story-horizontal-cover__front").attr("style");
-                coverLink = backgroundImageUrl.substring(backgroundImageUrl.indexOf("https://"), backgroundImageUrl.indexOf(")")-1);
-            }
-            if (url.equals("https://foxaholic.com/") || url.equals("https://wordrain69.com/") ) {
-                coverLink = coverSelect.attr("abs:data-src");
-            }
-            try {
-                bufferedCover = GrabberUtils.getImage(coverLink);
-                bookCover = GrabberUtils.getFilenameFromUrl(coverLink);
-                if(init.gui != null && window.equals("auto")) {
-                    init.gui.setBufferedCover(bufferedCover);
-                }
-            } catch (IOException e) {
-                try {
-                    bufferedCover = ImageIO.read(getClass().getResource("/images/cover_placeholder.png"));
-                    bookCover = "cover_placeholder.png";
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                bufferedCover = ImageIO.read(getClass().getResource("/images/cover_placeholder.png"));
-                bookCover = "cover_placeholder.png";
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        // Output EPUB
+        EPUB epub = new EPUB(this);
+        epub.writeEpub();
     }
 }

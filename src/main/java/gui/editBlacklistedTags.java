@@ -1,25 +1,21 @@
 package gui;
 
-import grabber.Novel;
-
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Arrays;
+import java.util.List;
 
 public class editBlacklistedTags extends JDialog {
     DefaultListModel blacklistedTagsListModel;
     private JPanel contentPane;
     private JButton buttonOK;
-    private JTextField manBlacklistField;
+    private JTextField blacklistedTagField;
     private JButton addButton;
     private JButton setBlacklistRemoveButton;
     private JList list1;
     private JScrollPane scrollPane1;
-    private Novel novel;
+    private List<String> blacklistedTags;
 
-    private editBlacklistedTags(Novel novel) {
-        this.novel = novel;
+    private editBlacklistedTags(List<String> blacklistedTags) {
+        this.blacklistedTags = blacklistedTags;
         setContentPane(contentPane);
         setModal(true);
         setTitle("Edit blacklisted tags");
@@ -33,11 +29,11 @@ public class editBlacklistedTags extends JDialog {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         addButton.addActionListener(e -> {
-            if (!(manBlacklistField.getText() == null || manBlacklistField.getText().isEmpty())) {
-                novel.blacklistedTags.addAll(Arrays.asList(manBlacklistField.getText().split(",")));
+            if (!(blacklistedTagField.getText() == null || blacklistedTagField.getText().isEmpty())) {
+                blacklistedTags.add(blacklistedTagField.getText());
             }
             blacklistedTagsListModel.clear();
-            for (String tag : novel.blacklistedTags) {
+            for (String tag : blacklistedTags) {
                 blacklistedTagsListModel.addElement(tag);
             }
         });
@@ -46,14 +42,14 @@ public class editBlacklistedTags extends JDialog {
                 int[] indices = list1.getSelectedIndices();
                 for (int i = indices.length - 1; i >= 0; i--) {
                     blacklistedTagsListModel.removeElementAt(indices[i]);
-                    novel.blacklistedTags.remove(indices[i]);
+                    blacklistedTags.remove(indices[i]);
                 }
             }
         });
     }
 
-    static void main(Novel novel) {
-        editBlacklistedTags dialog = new editBlacklistedTags(novel);
+    static void main(List<String> blacklistedTags) {
+        editBlacklistedTags dialog = new editBlacklistedTags(blacklistedTags);
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
@@ -64,13 +60,11 @@ public class editBlacklistedTags extends JDialog {
     }
 
     private void createUIComponents() {
-        if (novel.blacklistedTags != null) {
-            blacklistedTagsListModel = new DefaultListModel();
-            for (String tag : novel.blacklistedTags) {
-                blacklistedTagsListModel.addElement(tag);
-            }
-            list1 = new JList(blacklistedTagsListModel);
+        blacklistedTagsListModel = new DefaultListModel();
+        for (String tag : blacklistedTags) {
+            blacklistedTagsListModel.addElement(tag);
         }
+        list1 = new JList(blacklistedTagsListModel);
         scrollPane1 = new JScrollPane(list1, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         setBlacklistRemoveButton = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));

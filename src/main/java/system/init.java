@@ -1,4 +1,5 @@
 package system;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import grabber.*;
 import gui.GUI;
 import system.library.LibrarySystem;
@@ -12,9 +13,12 @@ import java.util.List;
  * Initially called class.
  * Handles cli input.
  * Creates GUI instance.
+ * Creates LibrarySystem instance.
  */
 public class init {
+    public static final String versionNumber = "3.2.0";
     public static GUI gui;
+    public static LibrarySystem librarySystem;
 
     public static void main(String[] args) {
         final Map<String, List<String>> params = CLI.createParamsFromArgs(args);
@@ -23,15 +27,18 @@ public class init {
 
     /**
      * Controls program start based on cli parameter.
-     * @param params CLI input
      */
     public static void processParams(Map<String, List<String>> params) {
         if(params.containsKey("gui") || params.isEmpty()) {
-            LibrarySystem.startPolling();
             startGUI();
+            librarySystem = new LibrarySystem();
         }
-        else if(params.containsKey("help")) printHelp();
-        else if(params.containsKey("libraryEnabled")) LibrarySystem.startPolling();
+        else if(params.containsKey("help")) {
+            printHelp();
+        }
+        else if(params.containsKey("libraryEnabled")) {
+            librarySystem = new LibrarySystem();
+        }
         else {
             if(!params.get("link").get(0).isEmpty()) {
                 CLI.downloadNovel(params);
@@ -47,7 +54,10 @@ public class init {
     private static void startGUI() {
         EventQueue.invokeLater(() -> {
             try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                System.setProperty("awt.useSystemAAFontSettings","on");
+                System.setProperty("swing.aatext", "true");
+                UIManager.setLookAndFeel(new FlatIntelliJLaf());
+                setUIFont (new javax.swing.plaf.FontUIResource("Tahoma",Font.PLAIN,12));
                 gui = new GUI();
                 gui.setLocationRelativeTo(null);
                 gui.setVisible(true);
@@ -82,5 +92,15 @@ public class init {
                 "java -jar Novel-Grabber.jar -link https://myhost.com/novel/a-novel\n" +
                 "java -jar Novel-Grabber.jar -link https://myhost.com/novel/a-novel -chapters 5 last -displayTitle -wait 3000\n" +
                 "java -jar Novel-Grabber.jar -link https://myhost.com/novel/a-novel -path /home/flameish/novels -account flameish kovzhvwlmzgv");
+    }
+
+    public static void setUIFont(javax.swing.plaf.FontUIResource f){
+        java.util.Enumeration keys = UIManager.getDefaults().keys();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            Object value = UIManager.get (key);
+            if (value instanceof javax.swing.plaf.FontUIResource)
+                UIManager.put (key, f);
+        }
     }
 }

@@ -1,21 +1,17 @@
 package gui;
 
 import grabber.*;
-import org.json.simple.JSONObject;
-import system.Config;
 import system.data.accounts.Account;
 import system.data.accounts.Accounts;
-import system.data.library.Library;
+import system.data.library.LibrarySettings;
 import system.data.library.LibraryNovel;
 import system.data.*;
-import updater.Updater;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import system.init;
+import system.library.LibrarySystem;
 
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultFormatter;
@@ -23,8 +19,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -32,10 +26,9 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    public static String versionNumber = "3.1.1";
     private static final String[] headerlessBrowserWebsites = {"FoxTeller","MoonQuill"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
-    private static final String[] loginWebsites = {"Booklat","Wuxiaworld", "WattPad"};
+    private static final String[] loginWebsites = {"Booklat","Wuxiaworld"};
     private static final String[] settingsMenus = {"Accounts","General", "Library", "Email", "Update"};
     public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
     public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
@@ -51,13 +44,10 @@ public class GUI extends JFrame {
     private static String[] sslList = {"SMTP","SMTPS","SMTP TLS",};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");
-    private static final Config config = Config.getInstance();
     private static final Settings settings = Settings.getInstance();
-    private static final Library library = Library.getInstance();
-    private static final EmailConfig emailConfig = EmailConfig.getInstance();
+    private static final LibrarySettings librarySettings = LibrarySettings.getInstance();
     public static Novel autoNovel = null;
     public static Novel manNovel = new Novel();
-    public JComboBox autoHostSelection;
     public JTextField chapterListURL;
     public JTextField autoSaveLocation;
     public JCheckBox chapterAllCheckBox;
@@ -101,7 +91,7 @@ public class GUI extends JFrame {
     private JRadioButton chapterToChapterRadioButton;
     private JButton getLinksButton;
     private JTabbedPane tabbedPane1;
-    private JButton manRemoveLinksButton;
+    private JButton manRemoveLinksBtn;
     private JScrollPane manLinkScrollPane;
     private JTextArea manLogArea;
     private JScrollPane manLogScrollPane;
@@ -110,8 +100,6 @@ public class GUI extends JFrame {
     private JTextArea updateTextArea;
     private JScrollPane updateScrollPane;
     private JProgressBar manProgressBar;
-    private JLabel updateStatusLbl;
-    private JLabel updateLogLbl;
     private JButton manGrabChaptersButton;
     private JButton manBlackListedTags;
     private JButton manBrowseLocationButton;
@@ -137,11 +125,10 @@ public class GUI extends JFrame {
     private JButton autoEditBlacklistBtn;
     private JLabel manTocURLlbl;
     private JButton checkForUpdatesButton;
-    private JPanel newReleaseDescriptionPanel;
     public JLabel pagesCountLbl;
     public JLabel pagesLbl;
     public JCheckBox useHeaderlessBrowserCheckBox;
-    public JComboBox autoBrowserCombobox;
+    public JComboBox settingsBrowserComboBox;
     public JCheckBox displayChapterTitleCheckBox;
     public JCheckBox manDispalyChapterTitleCheckbox;
     public JTextField autoChapterToChapterNumberField;
@@ -160,7 +147,6 @@ public class GUI extends JFrame {
     private JScrollPane settingsMenuScrollPane;
     private JPanel settingsAccountsPanel;
     private JPanel settingsHeadlessPanel;
-    private JPanel settingsUpdatePanel;
     private JButton emailSaveBtn;
     private JComboBox settingsOutputFormatComboBox;
     private JPanel settingsGeneralPanel;
@@ -188,7 +174,6 @@ public class GUI extends JFrame {
     private JSpinner libraryFrequencySpinner;
     private JCheckBox updateLastChapterNumberCheckBox;
     private JButton settingsSaveBtn;
-    private JButton librarySaveBtn;
     private JCheckBox manDetectChapterContainerCheckBox;
     private JButton manDetectChaptersBtn;
     private JButton manChapterPreviewBtn;
@@ -200,6 +185,19 @@ public class GUI extends JFrame {
     private JPanel chapterFromListPanel;
     public JLabel manPageCounter;
     private JLabel manPageLbl;
+    private JButton manReverseBtn;
+    private JLabel manChapterAmountLbl;
+    private JButton startButton;
+    private JButton stopButton1;
+    private JButton libraryStopBtn;
+    private JButton libraryStartBtn;
+    private JButton settingsAccountsBtn;
+    private JButton settingsGeneralBtn;
+    private JButton settingsLibraryBtn;
+    private JButton settingsEmailBtn;
+    private JButton settingsUpdateBtn;
+    private JPanel accountEditPanel;
+    private JButton settingsContributeBtn;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -221,32 +219,11 @@ public class GUI extends JFrame {
                 autoNovel = Novel.builder()
                         .novelLink(chapterListURL.getText())
                         .window("auto")
-                        .useHeadless(useHeaderlessBrowserCheckBox.isSelected())
                         .browser(settings.getBrowser())
                         .useAccount(useAccountCheckBox.isSelected())
                         .build();
-                autoNovel.fetchChapterList();
-                autoNovel.getMetadata();
-
-                // Button logic
-                if (!autoNovel.chapterList.isEmpty()) {
-                    grabChaptersButton.setEnabled(true);
-                    autoGetNumberButton.setEnabled(true);
-                    autoEditMetaBtn.setEnabled(true);
-                    autoEditBlacklistBtn.setEnabled(true);
-                    pagesCountLbl.setText("");
-                    pagesCountLbl.setVisible(false);
-                    pagesLbl.setVisible(false);
-                    if(library.isStarred(autoNovel.novelLink)) {
-                        autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/starred_icon.png")));
-                        autoStarredBtn.setEnabled(true);
-                        autoStarredBtn.setToolTipText("Remove novel from system.library");
-                    } else {
-                        autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/unstarred_icon.png")));
-                        autoStarredBtn.setEnabled(true);
-                        autoStarredBtn.setToolTipText("Add novel to system.library");
-                    }
-                }
+                autoNovel.check();
+                updateMetadataDisplay();
                 autoBusyLabel.setVisible(false);
             }
         }));
@@ -304,14 +281,11 @@ public class GUI extends JFrame {
                         .saveLocation(autoSaveLocation.getText())
                         .waitTime(Integer.parseInt(waitTime.getText()))
                         .displayChapterTitle(displayChapterTitleCheckBox.isSelected())
-                        .reverseOrder(checkInvertOrder.isSelected())
                         .removeStyling(autoRemoveStyling.isSelected())
                         .getImages(autoGetImages.isSelected())
-                        .useHeadless(useHeaderlessBrowserCheckBox.isSelected())
                         .browser(settings.getBrowser())
                         .useAccount(useAccountCheckBox.isSelected())
                         .build();
-
                 // Get chapter range
                 int tempFirstChapter;
                 int tempLastChapter;
@@ -332,9 +306,7 @@ public class GUI extends JFrame {
                         .lastChapter(tempLastChapter)
                         .build();
                 autoNovel.downloadChapters(); // Throws exception if grabbing was stopped
-                autoNovel.writeEpub();
-                autoNovel.report();
-
+                autoNovel.output();
             } catch (Exception  err) {
                 appendText("auto", "[ERROR]"+err.getMessage());
                 err.printStackTrace();
@@ -359,8 +331,11 @@ public class GUI extends JFrame {
                 autoSaveLocation.setText(chooser.getSelectedFile().toString());
             }
         });
-        autoEditBlacklistBtn.addActionListener(e -> editBlacklistedTags.main(autoNovel));
-        autoEditMetaBtn.addActionListener(e -> editMetadata.main(autoNovel));
+        autoEditBlacklistBtn.addActionListener(e -> editBlacklistedTags.main(autoNovel.blacklistedTags));
+        autoEditMetaBtn.addActionListener(e -> {
+            editMetadata.main(autoNovel.metadata);
+            updateMetadataDisplay();
+        });
         autoChapterToChapterNumberField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -376,17 +351,6 @@ public class GUI extends JFrame {
                     autoChapterToChapterNumberField.setForeground(Color.GRAY);
                     autoChapterToChapterNumberField.setText("Number");
                 }
-            }
-        });
-        autoVisitButton.addActionListener(arg0 -> {
-            try {
-                String toOpenHostSite;
-                JSONObject site = (JSONObject) config.siteSelectorsJSON.get(autoHostSelection.getSelectedItem());
-                toOpenHostSite =  String.valueOf(site.get("url"));
-                URI uri = new URI(toOpenHostSite);
-                GrabberUtils.openWebpage(uri);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         });
         chapterAllCheckBox.addActionListener(arg0 -> {
@@ -413,33 +377,14 @@ public class GUI extends JFrame {
             stopButton.setEnabled(false);
             autoNovel.killTask = true;
         });
-        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> autoChapterOrder.main(autoNovel)));
-        autoHostSelection.addItemListener(e -> {
-            String selection = autoHostSelection.getSelectedItem().toString();
-            if (headerlessBrowserWebsitesList.contains(selection)) {
-                useHeaderlessBrowserCheckBox.setSelected(true);
-                useHeaderlessBrowserCheckBox.setEnabled(false);
-            } else {
-                useHeaderlessBrowserCheckBox.setEnabled(true);
-            }
-            chapterAllCheckBox.setEnabled(true);
-            firstChapter.setEnabled(true);
-            lastChapter.setEnabled(true);
-            toLastChapter.setEnabled(true);
-            checkInvertOrder.setEnabled(true);
-            autoChapterToChapterNumberField.setVisible(false);
-            autoFirstChapterLbl.setVisible(false);
-            autoFirstChapterURL.setVisible(false);
-            autoLastChapterLbl.setVisible(false);
-            autoLastChapterURL.setVisible(false);
-            if (noHeaderlessBrowserWebsitesList.contains(selection)) {
-                useHeaderlessBrowserCheckBox.setSelected(false);
-                useHeaderlessBrowserCheckBox.setEnabled(false);
-            }
-        });
 
+        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> autoChapterOrder.main(autoNovel.chapterList)));
 
         // manual chapter download
+
+        manNovel.metadata = new NovelMetadata();
+        manNovel.blacklistedTags = new ArrayList<>();
+
         getLinksButton.addActionListener(e -> {
             if (manNovelURL.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(window, "URL field is empty.", "Warning",
@@ -454,15 +399,18 @@ public class GUI extends JFrame {
                             .useHeadless(manUseHeaderlessBrowser.isSelected())
                             .browser(settings.getBrowser())
                             .build();
-                    manNovel.retrieveLinks();
+                    manNovel.check();
                 } catch (NullPointerException err) {
                     err.printStackTrace();
                     appendText("manual", "[ERROR]" + err.getMessage());
                 } finally {
                     if (!manLinkListModel.isEmpty()) {
-                        manRemoveLinksButton.setEnabled(true);
+                        manRemoveLinksBtn.setEnabled(true);
                         manChapterPreviewBtn.setEnabled(true);
                         manDetectChaptersBtn.setEnabled(true);
+                        manReverseBtn.setEnabled(true);
+                        manChapterAmountLbl.setVisible(true);
+                        manChapterAmountLbl.setText("Chapters: "+manLinkListModel.size());
                     }
                 }
             }
@@ -500,20 +448,15 @@ public class GUI extends JFrame {
                                 .window("manual")
                                 .useHeadless(manUseHeaderlessBrowser.isSelected())
                                 .browser(settings.getBrowser())
-                                .reverseOrder(manInvertOrder.isSelected())
                                 .removeStyling(manNoStyling.isSelected())
                                 .displayChapterTitle(manDispalyChapterTitleCheckbox.isSelected())
                                 .waitTime(Integer.parseInt(manWaitTime.getText()))
-                                .chapterContainer(manChapterContainer.getText())
-                                .blacklistedTags(GUI.blacklistedTags)
                                 .getImages(manGetImages.isSelected())
                                 .autoDetectContainer(manDetectChapterContainerCheckBox.isSelected())
                                 .saveLocation(manSaveLocation.getText())
                                 .build();
-                        manNovel.getMetadata();
                         manNovel.processChaptersToChapters(firstChapterField.getText(), lastChapterField.getText(), nextChapterButtonField.getText(), manChapterToChapterNumberField.getText());
-                        manNovel.writeEpub();
-                        manNovel.report();
+                        manNovel.output();
                     } catch (Exception err) {
                         appendText("manual", "[ERROR]"+err.getMessage());
                         err.printStackTrace();
@@ -559,24 +502,24 @@ public class GUI extends JFrame {
                     manStopButton.setVisible(true);
                     manProgressBar.setStringPainted(true);
                     try {
-                        // Needed
+                        manNovel.chapterList = new ArrayList<>();
+                        for (int i = 0; i < manLinkListModel.size(); i++) {
+                            manNovel.chapterList.add(manLinkListModel.get(i));
+                        }
                         manNovel = Novel.modifier(manNovel)
                                 .useHeadless(manUseHeaderlessBrowser.isSelected())
                                 .browser(settings.getBrowser())
-                                .reverseOrder(manInvertOrder.isSelected())
                                 .removeStyling(manNoStyling.isSelected())
                                 .displayChapterTitle(manDispalyChapterTitleCheckbox.isSelected())
                                 .waitTime(Integer.parseInt(manWaitTime.getText()))
-                                .chapterContainer(manChapterContainer.getText())
-                                .blacklistedTags(GUI.blacklistedTags)
                                 .getImages(manGetImages.isSelected())
                                 .autoDetectContainer(manDetectChapterContainerCheckBox.isSelected())
                                 .saveLocation(manSaveLocation.getText())
+                                .firstChapter(1)
+                                .lastChapter(manNovel.chapterList.size())
                                 .build();
-                        manNovel.getMetadata();
-                        manNovel.processChaptersFromList();
-                        manNovel.writeEpub();
-                        manNovel.report();
+                        manNovel.downloadChapters();
+                        manNovel.output();
                     } catch (Exception err) {
                         appendText("manual", "[ERROR]"+err.getMessage());
                         err.printStackTrace();
@@ -598,7 +541,8 @@ public class GUI extends JFrame {
                 chapterToChapterRadioButton.setSelected(false);
                 chapterToChapterPanel.setVisible(false);
                 chapterFromListPanel.setVisible(true);
-                manInvertOrder.setEnabled(true);
+            } else {
+                chapterFromListPanel.setVisible(false);
             }
         });
 
@@ -607,21 +551,26 @@ public class GUI extends JFrame {
                 chaptersFromLinksRadioButton.setSelected(false);
                 chapterToChapterPanel.setVisible(true);
                 chapterFromListPanel.setVisible(false);
-                manInvertOrder.setEnabled(false);
+            } else {
+                chapterToChapterPanel.setVisible(false);
             }
         });
 
-        manRemoveLinksButton.addActionListener(arg0 -> {
+        manRemoveLinksBtn.addActionListener(arg0 -> {
             if (!manLinkListModel.isEmpty()) {
                 int[] indices = manLinkList.getSelectedIndices();
                 for (int i = indices.length - 1; i >= 0; i--) {
                     manLinkListModel.removeElementAt(indices[i]);
                 }
                 if (manLinkListModel.isEmpty()) {
-                    manRemoveLinksButton.setEnabled(false);
+                    manRemoveLinksBtn.setEnabled(false);
                     manChapterPreviewBtn.setEnabled(false);
                     manDetectChaptersBtn.setEnabled(false);
+                    manReverseBtn.setEnabled(false);
+                    manChapterAmountLbl.setVisible(false);
                 }
+                manChapterAmountLbl.setVisible(true);
+                manChapterAmountLbl.setText("Chapters: "+manLinkListModel.size());
                 appendText("manual", indices.length + " links removed.");
             }
         });
@@ -638,9 +587,13 @@ public class GUI extends JFrame {
             }
         });
 
-        manSetMetadataButton.addActionListener(arg0 -> editMetadata.main(manNovel));
+        manSetMetadataButton.addActionListener(arg0 -> {
+            editMetadata.main(manNovel.metadata);
+        });
 
-        manBlackListedTags.addActionListener(e -> editBlacklistedTags.main(manNovel));
+        manBlackListedTags.addActionListener(e -> {
+            editBlacklistedTags.main(manNovel.blacklistedTags);
+        });
 
         manStopButton.addActionListener(e -> {
             manStopButton.setEnabled(false);
@@ -658,19 +611,25 @@ public class GUI extends JFrame {
         manAddChapterButton.addActionListener(actionEvent -> {
             editChapterList.main("manual");
             if (!manLinkListModel.isEmpty()) {
-                manRemoveLinksButton.setEnabled(true);
+                manRemoveLinksBtn.setEnabled(true);
+                manChapterPreviewBtn.setEnabled(true);
+                manDetectChaptersBtn.setEnabled(true);
+                manReverseBtn.setEnabled(true);
+                manChapterAmountLbl.setVisible(true);
+                manChapterAmountLbl.setText("Chapters: "+manLinkListModel.size());
             }
         });
 
         manDetectChaptersBtn.addActionListener(actionEvent -> {
-            manNovel.getMostLikelyChapters();
+            manLinkListModel.removeAllElements();
+            manNovel.chapterList = GrabberUtils.getMostLikelyChapters(manNovel.tableOfContent);
+            for(Chapter chapter: manNovel.chapterList) manLinkListModel.addElement(chapter);
+            manChapterAmountLbl.setVisible(true);
+            manChapterAmountLbl.setText("Chapters: "+manLinkListModel.size());
         });
 
         manChapterPreviewBtn.addActionListener(actionEvent -> {
             if(manLinkList.getSelectedIndex() >= 0) {
-                if(!manDetectChapterContainerCheckBox.isSelected()) {
-                    Novel.modifier(manNovel).chapterContainer(manChapterContainer.getText()).build();
-                }
                 Chapter chapter = manLinkListModel.getElementAt(manLinkList.getSelectedIndex());
                 chapter.saveChapter(manNovel);
                 chapterPreview.main(chapter.chapterContent);
@@ -678,16 +637,12 @@ public class GUI extends JFrame {
         });
 
 
-        updateButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
-            updaterStatus.setVisible(true);
-            updateButton.setVisible(false);
-            checkForUpdatesButton.setVisible(false);
-            updaterStatus.setText("Downloading...");
-            Updater.updateJar();
-        }));
-        checkForUpdatesButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::checkForNewReleases));
+
         // Accounts
         accountWebsiteList.addListSelectionListener(listSelectionEvent -> {
+            accountEditPanel.setVisible(true);
+            Border border = BorderFactory.createTitledBorder(accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex()));
+            accountEditPanel.setBorder(border);
             Account account = Accounts.getInstance().getAccount(accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex()));
             accountUsernameField.setText(account.getUsername());
             accountPasswordField.setText(account.getPassword());
@@ -704,22 +659,6 @@ public class GUI extends JFrame {
             account.setUsername(accountUsernameField.getText());
             account.setPassword(accountPasswordField.getText());
             Accounts.getInstance().addAccount(account);
-        });
-        // Settings Tab
-        settingsMenuList.addListSelectionListener(listSelectionEvent -> {
-            String selectedMenu = settingsMenuModel.get(settingsMenuList.getSelectedIndex());
-            settingsAccountsPanel.setVisible(false);
-            settingsUpdatePanel.setVisible(false);
-            settingsGeneralPanel.setVisible(false);
-            settingsEmailPanel.setVisible(false);
-            settingsLibraryPanel.setVisible(false);
-            if(selectedMenu.equals("Accounts")) settingsAccountsPanel.setVisible(true);
-            if(selectedMenu.equals("Update")) settingsUpdatePanel.setVisible(true);
-            if(selectedMenu.equals("Library")) settingsLibraryPanel.setVisible(true);
-            if(selectedMenu.equals("Email")) settingsEmailPanel.setVisible(true);
-            if(selectedMenu.equals("General")) {
-                settingsGeneralPanel.setVisible(true);
-            }
         });
         settingsBrowseSaveLocationBtn.addActionListener(actionEvent -> {
             JFileChooser chooser = new JFileChooser();
@@ -738,18 +677,18 @@ public class GUI extends JFrame {
             settings.setUseStandardLocation(standardSaveLocationCheckBox.isSelected());
             settings.setRemoveStyling(settingsAlwaysRemoveStylingCheckBox.isSelected());
             settings.setAutoGetImages(settingsAlwaysGetImagesCheckBox.isSelected());
-            settings.setBrowser(autoBrowserCombobox.getSelectedItem().toString());
+            settings.setBrowser(settingsBrowserComboBox.getSelectedItem().toString());
             settings.setFilenameFormat(settingsOutputFormatComboBox.getSelectedIndex());
             settings.save();
         });
 
         autoStarredBtn.addActionListener(actionEvent -> {
-            if(library.isStarred(autoNovel.novelLink)) {
-                library.removeStarred(autoNovel.novelLink);
+            if(librarySettings.isStarred(autoNovel.novelLink)) {
+                librarySettings.removeStarred(autoNovel.novelLink);
                 autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/unstarred_icon.png")));
             } else {
-                library.setStarred(autoNovel);
-                library.save();
+                librarySettings.setStarred(autoNovel);
+                librarySettings.save();
                 autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/starred_icon.png")));
             }
         });
@@ -761,13 +700,13 @@ public class GUI extends JFrame {
         });
         // Email config
         emailSaveBtn.addActionListener(actionEvent -> {
-            emailConfig.setHost(emailHostField.getText());
-            emailConfig.setReceiverEmail(emailReceiver.getText());
-            emailConfig.setPassword(emailPasswordField.getText());
-            emailConfig.setUsername(emailUserField.getText());
-            emailConfig.setPort(Integer.parseInt(emailPortField.getText()));
-            emailConfig.setSsl(emailSLLComboBox.getSelectedIndex());
-            emailConfig.save();
+            settings.setHost(emailHostField.getText());
+            settings.setReceiverEmail(emailReceiver.getText());
+            settings.setPassword(emailPasswordField.getText());
+            settings.setUsername(emailUserField.getText());
+            settings.setPort(Integer.parseInt(emailPortField.getText()));
+            settings.setSsl(emailSLLComboBox.getSelectedItem().toString());
+            settings.save();
         });
 
         // Library config
@@ -779,20 +718,81 @@ public class GUI extends JFrame {
             }
         });
 
-        librarySaveBtn.addActionListener(actionEvent -> {
-            library.setPollingEnabled(enableCheckingCheckBox.isSelected());
-            library.save();
+        manReverseBtn.addActionListener(actionEvent -> {
+            List<Chapter> tempList = new ArrayList<>();
+            for (int i = 0; i < manLinkListModel.size(); i++) {
+                tempList.add(manLinkListModel.get(i));
+            }
+            Collections.reverse(tempList);
+            manLinkListModel.removeAllElements();
+            for (Chapter chapter: tempList) {
+                manLinkListModel.addElement(chapter);
+            }
         });
+        libraryStopBtn.addActionListener(actionEvent -> {
+            libraryStartBtn.setEnabled(true);
+            libraryStartBtn.setVisible(true);
+            libraryStopBtn.setEnabled(false);
+            libraryStopBtn.setVisible(false);
+            settings.setFrequency((Integer) libraryFrequencySpinner.getValue());
+            settings.setPollingEnabled(false);
+            settings.save();
+            init.librarySystem.scheduler.shutdown();
+        });
+        libraryStartBtn.addActionListener(actionEvent -> {
+            libraryStartBtn.setEnabled(false);
+            libraryStartBtn.setVisible(false);
+            libraryStopBtn.setEnabled(true);
+            libraryStopBtn.setVisible(true);
+            settings.setFrequency((Integer) libraryFrequencySpinner.getValue());
+            settings.setPollingEnabled(true);
+            settings.save();
+            init.librarySystem = new LibrarySystem();
+        });
+        settingsAccountsBtn.addActionListener(actionEvent -> {
+            settingsGeneralPanel.setVisible(false);
+            settingsEmailPanel.setVisible(false);
+            settingsLibraryPanel.setVisible(false);
 
+            settingsAccountsPanel.setVisible(true);
+        });
+        settingsGeneralBtn.addActionListener(actionEvent -> {
+            settingsAccountsPanel.setVisible(false);
+            settingsEmailPanel.setVisible(false);
+            settingsLibraryPanel.setVisible(false);
+
+            settingsGeneralPanel.setVisible(true);
+        });
+        settingsLibraryBtn.addActionListener(actionEvent -> {
+            settingsAccountsPanel.setVisible(false);
+            settingsGeneralPanel.setVisible(false);
+            settingsEmailPanel.setVisible(false);
+
+            settingsLibraryPanel.setVisible(true);
+        });
+        settingsEmailBtn.addActionListener(actionEvent -> {
+            settingsAccountsPanel.setVisible(false);
+            settingsGeneralPanel.setVisible(false);
+            settingsLibraryPanel.setVisible(false);
+
+            settingsEmailPanel.setVisible(true);
+        });
+        settingsContributeBtn.addActionListener(e -> {
+            try {
+                GrabberUtils.openWebpage(new URI("https://www.paypal.com/paypalme/flameish"));
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+        });
     }
 
     public void buildLibrary() {
-        libraryPanel.setVisible(false);
+        //libraryPanel.setVisible(false);
         libraryPanel.removeAll();
         libraryPanel.setVisible(true);
         int gridRow = 0;
         int gridCol = 0;
-        for(LibraryNovel libNovel: library.getStarredNovels()) {
+        for(LibraryNovel libNovel: librarySettings.getStarredNovels()) {
             JPanel novelPane = new JPanel();
             novelPane.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
@@ -811,8 +811,8 @@ public class GUI extends JFrame {
 
             });
 
-            JLabel lastChapter = new JLabel("Last chapter: "+ libNovel.getLastChapter());
-            JLabel newestChapter = new JLabel("Newest chapter: "+ libNovel.getNewestChapter());
+            JLabel lastChapter = new JLabel("Last chapter: "+ libNovel.getLastLocalChapterNumber());
+            JLabel newestChapter = new JLabel("Newest chapter: "+ libNovel.getNewestChapterNumber());
 
             JButton changeCLIBtn = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));
             changeCLIBtn.setBorder(BorderFactory.createEmptyBorder());
@@ -829,8 +829,8 @@ public class GUI extends JFrame {
             removeFromFavBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             removeFromFavBtn.setToolTipText("Remove novel from system.library");
             removeFromFavBtn.addActionListener(actionEvent -> {
-                library.removeStarred(libNovel.getNovelUrl());
-                library.save();
+                librarySettings.removeStarred(libNovel.getNovelUrl());
+                librarySettings.save();
                 buildLibrary();
             });
 
@@ -856,8 +856,7 @@ public class GUI extends JFrame {
             imagePanel.setLayout(new GridBagLayout());
 
             JLabel novelImage;
-            String novelCover = config.home_path+ "/" + config.home_folder +
-                    "/"+ libNovel.getTitle()+"/"+ libNovel.getCover();
+            String novelCover = LibrarySettings.libraryFolder + "/"+ libNovel.getTitle()+"/"+ libNovel.getCover();
             if(novelCover.isEmpty()) {
                 novelImage = new JLabel(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
             } else {
@@ -933,15 +932,16 @@ public class GUI extends JFrame {
 
     private void initialize() {
         add(rootPanel);
-        setTitle("Novel-Grabber " + versionNumber);
+        setTitle("Novel-Grabber " + init.versionNumber);
         ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
         setIconImage(favicon.getImage());
         setMinimumSize(new Dimension(1000, 700));
-        Tray();
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        if (!SystemTray.isSupported()) {
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        }
+        //Tray();
+        //setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //if (!SystemTray.isSupported()) {
+        //    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //}
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -949,14 +949,14 @@ public class GUI extends JFrame {
             }
         });
     }
-
+/*
     private void Tray() {
         if (!SystemTray.isSupported()) {
             showPopup("SystemTray is not supported. Exiting...", "Error");
             return;
         }
         SystemTray tray = SystemTray.getSystemTray();
-        Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/favicon.png"));
+        ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
 
         ActionListener exitListener = e -> System.exit(0);
         ActionListener openWindow = e -> setVisible(true);
@@ -990,7 +990,7 @@ public class GUI extends JFrame {
         defaultItem.addActionListener(exitListener);
         popup.add(defaultItem);
 
-        trayIcon = new TrayIcon(image, "Novel-Grabber", popup);
+        trayIcon = new TrayIcon(favicon.getImage(), "Novel-Grabber", popup);
         trayIcon.setToolTip("Novel-Grabber");
         trayIcon.setImageAutoSize(true);
 
@@ -1001,6 +1001,8 @@ public class GUI extends JFrame {
         }
     }
 
+
+ */
     public void appendText(String logWindow, String logMsg) {
         switch (logWindow) {
             case "auto":
@@ -1010,9 +1012,6 @@ public class GUI extends JFrame {
             case "manual":
                 manLogArea.append(logMsg + NL);
                 manLogArea.setCaretPosition(manLogArea.getText().length());
-                break;
-            case "checker":
-                System.out.println(logMsg);
                 break;
             case "update":
                 updateTextArea.append(" - " + logMsg + NL);
@@ -1036,6 +1035,46 @@ public class GUI extends JFrame {
         }
     }
 
+    public void updateMetadataDisplay() {
+        autoBusyLabel.setVisible(false);
+        NovelMetadata metadata = autoNovel.metadata;
+        if(metadata != null) {
+            grabChaptersButton.setEnabled(true);
+            autoGetNumberButton.setEnabled(true);
+            autoEditMetaBtn.setEnabled(true);
+            autoEditBlacklistBtn.setEnabled(true);
+            pagesCountLbl.setText("");
+            pagesCountLbl.setVisible(false);
+            pagesLbl.setVisible(false);
+            if(librarySettings.isStarred(autoNovel.novelLink)) {
+                autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/starred_icon.png")));
+                autoStarredBtn.setEnabled(true);
+                autoStarredBtn.setToolTipText("Remove novel from system.library");
+            } else {
+                autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/unstarred_icon.png")));
+                autoStarredBtn.setEnabled(true);
+                autoStarredBtn.setToolTipText("Add novel to system.library");
+            }
+            autoBookTitle.setText("<html><p style=\"width:200px\">"+metadata.getTitle()+"</p></html>");
+            autoAuthor.setText(metadata.getAuthor());
+            setBufferedCover(metadata.getBufferedCover());
+            autoChapterAmount.setText(String.valueOf(autoNovel.chapterList.size()));
+        } else {
+            grabChaptersButton.setEnabled(false);
+            autoGetNumberButton.setEnabled(false);
+            autoEditMetaBtn.setEnabled(false);
+            autoEditBlacklistBtn.setEnabled(false);
+            pagesCountLbl.setText("");
+            pagesCountLbl.setVisible(false);
+            pagesLbl.setVisible(false);
+            autoStarredBtn.setEnabled(false);
+            autoBookTitle.setText("");
+            autoAuthor.setText("");
+            setBufferedCover(null);
+            autoChapterAmount.setText("");
+        }
+    }
+
     public void updateProgress(String window) {
         switch (window) {
             case "auto":
@@ -1053,6 +1092,22 @@ public class GUI extends JFrame {
         }
     }
 
+
+    /**
+     * Updates word counter of novel and page counter on GUI.
+     * (300 words per page)
+     */
+    public void updatePageCount(String window, int wordCount) {
+        if(init.gui != null) {
+            if(window.equals("auto")) {
+                init.gui.pagesCountLbl.setText(String.valueOf(wordCount / 300));
+            }
+            if(window.equals("manual")) {
+                init.gui.manPageCounter.setText(String.valueOf(wordCount / 300));
+            }
+        }
+    }
+
     public void showPopup(String errorMsg, String kind) {
         switch (kind) {
             case "warning":
@@ -1064,48 +1119,6 @@ public class GUI extends JFrame {
         }
     }
 
-    public String[] getWebsites() {
-        List<String> websitesList = new ArrayList<>();
-        for (Object key: config.siteSelectorsJSON.keySet()){
-            websitesList.add(key.toString());
-        }
-        websitesList.remove("no_domain");
-        Collections.sort(websitesList);
-        String[] websites = new String[websitesList.size()];
-        websitesList.toArray(websites);
-        return websites;
-    }
-
-    private void checkForNewReleases() {
-        updaterStatus.setVisible(true);
-        updaterStatus.setText("Checking for new releases...");
-        checkForUpdatesButton.setVisible(false);
-        try {
-            Document doc = Jsoup.connect("https://github.com/Flameish/Novel-Grabber/releases").get();
-            Element versionString = doc.select("a[title]").first();
-            String oldVersionString = versionNumber;
-            String newVersionString = versionString.attr("title");
-            if (Updater.compareStrings(oldVersionString, newVersionString) == -1) {
-                updateTextArea.setText("");
-                updateStatusLbl.setText("A new update of Novel-Grabber was released. The latest version is: " + newVersionString);
-                setTitle("Novel-Grabber " + versionNumber + " - New version released");
-                updateLogLbl.setText("Changes in " + newVersionString + ":");
-                Element releaseDesc = doc.select(".markdown-body").first();
-                Elements descLines = releaseDesc.select("li");
-                for (Element s : descLines) {
-                    appendText("update", s.text());
-                }
-                updateButton.setVisible(true);
-                updateStatusLbl.setVisible(true);
-                newReleaseDescriptionPanel.setVisible(true);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        updaterStatus.setVisible(false);
-        checkForUpdatesButton.setVisible(true);
-    }
-
     public void setBufferedCover(BufferedImage bufferedImage) {
         if (bufferedImage == null)
             coverImage.setIcon(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
@@ -1115,10 +1128,11 @@ public class GUI extends JFrame {
 
     private void createUIComponents() {
         // Automatic Tab
-        autoHostSelection = new JComboBox(getWebsites());
+        firstChapter = new JSpinner();
+        firstChapter.setValue(1);
 
-        autoBrowserCombobox = new JComboBox(browserList);
-        autoBrowserCombobox.setSelectedItem(settings.getBrowser());
+        lastChapter = new JSpinner();
+        lastChapter.setValue(1);
 
         autoGetImages = new JCheckBox();
         autoGetImages.setSelected(settings.isAutoGetImages());
@@ -1215,8 +1229,6 @@ public class GUI extends JFrame {
         autoBookDescScrollPane = new JScrollPane(autoBookDescArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // Manual Tab
-        manBrowserCombobox = new JComboBox(browserList);
-
         manSetMetadataButton = new JButton(new ImageIcon(getClass().getResource("/images/edit.png")));
         manSetMetadataButton.setBorder(BorderFactory.createEmptyBorder());
         manSetMetadataButton.setContentAreaFilled(false);
@@ -1227,15 +1239,20 @@ public class GUI extends JFrame {
         manBlackListedTags.setContentAreaFilled(false);
         manBlackListedTags.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        manReverseBtn = new JButton(new ImageIcon(getClass().getResource("/images/reverse_icon.png")));
+        manReverseBtn.setBorder(BorderFactory.createEmptyBorder());
+        manReverseBtn.setContentAreaFilled(false);
+        manReverseBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         manAddChapterButton = new JButton(new ImageIcon(getClass().getResource("/images/add_icon.png")));
         manAddChapterButton.setBorder(BorderFactory.createEmptyBorder());
         manAddChapterButton.setContentAreaFilled(false);
         manAddChapterButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        manRemoveLinksButton = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));
-        manRemoveLinksButton.setBorder(BorderFactory.createEmptyBorder());
-        manRemoveLinksButton.setContentAreaFilled(false);
-        manRemoveLinksButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        manRemoveLinksBtn = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));
+        manRemoveLinksBtn.setBorder(BorderFactory.createEmptyBorder());
+        manRemoveLinksBtn.setContentAreaFilled(false);
+        manRemoveLinksBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         manDetectChaptersBtn = new JButton(new ImageIcon(getClass().getResource("/images/smart_icon.png")));
         manDetectChaptersBtn.setBorder(BorderFactory.createEmptyBorder());
@@ -1275,12 +1292,49 @@ public class GUI extends JFrame {
         manWaitTime.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Settins Tab
-        for(String settingsMenu: settingsMenus) {
-            settingsMenuModel.addElement(settingsMenu);
+        settingsAccountsBtn = new JButton("Accounts", new ImageIcon(getClass().getResource("/images/accounts_icon.png")));
+        settingsAccountsBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsAccountsBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsAccountsBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsAccountsBtn.setContentAreaFilled(false);
+        settingsAccountsBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        settingsGeneralBtn = new JButton("General", new ImageIcon(getClass().getResource("/images/settings_icon.png")));
+        settingsGeneralBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsGeneralBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsGeneralBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsGeneralBtn.setContentAreaFilled(false);
+        settingsGeneralBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        settingsEmailBtn = new JButton("Email", new ImageIcon(getClass().getResource("/images/email_icon.png")));
+        settingsEmailBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsEmailBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsEmailBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsEmailBtn.setContentAreaFilled(false);
+        settingsEmailBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        settingsLibraryBtn = new JButton("Library", new ImageIcon(getClass().getResource("/images/library_icon.png")));
+        settingsLibraryBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsLibraryBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsLibraryBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsLibraryBtn.setContentAreaFilled(false);
+        settingsLibraryBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        settingsContributeBtn = new JButton("Contribute", new ImageIcon(getClass().getResource("/images/heart_icon.png")));
+        settingsContributeBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsContributeBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsContributeBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsContributeBtn.setContentAreaFilled(false);
+        settingsContributeBtn.setToolTipText("Buy the dev a coffee");
+        settingsContributeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        settingsBrowserComboBox = new JComboBox(browserList);
+        if(settings.getBrowser().isEmpty()) {
+            String browserSelection = (String)JOptionPane.showInputDialog(this, "Please select your browser:","Browser selection",JOptionPane.PLAIN_MESSAGE, null, browserList,"Crhome");
+            settings.setBrowser(browserSelection);
+            settings.save();
         }
-        settingsMenuList = new JList<>(settingsMenuModel);
-        settingsMenuList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        settingsMenuScrollPane = new JScrollPane(settingsMenuList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        settingsBrowserComboBox.setSelectedItem(settings.getBrowser());
 
         settingsAlwaysGetImagesCheckBox = new JCheckBox();
         settingsAlwaysGetImagesCheckBox.setSelected(settings.isAutoGetImages());
@@ -1316,34 +1370,54 @@ public class GUI extends JFrame {
         accountWebsiteScrollPane = new JScrollPane(accountWebsiteList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // Email settings
-        emailHostField = new JTextField(emailConfig.getHost());
+        emailHostField = new JTextField(settings.getHost());
 
-        emailUserField = new JTextField(emailConfig.getUsername());
+        emailUserField = new JTextField(settings.getUsername());
 
-        emailReceiver = new JTextField(emailConfig.getReceiverEmail());
+        emailReceiver = new JTextField(settings.getReceiverEmail());
 
-        emailPasswordField = new JPasswordField(emailConfig.getPassword());
-        emailPortField = new JTextField(String.valueOf(emailConfig.getPort()));
+        emailPasswordField = new JPasswordField(settings.getPassword());
+        emailPortField = new JTextField(String.valueOf(settings.getPort()));
 
         emailSLLComboBox = new JComboBox(sslList);
-        emailSLLComboBox.setSelectedIndex(emailConfig.getSsl());
+        int selectedIndex = 0;
+        switch(settings.getSsl()) {
+            case "SMTP":
+                selectedIndex = 0;
+                break;
+            case "SMTPS":
+                selectedIndex = 1;
+                break;
+            case "SMTP_TLS":
+                selectedIndex = 2;
+                break;
+        }
+        emailSLLComboBox.setSelectedIndex(selectedIndex);
+
         // Library
         enableCheckingCheckBox = new JCheckBox();
-        enableCheckingCheckBox.setSelected(library.isPollingEnabled());
+        enableCheckingCheckBox.setSelected(settings.isPollingEnabled());
+
+        libraryStopBtn = new JButton();
+        libraryStopBtn.setVisible(false);
+        if(settings.isPollingEnabled()) {
+            libraryStopBtn.setVisible(true);
+        }
+
+        libraryStartBtn = new JButton();
+        libraryStartBtn.setVisible(false);
+        if(!settings.isPollingEnabled()) {
+            libraryStartBtn.setVisible(true);
+        }
 
         libraryFrequencySpinner = new JSpinner();
-        libraryFrequencySpinner.setValue(library.getFrequency());
+        libraryFrequencySpinner.setValue(settings.getFrequency());
         JComponent comp = libraryFrequencySpinner.getEditor();
         JFormattedTextField field = (JFormattedTextField) comp.getComponent(0);
         field.setColumns(4);
         DefaultFormatter formatter = (DefaultFormatter) field.getFormatter();
         formatter.setCommitsOnValidEdit(true);
-        libraryFrequencySpinner.addChangeListener(e -> library.setFrequency((Integer) libraryFrequencySpinner.getValue()));
+        libraryFrequencySpinner.addChangeListener(e -> settings.setFrequency((Integer) libraryFrequencySpinner.getValue()));
 
-        // Update Tab
-        updateTextArea = new JTextArea();
-        updateTextArea.setLineWrap(true);
-        updateTextArea.setWrapStyleWord(true);
-        updateScrollPane = new JScrollPane(updateTextArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     }
 }
