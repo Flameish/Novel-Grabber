@@ -22,7 +22,7 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 - Unwanted content removal via blacklisted HTML tags
 - EPUB metadata
 - Desktop and email notifications for new chapter releases of followed novels
-- Automatic chapter detection (Able to download via NovelUpdates)
+- Automatic chapter body detection 
 - Headless browser support
 - Login support for certain host sites
 - CLI 
