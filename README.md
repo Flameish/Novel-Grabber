@@ -30,8 +30,8 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 ## How to use
 <strong>Automatic:</strong>
 
-1. Download and execute the [NovelGrabber.jar](https://github.com/Flameish/Novel-Grabber/releases/latest) of the latest release
-<br>(If you can't execute the jar, try navigating to the jar location with cmd/terminal and use: `java -jar Novel-Grabber.jar`)
+1. Download and unzip [Novel-Grabber.zip](https://dl.dropboxusercontent.com/s/kjdfl0xnt4xq9y4/Novel-Grabber.zip) and execute the launcher
+<br>(If you can't execute the jar, try to start it via the terminal command: `java -jar NG-Launcher.jar`)
 2. Enter the link to the novel's Table of Contents page
 3. Click on 'Check' to fetch novel info and chapter list
 4. Grab chapters
