@@ -102,4 +102,4 @@ Novel Grabber was build in java with: <br>
  * [Readability4J](https://github.com/dankito/Readability4J)
  * [Notify](https://github.com/dorkbox/Notify)
  * [icons8](https://icons8.com)
- 
+ * [FlatLaf](https://www.formdev.com/flatlaf/)
