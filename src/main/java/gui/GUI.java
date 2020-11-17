@@ -29,12 +29,11 @@ public class GUI extends JFrame {
     private static final String[] headerlessBrowserWebsites = {"FoxTeller","MoonQuill"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     private static final String[] loginWebsites = {"Booklat","Wuxiaworld"};
-    private static final String[] settingsMenus = {"Accounts","General", "Library", "Email", "Update"};
-    public static List<String> headerlessBrowserWebsitesList = Arrays.asList(headerlessBrowserWebsites);
-    public static List<String> noHeaderlessBrowserWebsitesList = Arrays.asList(noHeaderlessBrowserWebsites);
+    private static final String[] sourcesList = {"NovelUpdates"};
     public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static DefaultListModel<String> accountWebsiteListModel = new DefaultListModel<>();
+    public static DefaultListModel<String> sourcesListModel = new DefaultListModel<>();
     public static DefaultListModel<String> settingsMenuModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
     public static TrayIcon trayIcon;
@@ -198,6 +197,12 @@ public class GUI extends JFrame {
     private JButton settingsUpdateBtn;
     private JPanel accountEditPanel;
     private JButton settingsContributeBtn;
+    private JButton settingsSourcesBtn;
+    private JPanel settingsSourcesPanel;
+    private JScrollPane sourcesScrollPane;
+    private JList sourcesJList;
+    private JPanel sourcesNUPanel;
+    private JCheckBox sourcesNUHeadlessCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -653,6 +658,7 @@ public class GUI extends JFrame {
                 accountAddBtn.setText("Add");
             }
         });
+
         accountAddBtn.addActionListener(actionEvent -> {
             String domain = accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex());
             Account account = Accounts.getInstance().getAccount(domain);
@@ -753,6 +759,7 @@ public class GUI extends JFrame {
             settingsGeneralPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
+            settingsSourcesPanel.setVisible(false);
 
             settingsAccountsPanel.setVisible(true);
         });
@@ -760,6 +767,7 @@ public class GUI extends JFrame {
             settingsAccountsPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
+            settingsSourcesPanel.setVisible(false);
 
             settingsGeneralPanel.setVisible(true);
         });
@@ -767,6 +775,7 @@ public class GUI extends JFrame {
             settingsAccountsPanel.setVisible(false);
             settingsGeneralPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
+            settingsSourcesPanel.setVisible(false);
 
             settingsLibraryPanel.setVisible(true);
         });
@@ -774,15 +783,37 @@ public class GUI extends JFrame {
             settingsAccountsPanel.setVisible(false);
             settingsGeneralPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
+            settingsSourcesPanel.setVisible(false);
 
             settingsEmailPanel.setVisible(true);
         });
+        settingsSourcesBtn.addActionListener(actionEvent -> {
+            settingsAccountsPanel.setVisible(false);
+            settingsGeneralPanel.setVisible(false);
+            settingsLibraryPanel.setVisible(false);
+            settingsEmailPanel.setVisible(false);
+
+            settingsSourcesPanel.setVisible(true);
+        });
+
+        // Sources list logic
+        sourcesJList.addListSelectionListener(listSelectionEvent -> {
+            if(sourcesListModel.get(sourcesJList.getSelectedIndex()).equals("NovelUpdates")) {
+                sourcesNUPanel.setVisible(true);
+            }
+
+        });
+
         settingsContributeBtn.addActionListener(e -> {
             try {
                 GrabberUtils.openWebpage(new URI("https://www.paypal.com/paypalme/flameish"));
             } catch (URISyntaxException uriSyntaxException) {
                 uriSyntaxException.printStackTrace();
             }
+        });
+        sourcesNUHeadlessCheckBox.addActionListener(e -> {
+            Settings.getInstance().setNuHeadless(sourcesNUHeadlessCheckBox.isSelected());
+            Settings.getInstance().save();
         });
     }
 
@@ -1328,6 +1359,14 @@ public class GUI extends JFrame {
         settingsContributeBtn.setToolTipText("Buy the dev a coffee");
         settingsContributeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        settingsSourcesBtn = new JButton("Contribute", new ImageIcon(getClass().getResource("/images/webpage_icon.png")));
+        settingsSourcesBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsSourcesBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsSourcesBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsSourcesBtn.setContentAreaFilled(false);
+        settingsSourcesBtn.setToolTipText("Buy the dev a coffee");
+        settingsSourcesBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         settingsBrowserComboBox = new JComboBox(browserList);
         if(settings.getBrowser().isEmpty()) {
             String browserSelection = (String)JOptionPane.showInputDialog(this, "Please select your browser:","Browser selection",JOptionPane.PLAIN_MESSAGE, null, browserList,"Crhome");
@@ -1419,5 +1458,16 @@ public class GUI extends JFrame {
         formatter.setCommitsOnValidEdit(true);
         libraryFrequencySpinner.addChangeListener(e -> settings.setFrequency((Integer) libraryFrequencySpinner.getValue()));
 
+        //Sources
+        for(String source: sourcesList) {
+            sourcesListModel.addElement(source);
+        }
+        sourcesJList = new JList<>(sourcesListModel);
+        sourcesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        sourcesScrollPane = new JScrollPane(sourcesJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        //NovelUpdates
+        sourcesNUHeadlessCheckBox = new JCheckBox();
+        sourcesNUHeadlessCheckBox.setSelected(Settings.getInstance().isNuHeadless());
     }
 }
