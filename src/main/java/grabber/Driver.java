@@ -39,13 +39,20 @@ public class Driver {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
                 ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.setHeadless(true);
+                Map<String, Object> prefs = new HashMap<>();
+                prefs.put("profile.managed_default_content_settings.images", 2);
+                prefs.put("useAutomationExtension", false);
+                chromeOptions.setExperimentalOption("prefs", prefs);
+                chromeOptions.addArguments("--disable-gpu",
+                        "--blink-settings=imagesEnabled=false",
+                        "--disable-blink-features=AutomationControlled",
+                        "--incognito");
                 driver = new ChromeDriver(chromeOptions);
                 break;
             case "Firefox":
                 WebDriverManager.firefoxdriver().setup();
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
-                //firefoxOptions.setHeadless(true);
+                firefoxOptions.addPreference("permissions.default.image", 2);
                 driver = new FirefoxDriver(firefoxOptions);
                 break;
             case "Opera":
