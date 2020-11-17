@@ -378,7 +378,7 @@ public class GUI extends JFrame {
             autoNovel.killTask = true;
         });
 
-        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> autoChapterOrder.main(autoNovel.chapterList)));
+        autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> autoChapterOrder.main(autoNovel)));
 
         // manual chapter download
 

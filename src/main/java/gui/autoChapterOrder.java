@@ -21,11 +21,11 @@ public class autoChapterOrder extends JDialog {
     private JButton removeChapter;
     private JButton editChapterListBtn;
     private JButton invertButton;
-    private List<Chapter> chapterList;
+    private Novel novel;
 
 
-    private autoChapterOrder(List<Chapter> chapterList) {
-        this.chapterList = chapterList;
+    private autoChapterOrder(Novel novel) {
+        this.novel = novel;
         ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
         setIconImage(favicon.getImage());
         setContentPane(contentPane);
@@ -33,7 +33,6 @@ public class autoChapterOrder extends JDialog {
         getRootPane().setDefaultButton(buttonOK);
 
         buttonOK.addActionListener(e -> onOK());
-
         buttonCancel.addActionListener(e -> onCancel());
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -66,8 +65,8 @@ public class autoChapterOrder extends JDialog {
         });
     }
 
-    static void main(List<Chapter> chapterList) {
-        dialog = new autoChapterOrder(chapterList);
+    static void main(Novel novel) {
+        dialog = new autoChapterOrder(novel);
         dialog.setTitle("Edit chapter order");
         dialog.pack();
         dialog.setLocationRelativeTo(null);
@@ -79,7 +78,7 @@ public class autoChapterOrder extends JDialog {
         for (int i = 0; i < chapterListModel.size(); i++) {
             newChapters.add(chapterListModel.get(i));
         }
-        chapterList = newChapters;
+        novel.chapterList = newChapters;
         // Update chapter counter label
         init.gui.autoChapterAmount.setText(String.valueOf(newChapters.size()));
         dialog.dispose();
@@ -94,7 +93,7 @@ public class autoChapterOrder extends JDialog {
         removeChapter = new JButton("Remove");
 
         chapterListModel = new DefaultListModel<>();
-        for (Chapter chapter: chapterList) {
+        for (Chapter chapter: novel.chapterList) {
             chapterListModel.addElement(chapter);
         }
 
