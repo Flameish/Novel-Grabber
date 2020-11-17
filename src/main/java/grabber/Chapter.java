@@ -101,30 +101,28 @@ public class Chapter implements Serializable {
      */
     private void getImages(String window, HashMap<String, BufferedImage> images) {
         for (Element image : chapterContainer.select("img")) {
-            try {
-                String imageURL = image.absUrl("src");
-                String imageFilename = GrabberUtils.getFilenameFromUrl(imageURL);
-                BufferedImage bufferedImage = GrabberUtils.getImage(imageURL);
-                if(imageFilename != null && bufferedImage != null) {
-                    // Check if image has file extension. If not set as png.
-                    if(GrabberUtils.getFileExtension(imageFilename) == null) imageFilename += ".png";
-                    // Modify href of image src to downloaded image
-                    image.attr("src", imageFilename);
-                    images.put(imageFilename, bufferedImage);
-                    if(init.gui != null) {
-                        init.gui.appendText(window, "[CHAPTER]Saved image: "+ imageFilename);
-                    }
-                    System.out.println("[CHAPTER]Saved image: "+ imageFilename);
-                } else {
-                    image.remove();
-                    if(init.gui != null) {
-                        init.gui.appendText(window, "[CHAPTER-ERROR]Could not save image: "+ imageFilename);
-                    }
-                    System.out.println("[CHAPTER-ERROR]Could not save image: "+ imageFilename);
+            String imageURL = image.absUrl("src");
+            String imageFilename = GrabberUtils.getFilenameFromUrl(imageURL);
+            BufferedImage bufferedImage = GrabberUtils.getImage(imageURL);
+
+            if(imageFilename != null && bufferedImage != null) {
+                // Check if image has file extension. If not set as png.
+                if(GrabberUtils.getFileExtension(imageFilename) == null) imageFilename += ".png";
+                // Modify href of image src to downloaded image
+                image.attr("src", imageFilename);
+
+                images.put(imageFilename, bufferedImage);
+
+                System.out.println("[CHAPTER] Saved image: " + imageFilename);
+                if(init.gui != null) {
+                    init.gui.appendText(window, "[CHAPTER] Saved image: " + imageFilename);
                 }
-            } catch (IOException e) {
+            } else {
                 image.remove();
-                e.printStackTrace();
+                System.err.println("[ERROR] Could not save image: " + imageFilename);
+                if(init.gui != null) {
+                    init.gui.appendText(window, "[ERROR] Could not save image: " + imageFilename);
+                }
             }
         }
     }

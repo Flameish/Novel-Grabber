@@ -34,14 +34,24 @@ public class GrabberUtils {
         return null;
     }
 
-    public static BufferedImage getImage(String urlStr) throws IOException {
-        URL url = new URL(urlStr);
-        HttpURLConnection connection = (HttpURLConnection) url
-                .openConnection();
-        connection.setRequestProperty(
-                "User-Agent",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
-        return ImageIO.read(connection.getInputStream());
+    public static BufferedImage getImage(String urlStr) {
+        BufferedImage image = null;
+        try {
+            URL url = new URL(urlStr);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty(
+                    "User-Agent",
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
+            image = ImageIO.read(connection.getInputStream());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            System.err.println("[ERROR] Image URL malformed: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("[ERROR] Could not read image: " + e.getMessage());
+        }
+
+        return image;
     }
 
     /**

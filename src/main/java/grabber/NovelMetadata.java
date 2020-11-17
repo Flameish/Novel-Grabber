@@ -54,21 +54,22 @@ public class NovelMetadata {
         this.subjects = subjects;
     }
     public void setBufferedCover(String coverURL) {
-        try {
+        if(coverURL != null && !coverURL.isEmpty()) {
+            System.out.println(coverURL);
             bufferedCover = GrabberUtils.getImage(coverURL);
             String coverName = GrabberUtils.getFilenameFromUrl(coverURL);
             coverFormat = GrabberUtils.getFileExtension(coverName) == null ? "png" : GrabberUtils.getFileExtension(coverName);
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Set default cover image
-            try {
-                bufferedCover = ImageIO.read(this.getClass().getResource("/images/cover_placeholder.png"));
-                coverFormat = "png";
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
+            if(bufferedCover == null) {
+                try {
+                    bufferedCover = ImageIO.read(this.getClass().getResource("/images/cover_placeholder.png"));
+                    coverFormat = "png";
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
+
     public void setBufferedCover(BufferedImage coverImage, String coverFormat) {
         this.bufferedCover = coverImage;
         this.coverFormat = coverFormat;
