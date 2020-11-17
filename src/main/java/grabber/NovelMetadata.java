@@ -55,7 +55,6 @@ public class NovelMetadata {
     }
     public void setBufferedCover(String coverURL) {
         if(coverURL != null && !coverURL.isEmpty()) {
-            System.out.println(coverURL);
             bufferedCover = GrabberUtils.getImage(coverURL);
             String coverName = GrabberUtils.getFilenameFromUrl(coverURL);
             coverFormat = GrabberUtils.getFileExtension(coverName) == null ? "png" : GrabberUtils.getFileExtension(coverName);
