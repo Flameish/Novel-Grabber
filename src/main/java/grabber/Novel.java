@@ -179,8 +179,10 @@ public class Novel {
                 }
         }
 
-        // Close headless browser
-        if(useHeadless) headlessDriver.close();
+        if(headlessDriver != null) {
+            headlessDriver.close();
+            headlessDriver = null; // close() != null --> checks to start a new browser are against null
+        }
 
         // Output EPUB
         EPUB epub = new EPUB(this);
