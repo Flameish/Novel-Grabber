@@ -1,20 +1,6 @@
 # ![alt text](https://i.imgur.com/LrV2tLe.png)Novel-Grabber
 Novel-Grabber is a gui based web scrapper that can download and convert chapters into EPUB from various supported web/light novel sites or from any other site manually.
 
-
-## Natively supported sites
-
-| [Wuxiaworld](https://wuxiaworld.com/) | [Royalroad](https://royalroad.com/) | [FoxTeller](https://foxteller.com/)| [Tapas](https://tapas.io/)|
-| :--- | :--- | :--- | :--- |
-| <b>[NovelUpdates](https://novelupdates.com/)</b>| <b>[Creative Novels](https://https://creativenovels.com/.com/)</b> | <b>[WordExcerpt](https://wordexcerpt.com/)</b> | <b>[Moonquill](https://www.moonquill.com/)</b> |
-| <b>[Dreame](https://dreame.com/)</b> | <b>[TapRead](https://www.tapread.com/)</b> | <b>[Zenith Novels](https://zenithnovels.com/)</b>|<b>[Quotev](https://www.quotev.com/)</b>|
-| <b>[Kuhaku Light Novel Translations](https://kuhakulightnoveltranslations.com/)</b> | <b>[Translation Otaku](https://translatinotaku.net/)</b> | <b>[ISO Translations](https://isotls.com/)</b>|<b>[Inkitt](https://www.inkitt.com/)</b>|
-| <b>[Chrysanthemum Garden](https://chrysanthemumgarden.com/)</b> | <b>[FanFiction](https://fanfiction.net/)</b> | <b>[BoxNovel](https://boxnovel.com/)</b>|<b>[HoneyFeed](https://www.honeyfeed.fm/)</b>|
-| <b>[LiberSpark](https://liberspark.com/)</b> |<b>[Wordrain](https://wordrain69.com/)</b> | <b>[Comrade Mao](https://comrademao.com/)</b>|<b>[MTL Novel](https://www.mtlnovel.com/)</b>|
-| <b>[Light Novels Translations](https://lightnovelstranslations.com/)</b> | <b>[Ebisu Translations](https://ebisutranslations.com/)</b> | <b>[Webnovel](https://webnovel.com/)</b>|<b>[Volarenovels](https://volarenovels.com/)</b>
-| <b>[Wattpad](https://wattpad.com/)</b> | <b>[WuxiaWorld.online](https://wuxiaworld.online/)</b> | <b>[Booklat](https://booklat.com.ph/)</b>|<b>[Scribble Hub](https://scribblehub.com/)</b>
-| <b>[WuxiaWorld.site](https://wuxiaworld.site/)</b> | <b>[FicFun](https://ficfun.com/)</b> | <b>[Novel Full](http://novelfull.com/)</b> | <b>[FanFiktion](https://fanfiktion.de/)</b> | 
-| <b>[Foxaholic](https://foxaholic.com/)</b> | | | 
 ## Features
 - Extensive and easy to use manual grabbing
 - Image support
@@ -27,10 +13,14 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 - Login support for certain host sites
 - CLI 
 
+## Natively supported sites
+
+[List](https://github.com/Flameish/Novel-Grabber/tree/master/src/main/java/grabber/sources)
+
 ## How to use
 <strong>Automatic:</strong>
 
-1. Download [Novel-Grabber.zip](https://dl.dropboxusercontent.com/s/kjdfl0xnt4xq9y4/Novel-Grabber.zip) and execute the launcher inside
+1. Download [Novel-Grabber.zip](https://github.com/Flameish/Novel-Grabber/releases/latest/download/Novel-Grabber.zip) and execute the launcher inside
 <br>(If you can't execute the jar, try to start it via the terminal command: `java -jar NG-Launcher.jar`)
 2. Enter the link to the novel's Table of Contents page
 3. Click on 'Check' to fetch novel info and chapter list
