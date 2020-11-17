@@ -25,6 +25,7 @@ public class Settings {
     private boolean removeStyling = false;
     private boolean useStandardLocation = false;
     private boolean pollingEnabled = true;
+    private boolean nuHeadless = true;
     private int filenameFormat = 0;
     private int port = 25;
     private int frequency = 20;
@@ -67,6 +68,7 @@ public class Settings {
             setUseStandardLocation(Boolean.parseBoolean(prop.getProperty("useStandardLocation")));
             setFrequency(Integer.parseInt(prop.getProperty("frequency")));
             setPollingEnabled(Boolean.parseBoolean(prop.getProperty("pollingEnabled")));
+            setNuHeadless(Boolean.parseBoolean(prop.getProperty("nuHeadless")));
         } catch (IOException e) {
             System.out.println("[SETTINGS]No file found.");
         }
@@ -93,7 +95,7 @@ public class Settings {
             prop.setProperty("useStandardLocation", String.valueOf(isUseStandardLocation()));
             prop.setProperty("frequency", String.valueOf(getFrequency()));
             prop.setProperty("pollingEnabled", String.valueOf(isPollingEnabled()));
-
+            prop.setProperty("nuHeadless", String.valueOf(isNuHeadless()));
             prop.store(writer, "Novel-Grabber version: " + init.versionNumber);
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,6 +110,9 @@ public class Settings {
     }
     public boolean isAutoGetImages() {
         return autoGetImages;
+    }
+    public boolean isNuHeadless() {
+        return nuHeadless;
     }
     public String getSaveLocation() {
         return saveLocation;
@@ -184,5 +189,8 @@ public class Settings {
     }
     public void setPollingEnabled(boolean pollingEnabled) {
         this.pollingEnabled = pollingEnabled;
+    }
+    public void setNuHeadless(boolean nuHeadless) {
+        this.nuHeadless = nuHeadless;
     }
 }

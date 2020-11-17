@@ -19,6 +19,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import system.data.Settings;
 import system.init;
 
 public class novelupdates_com implements Source {
@@ -57,11 +58,33 @@ public class novelupdates_com implements Source {
     }
 
     public Element getChapterContent(Chapter chapter) {
-        Element chapterBody;
-        Document doc = getPageHeadless(chapter);
-        String extractedContentHtml = findChapter(doc, chapter.chapterURL);
-        chapterBody = Jsoup.parse(extractedContentHtml);
+        Element chapterBody = null;
+        try {
+            Document doc;
+            if(Settings.getInstance().isNuHeadless()) {
+                doc = getPageHeadless(chapter);
+            } else {
+                doc = getPageStatic(chapter);
+            }
+            String extractedContentHtml = findChapter(doc, chapter.chapterURL);
+            chapterBody = Jsoup.parse(extractedContentHtml);
+        } catch (IOException e) {
+            e.printStackTrace();
+            if(init.gui != null) {
+                init.gui.appendText(novel.window,"[GRABBER-ERROR]Could not connect to webpage. "+"("+e.getMessage()+")");
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            if(init.gui != null) {
+                init.gui.appendText(novel.window,"[GRABBER-ERROR]Could not detect chapter on: "
+                        + chapter.chapterURL+"("+e.getMessage()+")");
+            }
+        }
         return chapterBody;
+    }
+
+    private Document getPageStatic(Chapter chapter) throws IOException {
+        return Jsoup.connect(chapter.chapterURL).get();
     }
 
     private Document getPageHeadless(Chapter chapter) {
