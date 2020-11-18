@@ -170,9 +170,9 @@ public class NovelBuilder {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("[ERROR]Host not supported: "+ e.getMessage() + " not found.");
+            System.err.println("[ERROR]Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
             if(init.gui != null) {
-                init.gui.appendText(novel.window,"[ERROR]Host not supported: "+ e.getMessage()+ " not found.");
+                init.gui.appendText(novel.window,"[ERROR]Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
             }
             novel.source = null;
         }
