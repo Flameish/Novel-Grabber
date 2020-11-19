@@ -34,7 +34,7 @@ Using a table of content:
 2. Remove all unwanted links from the selection window.
 3. Input the chapter container the site uses. 
 I strongly suggest using the "auto detect" function, it generally works well and enables grabbing from different sites.
-<br>Or you can specify a CSS selector manually.
+<br>Or you can specify a CSS selector manually. [Guide](https://github.com/Flameish/Novel-Grabber/issues/62#issuecomment-730305855)
 4. You can remove unwanted content from the chapter via the "blacklisted tags" window (flag icon at the top).
  <br>Don't forget to set title, author, cover etc.
  
