@@ -148,13 +148,13 @@ public class Chapter implements Serializable {
 
         String html = "<" + tagNode.getName() + ">" + cleaner.getInnerHtml(tagNode) + "</" + tagNode.getName() + ">";
         chapterContainer = Jsoup.parse(html).outputSettings(outputSettings);
-        if (displayChapterTitle) {
-            chapterContainer.prepend(
-                    "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span><br>" + EPUB.NL);
-        }
+
         chapterContainer.prepend(EPUB.htmlHead);
         chapterContainer.append(EPUB.NL+EPUB.htmlFoot);
-
+        if (displayChapterTitle) {
+            chapterContainer.selectFirst("body").child(0).before(
+                    "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>" + EPUB.NL);
+        }
     }
 
     @Override
