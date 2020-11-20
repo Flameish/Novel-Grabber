@@ -1,16 +1,12 @@
 package grabber;
 
-import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Entities;
+import org.jsoup.parser.Parser;
+import org.jsoup.safety.Whitelist;
 import system.init;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,8 +56,6 @@ public class Chapter implements Serializable {
             chapterContainer.select("img").remove();
         }
 
-        fixHTML(novel.displayChapterTitle);
-
         novel.wordCount = novel.wordCount + GrabberUtils.getWordCount(chapterContainer.toString());
         System.out.println("[GRABBER]Saved chapter: "+ name);
         if(init.gui != null) {
@@ -69,7 +63,7 @@ public class Chapter implements Serializable {
             init.gui.updatePageCount(novel.window, novel.wordCount);
         }
 
-        chapterContent = chapterContainer.toString();
+        chapterContent = cleanContent(chapterContainer, novel.displayChapterTitle);
         chapterContainer = null;
         status = 1; // Chapter was successfully downloaded
     }
@@ -131,30 +125,15 @@ public class Chapter implements Serializable {
      * Cleans HTML tags and adds header & footer
      * Add chapter title optionally
      */
-    private void fixHTML(boolean displayChapterTitle) {
-        HtmlCleaner cleaner = new HtmlCleaner();
-        CleanerProperties props = cleaner.getProperties();
-        props.setTranslateSpecialEntities(true);
-        props.setTransResCharsToNCR(true);
-        props.setTransSpecialEntitiesToNCR(true);
-        props.setOmitComments(true);
-
-        Document.OutputSettings outputSettings = new Document.OutputSettings();
-        outputSettings.syntax(Document.OutputSettings.Syntax.xml);
-        outputSettings.escapeMode(Entities.EscapeMode.xhtml);
-
-        String chapter = chapterContainer.toString().replaceAll("<br>", "\n");
-        TagNode tagNode = cleaner.clean(chapter);
-
-        String html = "<" + tagNode.getName() + ">" + cleaner.getInnerHtml(tagNode) + "</" + tagNode.getName() + ">";
-        chapterContainer = Jsoup.parse(html).outputSettings(outputSettings);
-
-        chapterContainer.prepend(EPUB.htmlHead);
-        chapterContainer.append(EPUB.NL+EPUB.htmlFoot);
-        if (displayChapterTitle) {
-            chapterContainer.selectFirst("body").child(0).before(
-                    "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>" + EPUB.NL);
+    private String cleanContent(Element chapterContainer, boolean displayChapterTitle) {
+        String chapterString;
+        chapterString = Parser.unescapeEntities(chapterContainer.toString(), true);
+        if(displayChapterTitle) {
+            chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>" + EPUB.NL + chapterString;
         }
+        chapterString = chapterString.replaceAll("<br>", "\n");
+        chapterString = Jsoup.clean(chapterString, Whitelist.relaxed());
+        return chapterString;
     }
 
     @Override

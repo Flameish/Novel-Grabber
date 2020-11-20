@@ -96,7 +96,8 @@ public class EPUB {
     private void addChapters() {
         for(Chapter chapter: novel.chapterList) {
             if(chapter.status == 1) {
-                try(InputStream inputStream = new ByteArrayInputStream(chapter.chapterContent.getBytes(StandardCharsets.UTF_8))) {
+                String chapterString = htmlHead + chapter.chapterContent + htmlFoot;
+                try(InputStream inputStream = new ByteArrayInputStream(chapterString.getBytes(StandardCharsets.UTF_8))) {
                     Resource resource = new Resource(inputStream, chapter.fileName + ".html");
                     book.addSection(chapter.name, resource);
                 } catch (IOException e) {
