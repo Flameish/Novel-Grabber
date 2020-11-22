@@ -26,6 +26,8 @@ public class Settings {
     private boolean useStandardLocation = false;
     private boolean pollingEnabled = true;
     private boolean nuHeadless = true;
+    private boolean wuxiaHeadless = false;
+    private boolean wattHeadless = false;
     private int filenameFormat = 0;
     private int port = 25;
     private int frequency = 20;
@@ -69,6 +71,8 @@ public class Settings {
             setFrequency(Integer.parseInt(prop.getProperty("frequency")));
             setPollingEnabled(Boolean.parseBoolean(prop.getProperty("pollingEnabled")));
             setNuHeadless(Boolean.parseBoolean(prop.getProperty("nuHeadless")));
+            setWuxiaHeadless(Boolean.parseBoolean(prop.getProperty("wuxiaHeadless")));
+            setWattHeadless(Boolean.parseBoolean(prop.getProperty("wattHeadless")));
         } catch (IOException e) {
             System.out.println("[SETTINGS]No file found.");
         }
@@ -96,6 +100,8 @@ public class Settings {
             prop.setProperty("frequency", String.valueOf(getFrequency()));
             prop.setProperty("pollingEnabled", String.valueOf(isPollingEnabled()));
             prop.setProperty("nuHeadless", String.valueOf(isNuHeadless()));
+            prop.setProperty("wuxiaHeadless", String.valueOf(isWuxiaHeadless()));
+            prop.setProperty("wattHeadless", String.valueOf(isWattHeadless()));
             prop.store(writer, "Novel-Grabber version: " + init.versionNumber);
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,6 +119,12 @@ public class Settings {
     }
     public boolean isNuHeadless() {
         return nuHeadless;
+    }
+    public boolean isWuxiaHeadless() {
+        return wuxiaHeadless;
+    }
+    public boolean isWattHeadless() {
+        return wattHeadless;
     }
     public String getSaveLocation() {
         return saveLocation;
@@ -147,6 +159,7 @@ public class Settings {
     public String getSsl() {
         return ssl;
     }
+
     // Setter
     public void setBrowser(String browser) {
         this.browser = browser;
@@ -192,5 +205,11 @@ public class Settings {
     }
     public void setNuHeadless(boolean nuHeadless) {
         this.nuHeadless = nuHeadless;
+    }
+    public void setWuxiaHeadless(boolean wuxiaHeadless) {
+        this.wuxiaHeadless = wuxiaHeadless;
+    }
+    public void setWattHeadless(boolean wattHeadless) {
+        this.wattHeadless = wattHeadless;
     }
 }
