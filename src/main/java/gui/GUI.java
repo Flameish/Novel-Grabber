@@ -29,7 +29,7 @@ public class GUI extends JFrame {
     private static final String[] headerlessBrowserWebsites = {"FoxTeller","MoonQuill"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
     private static final String[] loginWebsites = {"Booklat","Wuxiaworld"};
-    private static final String[] sourcesList = {"NovelUpdates"};
+    private static final String[] sourcesList = {"NovelUpdates","Wuxiaworld.com","WattPad"};
     public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static DefaultListModel<String> accountWebsiteListModel = new DefaultListModel<>();
@@ -203,6 +203,10 @@ public class GUI extends JFrame {
     private JList sourcesJList;
     private JPanel sourcesNUPanel;
     private JCheckBox sourcesNUHeadlessCheckBox;
+    private JCheckBox sourcesWuxiaHeadlessCheckBox;
+    private JCheckBox sourcesWattHeadlessCheckBox;
+    private JPanel sourcesWuxiaPanel;
+    private JPanel sourcesWattPanel;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -796,14 +800,39 @@ public class GUI extends JFrame {
             settingsSourcesPanel.setVisible(true);
         });
 
-        // Sources list logic
+        // Sources Panels
         sourcesJList.addListSelectionListener(listSelectionEvent -> {
+            sourcesNUPanel.setVisible(false);
+            sourcesWuxiaPanel.setVisible(false);
+            sourcesWattPanel.setVisible(false);
             if(sourcesListModel.get(sourcesJList.getSelectedIndex()).equals("NovelUpdates")) {
                 sourcesNUPanel.setVisible(true);
             }
-
+            if(sourcesListModel.get(sourcesJList.getSelectedIndex()).equals("Wuxiaworld.com")) {
+                sourcesWuxiaPanel.setVisible(true);
+            }
+            if(sourcesListModel.get(sourcesJList.getSelectedIndex()).equals("WattPad")) {
+                sourcesWattPanel.setVisible(true);
+            }
         });
 
+        sourcesNUHeadlessCheckBox.addActionListener(e -> {
+            Settings.getInstance().setNuHeadless(sourcesNUHeadlessCheckBox.isSelected());
+            Settings.getInstance().save();
+        });
+
+        sourcesWuxiaHeadlessCheckBox.addActionListener(e -> {
+            Settings.getInstance().setWuxiaHeadless(sourcesWuxiaHeadlessCheckBox.isSelected());
+            Settings.getInstance().save();
+        });
+
+        sourcesWattHeadlessCheckBox.addActionListener(e -> {
+            Settings.getInstance().setWattHeadless(sourcesWattHeadlessCheckBox.isSelected());
+            Settings.getInstance().save();
+        });
+
+
+        // Contribute button logic
         settingsContributeBtn.addActionListener(e -> {
             try {
                 GrabberUtils.openWebpage(new URI("https://www.paypal.com/paypalme/flameish"));
@@ -811,10 +840,7 @@ public class GUI extends JFrame {
                 uriSyntaxException.printStackTrace();
             }
         });
-        sourcesNUHeadlessCheckBox.addActionListener(e -> {
-            Settings.getInstance().setNuHeadless(sourcesNUHeadlessCheckBox.isSelected());
-            Settings.getInstance().save();
-        });
+
     }
 
     public void buildLibrary() {
@@ -1469,5 +1495,11 @@ public class GUI extends JFrame {
         //NovelUpdates
         sourcesNUHeadlessCheckBox = new JCheckBox();
         sourcesNUHeadlessCheckBox.setSelected(Settings.getInstance().isNuHeadless());
+        //Wuxiaworld.com
+        sourcesWuxiaHeadlessCheckBox = new JCheckBox();
+        sourcesWuxiaHeadlessCheckBox.setSelected(Settings.getInstance().isWuxiaHeadless());
+        //WattPad
+        sourcesWattHeadlessCheckBox = new JCheckBox();
+        sourcesWattHeadlessCheckBox.setSelected(Settings.getInstance().isWattHeadless());
     }
 }
