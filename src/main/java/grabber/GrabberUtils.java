@@ -41,7 +41,7 @@ public class GrabberUtils {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty(
                     "User-Agent",
-                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
+                    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0");
             image = ImageIO.read(connection.getInputStream());
         } catch (MalformedURLException e) {
             e.printStackTrace();
