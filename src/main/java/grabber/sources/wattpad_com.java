@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import gui.GUI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -14,6 +15,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import system.data.Settings;
 import system.data.accounts.Account;
 import system.data.accounts.Accounts;
 import system.init;
@@ -28,12 +30,26 @@ public class wattpad_com implements Source {
 
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
-        toc = getTocHeadless();
-        Elements chapterLinks = toc.select(".table-of-contents a");
-        for(Element chapterLink: chapterLinks) {
-            chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+        try {
+            if(Settings.getInstance().isWattHeadless()) {
+                toc = getTocHeadless();
+            } else {
+                toc = getPageStatic();
+            }
+            Elements chapterLinks = toc.select(".table-of-contents a");
+            for(Element chapterLink: chapterLinks) {
+                chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return chapterList;
+    }
+
+    private Document getPageStatic() throws IOException {
+        return Jsoup.connect(novel.novelLink)
+                .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                .get();
     }
 
     private Document getTocHeadless() {

@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import system.data.Settings;
 import system.data.accounts.Account;
 import system.data.accounts.Accounts;
 import system.init;
@@ -27,10 +29,10 @@ public class wuxiaworld_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            if(novel.cookies != null) {
-                toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
+            if(Settings.getInstance().isWuxiaHeadless()) {
+                toc = getTocHeadless();
             } else {
-                toc = Jsoup.connect(novel.novelLink).get();
+                toc = getPageStatic();
             }
             Elements chapterLinks = toc.select("#accordion .chapter-item a");
             for(Element chapterLink: chapterLinks) {
@@ -38,11 +40,24 @@ public class wuxiaworld_com implements Source {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
-            }
         }
         return chapterList;
+    }
+
+    private Document getPageStatic() throws IOException {
+        return Jsoup.connect(novel.novelLink)
+                .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                .get();
+    }
+
+    private Document getTocHeadless() {
+        if(novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
+        novel.headlessDriver.driver.navigate().to(novel.novelLink);
+        novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+        String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
+        Document toc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
+        novel.headlessDriver.driver.close();
+        return toc;
     }
 
     public Element getChapterContent(Chapter chapter) {
@@ -97,6 +112,7 @@ public class wuxiaworld_com implements Source {
             Account account = Accounts.getInstance().getAccount("Wuxiaworld");
             if(!account.getUsername().isEmpty()) {
                 Connection.Response res = Jsoup.connect("https://www.wuxiaworld.com/account/login")
+                        .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .method(Connection.Method.GET)
                         .execute();
                 String token = res.parse().select("input[name=__RequestVerificationToken]").attr("value");
