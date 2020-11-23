@@ -16,7 +16,7 @@ import java.util.List;
  * Creates LibrarySystem instance.
  */
 public class init {
-    public static final String versionNumber = "3.2.1";
+    public static final String versionNumber = "3.2.2";
     public static GUI gui;
     public static LibrarySystem librarySystem;
 

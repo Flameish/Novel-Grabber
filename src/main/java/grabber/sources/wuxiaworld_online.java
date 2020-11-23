@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -31,10 +32,36 @@ public class wuxiaworld_online implements Source {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
             Collections.reverse(chapterList);
+        } catch (HttpStatusException httpEr) {
+            String errorMsg;
+            int errorCode = httpEr.getStatusCode();
+            switch(errorCode) {
+                case 403:
+                    errorMsg = "[ERROR] Forbidden! (403)";
+                    break;
+                case 404:
+                    errorMsg = "[ERROR] Page not found! (404)";
+                    break;
+                case 500:
+                    errorMsg = "[ERROR] Server error! (500)";
+                    break;
+                case 503:
+                    errorMsg = "[ERROR] Service Unavailable! (503)";
+                    break;
+                case 504:
+                    errorMsg = "[ERROR] Gateway Timeout! (504)";
+                    break;
+                default:
+                    errorMsg = "[ERROR] Could not connect to webpage!";
+            }
+            System.err.println(errorMsg);
+            if (init.gui != null) {
+                init.gui.appendText(novel.window, errorMsg);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
+                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
             }
         }
         return chapterList;
@@ -45,10 +72,36 @@ public class wuxiaworld_online implements Source {
         try {
             Document doc = Jsoup.connect(chapter.chapterURL).get();
             chapterBody = doc.select(".content-area").first();
+        } catch (HttpStatusException httpEr) {
+            String errorMsg;
+            int errorCode = httpEr.getStatusCode();
+            switch(errorCode) {
+                case 403:
+                    errorMsg = "[ERROR] Forbidden! (403)";
+                    break;
+                case 404:
+                    errorMsg = "[ERROR] Page not found! (404)";
+                    break;
+                case 500:
+                    errorMsg = "[ERROR] Server error! (500)";
+                    break;
+                case 503:
+                    errorMsg = "[ERROR] Service Unavailable! (503)";
+                    break;
+                case 504:
+                    errorMsg = "[ERROR] Gateway Timeout! (504)";
+                    break;
+                default:
+                    errorMsg = "[ERROR] Could not connect to webpage!";
+            }
+            System.err.println(errorMsg);
+            if (init.gui != null) {
+                init.gui.appendText(novel.window, errorMsg);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
+                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
             }
         }
         return chapterBody;
@@ -57,17 +110,19 @@ public class wuxiaworld_online implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        metadata.setTitle(toc.select("h1.entry-title").first().text());
-        metadata.setAuthor(toc.select(".truyen_info_right > li:nth-child(2) > a:nth-child(2)").first().text());
-        metadata.setDescription(toc.select("#noidungm").first().text());
-        metadata.setBufferedCover(toc.select(".truyen_info_left img").attr("abs:src"));
+        if(toc != null) {
+            metadata.setTitle(toc.select("h1.entry-title").first().text());
+            metadata.setAuthor(toc.select(".truyen_info_right > li:nth-child(2) > a:nth-child(2)").first().text());
+            metadata.setDescription(toc.select("#noidungm").first().text());
+            metadata.setBufferedCover(toc.select(".truyen_info_left img").attr("abs:src"));
 
-        Elements tags = toc.select("li:contains(Genres) a");
-        List<String> subjects = new ArrayList<>();
-        for(Element tag: tags) {
-            subjects.add(tag.text());
+            Elements tags = toc.select("li:contains(Genres) a");
+            List<String> subjects = new ArrayList<>();
+            for(Element tag: tags) {
+                subjects.add(tag.text());
+            }
+            metadata.setSubjects(subjects);
         }
-        metadata.setSubjects(subjects);
 
         return metadata;
     }

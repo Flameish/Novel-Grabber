@@ -88,17 +88,19 @@ public class wattpad_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        metadata.setTitle(toc.select(".container h1").first().text());
-        metadata.setAuthor(toc.select("a.send-author-event.on-navigate:not(.avatar)").first().text());
-        metadata.setDescription(toc.select("h2.description").first().text());
-        metadata.setBufferedCover(toc.select(".cover.cover-lg img").attr("abs:src"));
+        if(toc != null) {
+            metadata.setTitle(toc.select(".container h1").first().text());
+            metadata.setAuthor(toc.select("a.send-author-event.on-navigate:not(.avatar)").first().text());
+            metadata.setDescription(toc.select("h2.description").first().text());
+            metadata.setBufferedCover(toc.select(".cover.cover-lg img").attr("abs:src"));
 
-        Elements tags = toc.select(".tag-items li div.tag-item");
-        List<String> subjects = new ArrayList<>();
-        for(Element tag: tags) {
-            subjects.add(tag.text());
+            Elements tags = toc.select(".tag-items li div.tag-item");
+            List<String> subjects = new ArrayList<>();
+            for(Element tag: tags) {
+                subjects.add(tag.text());
+            }
+            metadata.setSubjects(subjects);
         }
-        metadata.setSubjects(subjects);
 
         return metadata;
     }

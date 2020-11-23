@@ -13,6 +13,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -56,10 +57,36 @@ public class tapread_com implements Source {
             for (String chapterId : chapterMap.keySet()) {
                 chapterList.add(new Chapter(chapterMap.get(chapterId), "https://tapread.com/book/index/" + bookID + "/" + chapterId));
             }
+        } catch (HttpStatusException httpEr) {
+            String errorMsg;
+            int errorCode = httpEr.getStatusCode();
+            switch(errorCode) {
+                case 403:
+                    errorMsg = "[ERROR] Forbidden! (403)";
+                    break;
+                case 404:
+                    errorMsg = "[ERROR] Page not found! (404)";
+                    break;
+                case 500:
+                    errorMsg = "[ERROR] Server error! (500)";
+                    break;
+                case 503:
+                    errorMsg = "[ERROR] Service Unavailable! (503)";
+                    break;
+                case 504:
+                    errorMsg = "[ERROR] Gateway Timeout! (504)";
+                    break;
+                default:
+                    errorMsg = "[ERROR] Could not connect to webpage!";
+            }
+            System.err.println(errorMsg);
+            if (init.gui != null) {
+                init.gui.appendText(novel.window, errorMsg);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
+                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
             }
         }
         return chapterList;
@@ -94,17 +121,19 @@ public class tapread_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        metadata.setTitle(toc.select(".book-name").first().text());
-        metadata.setAuthor(toc.select(".person-info .author .name").first().text());
-        metadata.setDescription(toc.select(".desc").first().text());
-        metadata.setBufferedCover(toc.select(".book-img img").attr("abs:src"));
+        if(toc != null) {
+            metadata.setTitle(toc.select(".book-name").first().text());
+            metadata.setAuthor(toc.select(".person-info .author .name").first().text());
+            metadata.setDescription(toc.select(".desc").first().text());
+            metadata.setBufferedCover(toc.select(".book-img img").attr("abs:src"));
 
-        Elements tags = toc.select(".book-catalog .txt");
-        List<String> subjects = new ArrayList<>();
-        for(Element tag: tags) {
-            subjects.add(tag.text());
+            Elements tags = toc.select(".book-catalog .txt");
+            List<String> subjects = new ArrayList<>();
+            for(Element tag: tags) {
+                subjects.add(tag.text());
+            }
+            metadata.setSubjects(subjects);
         }
-        metadata.setSubjects(subjects);
 
         return metadata;
     }

@@ -61,17 +61,19 @@ public class dreame_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        metadata.setTitle(toc.select(".details .name").first().text());
-        metadata.setAuthor(toc.select(".details .author").first().text());
-        metadata.setDescription(toc.select(".brief").first().text());
-        metadata.setBufferedCover(toc.select(".js-cover.img").attr("abs:data-cover"));
+        if(toc != null) {
+            metadata.setTitle(toc.select(".details .name").first().text());
+            metadata.setAuthor(toc.select(".details .author").first().text());
+            metadata.setDescription(toc.select(".brief").first().text());
+            metadata.setBufferedCover(toc.select(".js-cover.img").attr("abs:data-cover"));
 
-        Elements tags = toc.select(".novel-tags span");
-        List<String> subjects = new ArrayList<>();
-        for(Element tag: tags) {
-            subjects.add(tag.text());
+            Elements tags = toc.select(".novel-tags span");
+            List<String> subjects = new ArrayList<>();
+            for(Element tag: tags) {
+                subjects.add(tag.text());
+            }
+            metadata.setSubjects(subjects);
         }
-        metadata.setSubjects(subjects);
 
         return metadata;
     }

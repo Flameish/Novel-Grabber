@@ -11,6 +11,7 @@ import gui.GUI;
 import net.dankito.readability4j.Article;
 import net.dankito.readability4j.Readability4J;
 import net.dankito.readability4j.extended.Readability4JExtended;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -41,14 +42,17 @@ public class manualSource implements Source {
         }
         GUI.manLinkListModel.removeAllElements();
         // Add every link as a new chapter and add to gui
-        Elements links = novel.tableOfContent.select("a[href]");
+        Elements links = new Elements();
+        if(novel.tableOfContent != null) {
+            links = novel.tableOfContent.select("a[href]");
+        }
         for (Element chapterLink : links) {
             if (chapterLink.attr("abs:href").startsWith("http") && !chapterLink.text().isEmpty()) {
                 Chapter chapter = new Chapter(chapterLink.text(),chapterLink.attr("abs:href"));
                 GUI.manLinkListModel.addElement(chapter);
             }
         }
-        init.gui.appendText("manual", "[GRABBER]"+ links.size() + " links retrieved.");
+        init.gui.appendText("manual", links.size() + " links retrieved.");
         return null;
     }
 
@@ -64,11 +68,39 @@ public class manualSource implements Source {
 
     private Document getTocStatic() {
         try {
-            return Jsoup.connect(novel.novelLink).get();
+            return Jsoup.connect(novel.novelLink)
+                    .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                    .get();
+        } catch (HttpStatusException httpEr) {
+            String errorMsg;
+            int errorCode = httpEr.getStatusCode();
+            switch(errorCode) {
+                case 403:
+                    errorMsg = "[ERROR] Forbidden! (403)";
+                    break;
+                case 404:
+                    errorMsg = "[ERROR] Page not found! (404)";
+                    break;
+                case 500:
+                    errorMsg = "[ERROR] Server error! (500)";
+                    break;
+                case 503:
+                    errorMsg = "[ERROR] Service Unavailable! (503)";
+                    break;
+                case 504:
+                    errorMsg = "[ERROR] Gateway Timeout! (504)";
+                    break;
+                default:
+                    errorMsg = "[ERROR] Could not connect to webpage!";
+            }
+            System.err.println(errorMsg);
+            if (init.gui != null) {
+                init.gui.appendText(novel.window, errorMsg);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             if (init.gui != null && !novel.window.equals("checker")) {
-                init.gui.appendText(novel.window, "[GRABBER-ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
+                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
             }
         }
         return null;
@@ -81,7 +113,9 @@ public class manualSource implements Source {
             if(novel.useHeadless) {
                 doc = getPageHeadless(chapter);
             } else {
-                doc = getPageStatic(chapter);
+                doc = Jsoup.connect(chapter.chapterURL)
+                        .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                        .get();
             }
             if(novel.autoDetectContainer || chapterContainer == null || chapterContainer.isEmpty()) {
                 String extractedContentHtml = findChapter(doc, chapter.chapterURL);
@@ -93,10 +127,36 @@ public class manualSource implements Source {
             if (!novel.nextChapterBtn.equals("NOT_SET")) {
                 novel.nextChapterURL = doc.select(novel.nextChapterBtn).first().absUrl("href");
             }
+        } catch (HttpStatusException httpEr) {
+            String errorMsg;
+            int errorCode = httpEr.getStatusCode();
+            switch(errorCode) {
+                case 403:
+                    errorMsg = "[ERROR] Forbidden! (403)";
+                    break;
+                case 404:
+                    errorMsg = "[ERROR] Page not found! (404)";
+                    break;
+                case 500:
+                    errorMsg = "[ERROR] Server error! (500)";
+                    break;
+                case 503:
+                    errorMsg = "[ERROR] Service Unavailable! (503)";
+                    break;
+                case 504:
+                    errorMsg = "[ERROR] Gateway Timeout! (504)";
+                    break;
+                default:
+                    errorMsg = "[ERROR] Could not connect to webpage!";
+            }
+            System.err.println(errorMsg);
+            if (init.gui != null) {
+                init.gui.appendText(novel.window, errorMsg);
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            if(init.gui != null) {
-                init.gui.appendText(novel.window,"[GRABBER-ERROR]Could not connect to webpage. "+"("+e.getMessage()+")");
+            if (init.gui != null) {
+                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -127,10 +187,6 @@ public class manualSource implements Source {
         WebElement chapterElement = novel.headlessDriver.driver.findElement(By.cssSelector("body"));
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
         return Jsoup.parse(chapterElement.getAttribute("innerHTML"), baseUrl);
-    }
-
-    private Document getPageStatic(Chapter chapter) throws IOException {
-        return Jsoup.connect(chapter.chapterURL).get();
     }
 
     // Dummy

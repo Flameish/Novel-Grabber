@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -36,10 +37,36 @@ public class booklat_com_ph implements Source {
                         novel.novelLink.replace("/Info/", "/Read/") + "/" + chapterLink.attr("value")));
             }
             toc = tempPage;
+        } catch (HttpStatusException httpEr) {
+            String errorMsg;
+            int errorCode = httpEr.getStatusCode();
+            switch(errorCode) {
+                case 403:
+                    errorMsg = "[ERROR] Forbidden! (403)";
+                    break;
+                case 404:
+                    errorMsg = "[ERROR] Page not found! (404)";
+                    break;
+                case 500:
+                    errorMsg = "[ERROR] Server error! (500)";
+                    break;
+                case 503:
+                    errorMsg = "[ERROR] Service Unavailable! (503)";
+                    break;
+                case 504:
+                    errorMsg = "[ERROR] Gateway Timeout! (504)";
+                    break;
+                default:
+                    errorMsg = "[ERROR] Could not connect to webpage!";
+            }
+            System.err.println(errorMsg);
+            if (init.gui != null) {
+                init.gui.appendText(novel.window, errorMsg);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
+                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
             }
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
@@ -55,10 +82,36 @@ public class booklat_com_ph implements Source {
         try {
             Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             chapterBody = doc.select("#chapter-content").first();
+        } catch (HttpStatusException httpEr) {
+            String errorMsg;
+            int errorCode = httpEr.getStatusCode();
+            switch(errorCode) {
+                case 403:
+                    errorMsg = "[ERROR] Forbidden! (403)";
+                    break;
+                case 404:
+                    errorMsg = "[ERROR] Page not found! (404)";
+                    break;
+                case 500:
+                    errorMsg = "[ERROR] Server error! (500)";
+                    break;
+                case 503:
+                    errorMsg = "[ERROR] Service Unavailable! (503)";
+                    break;
+                case 504:
+                    errorMsg = "[ERROR] Gateway Timeout! (504)";
+                    break;
+                default:
+                    errorMsg = "[ERROR] Could not connect to webpage!";
+            }
+            System.err.println(errorMsg);
+            if (init.gui != null) {
+                init.gui.appendText(novel.window, errorMsg);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
+                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
             }
         }
         return chapterBody;
