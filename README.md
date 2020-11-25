@@ -13,10 +13,6 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 - Login support for certain host sites
 - CLI 
 
-## Natively supported sites
-
-[List](https://github.com/Flameish/Novel-Grabber/tree/master/src/main/java/grabber/sources)
-
 ## How to use
 <strong>Automatic:</strong>
 
@@ -68,11 +64,48 @@ Usage:
 
 ## Screenshots
 
-![Automatic Tab](https://i.imgur.com/dcEC1uk.png)
+![Automatic Tab](https://i.imgur.com/xBUdkmL.png)
 
-![Manual Tab](https://i.imgur.com/xNAQsB0.png)
+![Manual Tab](https://i.imgur.com/jDm2ABW.png)
 
-![Library Tab](https://i.imgur.com/p1thlXJ.png)
+![Library Tab](https://i.imgur.com/ef5P4mf.png)
+
+## Natively supported sites
+* [Booklat](https://booklat.com.ph)
+* [MTLNovel](https://mtlnovel.com)
+* [BoxNovel](https://boxnovel.com)
+* [Novel Full](https://novelfull.com)
+* [Chrysanthemum Garden](https://chrysanthemumgarden.com)
+* [Novelhall](https://novelhall.com)
+* [Comrade Mao](https://comrademao.com)
+* [Novel Updates](https://novelupdates.com)
+* [Creative Novels](https://creativenovels.com)
+* [Quotev](https://quotev.com)
+* [Dreame](https://dreame.com)
+* [Re:Library](https://re-library.com)
+* [FanFiction](https://fanfiction.net)
+* [Royal Road](https://royalroad.com)
+* [FanFiktion](https://fanfiktion.de)
+* [Scribble Hub](https://scribblehub.com)
+* [FicFun](https://ficfun.com)
+* [Tapas](https://tapas.io)
+* [Foxaholic](https://foxaholic.com)
+* [TapRead](https://tapread.com)
+* [Foxteller](https://foxteller.com)
+* [Volare Novels](https://volarenovels.com)
+* [Honeyfeed](https://honeyfeed.fm)
+* [Wattpad](https://wattpad.com)
+* [Inkitt](https://inkitt.com)
+* [Webnovel](https://webnovel.com)
+* [ISO Translations](https://isotls.com)
+* [Wordrain](https://wordrain69.com)
+* [LiberSpark](https://liberspark.com)
+* [Light Novels Translations](https://lightnovelstranslations.com)
+* [Wuxiaworld](https://wuxiaworld.com)
+* [WuxiaWorld.online](https://wuxiaworld.online)
+* [WuxiaWorld.site](https://wuxiaworld.site)
+* [MoonQuill](https://moonquill.com)
+* [Zenith Novels](https://zenithnovels.com)
 
 ## Disclaimer & Warning
 Most sites prohibit the scrapping for their content. Use at your own risk. 
