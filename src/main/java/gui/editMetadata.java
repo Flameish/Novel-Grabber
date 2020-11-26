@@ -3,13 +3,12 @@ package gui;
 import grabber.GrabberUtils;
 import grabber.NovelMetadata;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.Arrays;
 
 public class editMetadata extends JDialog {
     private JPanel contentPane;
@@ -73,6 +72,7 @@ public class editMetadata extends JDialog {
         metadata.setTitle(titleField.getText());
         metadata.setAuthor(authorField.getText());
         metadata.setDescription(descArea.getText());
+        metadata.setSubjects(Arrays.asList(subjectsField.getText().split(",")));
         Icon icon = coverBtn.getIcon();
         BufferedImage bufferedImage = new BufferedImage(
                 icon.getIconWidth(),
