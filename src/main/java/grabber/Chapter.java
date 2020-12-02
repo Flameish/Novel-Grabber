@@ -1,7 +1,7 @@
 package grabber;
 
 import org.jsoup.Jsoup;
-import org.jsoup.parser.Parser;
+import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
 import system.init;
 import org.jsoup.nodes.Element;
@@ -122,23 +122,29 @@ public class Chapter implements Serializable {
     }
 
     /**
-     * Cleans HTML tags and adds header & footer
-     * Add chapter title optionally
+     * Cleans HTML tags and adds chapter title optionally
      */
     private String cleanContent(Element chapterContainer, boolean displayChapterTitle) {
-        String chapterString;
-        chapterString = Parser.unescapeEntities(chapterContainer.toString(), true);
+        String chapterString = chapterContainer.toString();
         if(displayChapterTitle) {
             chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>" + EPUB.NL + chapterString;
         }
-        chapterString = chapterString.replaceAll("<br>", "\n");
-        chapterString = Jsoup.clean(chapterString, Whitelist.relaxed());
+        Document.OutputSettings settings = new Document.OutputSettings();
+        settings.syntax(Document.OutputSettings.Syntax.xml);
+        settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
+        settings.charset("UTF-8");
+
+        chapterString = Jsoup.clean(
+                chapterString,
+                "http://"+GrabberUtils.getDomainName(chapterURL),
+                Whitelist.relaxed().preserveRelativeLinks(true),
+                settings);
         return chapterString;
     }
 
     @Override
     public String toString() {
-            return name;
+        return name;
     }
 
 }
