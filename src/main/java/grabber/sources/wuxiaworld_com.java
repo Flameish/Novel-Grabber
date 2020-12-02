@@ -66,11 +66,11 @@ public class wuxiaworld_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = null;
+            Document doc;
             if(novel.cookies != null) {
-                toc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
+                doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             } else {
-                toc = Jsoup.connect(chapter.chapterURL).get();
+                doc = Jsoup.connect(chapter.chapterURL).get();
             }
             chapterBody = doc.select(".p-15 .fr-view").first();
         } catch (HttpStatusException httpEr) {
