@@ -2,6 +2,7 @@ package system;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import grabber.*;
 import gui.GUI;
+import system.bots.Telegram;
 import system.library.LibrarySystem;
 
 import javax.swing.*;
@@ -19,6 +20,7 @@ public class init {
     public static final String versionNumber = "3.2.2";
     public static GUI gui;
     public static LibrarySystem librarySystem;
+    public static Telegram telegramBot;
 
     public static void main(String[] args) {
         final Map<String, List<String>> params = CLI.createParamsFromArgs(args);
@@ -38,6 +40,10 @@ public class init {
         }
         else if(params.containsKey("libraryEnabled")) {
             librarySystem = new LibrarySystem();
+        }
+        else if(params.containsKey("telegramBot")) {
+            telegramBot = Telegram.getInstance();
+            telegramBot.run();
         }
         else {
             if(!params.get("link").get(0).isEmpty()) {
