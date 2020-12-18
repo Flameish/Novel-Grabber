@@ -71,6 +71,7 @@ public class EPUB {
                 init.gui.appendText(novel.window, "[ERROR]Could not write EPUB. "+e.getMessage());
             }
         }
+        novel.epubFilename = epubFilename;
         System.out.println("[GRABBER]Output: " + novel.saveLocation+"/"+ epubFilename);
     }
 
