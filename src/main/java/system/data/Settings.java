@@ -21,6 +21,7 @@ public class Settings {
     private String host = "";
     private String receiverEmail = "";
     private String ssl = "SMTP";
+    private String telegramApiToken = "";
     private boolean autoGetImages = false;
     private boolean removeStyling = false;
     private boolean useStandardLocation = false;
@@ -73,6 +74,8 @@ public class Settings {
             setNuHeadless(Boolean.parseBoolean(prop.getProperty("nuHeadless")));
             setWuxiaHeadless(Boolean.parseBoolean(prop.getProperty("wuxiaHeadless")));
             setWattHeadless(Boolean.parseBoolean(prop.getProperty("wattHeadless")));
+            setTelegramApiToken(prop.getProperty("telegramApiToken"));
+            setSaveLocation(prop.getProperty("saveLocation"));
         } catch (IOException e) {
             System.out.println("[SETTINGS]No file found.");
         }
@@ -159,6 +162,9 @@ public class Settings {
     public String getSsl() {
         return ssl;
     }
+    public String getTelegramApiToken() {
+        return telegramApiToken;
+    }
 
     // Setter
     public void setBrowser(String browser) {
@@ -211,5 +217,8 @@ public class Settings {
     }
     public void setWattHeadless(boolean wattHeadless) {
         this.wattHeadless = wattHeadless;
+    }
+    public void setTelegramApiToken(String token) {
+        this.telegramApiToken = token;
     }
 }
