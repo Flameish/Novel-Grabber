@@ -140,6 +140,11 @@ public class NovelBuilder {
         novel.waitTime = waitTime;
         return this;
     }
+    public NovelBuilder telegramChatId(long telegramChatId) {
+        novel.telegramChatId = telegramChatId;
+        return this;
+    }
+
     public NovelBuilder firstChapter(int firstChapter) {
         novel.firstChapter = firstChapter;
         return this;

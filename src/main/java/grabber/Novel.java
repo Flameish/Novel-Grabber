@@ -38,6 +38,7 @@ public class Novel {
     public String nextChapterBtn = "NOT_SET";
     public String nextChapterURL;
     public String epubFilename;
+    public long telegramChatId;
 
     /**
      * Main novel download handling object.
@@ -107,6 +108,9 @@ public class Novel {
             chapterList.get(i).saveChapter(this);
             if(init.gui != null) {
                 init.gui.updateProgress(window);
+            }
+            if(telegramChatId != 0) {
+                init.telegramBot.updateProgress(telegramChatId, i, lastChapter);
             }
             GrabberUtils.sleep(waitTime);
         }
