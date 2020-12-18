@@ -10,7 +10,7 @@ public class CLI {
     /**
      * Downloads a novel fully automatic based on CLI input.
      */
-    public static void downloadNovel(Map<String, List<String>> params) {
+    public static Novel downloadNovel(Map<String, List<String>> params) {
         Novel novel = new NovelBuilder().fromCLI(params).build();
         novel.check();
         NovelMetadata metadata = novel.metadata;
@@ -50,7 +50,7 @@ public class CLI {
         if(novel.window.equals("checker")) {
             metadata.setTitle(oldBookTitle);
         }
-
+        return novel;
     }
 
     public static Map<String, List<String>> createParamsFromArgs(String[] args) {
