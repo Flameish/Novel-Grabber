@@ -902,9 +902,13 @@ public class GUI extends JFrame {
                 if(lastDownloadedChapter != lastestChapter) {
                     String adjustedCliString = libNovel.getCliString()+" -window checker -chapters "+(lastDownloadedChapter+1)+" last";
                     String[] args = CLI.createArgsFromString(adjustedCliString);
-                    CLI.downloadNovel(CLI.createParamsFromArgs(args));
+                    Novel cliNovel = CLI.downloadNovel(CLI.createParamsFromArgs(args));
 
-                    libNovel.setLastChapter(lastestChapter);
+                    if(libNovel.isUpdateLast()) {
+                        libNovel.setLastChapter(cliNovel.chapterList.size());
+                        librarySettings.save();
+                    }
+
                     buildLibrary();
                 }
             });
