@@ -45,7 +45,7 @@ public class dreame_com implements Source {
         Element chapterBody = null;
         try {
             Document doc = Jsoup.connect(chapter.chapterURL).get();
-            String encodedChapter = doc.select("contentTpl").html();
+            String encodedChapter = doc.select("#contentTpl").html();
             String decodedChapter = new String(Base64.getMimeDecoder().decode(encodedChapter), StandardCharsets.UTF_8);
             doc = Jsoup.parse(decodedChapter);
             chapterBody = doc;
@@ -65,7 +65,9 @@ public class dreame_com implements Source {
             metadata.setTitle(toc.select(".details .name").first().text());
             metadata.setAuthor(toc.select(".details .author").first().text());
             metadata.setDescription(toc.select(".brief").first().text());
-            metadata.setBufferedCover(toc.select(".js-cover.img").attr("abs:data-cover"));
+            String coverURL = toc.select(".js-cover.img").attr("abs:data-cover");
+            if(coverURL.contains("@")) coverURL = coverURL.substring(0,coverURL.indexOf("@"));
+            metadata.setBufferedCover(coverURL);
 
             Elements tags = toc.select(".novel-tags span");
             List<String> subjects = new ArrayList<>();
