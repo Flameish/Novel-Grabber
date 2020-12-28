@@ -11,10 +11,7 @@ import grabber.CLI;
 import grabber.Novel;
 import system.data.Settings;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -24,57 +21,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Telegram {
+    private static final String supportedSourcesFile = "supported_Sources.txt";
     private static Telegram telegramBot;
     public TelegramBot novelly;
     private ConcurrentHashMap certificationCosts = new ConcurrentHashMap<>();
     private ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
     private Set currentlyDownloading = certificationCosts.newKeySet();
-    private static final String sources = "" +
-            "[Asian Hobbyist](https://www.asianhobbyist.com/)\n" +
-            "[Booklat](https://booklat.com.ph)\n" +
-            "[BoxNovel.com](https://boxnovel.com)\n" +
-            "[BoxNovel.net](https://boxnovel.net)\n" +
-            "[BoxNovel.org](https://boxnovel.org/)\n" +
-            "[Chrysanthemum Garden](https://chrysanthemumgarden.com)\n" +
-            "[Comrade Mao](https://comrademao.com)\n" +
-            "[Creative Novels](https://creativenovels.com)\n" +
-            "[Dreame](https://dreame.com)\n" +
-            "[FanFiction](https://fanfiction.net)\n" +
-            "[FanFiktion](https://fanfiktion.de)\n" +
-            "[FicFun](https://ficfun.com)\n" +
-            "[Foxaholic](https://foxaholic.com)\n" +
-            "[Foxteller](https://foxteller.com)\n" +
-            "[Honeyfeed](https://honeyfeed.fm)\n" +
-            "[Inkitt](https://inkitt.com)\n" +
-            "[ISO Translations](https://isotls.com)\n" +
-            "[LiberSpark](https://liberspark.com)\n" +
-            "[Light Novels Translations](https://lightnovelstranslations.com)\n" +
-            "[LNMTL](https://lnmtl.com/)\n" +
-            "[MoonQuill](https://moonquill.com)\n" +
-            "[MTLNovel](https://mtlnovel.com)\n" +
-            "[Novel Full](https://novelfull.com)\n" +
-            "[Novelhall](https://novelhall.com)\n" +
-            "[Novelsrock](https://novelsrock.com/)\n" +
-            "[Novel Updates](https://novelupdates.com)\n" +
-            "[Quotev](https://quotev.com)\n" +
-            "[ReadLightNovel](https://www.readlightnovel.org/)\n" +
-            "[ReadNovelFull.Com](https://readnovelfull.com/)\n" +
-            "[Re:Library](https://re-library.com)\n" +
-            "[Royal Road](https://royalroad.com)\n" +
-            "[Scribble Hub](https://scribblehub.com)\n" +
-            "[Tapas](https://tapas.io)\n" +
-            "[TapRead](https://tapread.com)\n" +
-            "[Veratales](https://veratales.com/)\n" +
-            "[VipNovel](https://vipnovel.com/)\n" +
-            "[Volare Novels](https://volarenovels.com)\n" +
-            "[Wattpad](https://wattpad.com)\n" +
-            "[Webnovel](https://webnovel.com)\n" +
-            "[Wordrain](https://wordrain69.com)\n" +
-            "[WuxiaWorld.co](https://wuxiaworld.co)\n" +
-            "[Wuxiaworld.com](https://wuxiaworld.com)\n" +
-            "[WuxiaWorld.online](https://wuxiaworld.online)\n" +
-            "[WuxiaWorld.site](https://wuxiaworld.site)" +
-            "";
+
 
     // Initialization with api token
     private Telegram() {
@@ -113,7 +66,16 @@ public class Telegram {
                         ));
                     }
                     else if(messageTxt.startsWith("/sources")) {
-                        novelly.execute(new SendMessage(chatId, sources).parseMode(ParseMode.Markdown).disableWebPagePreview(true));
+                        StringBuilder resultStringBuilder = new StringBuilder();
+                        try (BufferedReader br = new BufferedReader(new FileReader(supportedSourcesFile))) {
+                            String line;
+                            while ((line = br.readLine()) != null) {
+                                resultStringBuilder.append(line).append("\n");
+                            }
+                        } catch (IOException e) {
+                            System.out.println("[SETTINGS]No file found.");
+                        }
+                        novelly.execute(new SendMessage(chatId, resultStringBuilder.toString()).parseMode(ParseMode.Markdown).disableWebPagePreview(true));
                     }
                     else if(messageTxt.startsWith("/cli")) {
                         novelly.execute(new SendMessage(chatId,
