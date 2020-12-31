@@ -72,9 +72,9 @@ public class Chapter implements Serializable {
      * Removes general and specified blacklisted tags from chapter body.
      */
     private void removeUnwantedTags(boolean removeStyling, List<String> blacklistedTags) {
-        // Always remove <script>
-        chapterContainer.select("script").remove();
-        chapterContainer.select("style").remove();
+        for (String tag : blacklistedTags) {
+            chapterContainer.select(tag).remove();
+        }
         // Try to remove navigation links
         String[] blacklistedWords = new String[] {"next","previous","table","index","back","chapter","home"};
         for(Element link: chapterContainer.select("a[href]")) {
@@ -82,10 +82,6 @@ public class Chapter implements Serializable {
         }
         if (removeStyling) {
             chapterContainer.select("[style]").removeAttr("style");
-        }
-
-        for (String tag : blacklistedTags) {
-            chapterContainer.select(tag).remove();
         }
     }
 
@@ -126,9 +122,7 @@ public class Chapter implements Serializable {
      */
     private String cleanContent(Element chapterContainer, boolean displayChapterTitle) {
         String chapterString = chapterContainer.toString();
-        if(displayChapterTitle) {
-            chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>" + EPUB.NL + chapterString;
-        }
+
         Document.OutputSettings settings = new Document.OutputSettings();
         settings.syntax(Document.OutputSettings.Syntax.xml);
         settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
@@ -139,6 +133,10 @@ public class Chapter implements Serializable {
                 "http://"+GrabberUtils.getDomainName(chapterURL),
                 Whitelist.relaxed().preserveRelativeLinks(true),
                 settings);
+
+        if(displayChapterTitle) {
+            chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>" + EPUB.NL + chapterString;
+        }
         return chapterString;
     }
 
