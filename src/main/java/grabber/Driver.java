@@ -41,7 +41,6 @@ public class Driver {
                 ChromeOptions chromeOptions = new ChromeOptions();
                 chromeOptions.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
                 chromeOptions.setExperimentalOption("useAutomationExtension", false);
-                chromeOptions.setExperimentalOption("profile.managed_default_content_settings.images", false);
                 driver = new ChromeDriver(chromeOptions);
                 break;
             case "Firefox":
