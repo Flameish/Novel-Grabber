@@ -31,10 +31,16 @@ public class wattpad_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            if(Settings.getInstance().isWattHeadless()) {
-                toc = getTocHeadless();
+            if(novel.cookies != null) {
+                toc = Jsoup.connect(novel.novelLink)
+                        .cookies(novel.cookies)
+                        .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                        .get();
             } else {
-                toc = getPageStatic();
+                toc = Jsoup.connect(novel.novelLink)
+                        .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                        .get();
+
             }
             Elements chapterLinks = toc.select(".table-of-contents a");
             for(Element chapterLink: chapterLinks) {
@@ -52,16 +58,6 @@ public class wattpad_com implements Source {
                 .get();
     }
 
-    private Document getTocHeadless() {
-        if(novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
-        novel.headlessDriver.driver.navigate().to(novel.novelLink);
-        novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
-        String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
-        Document toc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
-        novel.headlessDriver.driver.close();
-        return toc;
-    }
-
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
@@ -74,7 +70,15 @@ public class wattpad_com implements Source {
             Object obj = parser.parse(json);
             JSONObject jsonObject = (JSONObject) obj;
             JSONObject results = (JSONObject) jsonObject.get("text_url");
-            Document doc = Jsoup.connect(String.valueOf(results.get("text"))).get();
+            Document doc;
+            if(novel.cookies != null) {
+                doc = Jsoup.connect(String.valueOf(results.get("text")))
+                        .cookies(novel.cookies)
+                        .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                        .get();
+            } else {
+                doc = Jsoup.connect(String.valueOf(results.get("text"))).get();
+            }
             chapterBody = doc.select("body").first();
         } catch (ParseException | IOException e) {
             e.printStackTrace();
