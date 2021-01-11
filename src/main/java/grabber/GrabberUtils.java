@@ -57,7 +57,7 @@ public class GrabberUtils {
     /**
      * Tries to find the container which contains chapter links.
      */
-    public static java.util.List<Chapter> getMostLikelyChapters(Document doc) {
+    public static List<Chapter> getMostLikelyChapters(Document doc) {
         System.out.println("[GRABBER]Trying to detect chapters.");
         Element mostLikely = doc.select("body").first().child(0);
 
