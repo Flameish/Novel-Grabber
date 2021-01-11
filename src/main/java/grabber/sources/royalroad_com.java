@@ -109,10 +109,15 @@ public class royalroad_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if(toc != null) {
-            metadata.setTitle(toc.select("h1[property=name]").first().text());
-            metadata.setAuthor(toc.select("h4 span[property=name] a").first().text());
-            metadata.setDescription(toc.select(".description").first().text());
+            Element title = toc.selectFirst("h1[property=name]");
+            Element author = toc.selectFirst("h4 span[property=name] a");
+            Element desc = toc.selectFirst(".description");
+
+            metadata.setTitle(title != null ? title.text(): "");
+            metadata.setAuthor(author != null ? author.text(): "");
+            metadata.setDescription(desc != null ? desc.text(): "");
             metadata.setBufferedCover(toc.select("img.thumbnail").attr("abs:src"));
+
             Elements tags = toc.select(".tags span");
             List<String> subjects = new ArrayList<>();
             for(Element tag: tags) {
