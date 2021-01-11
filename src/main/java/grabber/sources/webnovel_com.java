@@ -13,11 +13,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import system.data.accounts.Account;
+import system.data.accounts.Accounts;
 import system.init;
 
 public class webnovel_com implements Source {
@@ -193,6 +196,34 @@ public class webnovel_com implements Source {
     }
 
     public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
+        System.out.println("[INFO] Login...");
+        if(init.gui != null) {
+            init.gui.appendText(novel.window,"[INFO] Login...");
+        }
+        try {
+            Account account = Accounts.getInstance().getAccount("WattPad");
+            if(!account.getUsername().isEmpty()) {
+                Connection.Response res = Jsoup.connect("https://www.wattpad.com/")
+                        .method(Connection.Method.GET)
+                        .execute();
+                res = Jsoup.connect("https://www.wattpad.com/login")
+                        .data("username", account.getUsername())
+                        .data("password", account.getPassword())
+                        .cookies(res.cookies())
+                        .method(Connection.Method.POST)
+                        .execute();
+                return res.cookies();
+            } else {
+                System.out.println("[ERROR] No account found.");
+                if(init.gui != null) {
+                    init.gui.appendText(novel.window,"[ERROR] No account found.");
+                }
+                return null;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         throw new UnsupportedOperationException();
     }
 

@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 public class GUI extends JFrame {
     private static final String[] headerlessBrowserWebsites = {"FoxTeller","MoonQuill"};
     private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
-    private static final String[] loginWebsites = {"Booklat","Wuxiaworld","LNMTL","WattPad"};
+    private static final String[] loginWebsites = {"Booklat","Wuxiaworld","LNMTL","WattPad","WebNovel"};
     private static final String[] sourcesList = {"NovelUpdates","Wuxiaworld.com","WattPad"};
     public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
