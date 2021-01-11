@@ -2,6 +2,7 @@ package system.bots;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.EditMessageText;
@@ -12,6 +13,8 @@ import grabber.Novel;
 import system.data.Settings;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -22,11 +25,28 @@ import java.util.concurrent.Executors;
 
 public class Telegram {
     private static final String supportedSourcesFile = "supported_Sources.txt";
+    private static final String telegramDir = "./telegram";
+    private static final String infoText = "To start downloading a novel just paste it's link.\n\n" +
+            "You can list all supported websites with /sources\n\n" +
+            "If you want to download specific chapters or you want more control over your EPUB, " +
+            "take a look at the possible download arguments with /cli\n" +
+            "To cancel a download use /stop\n" +
+            "To use this bot in a group use /download@NovelGrabbyBot novel_url/cli arguments";
+    private static final String cliText = "" +
+            "Needs to start with \"-link\". All arguments are case sensitive." +
+            "[-link] | {novel_URL} | URL to the novel's table of contents page.\n" +
+            "[-wait] | {miliseconds} | Time between each chapter grab.\n" +
+            "[-chapters] | {all}, {5 27}, {12 last} | Specify which chapters to download.\n" +
+            "[-noDesc] | Don't create a description page.\n" +
+            "[-removeStyle] | Remove all styling from chapter body.\n" +
+            "[-getImages] | Grab images from chapter body as well.\n" +
+            "[-displayTitle] | Write the chapter title at the top of each chapter text.\n" +
+            "[-invertOrder] | Invert the chapter order.\n\n" +
+            "Example: -link http://novelhost.com/anovel/ -chapters 5 10 -getImages";
     private static Telegram telegramBot;
     public TelegramBot novelly;
-    private ConcurrentHashMap certificationCosts = new ConcurrentHashMap<>();
+    private ConcurrentHashMap currentlyDownloading = new ConcurrentHashMap<>();
     private ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
-    private Set currentlyDownloading = certificationCosts.newKeySet();
 
 
     // Initialization with api token
@@ -48,95 +68,92 @@ public class Telegram {
         }
         return telegramBot;
     }
-    // Poll for new messages
+
     public void run() {
+        // Poll for new messages
         novelly.setUpdatesListener(updates -> {
             ExecutorService executor = Executors.newFixedThreadPool(10);
-           // Loop through each new message in new thread
+            // Process each update in new thread
             for(Update update: updates) {
-                executor.execute(() -> {
-                    long chatId = update.message().chat().id();
-                    String messageTxt = update.message().text();
-                    if(messageTxt.startsWith("/info") || messageTxt.startsWith("/start")) {
-                        novelly.execute(new SendMessage(chatId, "" +
-                                "To start downloading a novel just paste the it's link.\n\n" +
-                                "You can list all supported websites with /sources\n\n" +
-                                "If you want to only download specific chapters or you want more control over your EPUB, " +
-                                "take a look at the possible download arguments with /cli"
-                        ));
-                    }
-                    else if(messageTxt.startsWith("/sources")) {
-                        StringBuilder resultStringBuilder = new StringBuilder();
-                        try (BufferedReader br = new BufferedReader(new FileReader(supportedSourcesFile))) {
-                            String line;
-                            while ((line = br.readLine()) != null) {
-                                resultStringBuilder.append(line).append("\n");
-                            }
-                        } catch (IOException e) {
-                            System.out.println("[SETTINGS]No file found.");
-                        }
-                        novelly.execute(new SendMessage(chatId, resultStringBuilder.toString()).parseMode(ParseMode.Markdown).disableWebPagePreview(true));
-                    }
-                    else if(messageTxt.startsWith("/cli")) {
-                        novelly.execute(new SendMessage(chatId,
-                                "[-link] | {novel_URL} | URL to the novel's table of contents page.\n" +
-                                "[-wait] | {miliseconds} | Time between each chapter grab.\n" +
-                                "[-chapters] | {all}, {5 27}, {12 last} | Specify which chapters to download.\n" +
-                                "[-noDesc] | Don't create a description page.\n" +
-                                "[-removeStyle] | Remove all styling from chapter body.\n" +
-                                "[-getImages] | Grab images from chapter body as well.\n" +
-                                "[-displayTitle] | Write the chapter title at the top of each chapter text.\n" +
-                                "[-invertOrder] | Invert the chapter order.\n\n" +
-                                "Example: -link http://yournovelhost.com/anovel/ -chapters 5 10 -getImages"
-                        ));
-                    }
-                    else if(messageTxt.startsWith("http")) {
-                        if(!currentlyDownloading.contains(chatId)) {
-                            writeLog(messageTxt);
-                            currentlyDownloading.add(chatId);
-                            try {
-                                downloadNovel(chatId, messageTxt);
-                            } catch(Exception e) {
-                                novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
-                            }
-                            currentlyDownloading.remove(chatId);
-                        } else {
-                            novelly.execute(new SendMessage(chatId, "Only one download at a time allowed."));
-                        }
-                    } else if(messageTxt.startsWith("-link")) {
-                        if(!currentlyDownloading.contains(chatId)) {
-                            writeLog(messageTxt);
-                            currentlyDownloading.add(chatId);
-                            try {
-                                downloadNovelCLI(chatId, messageTxt);
-                            } catch(Exception e) {
-                                novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
-                            }
-                            currentlyDownloading.remove(chatId);
-                        } else {
-                            novelly.execute(new SendMessage(chatId, "Only one download at a time allowed."));
-                        }
-                    } else {
-                        novelly.execute(new SendMessage(chatId, "Please post a valid URL"));
-                    }
-                });
+                executor.execute(() -> processMessage(update.message()));
             }
             executor.shutdown();
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         });
     }
 
+    private void processMessage(Message message) {
+        long chatId = message.chat().id();
+        String messageTxt = message.text();
+
+        if(messageTxt.startsWith("/info") || messageTxt.startsWith("/start")) {
+            novelly.execute(new SendMessage(chatId, infoText));
+        }
+        else if(messageTxt.startsWith("/sources")) {
+            novelly.execute(new SendMessage(chatId, getSourcesString())
+                    .parseMode(ParseMode.Markdown)
+                    .disableWebPagePreview(true));
+        }
+        else if(messageTxt.startsWith("/cli")) {
+            novelly.execute(new SendMessage(chatId, cliText));
+        }
+        else if(messageTxt.startsWith("/stop")) {
+            if(currentlyDownloading.containsKey(chatId)) {
+                ((Novel) currentlyDownloading.get(chatId)).killTask = true;
+                currentlyDownloading.remove(chatId);
+            } else {
+                novelly.execute(new SendMessage(chatId, "No current download."));
+            }
+        }
+        else {
+            if(messageTxt.startsWith("/download")) {
+                messageTxt = messageTxt.substring(messageTxt.indexOf(" ")+1);
+                System.out.println(messageTxt);
+            }
+            if(messageTxt.startsWith("http")) {
+                if(!currentlyDownloading.containsKey(chatId)) {
+                    log(messageTxt);
+                    currentlyDownloading.put(chatId, "");
+                    try {
+                        downloadNovel(chatId, messageTxt);
+                    } catch(Exception e) {
+                        novelly.execute(new SendMessage(chatId, "Error: " + e.getMessage()));
+                    }
+                    currentlyDownloading.remove(chatId);
+                } else {
+                    novelly.execute(new SendMessage(chatId, "Only one download at a time allowed."));
+                }
+            } else if(messageTxt.startsWith("-link")) {
+                if(!currentlyDownloading.containsKey(chatId)) {
+                    log(messageTxt);
+                    currentlyDownloading.put(chatId, "");
+                    try {
+                        downloadNovelCLI(chatId, messageTxt);
+                    } catch(Exception e) {
+                        novelly.execute(new SendMessage(chatId, "Error: " + e.getMessage()));
+                    }
+                    currentlyDownloading.remove(chatId);
+                } else {
+                    novelly.execute(new SendMessage(chatId, "Only one download at a time allowed."));
+                }
+            } else {
+                novelly.execute(new SendMessage(chatId, "Please post a valid URL"));
+            }
+        }
+    }
+
     private void downloadNovel(long chatId, String messageTxt) throws  Exception {
         Novel novel = Novel.builder()
                 .novelLink(messageTxt)
                 .window("auto")
-                .saveLocation("./requests/"+ chatId)
+                .saveLocation("./telegram/requests/"+ chatId)
                 .getImages(true)
+                .telegramChatId(chatId)
                 .build();
         novel.check();
 
         if(novel.chapterList.isEmpty()) throw new Exception();
-
+        currentlyDownloading.put(chatId, novel);
         // Send confirmation message and store message id
         novelly.execute(new SendMessage(chatId, "Downloading: "+novel.metadata.getTitle()));
         int messageId = novelly.execute(new SendMessage(chatId, "Progress: ")).message().messageId();
@@ -145,16 +162,17 @@ public class Telegram {
         novel = Novel.modifier(novel)
                 .firstChapter(1)
                 .lastChapter(novel.chapterList.size())
-                .telegramChatId(chatId)
                 .build();
         novel.downloadChapters();
-        novel.output();
 
-        File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
-        if(epub.exists()) {
-            novelly.execute(new SendDocument(chatId, epub));
-        } else {
-            novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
+        if(!novel.killTask) {
+            novel.output();
+            File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
+            if(epub.exists()) {
+                novelly.execute(new SendDocument(chatId, epub));
+            } else {
+                novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
+            }
         }
     }
 
@@ -167,11 +185,13 @@ public class Telegram {
                 .useHeadless(false)
                 .useAccount(false)
                 .telegramChatId(chatId)
-                .saveLocation("./requests/"+ chatId)
+                .saveLocation("./telegram/requests/"+ chatId)
                 .build();
 
         novel.check();
         if(novel.chapterList.isEmpty()) throw new Exception();
+        currentlyDownloading.put(chatId, novel);
+
         // Chapter range needs to be set after fetching the chapter list
         if(params.containsKey("chapters")) {
             if(params.get("chapters").get(0).equals("all")) {
@@ -195,13 +215,15 @@ public class Telegram {
         int messageId = novelly.execute(new SendMessage(chatId, "Progress: ")).message().messageId();
         downloadMsgIds.put(chatId, messageId);
         novel.downloadChapters();
-        novel.output();
 
-        File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
-        if(epub.exists()) {
-            novelly.execute(new SendDocument(chatId, epub));
-        } else {
-            novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
+        if(!novel.killTask) {
+            novel.output();
+            File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
+            if(epub.exists()) {
+                novelly.execute(new SendDocument(chatId, epub));
+            } else {
+                novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
+            }
         }
     }
 
@@ -210,14 +232,34 @@ public class Telegram {
         novelly.execute(new EditMessageText(chatId, messageId, "Progress: "+(currChapter+1)+"/"+lastChapter));
     }
 
-    public static void writeLog(String info) {
-        String filename = "./telegramBot.log";
+    public static void log(String msg) {
         String time = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-            writer.write("[" + time + "] " + info);
-            writer.write("\n");
+        try {
+            Files.createDirectories(Paths.get(telegramDir));
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(telegramDir + "/log.txt", true))) {
+                writer.write("[" + time + "] " + msg);
+                writer.write("\n");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private static String getSourcesString() {
+        StringBuilder resultStringBuilder = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(supportedSourcesFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                resultStringBuilder.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            System.out.println("[SETTINGS]No file found.");
+        }
+        return resultStringBuilder.toString();
+    }
+
+    public void sendMsg(long chatId, String msg) {
+        novelly.execute(new SendMessage(chatId, msg));
+    }
+
 }
