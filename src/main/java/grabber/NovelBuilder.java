@@ -179,6 +179,9 @@ public class NovelBuilder {
             if(init.gui != null) {
                 init.gui.appendText(novel.window,"[ERROR]Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
             }
+            if(init.telegramBot != null) {
+                init.telegramBot.sendMsg(novel.telegramChatId,"[ERROR] Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
+            }
             novel.source = null;
         }
     }
