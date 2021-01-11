@@ -123,6 +123,8 @@ public class Chapter implements Serializable {
     private String cleanContent(Element chapterContainer, boolean displayChapterTitle) {
         String chapterString = chapterContainer.toString();
 
+        chapterString = chapterString.replaceAll("\n","<br \\>");
+
         Document.OutputSettings settings = new Document.OutputSettings();
         settings.syntax(Document.OutputSettings.Syntax.xml);
         settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
