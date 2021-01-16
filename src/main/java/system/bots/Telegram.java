@@ -9,6 +9,7 @@ import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import grabber.CLI;
+import grabber.GrabberUtils;
 import grabber.Novel;
 import system.data.Settings;
 
@@ -51,13 +52,13 @@ public class Telegram {
 
     // Initialization with api token
     private Telegram() {
-        System.out.print("Starting Telegram bot...");
+        GrabberUtils.info("Starting Telegram bot...");
         String token = Settings.getInstance().getTelegramApiToken();
         if(!token.isEmpty()) {
             novelly = new TelegramBot(token);
-            System.out.println("done");
+            GrabberUtils.info("done.");
         } else {
-            System.err.println("[ERROR] Token empty");
+            GrabberUtils.err("Token empty");
         }
     }
 
@@ -108,7 +109,6 @@ public class Telegram {
         else {
             if(messageTxt.startsWith("/download")) {
                 messageTxt = messageTxt.substring(messageTxt.indexOf(" ")+1);
-                System.out.println(messageTxt);
             }
             if(messageTxt.startsWith("http")) {
                 if(!currentlyDownloading.containsKey(chatId)) {
@@ -241,7 +241,7 @@ public class Telegram {
                 writer.write("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
     }
 
@@ -253,7 +253,7 @@ public class Telegram {
                 resultStringBuilder.append(line).append("\n");
             }
         } catch (IOException e) {
-            System.out.println("[SETTINGS]No file found.");
+            GrabberUtils.err("No sources file found.", e);
         }
         return resultStringBuilder.toString();
     }

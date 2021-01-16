@@ -316,9 +316,8 @@ public class GUI extends JFrame {
                         .build();
                 autoNovel.downloadChapters(); // Throws exception if grabbing was stopped
                 autoNovel.output();
-            } catch (Exception  err) {
-                appendText("auto", "[ERROR]"+err.getMessage());
-                err.printStackTrace();
+            } catch (Exception  e) {
+                GrabberUtils.err("auto",e.getMessage(), e);
                 autoNovel.killTask = false;
             }
             progressBar.setStringPainted(false);
@@ -409,9 +408,8 @@ public class GUI extends JFrame {
                             .browser(settings.getBrowser())
                             .build();
                     manNovel.check();
-                } catch (NullPointerException err) {
-                    err.printStackTrace();
-                    appendText("manual", "[ERROR]" + err.getMessage());
+                } catch (NullPointerException ex) {
+                    GrabberUtils.err("manual", ex.getMessage(), ex);
                 } finally {
                     if (!manLinkListModel.isEmpty()) {
                         manRemoveLinksBtn.setEnabled(true);
@@ -467,8 +465,7 @@ public class GUI extends JFrame {
                         manNovel.processChaptersToChapters(firstChapterField.getText(), lastChapterField.getText(), nextChapterButtonField.getText(), manChapterToChapterNumberField.getText());
                         manNovel.output();
                     } catch (Exception err) {
-                        appendText("manual", "[ERROR]"+err.getMessage());
-                        err.printStackTrace();
+                        GrabberUtils.err("manual", err.getMessage(), err);
                         manNovel.killTask = false;
                     } finally {
                         manProgressBar.setStringPainted(false);
@@ -530,8 +527,7 @@ public class GUI extends JFrame {
                         manNovel.downloadChapters();
                         manNovel.output();
                     } catch (Exception err) {
-                        appendText("manual", "[ERROR]"+err.getMessage());
-                        err.printStackTrace();
+                        GrabberUtils.err("manual", err.getMessage(), err);
                         manNovel.killTask = false;
                     } finally {
                         manProgressBar.setStringPainted(false);
@@ -613,7 +609,7 @@ public class GUI extends JFrame {
             try {
                 GrabberUtils.openWebpage(new URI("https://jsoup.org/cookbook/extracting-data/selector-syntax"));
             } catch (URISyntaxException ex) {
-                ex.printStackTrace();
+                GrabberUtils.err(ex.getMessage(), ex);
             }
         });
 
@@ -836,8 +832,8 @@ public class GUI extends JFrame {
         settingsContributeBtn.addActionListener(e -> {
             try {
                 GrabberUtils.openWebpage(new URI("https://www.paypal.com/paypalme/flameish"));
-            } catch (URISyntaxException uriSyntaxException) {
-                uriSyntaxException.printStackTrace();
+            } catch (URISyntaxException ex) {
+                GrabberUtils.err(ex.getMessage(), ex);
             }
         });
 

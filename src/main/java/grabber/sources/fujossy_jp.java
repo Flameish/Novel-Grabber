@@ -13,7 +13,6 @@ import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import system.init;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,8 +30,8 @@ public class fujossy_jp implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            String storyID = novel.novelLink.substring(GrabberUtils.ordinalIndexOf(novel.novelLink,"/",4)+1);
-            String json = Jsoup.connect("https://fujossy.jp/api/books/"+storyID+".json")
+            String storyID = novel.novelLink.substring(GrabberUtils.ordinalIndexOf(novel.novelLink, "/", 4) + 1);
+            String json = Jsoup.connect("https://fujossy.jp/api/books/" + storyID + ".json")
                     .ignoreContentType(true)
                     .method(Connection.Method.GET)
                     .execute().body();
@@ -45,38 +44,11 @@ public class fujossy_jp implements Source {
                         novel.novelLink + "/stories/" + chapterObj.get("id")));
             }
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         } catch (ParseException e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
         return chapterList;
     }
@@ -88,38 +60,11 @@ public class fujossy_jp implements Source {
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             doc.outputSettings().prettyPrint(false);
-            chapterBody = doc.selectFirst(".story__body");
+            chapterBody = Jsoup.parse(doc.selectFirst(".story__body").html().replaceAll("\n", "<br \\>"));
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterBody;
     }
@@ -127,7 +72,7 @@ public class fujossy_jp implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(bookObj != null) {
+        if (bookObj != null) {
 
             metadata.setTitle(String.valueOf(bookObj.get("title")));
             JSONObject userObj = (JSONObject) bookObj.get("user");

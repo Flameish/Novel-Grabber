@@ -1,12 +1,9 @@
 package grabber.sources;
 
-import grabber.*;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import gui.GUI;
+import grabber.Chapter;
+import grabber.GrabberUtils;
+import grabber.Novel;
+import grabber.NovelMetadata;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -15,10 +12,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import system.data.Settings;
 import system.data.accounts.Account;
 import system.data.accounts.Accounts;
 import system.init;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class wattpad_com implements Source {
     private final Novel novel;
@@ -31,7 +32,7 @@ public class wattpad_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            if(novel.cookies != null) {
+            if (novel.cookies != null) {
                 toc = Jsoup.connect(novel.novelLink)
                         .cookies(novel.cookies)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
@@ -43,11 +44,11 @@ public class wattpad_com implements Source {
 
             }
             Elements chapterLinks = toc.select(".table-of-contents a");
-            for(Element chapterLink: chapterLinks) {
+            for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
         return chapterList;
     }
@@ -71,7 +72,7 @@ public class wattpad_com implements Source {
             JSONObject jsonObject = (JSONObject) obj;
             JSONObject results = (JSONObject) jsonObject.get("text_url");
             Document doc;
-            if(novel.cookies != null) {
+            if (novel.cookies != null) {
                 doc = Jsoup.connect(String.valueOf(results.get("text")))
                         .cookies(novel.cookies)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
@@ -80,11 +81,10 @@ public class wattpad_com implements Source {
                 doc = Jsoup.connect(String.valueOf(results.get("text"))).get();
             }
             chapterBody = doc.select("body").first();
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
-            if(init.gui != null) {
-                init.gui.appendText(novel.window,"[ERROR]"+e.getMessage());
-            }
+        } catch (IOException e) {
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (ParseException e) {
+            GrabberUtils.err(novel.window, "JSON Parse error", e);
         }
         return chapterBody;
     }
@@ -92,7 +92,7 @@ public class wattpad_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(toc != null) {
+        if (toc != null) {
             metadata.setTitle(toc.select(".container h1").first().text());
             metadata.setAuthor(toc.select("a.send-author-event.on-navigate:not(.avatar)").first().text());
             metadata.setDescription(toc.select("h2.description").first().text());
@@ -100,7 +100,7 @@ public class wattpad_com implements Source {
 
             Elements tags = toc.select(".tag-items li div.tag-item");
             List<String> subjects = new ArrayList<>();
-            for(Element tag: tags) {
+            for (Element tag : tags) {
                 subjects.add(tag.text());
             }
             metadata.setSubjects(subjects);
@@ -115,13 +115,10 @@ public class wattpad_com implements Source {
     }
 
     public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        System.out.println("[INFO] Login...");
-        if(init.gui != null) {
-            init.gui.appendText(novel.window,"[INFO] Login...");
-        }
+        GrabberUtils.info(novel.window, "Login...");
         try {
             Account account = Accounts.getInstance().getAccount("WattPad");
-            if(!account.getUsername().isEmpty()) {
+            if (!account.getUsername().isEmpty()) {
                 Connection.Response res = Jsoup.connect("https://www.wattpad.com/")
                         .method(Connection.Method.GET)
                         .execute();
@@ -133,15 +130,12 @@ public class wattpad_com implements Source {
                         .execute();
                 return res.cookies();
             } else {
-                System.out.println("[ERROR] No account found.");
-                if(init.gui != null) {
-                    init.gui.appendText(novel.window,"[ERROR] No account found.");
-                }
+                GrabberUtils.err(novel.window, "No account found");
                 return null;
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            GrabberUtils.err(novel.window, e.getMessage(), e);
         }
         throw new UnsupportedOperationException();
     }

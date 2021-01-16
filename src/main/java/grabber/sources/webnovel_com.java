@@ -1,14 +1,9 @@
 package grabber.sources;
 
-import grabber.*;
-
-import java.io.IOException;
-import java.net.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import grabber.Chapter;
+import grabber.GrabberUtils;
+import grabber.Novel;
+import grabber.NovelMetadata;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -22,6 +17,13 @@ import org.jsoup.select.Elements;
 import system.data.accounts.Account;
 import system.data.accounts.Accounts;
 import system.init;
+
+import java.io.IOException;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class webnovel_com implements Source {
     private final Novel novel;
@@ -73,7 +75,7 @@ public class webnovel_com implements Source {
                         JSONObject slide = (JSONObject) a;
                         String chapterId = String.valueOf(slide.get("id"));
                         // Crude hotfix
-                        String chapterName = String.valueOf(slide.get("name")).replaceAll("â€™", "\'");
+                        String chapterName = String.valueOf(slide.get("name")).replaceAll("â€™", "'");
                         String isVip = String.valueOf(slide.get("isVip"));
                         if (isVip.equals("0")) {
                             webnovelChapters.put(chapterId, chapterName);
@@ -81,7 +83,7 @@ public class webnovel_com implements Source {
                     }
                 }
             } catch (ParseException | IOException e) {
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
 
             int webnovelChapterNumber = 1;
@@ -91,36 +93,9 @@ public class webnovel_com implements Source {
                 webnovelChapterNumber++;
             }
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterList;
     }
@@ -131,36 +106,9 @@ public class webnovel_com implements Source {
             Document doc = Jsoup.connect(chapter.chapterURL).get();
             chapterBody = doc.select("div[class^=chapter_content]").first();
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterBody;
     }
@@ -168,14 +116,14 @@ public class webnovel_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(toc != null) {
+        if (toc != null) {
             metadata.setTitle(toc.select("p.lh24.fs16.pt24.pb24.ell.c_000 span:not(span:contains(/))").first().text());
             metadata.setDescription(toc.select(".j_synopsis").first().text());
             metadata.setBufferedCover(toc.select(".g_thumb img:eq(1)").attr("abs:src"));
 
             Elements tags = toc.select("a[href^=/category/list?category=].c_000");
             List<String> subjects = new ArrayList<>();
-            for(Element tag: tags) {
+            for (Element tag : tags) {
                 subjects.add(tag.text());
             }
             metadata.setSubjects(subjects);
@@ -196,13 +144,13 @@ public class webnovel_com implements Source {
     }
 
     public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        System.out.println("[INFO] Login...");
-        if(init.gui != null) {
-            init.gui.appendText(novel.window,"[INFO] Login...");
+        GrabberUtils.info(novel.window, "Login...");
+        if (init.gui != null) {
+            init.gui.appendText(novel.window, "[INFO] Login...");
         }
         try {
             Account account = Accounts.getInstance().getAccount("WattPad");
-            if(!account.getUsername().isEmpty()) {
+            if (!account.getUsername().isEmpty()) {
                 Connection.Response res = Jsoup.connect("https://www.wattpad.com/")
                         .method(Connection.Method.GET)
                         .execute();
@@ -214,15 +162,12 @@ public class webnovel_com implements Source {
                         .execute();
                 return res.cookies();
             } else {
-                System.out.println("[ERROR] No account found.");
-                if(init.gui != null) {
-                    init.gui.appendText(novel.window,"[ERROR] No account found.");
-                }
+                GrabberUtils.err(novel.window, "No account found");
                 return null;
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            GrabberUtils.err(novel.window, e.getMessage(), e);
         }
         throw new UnsupportedOperationException();
     }

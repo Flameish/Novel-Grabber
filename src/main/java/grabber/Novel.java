@@ -70,10 +70,7 @@ public class Novel {
                 try {
                     cookies = source.getLoginCookies();
                 } catch (UnsupportedOperationException e) {
-                    System.err.println("[ERROR]Source does not support login.");
-                    if(init.gui != null) {
-                        init.gui.appendText(window,"[ERROR]Source does not support login.");
-                    }
+                    GrabberUtils.err(window,"Source does not support login.", e);
                 }
             }
             chapterList = source.getChapterList();
@@ -90,7 +87,7 @@ public class Novel {
      * @throws Exception on stopped grabbing.
      */
     public void downloadChapters() throws Exception {
-        System.out.println("[GRABBER]Starting download...");
+        GrabberUtils.info(window,"Starting download...");
         // Preparation
         if(init.gui != null) {
             init.gui.setMaxProgress(window, lastChapter-firstChapter+1);
@@ -103,13 +100,13 @@ public class Novel {
         // Download handling
         for(int i = firstChapter-1; i < lastChapter; i++) { // -1 since chapter numbers start at 1
             if(killTask) {
-                throw new Exception("[GRABBER]Download stopped.");
+                throw new Exception("Download stopped.");
             }
             chapterList.get(i).saveChapter(this);
             if(init.gui != null) {
                 init.gui.updateProgress(window);
             }
-            if(telegramChatId != 0) {
+            if((telegramChatId) != 0 && (i % 10 == 0 || i == lastChapter-1)) {
                 init.telegramBot.updateProgress(telegramChatId, i, lastChapter);
             }
             GrabberUtils.sleep(waitTime);
@@ -124,7 +121,7 @@ public class Novel {
                                           String lastChapterURL,
                                           String nextChapterBtn,
                                           String chapterNumberString) throws Exception {
-        init.gui.appendText(window, "[GRABBER]Connecting...");
+        GrabberUtils.info(window, "Connecting...");
         init.gui.setMaxProgress(window, 9001);
 
         nextChapterURL = firstChapterURL;
@@ -168,9 +165,7 @@ public class Novel {
      */
     public void output() {
         // Print finishing information
-        if(init.gui != null) {
-            init.gui.appendText(window,"[GRABBER]Finished.\n"); // GUI doesn't need save location displaying
-        }
+        GrabberUtils.info(window,"Finished.");
 
         // Reverse chapter order if needed for potential re-grabbing
         if(reverseOrder) Collections.reverse(chapterList);
@@ -178,9 +173,7 @@ public class Novel {
         // Print failed chapters
         for(Chapter chapter: chapterList) {
             if(chapter.status == 2) // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
-                if(init.gui != null) {
-                    init.gui.appendText(window,"[GRABBER]Failed to download: " +chapter.name);
-                }
+                GrabberUtils.info(window,"Failed to download: " +chapter.name);
         }
 
         if(headlessDriver != null) {

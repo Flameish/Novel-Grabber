@@ -1,17 +1,17 @@
 package grabber.sources;
 
 import grabber.*;
-
-import java.io.IOException;
-import java.util.*;
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import system.init;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class comrademao_com implements Source {
     private final Novel novel;
@@ -24,7 +24,7 @@ public class comrademao_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
 
-        if(novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
         novel.headlessDriver.driver.navigate().to(novel.novelLink);
         novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tbody a")));
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
@@ -51,26 +51,26 @@ public class comrademao_com implements Source {
     }
 
     public Element getChapterContent(Chapter chapter) {
-        if(novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
         novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
         novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("article")));
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
         Document doc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
-        return  doc.selectFirst("article");
+        return doc.selectFirst("article");
     }
 
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(toc != null) {
+        if (toc != null) {
             Element title = toc.selectFirst("title");
-            metadata.setTitle(title != null ? title.text().substring(0, title.text().indexOf("–")-1) : "");
+            metadata.setTitle(title != null ? title.text().substring(0, title.text().indexOf("–") - 1) : "");
             metadata.setDescription(toc.select("#Description").first().text());
             metadata.setBufferedCover(toc.select("#thumbnail img").attr("abs:src"));
 
             Elements tags = toc.select("#Genre a");
             List<String> subjects = new ArrayList<>();
-            for(Element tag: tags) {
+            for (Element tag : tags) {
                 subjects.add(tag.text());
             }
             metadata.setSubjects(subjects);

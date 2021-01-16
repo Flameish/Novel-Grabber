@@ -49,7 +49,7 @@ public class init {
             if(!params.get("link").get(0).isEmpty()) {
                 CLI.downloadNovel(params);
             } else {
-                System.out.println("No novel link.");
+                GrabberUtils.err("No novel link.");
             }
         }
     }
@@ -68,7 +68,7 @@ public class init {
                 gui.setLocationRelativeTo(null);
                 gui.setVisible(true);
             } catch (Exception e) {
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
         });
     }

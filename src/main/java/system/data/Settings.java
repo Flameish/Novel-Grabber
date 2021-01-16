@@ -1,5 +1,6 @@
 package system.data;
 
+import grabber.GrabberUtils;
 import system.init;
 
 import java.io.*;
@@ -39,10 +40,10 @@ public class Settings {
         if(settings == null) {
             settings = new Settings();
             try {
-                settingsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/../settings.ini";
+                settingsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/settings.ini";
             } catch (URISyntaxException e) {
                 settingsFile = "settings.ini";
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
             settings.load();
         }
@@ -77,7 +78,7 @@ public class Settings {
             setTelegramApiToken(prop.getProperty("telegramApiToken"));
             setSaveLocation(prop.getProperty("saveLocation"));
         } catch (IOException e) {
-            System.out.println("[SETTINGS]No file found.");
+            GrabberUtils.err("No settings file found.");
         }
     }
 
@@ -107,7 +108,7 @@ public class Settings {
             prop.setProperty("wattHeadless", String.valueOf(isWattHeadless()));
             prop.store(writer, "Novel-Grabber version: " + init.versionNumber);
         } catch (IOException e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
     }
     // Getter

@@ -1,6 +1,7 @@
 package system.library;
 
 import grabber.CLI;
+import grabber.GrabberUtils;
 import grabber.Novel;
 import system.data.Settings;
 import system.init;
@@ -26,8 +27,7 @@ public class LibrarySystem {
         try {
             emailNotification = new EmailNotification();
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("[ERROR]Could not establish connection to SMTP Server. Check email settings.");
+            GrabberUtils.err("Could not establish connection to SMTP Server. Check email settings.", e);
         }
         if(Settings.getInstance().isPollingEnabled()) {
             scheduler.scheduleWithFixedDelay(this::run, 0, Settings.getInstance().getFrequency(), TimeUnit.MINUTES);
@@ -39,9 +39,8 @@ public class LibrarySystem {
      * Downloads new chapters and sends emails if selected.
      */
     private void run() {
-        System.out.println("Working...");
         for(LibraryNovel libraryNovel: librarySettings.getStarredNovels()) {
-            System.out.println("[LIBRARY]Checking "+ libraryNovel.getTitle());
+            GrabberUtils.info("Checking "+ libraryNovel.getTitle());
 
             // Build a Novel object from CLI parameters and fetch chapter list
             String[] cliParams = CLI.createArgsFromString(libraryNovel.getCliString());
@@ -96,7 +95,7 @@ public class LibrarySystem {
             autoNovel.output();
             // downloadChapters throws an Exception when grabbing was stopped midway, not possible here
         } catch (Exception e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
     }
 }

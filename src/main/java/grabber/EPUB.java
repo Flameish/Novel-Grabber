@@ -41,11 +41,7 @@ public class EPUB {
         try {
             book.getResources().add(new Resource(getClass().getResourceAsStream("/default.css"), "default.css"));
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println();
-            if(init.gui != null) {
-                init.gui.appendText(novel.window, "[EPUB-ERROR]Could not add default.css file to EPUB. "+e.getMessage());
-            }
+            GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. "+e.getMessage(), e);
         }
     }
 
@@ -65,14 +61,10 @@ public class EPUB {
             EpubWriter epubWriter = new EpubWriter();
             epubWriter.write(book, new FileOutputStream(novel.saveLocation + "/" + epubFilename));
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("[ERROR]Could not write EPUB. "+e.getMessage());
-            if(init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not write EPUB. "+e.getMessage());
-            }
+            GrabberUtils.err(novel.window, "Could not write EPUB. "+e.getMessage(), e);
         }
         novel.epubFilename = epubFilename;
-        System.out.println("[GRABBER]Output: " + novel.saveLocation+"/"+ epubFilename);
+        GrabberUtils.info("Output: " + novel.saveLocation+"/"+ epubFilename);
     }
 
     private void addImages() {
@@ -85,11 +77,7 @@ public class EPUB {
                 book.getResources().add(resource);
                 inputStream.close();
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("[ERROR]Could not add "+entry.getValue()+" to EPUB. "+e.getMessage());
-                if(init.gui != null) {
-                    init.gui.appendText(novel.window, "[ERROR]Could not add "+entry.getValue()+" to EPUB. "+e.getMessage());
-                }
+                GrabberUtils.err(novel.window, "Could not add "+entry.getValue()+" to EPUB. "+e.getMessage(), e);
             }
         }
     }
@@ -102,11 +90,7 @@ public class EPUB {
                     Resource resource = new Resource(inputStream, chapter.fileName + ".html");
                     book.addSection(chapter.name, resource);
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println("[ERROR]Could not add "+chapter.name+" to EPUB. "+e.getMessage());
-                    if(init.gui != null) {
-                        init.gui.appendText(novel.window,"[ERROR]Could not add "+chapter.name+" to EPUB. "+e.getMessage());
-                    }
+                    GrabberUtils.err(novel.window, "Could not add "+chapter.name+" to EPUB. "+e.getMessage(), e);
                 }
             }
         }
@@ -154,11 +138,7 @@ public class EPUB {
             book.setCoverImage(resource);
             inputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("[ERROR]Could not add cover to EPUB. " + e.getMessage());
-            if(init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not add cover to EPUB. " + e.getMessage());
-            }
+            GrabberUtils.err(novel.window, "Could not add cover to EPUB. " + e.getMessage(), e);
         }
     }
 
@@ -174,11 +154,7 @@ public class EPUB {
             Resource resource = new Resource(inputStream, "table_of_contents.html");
             book.addSection("Table of Contents", resource);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("[ERROR]Could not add table of content to EPUB. "+e.getMessage());
-            if(init.gui != null) {
-                init.gui.appendText(novel.window, "[EPUB-ERROR]Could not add table of content to EPUB. "+e.getMessage());
-            }
+            GrabberUtils.err(novel.window, "Could not add table of content to EPUB. "+e.getMessage(), e);
         }
     }
 
@@ -192,11 +168,7 @@ public class EPUB {
             Resource resource = new Resource(inputStream, "desc_Page.html");
             book.addSection("Description", resource);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("[ERROR]Could not add description to EPUB. "+e.getMessage());
-            if(init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not add description to EPUB. "+e.getMessage());
-            }
+            GrabberUtils.err(novel.window, "Could not add description to EPUB. "+e.getMessage(), e);
         }
     }
 }

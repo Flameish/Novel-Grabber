@@ -1,14 +1,6 @@
 package grabber.sources;
 
 import grabber.*;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import net.dankito.readability4j.Article;
 import net.dankito.readability4j.Readability4J;
 import net.dankito.readability4j.extended.Readability4JExtended;
@@ -22,6 +14,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import system.data.Settings;
 import system.init;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class novelupdates_com implements Source {
     private final Novel novel;
@@ -50,36 +49,9 @@ public class novelupdates_com implements Source {
             }
             Collections.reverse(chapterList);
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterList;
     }
@@ -88,62 +60,56 @@ public class novelupdates_com implements Source {
         Element chapterBody = null;
         try {
             Document doc;
-            if(Settings.getInstance().isNuHeadless()) {
-                doc = getPageHeadless(chapter);
+            if (Settings.getInstance().isNuHeadless()) {
+                doc = getPageHeadless(chapter.chapterURL);
+                if (!doc.select(".entry-meta").isEmpty()) {
+                    String fullChapterUrl = doc.selectFirst(".entry-content a").attr("abs:href");
+                    if (!fullChapterUrl.isEmpty()) {
+                        if (init.gui != null) {
+                            init.gui.appendText(novel.window, "[INFO] WordPress \"Pre-Chapter\" detected. " +
+                                    "Trying to navigate to full chapter: " + fullChapterUrl);
+                        }
+                        doc = getPageHeadless(fullChapterUrl);
+                    }
+
+                }
             } else {
                 doc = Jsoup.connect(chapter.chapterURL)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .get();
+                if (!doc.select(".entry-meta").isEmpty()) {
+
+                    String fullChapterUrl = doc.selectFirst(".entry-content a").attr("abs:href");
+                    if (!fullChapterUrl.isEmpty()) {
+                        if (init.gui != null) {
+                            init.gui.appendText(novel.window, "[INFO] WordPress \"Pre-Chapter\" detected. " +
+                                    "Trying to navigate to full chapter: " + fullChapterUrl);
+                        }
+                        doc = Jsoup.connect(fullChapterUrl)
+                                .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                                .get();
+                    }
+                }
             }
             String extractedContentHtml = findChapter(doc, chapter.chapterURL);
             chapterBody = Jsoup.parse(extractedContentHtml);
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         } catch (NullPointerException e) {
-            e.printStackTrace();
-            if(init.gui != null) {
-                init.gui.appendText(novel.window,"[GRABBER-ERROR]Could not detect chapter on: "
-                        + chapter.chapterURL+"("+e.getMessage()+")");
-            }
+            GrabberUtils.err(novel.window, "Could not detect chapter on: "
+                    + chapter.chapterURL + "(" + e.getMessage() + ")", e);
         }
         return chapterBody;
     }
 
 
-    private Document getPageHeadless(Chapter chapter) {
-        if(novel.headlessDriver == null) {
+    private Document getPageHeadless(String chapterURL) {
+        if (novel.headlessDriver == null) {
             novel.headlessDriver = new Driver(novel.window, novel.browser);
         }
-        novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
+        novel.headlessDriver.driver.navigate().to(chapterURL);
         novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
         WebElement chapterElement = novel.headlessDriver.driver.findElement(By.cssSelector("body"));
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
@@ -159,7 +125,7 @@ public class novelupdates_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(toc != null) {
+        if (toc != null) {
             metadata.setTitle(toc.select(".seriestitlenu").first().text());
             metadata.setAuthor(toc.select("#authtag").first().text());
             metadata.setDescription(toc.select("#editdescription").first().text());
@@ -167,7 +133,7 @@ public class novelupdates_com implements Source {
 
             Elements tags = toc.select("#seriesgenre a");
             List<String> subjects = new ArrayList<>();
-            for(Element tag: tags) {
+            for (Element tag : tags) {
                 subjects.add(tag.text());
             }
             metadata.setSubjects(subjects);

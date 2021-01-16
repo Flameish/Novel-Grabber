@@ -1,5 +1,7 @@
 package gui;
 
+import grabber.GrabberUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -87,8 +89,8 @@ public class ListItemTransferHandler extends TransferHandler {
             }
             addCount = values.length;
             return true;
-        } catch (UnsupportedFlavorException | IOException ex) {
-            ex.printStackTrace();
+        } catch (UnsupportedFlavorException | IOException e) {
+            GrabberUtils.err(e.getMessage(), e);
         }
 
         return false;

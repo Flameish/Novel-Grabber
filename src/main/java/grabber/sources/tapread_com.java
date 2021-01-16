@@ -1,13 +1,9 @@
 package grabber.sources;
 
-import grabber.*;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import grabber.Chapter;
+import grabber.GrabberUtils;
+import grabber.Novel;
+import grabber.NovelMetadata;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,6 +15,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import system.init;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class tapread_com implements Source {
     private final Novel novel;
@@ -52,42 +54,15 @@ public class tapread_com implements Source {
                     if (chapterLocked.equals("0")) chapterMap.put(chapterId, chapterName);
                 }
             } catch (IOException | org.json.simple.parser.ParseException e) {
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
             for (String chapterId : chapterMap.keySet()) {
                 chapterList.add(new Chapter(chapterMap.get(chapterId), "https://tapread.com/book/index/" + bookID + "/" + chapterId));
             }
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterList;
     }
@@ -95,7 +70,7 @@ public class tapread_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            String chapterID = chapter.chapterURL.substring(chapter.chapterURL.lastIndexOf("/")+1);
+            String chapterID = chapter.chapterURL.substring(chapter.chapterURL.lastIndexOf("/") + 1);
             String bookID = novel.novelLink.substring(novel.novelLink.lastIndexOf("/") + 1);
             String json = Jsoup.connect("https://www.tapread.com/ajax/book/chapter")
                     .data("bookId", bookID)
@@ -109,11 +84,10 @@ public class tapread_com implements Source {
             String content = (String) results.get("content");
 
             chapterBody = Jsoup.parse(content);
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
-            }
+        } catch (IOException e) {
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (ParseException e) {
+            GrabberUtils.err(novel.window, "JSON parse error", e);
         }
         return chapterBody;
     }
@@ -121,7 +95,7 @@ public class tapread_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(toc != null) {
+        if (toc != null) {
             metadata.setTitle(toc.select(".book-name").first().text());
             metadata.setAuthor(toc.select(".person-info .author .name").first().text());
             metadata.setDescription(toc.select(".desc").first().text());
@@ -129,7 +103,7 @@ public class tapread_com implements Source {
 
             Elements tags = toc.select(".book-catalog .txt");
             List<String> subjects = new ArrayList<>();
-            for(Element tag: tags) {
+            for (Element tag : tags) {
                 subjects.add(tag.text());
             }
             metadata.setSubjects(subjects);

@@ -17,8 +17,8 @@ public class NovelMetadata {
     public NovelMetadata() {
         try {
             bufferedCover = ImageIO.read(this.getClass().getResource("/images/cover_placeholder.png"));
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
+        } catch (IOException e) {
+            GrabberUtils.err(e.getMessage(), e);
         }
     }
 
@@ -63,7 +63,7 @@ public class NovelMetadata {
                     bufferedCover = ImageIO.read(this.getClass().getResource("/images/cover_placeholder.png"));
                     coverFormat = "png";
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    GrabberUtils.err(e.getMessage(), e);
                 }
             }
         }

@@ -1,5 +1,6 @@
 package system.data.accounts;
 
+import grabber.GrabberUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -22,10 +23,10 @@ public class Accounts {
         if(accounts == null) {
             accounts = new Accounts();
             try {
-                accountsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/../accounts.ini";
+                accountsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/accounts.ini";
             } catch (URISyntaxException e) {
                 accountsFile = "accounts.ini";
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
             accounts.load();
         }
@@ -42,9 +43,9 @@ public class Accounts {
                 accountList.add(new Account((JSONObject) loadedAccount));
             }
         } catch (IOException e) {
-            System.out.println("[ACCOUNTS]No file found.");
+            GrabberUtils.err("No accounts file found.", e);
         } catch (ParseException e) {
-            System.out.println("[ACCOUNTS]Could not parse file.");
+            GrabberUtils.err("Could not parse accounts file.", e);
         }
     }
 
@@ -60,7 +61,7 @@ public class Accounts {
             }
             writer.write(accountArray.toJSONString());
         } catch(IOException e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
     }
 

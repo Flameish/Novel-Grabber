@@ -37,7 +37,7 @@ public class CLI {
         try {
             novel.downloadChapters();
         } catch (Exception e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
         // Change bookTitle temporarily to include chapter names
         // when creating the EPUB for system.library auto grabs
@@ -59,7 +59,7 @@ public class CLI {
         for (final String a : args) {
             if (a.charAt(0) == '-') {
                 if (a.length() < 2) {
-                    System.err.println("Error at argument " + a);
+                    GrabberUtils.err("Error at argument " + a);
                     return null;
                 }
 
@@ -68,7 +68,7 @@ public class CLI {
             } else if (options != null) {
                 options.add(a);
             } else {
-                System.err.println("Illegal parameter usage");
+                GrabberUtils.err("Illegal parameter usage");
                 return null;
             }
         }

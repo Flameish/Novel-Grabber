@@ -1,5 +1,6 @@
 package system.notifications;
 
+import grabber.GrabberUtils;
 import grabber.Novel;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.mailer.Mailer;
@@ -62,7 +63,7 @@ public class EmailNotification {
                 .buildEmail();
 
         mailer.sendMail(email);
-        System.out.println("[EMAIL]Email send.");
+        GrabberUtils.info("[EMAIL]Email send.");
     }
 
     /**
@@ -83,6 +84,6 @@ public class EmailNotification {
                 .buildEmail();
 
         mailer.sendMail(email);
-        System.out.println("[EMAIL]Email send with attachment.");
+        GrabberUtils.info("Email send with attachment.");
     }
 }

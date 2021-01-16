@@ -32,9 +32,7 @@ public class Driver {
      * Selenium driver creation for selected browser.
      */
     private void driverSetup(String window, String browser) {
-        if(init.gui != null && !window.equals("checker")) {
-            init.gui.appendText(window, "[HEADLESS]Starting browser...");
-        }
+        GrabberUtils.info(window, "Starting browser...");
         switch (browser) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
@@ -49,7 +47,6 @@ public class Driver {
                 String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36 OPR/60.0.3255.170";
                 firefoxOptions.addPreference("general.useragent.override", userAgent);
                 firefoxOptions.addPreference("permissions.default.image", 2);
-
                 driver = new FirefoxDriver();
                 break;
             case "Opera":

@@ -1,6 +1,7 @@
 package grabber.sources;
 
 import grabber.Chapter;
+import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
 import org.json.simple.JSONArray;
@@ -12,12 +13,9 @@ import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import system.init;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,55 +35,28 @@ public class jpmtl_com implements Source {
 
             bookID = novel.novelLink.substring(novel.novelLink.lastIndexOf("/") + 1);
             try {
-                String jsonString = Jsoup.connect("https://jpmtl.com/v2/chapter/"+bookID+"/list?state=published&structured=true&direction=false")
+                String jsonString = Jsoup.connect("https://jpmtl.com/v2/chapter/" + bookID + "/list?state=published&structured=true&direction=false")
                         .ignoreContentType(true)
                         .method(Connection.Method.GET)
                         .execute().body();
                 Object jsonObject = new JSONParser().parse(jsonString);
                 JSONArray volArray = (JSONArray) jsonObject;
-                for(Object volume : volArray) {
+                for (Object volume : volArray) {
                     JSONArray chapters = (JSONArray) ((JSONObject) volume).get("chapters");
-                    for(Object chapter : chapters) {
+                    for (Object chapter : chapters) {
                         long chapterID = (long) ((JSONObject) chapter).get("id");
                         String chapterTitle = (String) ((JSONObject) chapter).get("title");
-                        chapterList.add(new Chapter(chapterTitle, "https://jpmtl.com/books/"+bookID+"/"+chapterID));
+                        chapterList.add(new Chapter(chapterTitle, "https://jpmtl.com/books/" + bookID + "/" + chapterID));
                     }
                 }
 
             } catch (IOException | ParseException e) {
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterList;
     }
@@ -96,36 +67,9 @@ public class jpmtl_com implements Source {
             Document doc = Jsoup.connect(chapter.chapterURL).get();
             chapterBody = doc.select(".chapter-content__content").first();
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterBody;
     }
@@ -133,26 +77,26 @@ public class jpmtl_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(toc != null) {
+        if (toc != null) {
             metadata.setTitle(toc.selectFirst(".book-sidebar__title").text());
             metadata.setDescription(toc.selectFirst("meta[property=og:description]").attr("content"));
             metadata.setBufferedCover(toc.select("meta[property=og:image]").attr("content"));
 
             try {
                 List<String> subjects = new ArrayList<>();
-                String jsonString = Jsoup.connect("https://jpmtl.com/v2/book/"+bookID+"/category")
+                String jsonString = Jsoup.connect("https://jpmtl.com/v2/book/" + bookID + "/category")
                         .ignoreContentType(true)
                         .method(Connection.Method.GET)
                         .execute().body();
                 Object obj = new JSONParser().parse(jsonString);
                 JSONObject jsonObject = (JSONObject) obj;
                 JSONArray genres = (JSONArray) jsonObject.get("genres");
-                for(Object tag : genres) {
+                for (Object tag : genres) {
                     subjects.add((String) ((JSONObject) tag).get("name"));
                 }
                 metadata.setSubjects(subjects);
             } catch (IOException | ParseException e) {
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
         }
 

@@ -1,6 +1,14 @@
 package grabber.sources;
 
-import grabber.*;
+import grabber.Chapter;
+import grabber.GrabberUtils;
+import grabber.Novel;
+import grabber.NovelMetadata;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import system.init;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -8,12 +16,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import system.init;
 
 public class dreame_com implements Source {
     private final Novel novel;
@@ -33,10 +35,7 @@ public class dreame_com implements Source {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[GRABBER-ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
-            }
+GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
         }
         return chapterList;
     }
@@ -50,10 +49,7 @@ public class dreame_com implements Source {
             doc = Jsoup.parse(decodedChapter);
             chapterBody = doc;
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[GRABBER-ERROR]Could not connect to webpage. (" + e.getMessage() + ")");
-            }
+GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
         }
         return chapterBody;
     }
@@ -61,17 +57,17 @@ public class dreame_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(toc != null) {
+        if (toc != null) {
             metadata.setTitle(toc.select(".details .name").first().text());
             metadata.setAuthor(toc.select(".details .author").first().text());
             metadata.setDescription(toc.select(".brief").first().text());
             String coverURL = toc.select(".js-cover.img").attr("abs:data-cover");
-            if(coverURL.contains("@")) coverURL = coverURL.substring(0,coverURL.indexOf("@"));
+            if (coverURL.contains("@")) coverURL = coverURL.substring(0, coverURL.indexOf("@"));
             metadata.setBufferedCover(coverURL);
 
             Elements tags = toc.select(".novel-tags span");
             List<String> subjects = new ArrayList<>();
-            for(Element tag: tags) {
+            for (Element tag : tags) {
                 subjects.add(tag.text());
             }
             metadata.setSubjects(subjects);

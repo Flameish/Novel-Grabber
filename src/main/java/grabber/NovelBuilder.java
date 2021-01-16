@@ -174,13 +174,9 @@ public class NovelBuilder {
                 novel.source = (Source) classLoader.loadClass("grabber.sources."+domain).getConstructor(Novel.class).newInstance(novel);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("[ERROR]Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
-            if(init.gui != null) {
-                init.gui.appendText(novel.window,"[ERROR]Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
-            }
+            GrabberUtils.err(novel.window, "Host not supported: " + GrabberUtils.getDomainName(novel.novelLink), e);
             if(init.telegramBot != null) {
-                init.telegramBot.sendMsg(novel.telegramChatId,"[ERROR] Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
+                init.telegramBot.sendMsg(novel.telegramChatId,"Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
             }
             novel.source = null;
         }

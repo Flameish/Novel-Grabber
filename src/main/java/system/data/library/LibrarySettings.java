@@ -1,4 +1,5 @@
 package system.data.library;
+import grabber.GrabberUtils;
 import grabber.Novel;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,12 +24,12 @@ public class LibrarySettings {
         if(librarySettings == null) {
             librarySettings = new LibrarySettings();
             try {
-                libraryFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/../library.json";
-                libraryFolder = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/../Novels";
+                libraryFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/library.json";
+                libraryFolder = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/Novels";
             } catch (URISyntaxException e) {
                 libraryFile = "library.json";
                 libraryFolder = "Novels";
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
             librarySettings.load();
         }
@@ -47,9 +48,9 @@ public class LibrarySettings {
                 starredNovels.add(new LibraryNovel((JSONObject) loadedNovel));
             }
         } catch (IOException e) {
-            System.out.println("[LIBRARY]No file found.");
+            GrabberUtils.err("No library file found.", e);
         } catch (ParseException e) {
-            System.out.println("[LIBRARY]Could not parse file.");
+            GrabberUtils.err("Could not parse library file.", e);
         }
     }
 
@@ -68,7 +69,7 @@ public class LibrarySettings {
 
             writer.write(libraryObj.toJSONString());
         } catch(IOException e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
     }
 

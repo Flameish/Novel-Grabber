@@ -1,5 +1,6 @@
 package grabber;
 
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -29,7 +30,7 @@ public class GrabberUtils {
             String urlPath = url.getPath();
             return urlPath.substring(urlPath.lastIndexOf('/') + 1);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+           err(e.getMessage(), e);
         }
         return null;
     }
@@ -44,11 +45,9 @@ public class GrabberUtils {
                     "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0");
             image = ImageIO.read(connection.getInputStream());
         } catch (MalformedURLException e) {
-            e.printStackTrace();
-            System.err.println("[ERROR] Image URL malformed: " + e.getMessage());
+            err("Image URL malformed: " + e.getMessage(), e);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("[ERROR] Could not read image: " + e.getMessage());
+            err("Could not read image: " + e.getMessage(), e);
         }
 
         return image;
@@ -58,7 +57,7 @@ public class GrabberUtils {
      * Tries to find the container which contains chapter links.
      */
     public static List<Chapter> getMostLikelyChapters(Document doc) {
-        System.out.println("[GRABBER]Trying to detect chapters.");
+        info("Trying to detect chapters.");
         Element mostLikely = doc.select("body").first().child(0);
 
         // Set the container with the most direct children as most likely candidate;
@@ -118,14 +117,47 @@ public class GrabberUtils {
         try {
             URI uri = new URI(url);
             String domain = uri.getHost();
-            return domain.startsWith("www.") ? domain.substring(4) : domain;
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.showPopup("Malformed URL: " +e.getReason(), "error");
+            if(domain != null) {
+                return domain.startsWith("www.") ? domain.substring(4) : domain;
             }
+        } catch (URISyntaxException e) {
+            err("Malformed URL: " +e.getReason(), e);
         }
         return null;
+    }
+
+    public static void info(String msg) {
+        System.out.println("[INFO]" + msg);
+    }
+
+    public static void info(String window, String msg) {
+        System.out.println("[INFO]" + msg);
+        if(init.gui != null && window != null) {
+            init.gui.appendText(window,"[INFO]" + msg);
+        }
+    }
+
+    public static void err(String msg) {
+        System.err.println("[ERROR]" + msg);
+    }
+    public static void err(String window, String msg) {
+        System.err.println("[ERROR]" + msg);
+        if(init.gui != null && window != null) {
+            init.gui.appendText(window,"[ERROR]" + msg);
+        }
+    }
+
+    public static void err(String msg, Exception e) {
+        System.err.println("[ERROR]" + msg);
+        e.printStackTrace();
+    }
+
+    public static void err(String window, String msg, Exception e) {
+        System.err.println("[ERROR]" + msg);
+        e.printStackTrace();
+        if(init.gui != null && window != null) {
+            init.gui.appendText(window,"[ERROR]" + msg);
+        }
     }
 
     public static void openWebpage(URI uri) {
@@ -134,8 +166,33 @@ public class GrabberUtils {
             try {
                 desktop.browse(uri);
             } catch (Exception e) {
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
         }
     }
+    public static String getHTMLErrMsg(HttpStatusException httpEr) {
+        String errorMsg = "";
+        int errorCode = httpEr.getStatusCode();
+        switch (errorCode) {
+            case 403:
+                errorMsg = "Forbidden! (403)";
+                break;
+            case 404:
+                errorMsg = "Page not found! (404)";
+                break;
+            case 500:
+                errorMsg = "Server error! (500)";
+                break;
+            case 503:
+                errorMsg = "Service Unavailable! (503)";
+                break;
+            case 504:
+                errorMsg = "Gateway Timeout! (504)";
+                break;
+            default:
+                errorMsg = "Could not connect to webpage!";
+        }
+        return errorMsg;
+    }
+
 }

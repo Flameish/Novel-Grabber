@@ -9,8 +9,12 @@ import java.util.Map;
 
 public interface Source {
     List<Chapter> getChapterList();
+
     Element getChapterContent(Chapter chapter);
+
     NovelMetadata getMetadata();
+
     List<String> getBlacklistedTags();
+
     Map<String, String> getLoginCookies() throws UnsupportedOperationException;
 }

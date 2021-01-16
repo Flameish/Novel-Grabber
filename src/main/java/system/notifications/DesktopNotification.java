@@ -38,7 +38,7 @@ public class DesktopNotification {
                     .show();
 
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            GrabberUtils.err(e.getMessage(), e);
         }
     }
 }

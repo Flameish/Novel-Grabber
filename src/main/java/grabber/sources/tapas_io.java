@@ -1,12 +1,9 @@
 package grabber.sources;
 
-import grabber.*;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import grabber.Chapter;
+import grabber.GrabberUtils;
+import grabber.Novel;
+import grabber.NovelMetadata;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.jsoup.Connection;
@@ -15,7 +12,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import system.init;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class tapas_io implements Source {
     private final Novel novel;
@@ -30,9 +31,9 @@ public class tapas_io implements Source {
         try {
             toc = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
             String seriesId = toc.select("meta[property=al:android:url]").attr("content");
-            seriesId = seriesId.substring(seriesId.indexOf("eries/")+6,seriesId.indexOf("/info"));
+            seriesId = seriesId.substring(seriesId.indexOf("eries/") + 6, seriesId.indexOf("/info"));
             try {
-                String json = Jsoup.connect("https://tapas.io/series/"+seriesId+"/episodes?page=1&sort=OLDEST&max_limit=9999")
+                String json = Jsoup.connect("https://tapas.io/series/" + seriesId + "/episodes?page=1&sort=OLDEST&max_limit=9999")
                         .ignoreContentType(true)
                         .method(Connection.Method.GET)
                         .execute().body();
@@ -40,45 +41,18 @@ public class tapas_io implements Source {
                 JSONObject data = (JSONObject) jsonObject.get("data");
                 String body = (String) data.get("body");
                 for (Element chapterLink : Jsoup.parse(body).select("li")) {
-                    if(chapterLink.select(".ico--lock").isEmpty()) {
-                        chapterList.add(new Chapter(chapterLink.select("a.info__title").text(), "https://tapas.io"+chapterLink.attr("data-href")));
+                    if (chapterLink.select(".ico--lock").isEmpty()) {
+                        chapterList.add(new Chapter(chapterLink.select("a.info__title").text(), "https://tapas.io" + chapterLink.attr("data-href")));
                     }
 
                 }
             } catch (IOException | org.json.simple.parser.ParseException e) {
-                e.printStackTrace();
+                GrabberUtils.err(e.getMessage(), e);
             }
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterList;
     }
@@ -89,36 +63,9 @@ public class tapas_io implements Source {
             Document doc = Jsoup.connect(chapter.chapterURL).get();
             chapterBody = doc.select("article").first();
         } catch (HttpStatusException httpEr) {
-            String errorMsg;
-            int errorCode = httpEr.getStatusCode();
-            switch(errorCode) {
-                case 403:
-                    errorMsg = "[ERROR] Forbidden! (403)";
-                    break;
-                case 404:
-                    errorMsg = "[ERROR] Page not found! (404)";
-                    break;
-                case 500:
-                    errorMsg = "[ERROR] Server error! (500)";
-                    break;
-                case 503:
-                    errorMsg = "[ERROR] Service Unavailable! (503)";
-                    break;
-                case 504:
-                    errorMsg = "[ERROR] Gateway Timeout! (504)";
-                    break;
-                default:
-                    errorMsg = "[ERROR] Could not connect to webpage!";
-            }
-            System.err.println(errorMsg);
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, errorMsg);
-            }
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            e.printStackTrace();
-            if (init.gui != null) {
-                init.gui.appendText(novel.window, "[ERROR] Could not connect to webpage!");
-            }
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
         return chapterBody;
     }
@@ -126,7 +73,7 @@ public class tapas_io implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if(toc != null) {
+        if (toc != null) {
             metadata.setTitle(toc.select("a.title").first().text());
             metadata.setAuthor(toc.select(".creator").first().text());
             metadata.setDescription(toc.select(".description").first().text());
@@ -134,7 +81,7 @@ public class tapas_io implements Source {
 
             Elements tags = toc.select(".info-detail__row a");
             List<String> subjects = new ArrayList<>();
-            for(Element tag: tags) {
+            for (Element tag : tags) {
                 subjects.add(tag.text());
             }
             metadata.setSubjects(subjects);

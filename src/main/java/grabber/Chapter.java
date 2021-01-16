@@ -38,11 +38,7 @@ public class Chapter implements Serializable {
     public void saveChapter(Novel novel) {
         chapterContainer = novel.source.getChapterContent(this);
         if (chapterContainer == null) {
-            System.err.println("[ERROR]Chapter container not found.");
-            if(init.gui != null) {
-                init.gui.appendText(novel.window,
-                        "[ERROR]Chapter container not found.");
-            }
+            GrabberUtils.err(novel.window, "Chapter container not found.");
             status = 2; // Chapter was NOT downloaded
             return;
         }
@@ -57,9 +53,8 @@ public class Chapter implements Serializable {
         }
 
         novel.wordCount = novel.wordCount + GrabberUtils.getWordCount(chapterContainer.toString());
-        System.out.println("[GRABBER]Saved chapter: "+ name);
+        GrabberUtils.info(novel.window,  "Saved chapter: "+ name);
         if(init.gui != null) {
-            init.gui.appendText(novel.window, "[GRABBER]Saved chapter: "+ name);
             init.gui.updatePageCount(novel.window, novel.wordCount);
         }
 
@@ -103,16 +98,10 @@ public class Chapter implements Serializable {
 
                 images.put(imageFilename, bufferedImage);
 
-                System.out.println("[CHAPTER] Saved image: " + imageFilename);
-                if(init.gui != null) {
-                    init.gui.appendText(window, "[CHAPTER] Saved image: " + imageFilename);
-                }
+                GrabberUtils.info(window,"Saved image: " + imageFilename);
             } else {
                 image.remove();
-                System.err.println("[ERROR] Could not save image: " + imageFilename);
-                if(init.gui != null) {
-                    init.gui.appendText(window, "[ERROR] Could not save image: " + imageFilename);
-                }
+                GrabberUtils.err(window,"Could not save image: " + imageFilename);
             }
         }
     }

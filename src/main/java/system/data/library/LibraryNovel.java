@@ -1,5 +1,6 @@
 package system.data.library;
 
+import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
 import org.json.simple.JSONObject;
@@ -110,8 +111,7 @@ public class LibraryNovel {
             // cover name + file extension
             ImageIO.write(metadata.getBufferedCover(), metadata.getCoverFormat(), outputfile);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("[ERROR]Could not save cover.");
+            GrabberUtils.err("Could not save cover.", e);
         }
     }
 
