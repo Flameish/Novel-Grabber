@@ -25,17 +25,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Telegram {
+    private static Telegram telegramBot;
+    public TelegramBot novelly;
     private static final String supportedSourcesFile = "supported_Sources.txt";
+    private static final String infoFile = "info.txt";
     private static final String telegramDir = "./telegram";
-    private static final String infoText = "To start downloading a novel just paste it's link.\n\n" +
-            "You can list all supported websites with /sources\n\n" +
-            "If you want to download specific chapters or you want more control over your EPUB, " +
-            "take a look at the possible download arguments with /cli\n" +
-            "To cancel a download use /stop\n" +
-            "To use this bot in a group use /download@NovelGrabbyBot novel_url/cli arguments";
     private static final String cliText = "" +
             "Needs to start with \"-link\". All arguments are case sensitive." +
-            "[-link] | {novel_URL} | URL to the novel's table of contents page.\n" +
+            "[-link] | {novel_URL} | URL to the novel's table of contents page. Every other parameter is optional.\n" +
             "[-wait] | {miliseconds} | Time between each chapter grab.\n" +
             "[-chapters] | {all}, {5 27}, {12 last} | Specify which chapters to download.\n" +
             "[-noDesc] | Don't create a description page.\n" +
@@ -44,8 +41,6 @@ public class Telegram {
             "[-displayTitle] | Write the chapter title at the top of each chapter text.\n" +
             "[-invertOrder] | Invert the chapter order.\n\n" +
             "Example: -link http://novelhost.com/anovel/ -chapters 5 10 -getImages";
-    private static Telegram telegramBot;
-    public TelegramBot novelly;
     private ConcurrentHashMap currentlyDownloading = new ConcurrentHashMap<>();
     private ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
 
@@ -56,7 +51,7 @@ public class Telegram {
         String token = Settings.getInstance().getTelegramApiToken();
         if(!token.isEmpty()) {
             novelly = new TelegramBot(token);
-            GrabberUtils.info("done.");
+            GrabberUtils.info("Telegram bot started.");
         } else {
             GrabberUtils.err("Token empty");
         }
@@ -87,11 +82,13 @@ public class Telegram {
         long chatId = message.chat().id();
         String messageTxt = message.text();
 
+        GrabberUtils.info(messageTxt);
+
         if(messageTxt.startsWith("/info") || messageTxt.startsWith("/start")) {
-            novelly.execute(new SendMessage(chatId, infoText));
+            novelly.execute(new SendMessage(chatId, getStringFromFile(infoFile)));
         }
         else if(messageTxt.startsWith("/sources")) {
-            novelly.execute(new SendMessage(chatId, getSourcesString())
+            novelly.execute(new SendMessage(chatId, getStringFromFile(supportedSourcesFile))
                     .parseMode(ParseMode.Markdown)
                     .disableWebPagePreview(true));
         }
@@ -170,8 +167,10 @@ public class Telegram {
             File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
             if(epub.exists()) {
                 novelly.execute(new SendDocument(chatId, epub));
+                GrabberUtils.info("EPUB sent: " + novel.epubFilename);
             } else {
                 novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
+                GrabberUtils.err("EPUB not downloaded: " + messageTxt);
             }
         }
     }
@@ -221,8 +220,10 @@ public class Telegram {
             File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
             if(epub.exists()) {
                 novelly.execute(new SendDocument(chatId, epub));
+                GrabberUtils.info("EPUB sent: " + novel.epubFilename);
             } else {
                 novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
+                GrabberUtils.err("EPUB not downloaded: " + messageTxt);
             }
         }
     }
@@ -245,15 +246,15 @@ public class Telegram {
         }
     }
 
-    private static String getSourcesString() {
+    private static String getStringFromFile(String fileName) {
         StringBuilder resultStringBuilder = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(supportedSourcesFile))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(telegramDir+"/"+fileName))) {
             String line;
             while ((line = br.readLine()) != null) {
                 resultStringBuilder.append(line).append("\n");
             }
         } catch (IOException e) {
-            GrabberUtils.err("No sources file found.", e);
+            GrabberUtils.err("File found: "+ telegramDir+"/"+fileName);
         }
         return resultStringBuilder.toString();
     }
