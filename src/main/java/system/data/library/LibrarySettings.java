@@ -48,7 +48,7 @@ public class LibrarySettings {
                 starredNovels.add(new LibraryNovel((JSONObject) loadedNovel));
             }
         } catch (IOException e) {
-            GrabberUtils.err("No library file found.", e);
+            GrabberUtils.err("No library file found.");
         } catch (ParseException e) {
             GrabberUtils.err("Could not parse library file.", e);
         }

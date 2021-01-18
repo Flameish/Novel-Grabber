@@ -27,7 +27,7 @@ public class LibrarySystem {
         try {
             emailNotification = new EmailNotification();
         } catch (Exception e) {
-            GrabberUtils.err("Could not establish connection to SMTP Server. Check email settings.", e);
+            GrabberUtils.err("Could not establish connection to SMTP Server. Check email settings.");
         }
         if(Settings.getInstance().isPollingEnabled()) {
             scheduler.scheduleWithFixedDelay(this::run, 0, Settings.getInstance().getFrequency(), TimeUnit.MINUTES);
