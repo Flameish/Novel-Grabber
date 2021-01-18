@@ -23,9 +23,9 @@ public class Accounts {
         if(accounts == null) {
             accounts = new Accounts();
             try {
-                accountsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/accounts.ini";
+                accountsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/accounts.json";
             } catch (URISyntaxException e) {
-                accountsFile = "accounts.ini";
+                accountsFile = "accounts.json";
                 GrabberUtils.err(e.getMessage(), e);
             }
             accounts.load();
@@ -43,7 +43,7 @@ public class Accounts {
                 accountList.add(new Account((JSONObject) loadedAccount));
             }
         } catch (IOException e) {
-            GrabberUtils.err("No accounts file found.", e);
+            GrabberUtils.err("No accounts file found.");
         } catch (ParseException e) {
             GrabberUtils.err("Could not parse accounts file.", e);
         }
