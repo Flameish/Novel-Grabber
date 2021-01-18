@@ -63,6 +63,16 @@ Usage:
 [-invertOrder] | | Invert the chapter order.
 -help | | Shows the help page.
 
+<br>
+<strong>Telegram bot:</strong>
+
+To host your own Telegram bot you need to add the line `telegramApiToken=your_token ` to `settings.ini`
+
+By default the bot will read the output for `/info` and `/sources` from files inside the telegram folder. 
+The files need to be named `info.txt` and `supported_Sources.txt` respectively.
+
+To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-Grabber.jar -telegramBot`
+
 ## Screenshots
 
 ![Automatic Tab](https://i.imgur.com/xBUdkmL.png)
@@ -92,6 +102,7 @@ Usage:
 - [FicFun](https://ficfun.com)
 - [Foxaholic](https://foxaholic.com)
 - [Foxteller](https://foxteller.com)
+- [fujossy](https://fujossy.jp/)
 - [Honeyfeed](https://honeyfeed.fm)
 - [Inkitt](https://inkitt.com)
 - [ISO Translations](https://isotls.com)
@@ -117,18 +128,21 @@ Usage:
 - [Snowy Codex](https://snowycodex.com/)
 - [Tapas](https://tapas.io)
 - [TapRead](https://tapread.com)
+- [Truyen Full](https://truyenfull.vn/)
 - [UntamedAlley](https://untamedalley.com/)
 - [Veratales](https://veratales.com/)
 - [VipNovel](https://vipnovel.com/)
 - [Volare Novels](https://volarenovels.com)
 - [Wattpad](https://wattpad.com)
 - [Webnovel](https://webnovel.com)
+- [WebTruyen](https://webtruyen.com/)
 - [Wordrain](https://wordrain69.com)
 - [WuxiaWorld.co](https://wuxiaworld.co)
 - [Wuxiaworld.com](https://wuxiaworld.com)
 - [WuxiaWorld.online](https://wuxiaworld.online)
 - [WuxiaWorld.site](https://wuxiaworld.site)
 - [xiaoshuo](https://www.zhenhunxiaoshuo.com/)
+
 
 
 
