@@ -85,7 +85,9 @@ public class Telegram {
         GrabberUtils.info(messageTxt);
 
         if(messageTxt.startsWith("/info") || messageTxt.startsWith("/start")) {
-            novelly.execute(new SendMessage(chatId, getStringFromFile(infoFile)));
+            novelly.execute(new SendMessage(chatId, getStringFromFile(infoFile))
+                    .parseMode(ParseMode.Markdown)
+                    .disableWebPagePreview(true));
         }
         else if(messageTxt.startsWith("/sources")) {
             novelly.execute(new SendMessage(chatId, getStringFromFile(supportedSourcesFile))
