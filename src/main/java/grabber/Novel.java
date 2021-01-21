@@ -171,18 +171,35 @@ public class Novel {
         if(reverseOrder) Collections.reverse(chapterList);
 
         // Print failed chapters
+
+        List<Chapter> successfulChapters = new ArrayList();
+        List<Chapter> failedChapters = new ArrayList();
         for(Chapter chapter: chapterList) {
-            if(chapter.status == 2) // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
-                GrabberUtils.info(window,"Failed to download: " +chapter.name);
+            if(chapter.status == 1) { // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
+                successfulChapters.add(chapter);
+            }
+            if(chapter.status == 2) { // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
+                failedChapters.add(chapter);
+            }
         }
 
+        for (Chapter chapter: failedChapters) {
+            GrabberUtils.err("Failed to download: " + chapter.name);
+        }
+
+        if((telegramChatId) != 0 && !failedChapters.isEmpty()) {
+            init.telegramBot.sendMsg(telegramChatId, "Failed to download " + failedChapters.size() + " chapters");
+        }
+
+        // Set driver to null. Closed() driver cant be reopened
         if(headlessDriver != null) {
             headlessDriver.close();
             headlessDriver = null; // close() != null --> checks to start a new browser are against null
         }
-
-        // Output EPUB
-        EPUB epub = new EPUB(this);
-        epub.writeEpub();
+        if(!successfulChapters.isEmpty()) {
+            // Output EPUB
+            EPUB epub = new EPUB(this);
+            epub.writeEpub();
+        }
     }
 }
