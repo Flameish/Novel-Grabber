@@ -62,34 +62,10 @@ public class novelupdates_com implements Source {
             Document doc;
             if (Settings.getInstance().isNuHeadless()) {
                 doc = getPageHeadless(chapter.chapterURL);
-                if (!doc.select(".entry-meta").isEmpty()) {
-                    String fullChapterUrl = doc.selectFirst(".entry-content a").attr("abs:href");
-                    if (!fullChapterUrl.isEmpty()) {
-                        if (init.gui != null) {
-                            init.gui.appendText(novel.window, "[INFO] WordPress \"Pre-Chapter\" detected. " +
-                                    "Trying to navigate to full chapter: " + fullChapterUrl);
-                        }
-                        doc = getPageHeadless(fullChapterUrl);
-                    }
-
-                }
             } else {
                 doc = Jsoup.connect(chapter.chapterURL)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .get();
-                if (!doc.select(".entry-meta").isEmpty()) {
-
-                    String fullChapterUrl = doc.selectFirst(".entry-content a").attr("abs:href");
-                    if (!fullChapterUrl.isEmpty()) {
-                        if (init.gui != null) {
-                            init.gui.appendText(novel.window, "[INFO] WordPress \"Pre-Chapter\" detected. " +
-                                    "Trying to navigate to full chapter: " + fullChapterUrl);
-                        }
-                        doc = Jsoup.connect(fullChapterUrl)
-                                .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
-                                .get();
-                    }
-                }
             }
             String extractedContentHtml = findChapter(doc, chapter.chapterURL);
             chapterBody = Jsoup.parse(extractedContentHtml);
