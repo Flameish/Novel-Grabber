@@ -85,10 +85,6 @@ public class NovelBuilder {
         if(params.containsKey("login")) {
             novel.useAccount = true;
         }
-        if(params.containsKey("account")) {
-            Account newAccount = Accounts.getInstance().getAccount(novel.hostname);
-            Accounts.getInstance().addAccount(newAccount);
-        }
         return this;
     }
 
