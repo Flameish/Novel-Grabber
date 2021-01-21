@@ -167,6 +167,9 @@ public class NovelBuilder {
             }
             if(novel.window.equals("auto") || novel.window.equals("checker")) {
                 String domain = GrabberUtils.getDomainName(novel.novelLink).replaceAll("[^A-Za-z0-9]", "_");
+                // Supported sources have their domain name as their class name and java does not allow class names
+                // to start with digits, which is possible for domain names, we need to add a 'n' for number in front.
+                if(domain.substring(0, 1).matches("\\d")) domain = "n" + domain;
                 novel.source = (Source) classLoader.loadClass("grabber.sources."+domain).getConstructor(Novel.class).newInstance(novel);
             }
         } catch (Exception e) {
