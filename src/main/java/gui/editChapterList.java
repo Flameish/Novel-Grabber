@@ -23,6 +23,7 @@ public class editChapterList extends JDialog {
         ImageIcon favicon = new ImageIcon(getClass().getResource("/images/favicon.png"));
         setIconImage(favicon.getImage());
         setContentPane(contentPane);
+        getRootPane().setDefaultButton(buttonSave);
         setModal(true);
 
         buttonSave.addActionListener(actionEvent -> {
