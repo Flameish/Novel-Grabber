@@ -12,6 +12,8 @@ public class Novel {
     public Document tableOfContent;
     public Map<String, String> cookies;
     public List<Chapter> chapterList;
+    public List<Chapter> successfulChapters;
+    public List<Chapter> failedChapters;
     public NovelMetadata metadata;
     public List<String> blacklistedTags;
     public HashMap<String, BufferedImage> images = new HashMap<>();
@@ -157,6 +159,43 @@ public class Novel {
         }
     }
 
+    public void retry() throws Exception {
+        GrabberUtils.info(window,"Retrying failed chapters...");
+
+        if(init.gui != null) {
+            init.gui.setMaxProgress(window, failedChapters.size());
+        }
+
+        for (int i = 0; i < failedChapters.size(); i++) {
+            Chapter chapter = failedChapters.get(i);
+            chapter.saveChapter(this);
+            if(chapter.status == 1) {
+                successfulChapters.add(chapter);
+            }
+            if(init.gui != null) {
+                init.gui.updateProgress(window);
+            }
+            if((telegramChatId) != 0 && (i % 10 == 0 || i == failedChapters.size()-1)) {
+                init.telegramBot.updateProgress(telegramChatId, i, failedChapters.size());
+            }
+            if(killTask) {
+                throw new Exception("Download stopped.");
+            }
+            GrabberUtils.sleep(waitTime);
+        }
+        failedChapters.removeIf(chapter -> chapter.status != 2);
+        // Show failed chapter window again if using gui
+        if(init.gui != null && !failedChapters.isEmpty()) {
+            init.gui.showFailedChapters(this);
+        } else {
+            // Output EPUB if at least one chapter was downloaded
+            if(!successfulChapters.isEmpty()) {
+                EPUB epub = new EPUB(this);
+                epub.writeEpub();
+            }
+        }
+    }
+
     /**
      * Prints potential failed chapters.
      * Reverses the chapter order for next grabbing. (If grabbing was stopped with this option selected)
@@ -171,20 +210,19 @@ public class Novel {
         if(reverseOrder) Collections.reverse(chapterList);
 
         // Print failed chapters
-
-        List<Chapter> successfulChapters = new ArrayList();
-        List<Chapter> failedChapters = new ArrayList();
+        successfulChapters = new ArrayList<>();
+        failedChapters = new ArrayList<>();
         for(Chapter chapter: chapterList) {
             if(chapter.status == 1) { // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
                 successfulChapters.add(chapter);
             }
-            if(chapter.status == 2) { // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
+            if(chapter.status == 2) {
                 failedChapters.add(chapter);
             }
         }
 
         for (Chapter chapter: failedChapters) {
-            GrabberUtils.err("Failed to download: " + chapter.name);
+            GrabberUtils.err(window, "Failed to download: " + chapter.name);
         }
 
         if((telegramChatId) != 0 && !failedChapters.isEmpty()) {
@@ -196,10 +234,15 @@ public class Novel {
             headlessDriver.close();
             headlessDriver = null; // close() != null --> checks to start a new browser are against null
         }
-        if(!successfulChapters.isEmpty()) {
-            // Output EPUB
-            EPUB epub = new EPUB(this);
-            epub.writeEpub();
+        // Show failed chapter window if using gui
+        if(init.gui != null && !failedChapters.isEmpty()) {
+            init.gui.showFailedChapters(this);
+        } else {
+            // Output EPUB if at least one chapter was downloaded
+            if(!successfulChapters.isEmpty()) {
+                EPUB epub = new EPUB(this);
+                epub.writeEpub();
+            }
         }
     }
 }
