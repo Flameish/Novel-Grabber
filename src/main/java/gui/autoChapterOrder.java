@@ -5,6 +5,7 @@ import grabber.Novel;
 import system.init;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,6 +103,18 @@ public class autoChapterOrder extends JDialog {
         GUIChapterList.setDropMode(DropMode.INSERT);
         GUIChapterList.setDragEnabled(true);
         GUIChapterList.setTransferHandler(new ListItemTransferHandler());
+        MouseListener mouseListener = new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    Chapter selectedChapter = GUIChapterList.getSelectedValue();
+                    chapterListScrollPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    selectedChapter.saveChapter(novel);
+                    chapterListScrollPane.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    chapterPreview.main(selectedChapter);
+                }
+            }
+        };
+        GUIChapterList.addMouseListener(mouseListener);
         chapterListScrollPane = new JScrollPane(GUIChapterList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     }
 }

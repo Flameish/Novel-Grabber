@@ -175,7 +175,6 @@ public class GUI extends JFrame {
     private JButton settingsSaveBtn;
     private JCheckBox manDetectChapterContainerCheckBox;
     private JButton manDetectChaptersBtn;
-    private JButton manChapterPreviewBtn;
     private JTextField firstChapterField;
     private JTextField lastChapterField;
     private JTextField nextChapterButtonField;
@@ -279,12 +278,7 @@ public class GUI extends JFrame {
                 showPopup("Wait time must contain numbers.", "warning");
                 return;
             }
-            pagesLbl.setVisible(true);
-            pagesCountLbl.setVisible(true);
-            grabChaptersButton.setEnabled(false);
-            grabChaptersButton.setVisible(false);
-            stopButton.setEnabled(true);
-            stopButton.setVisible(true);
+            autoDownloadInProgress(true);
             try {
                 autoNovel = Novel.modifier(autoNovel)
                         .saveLocation(autoSaveLocation.getText())
@@ -320,12 +314,7 @@ public class GUI extends JFrame {
                 GrabberUtils.err("auto",e.getMessage(), e);
                 autoNovel.killTask = false;
             }
-            progressBar.setStringPainted(false);
-            progressBar.setValue(0);
-            grabChaptersButton.setEnabled(true);
-            grabChaptersButton.setVisible(true);
-            stopButton.setEnabled(false);
-            stopButton.setVisible(false);
+            autoDownloadInProgress(false);
 
         }));
         browseButton.addActionListener(arg0 -> {
@@ -413,7 +402,6 @@ public class GUI extends JFrame {
                 } finally {
                     if (!manLinkListModel.isEmpty()) {
                         manRemoveLinksBtn.setEnabled(true);
-                        manChapterPreviewBtn.setEnabled(true);
                         manDetectChaptersBtn.setEnabled(true);
                         manReverseBtn.setEnabled(true);
                         manChapterAmountLbl.setVisible(true);
@@ -442,14 +430,7 @@ public class GUI extends JFrame {
                 } else if ((!manSaveLocation.getText().isEmpty())
                         && (!manChapterContainer.getText().isEmpty() || manDetectChapterContainerCheckBox.isSelected())
                         && (!manWaitTime.getText().isEmpty())) {
-                    manPageCounter.setText("");
-                    manPageCounter.setVisible(true);
-                    manPageLbl.setVisible(true);
-                    manGrabChaptersButton.setEnabled(false);
-                    manGrabChaptersButton.setVisible(false);
-                    manStopButton.setEnabled(true);
-                    manStopButton.setVisible(true);
-                    manProgressBar.setStringPainted(true);
+                    manDownloadInProgress(true);
                     try {
                         manNovel = Novel.modifier(manNovel)
                                 .window("manual")
@@ -468,12 +449,7 @@ public class GUI extends JFrame {
                         GrabberUtils.err("manual", err.getMessage(), err);
                         manNovel.killTask = false;
                     } finally {
-                        manProgressBar.setStringPainted(false);
-                        manProgressBar.setValue(0);
-                        manGrabChaptersButton.setEnabled(true);
-                        manGrabChaptersButton.setVisible(true);
-                        manStopButton.setEnabled(false);
-                        manStopButton.setVisible(false);
+                        manDownloadInProgress(false);
                     }
                 }
                 // Download chapters from link list
@@ -499,14 +475,7 @@ public class GUI extends JFrame {
                         && (!manChapterContainer.getText().isEmpty() || manDetectChapterContainerCheckBox.isSelected())
                         && (!manWaitTime.getText().isEmpty())
                 ) {
-                    manPageCounter.setText("");
-                    manPageCounter.setVisible(true);
-                    manPageLbl.setVisible(true);
-                    manGrabChaptersButton.setEnabled(false);
-                    manGrabChaptersButton.setVisible(false);
-                    manStopButton.setEnabled(true);
-                    manStopButton.setVisible(true);
-                    manProgressBar.setStringPainted(true);
+                    manDownloadInProgress(true);
                     try {
                         manNovel.chapterList = new ArrayList<>();
                         for (int i = 0; i < manLinkListModel.size(); i++) {
@@ -530,12 +499,7 @@ public class GUI extends JFrame {
                         GrabberUtils.err("manual", err.getMessage(), err);
                         manNovel.killTask = false;
                     } finally {
-                        manProgressBar.setStringPainted(false);
-                        manProgressBar.setValue(0);
-                        manGrabChaptersButton.setEnabled(true);
-                        manGrabChaptersButton.setVisible(true);
-                        manStopButton.setEnabled(false);
-                        manStopButton.setVisible(false);
+                        manDownloadInProgress(false);
                     }
                 }
             }
@@ -569,7 +533,6 @@ public class GUI extends JFrame {
                 }
                 if (manLinkListModel.isEmpty()) {
                     manRemoveLinksBtn.setEnabled(false);
-                    manChapterPreviewBtn.setEnabled(false);
                     manDetectChaptersBtn.setEnabled(false);
                     manReverseBtn.setEnabled(false);
                     manChapterAmountLbl.setVisible(false);
@@ -617,7 +580,6 @@ public class GUI extends JFrame {
             editChapterList.main("manual");
             if (!manLinkListModel.isEmpty()) {
                 manRemoveLinksBtn.setEnabled(true);
-                manChapterPreviewBtn.setEnabled(true);
                 manDetectChaptersBtn.setEnabled(true);
                 manReverseBtn.setEnabled(true);
                 manChapterAmountLbl.setVisible(true);
@@ -631,14 +593,6 @@ public class GUI extends JFrame {
             for(Chapter chapter: manNovel.chapterList) manLinkListModel.addElement(chapter);
             manChapterAmountLbl.setVisible(true);
             manChapterAmountLbl.setText("Chapters: "+manLinkListModel.size());
-        });
-
-        manChapterPreviewBtn.addActionListener(actionEvent -> {
-            if(manLinkList.getSelectedIndex() >= 0) {
-                Chapter chapter = manLinkListModel.getElementAt(manLinkList.getSelectedIndex());
-                chapter.saveChapter(manNovel);
-                chapterPreview.main(chapter.chapterContent);
-            }
         });
 
 
@@ -1060,6 +1014,10 @@ public class GUI extends JFrame {
 
 
  */
+
+    public void showFailedChapters(Novel novel) {
+        failedChaptersWindow.main(novel);
+    }
     public void appendText(String logWindow, String logMsg) {
         switch (logWindow) {
             case "auto":
@@ -1091,6 +1049,45 @@ public class GUI extends JFrame {
                 break;
         }
     }
+
+    public void manDownloadInProgress(boolean running) {
+        if(running) {
+            manProgressBar.setValue(0);
+            manProgressBar.setStringPainted(true);
+            manPageCounter.setText("");
+            manPageCounter.setVisible(true);
+            manPageLbl.setVisible(true);
+            manGrabChaptersButton.setEnabled(false);
+            manGrabChaptersButton.setVisible(false);
+            manStopButton.setEnabled(true);
+            manStopButton.setVisible(true);
+        } else {
+            manGrabChaptersButton.setEnabled(true);
+            manGrabChaptersButton.setVisible(true);
+            manStopButton.setEnabled(false);
+            manStopButton.setVisible(false);
+            manProgressBar.setValue(0);
+            manProgressBar.setStringPainted(false);
+        }
+    }
+    public void autoDownloadInProgress(boolean running) {
+        if(running) {
+            progressBar.setValue(0);
+            progressBar.setStringPainted(true);
+            grabChaptersButton.setEnabled(false);
+            grabChaptersButton.setVisible(false);
+            stopButton.setEnabled(true);
+            stopButton.setVisible(true);
+        } else {
+            grabChaptersButton.setEnabled(true);
+            grabChaptersButton.setVisible(true);
+            stopButton.setEnabled(false);
+            stopButton.setVisible(false);
+            progressBar.setValue(0);
+            progressBar.setStringPainted(false);
+        }
+    }
+
 
     public void updateMetadataDisplay() {
         autoBusyLabel.setVisible(false);
@@ -1316,16 +1313,23 @@ public class GUI extends JFrame {
         manDetectChaptersBtn.setContentAreaFilled(false);
         manDetectChaptersBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        manChapterPreviewBtn = new JButton(new ImageIcon(getClass().getResource("/images/preview_icon.png")));
-        manChapterPreviewBtn.setBorder(BorderFactory.createEmptyBorder());
-        manChapterPreviewBtn.setContentAreaFilled(false);
-        manChapterPreviewBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
         manLinkList = new JList<>(manLinkListModel);
         manLinkList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         manLinkList.setDropMode(DropMode.INSERT);
         manLinkList.setDragEnabled(true);
         manLinkList.setTransferHandler(new ListItemTransferHandler());
+        MouseListener mouseListener = new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    Chapter selectedChapter = manLinkList.getSelectedValue();
+                    manLinkScrollPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    selectedChapter.saveChapter(manNovel);
+                    manLinkScrollPane.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    chapterPreview.main(selectedChapter);
+                }
+            }
+        };
+        manLinkList.addMouseListener(mouseListener);
         manLinkScrollPane = new JScrollPane(manLinkList, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
         manLogArea = new JTextArea();
