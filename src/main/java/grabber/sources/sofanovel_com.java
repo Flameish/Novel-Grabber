@@ -11,13 +11,14 @@ import org.json.simple.parser.ParseException;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.jsoup.parser.Parser;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,6 @@ public class sofanovel_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         String title = novel.novelLink.substring(novel.novelLink.indexOf("/book/")+6);
-        System.out.println(title);
         try {
             // Book details
             String response = Jsoup.connect("https://srv.sofanovel.com/bookinfo/book?nType=3&nNeedThrdTypeData=0&szNameKey="+title)
@@ -57,16 +57,17 @@ public class sofanovel_com implements Source {
                     .method(Connection.Method.GET)
                     .execute()
                     .body();
-            System.out.println(response);
             jsonObject = (JSONObject) new JSONParser().parse(response);
             JSONObject chapterAnyData = (JSONObject) jsonObject.get("anyData");
             JSONArray chapterArr = (JSONArray) chapterAnyData.get("aryChapter");
             for (Object chapterObj : chapterArr) {
                 JSONObject chapter = (JSONObject) chapterObj;
-                String chapterName = String.valueOf(chapter.get("szChapterName"));
-                String chapterId = String.valueOf(chapter.get("szTrdChpId2"));
-                String chapterLink = "https://sofa-novel-private.sofanovel.com/book%2F1%2F"+trdBookId+"%2F0%2F"+chapterId+"%2F54.txt";
-                chapterList.add(new Chapter(chapterName, chapterLink));
+                if(String.valueOf(chapter.get("nLock")).equals("0")) {
+                    String chapterName = String.valueOf(chapter.get("szChapterName"));
+                    String chapterId = String.valueOf(chapter.get("szChapterID"));
+                    String chapterLink = "https://srv.sofanovel.com/chapter/getAry?bookID="+bookId+"&chapterID="+chapterId;
+                    chapterList.add(new Chapter(chapterName, chapterLink));
+                }
             }
 
         } catch (IOException | ParseException e) {
@@ -78,14 +79,37 @@ public class sofanovel_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL)
-                    .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
-                    .get();
-            chapterBody = doc.selectFirst("");
+            // Book details
+            String response = Jsoup.connect(chapter.chapterURL+"&report=[{%22szCDNName%22:%22aliCDN%22,%22nErrCount%22:0,%22nTime%22:1873,%22nCount%22:10}]")
+                    .ignoreContentType(true)
+                    .header("Accept", "application/json")
+                    .header("Content-Type", "application/json")
+                    .method(Connection.Method.GET)
+                    .execute()
+                    .body();
+            JSONObject jsonObject = (JSONObject) new JSONParser().parse(response);
+            JSONObject chapterAnyData = (JSONObject) jsonObject.get("anyData");
+            JSONArray chapterArr = (JSONArray) chapterAnyData.get("aryContentURL");
+            JSONObject report = (JSONObject) chapterArr.get(0);
+            String txtLink = String.valueOf(report.get("szContentURL"));
+            StringBuilder chapterContent = new StringBuilder();
+            try(BufferedReader in = new BufferedReader(new InputStreamReader(new URL(txtLink).openStream()))) {
+                chapterContent.append("<div>");
+                String line = null;
+                while((line = in.readLine()) != null) {
+                    if(!line.trim().isEmpty()) chapterContent.append("<p>"+line+"</p>");
+                }
+                chapterContent.append("</div>");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            chapterBody = Jsoup.parse(chapterContent.toString(), "", Parser.xmlParser());
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (ParseException e) {
+            GrabberUtils.err(novel.window, "Parse error!", e);
         }
         return chapterBody;
     }
