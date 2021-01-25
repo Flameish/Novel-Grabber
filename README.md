@@ -82,7 +82,11 @@ To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-
 ![Library Tab](https://i.imgur.com/ef5P4mf.png)
 
 ## Natively supported sites
+- [101novel](https://www.101novel.com/)
+- [17k](https://www.17k.com/)
+- [9kqw](https://9kqw.com/)
 - [Asian Hobbyist](https://www.asianhobbyist.com/)
+- [Biquge](http://www.biquge.se/)
 - [Blackbox Translations](https://blackbox-tl.com/)
 - [Booklat](https://booklat.com.ph)
 - [BoxNovel.com](https://boxnovel.com)
@@ -114,6 +118,7 @@ To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-
 - [MoonQuill](https://moonquill.com)
 - [MTLNovel](https://mtlnovel.com)
 - [Novel Full](https://novelfull.com)
+- [NovelFun](https://novelfun.net/)
 - [Novelhall](https://novelhall.com)
 - [Novelsrock](https://novelsrock.com/)
 - [NovelUpdates.cc](https://www.novelupdates.cc/)
@@ -124,8 +129,10 @@ To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-
 - [Re:Library](https://re-library.com)
 - [Royal Road](https://royalroad.com)
 - [Scribble Hub](https://scribblehub.com)
+- [shu111](http://shu111.com/)
 - [shubaow](https://www.shubaow.net/)
 - [Snowy Codex](https://snowycodex.com/)
+- [SofaNovel](https://www.sofanovel.com/)
 - [Tapas](https://tapas.io)
 - [TapRead](https://tapread.com)
 - [Truyen Full](https://truyenfull.vn/)
@@ -136,15 +143,13 @@ To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-
 - [Wattpad](https://wattpad.com)
 - [Webnovel](https://webnovel.com)
 - [WebTruyen](https://webtruyen.com/)
+- [Wenxue](http://wenxue.iqiyi.com/)
 - [Wordrain](https://wordrain69.com)
 - [WuxiaWorld.co](https://wuxiaworld.co)
 - [Wuxiaworld.com](https://wuxiaworld.com)
 - [WuxiaWorld.online](https://wuxiaworld.online)
 - [WuxiaWorld.site](https://wuxiaworld.site)
 - [xiaoshuo](https://www.zhenhunxiaoshuo.com/)
-
-
-
 
 ## Disclaimer & Warning
 Most sites prohibit the scrapping for their content. Use at your own risk. 
