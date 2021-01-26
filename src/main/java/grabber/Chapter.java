@@ -67,8 +67,15 @@ public class Chapter implements Serializable {
      * Removes general and specified blacklisted tags from chapter body.
      */
     private void removeUnwantedTags(boolean removeStyling, List<String> blacklistedTags) {
+        // Remove user set blacklisted tags
         for (String tag : blacklistedTags) {
             chapterContainer.select(tag).remove();
+        }
+        // Remove empty block elements
+        for (Element element : chapterContainer.select("*")) {
+            if (!element.hasText() && element.isBlock()) {
+                element.remove();
+            }
         }
         // Try to remove navigation links
         String[] blacklistedWords = new String[] {"next","previous","table","index","back","chapter","home"};
