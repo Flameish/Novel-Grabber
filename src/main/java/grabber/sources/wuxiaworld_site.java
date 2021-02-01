@@ -69,10 +69,14 @@ public class wuxiaworld_site implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            metadata.setTitle(toc.select(".post-title h3").first().text());
-            metadata.setAuthor(toc.select(".author-content a").first().text());
-            metadata.setDescription(toc.select(".summary__content").first().text());
-            metadata.setBufferedCover(toc.select(".summary_image img").attr("abs:src"));
+            Element title = toc.selectFirst(".post-title");
+            Element author = toc.selectFirst(".author-content a");
+            Element desc = toc.selectFirst(".summary__content");
+
+            metadata.setTitle(title != null ? title.text() : "");
+            metadata.setAuthor(author != null ? author.text() : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(toc.selectFirst(".summary_image img").attr("abs:src"));
 
             Elements tags = toc.select(".genres-content a");
             List<String> subjects = new ArrayList<>();
