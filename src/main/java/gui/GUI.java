@@ -38,7 +38,6 @@ public class GUI extends JFrame {
     public static List<String> blacklistedTags = new ArrayList<>();
     public static TrayIcon trayIcon;
     public static Integer chapterToChapterNumber = 1;
-    private static String[] browserList = {"Chrome", "Firefox", "Edge", "Opera", "IE"};
     private static String[] epubFilenameFormats = {"<author> - <title>", "<title> - <author>", "<title>"};
     private static String[] sslList = {"SMTP","SMTPS","SMTP TLS",};
     private static MenuItem defaultItem0;
@@ -1397,9 +1396,9 @@ public class GUI extends JFrame {
         settingsSourcesBtn.setToolTipText("Buy the dev a coffee");
         settingsSourcesBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        settingsBrowserComboBox = new JComboBox(browserList);
+        settingsBrowserComboBox = new JComboBox(Driver.browserList);
         if(settings.getBrowser().isEmpty()) {
-            String browserSelection = (String)JOptionPane.showInputDialog(this, "Please select your browser:","Browser selection",JOptionPane.PLAIN_MESSAGE, null, browserList,"Crhome");
+            String browserSelection = (String)JOptionPane.showInputDialog(this, "Please select your browser:","Browser selection",JOptionPane.PLAIN_MESSAGE, null, Driver.browserList,"Crhome");
             settings.setBrowser(browserSelection);
             settings.save();
         }

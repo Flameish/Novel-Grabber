@@ -20,6 +20,7 @@ import java.util.Map;
  * Selenium driver handler
  */
 public class Driver {
+    public static String[] browserList = {"Chrome", "Firefox", "Edge", "Opera", "IE", "Headless"};
     public WebDriver driver;
     public WebDriverWait wait;
 
