@@ -1,7 +1,7 @@
 ---
 name: Site request
 about: Request a new host to be added
-title: ''
+title: "[SITE REQUEST]"
 labels: ''
 assignees: ''
 
