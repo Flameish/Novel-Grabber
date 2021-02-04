@@ -66,7 +66,6 @@ public class booknet_com implements Source {
             int page = 1;
             while(true) {
                 GrabberUtils.sleep(500);
-                System.out.println("visiting page " + page);
                 String json = Jsoup.connect("https://booknet.com/reader/get-page")
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .ignoreContentType(true)
