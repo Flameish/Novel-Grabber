@@ -116,6 +116,7 @@ To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-
 - [JPMTL](https://jpmtl.com/)
 - [LiberSpark](https://liberspark.com)
 - [Light Novels Translations](https://lightnovelstranslations.com)
+- [Light Novel World](https://www.lightnovelworld.com/)
 - [LNMTL](https://lnmtl.com/)
 - [Machine-Translation](https://www.machine-translation.org/)
 - [MoboReader](https://www.moboreader.net/)
