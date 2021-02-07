@@ -27,7 +27,7 @@ public class asianhobbyist_com implements Source {
         List<Chapter> chapterList = new ArrayList();
         try {
             toc = Jsoup.connect(novel.novelLink).get();
-            Elements chapterLinks = toc.select("div.tabs div:contains(Table of Contents) a");
+            Elements chapterLinks = toc.select(".releases-wrap a.cell");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
@@ -56,9 +56,12 @@ public class asianhobbyist_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            metadata.setTitle(toc.select(".post-title").first().text());
-            metadata.setDescription(toc.select("div.tabs div:contains(Description)").first().text());
-
+            Element title = toc.selectFirst(".details .entry-title");
+            Element desc = toc.selectFirst(".details .description");
+            String coverUrl = toc.selectFirst(".thumb img").attr("abs:data-lazy-src");
+            metadata.setTitle(title != null ? title.text() : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(coverUrl);
         }
 
         return metadata;
