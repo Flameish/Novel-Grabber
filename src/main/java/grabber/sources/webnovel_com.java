@@ -149,12 +149,12 @@ public class webnovel_com implements Source {
             init.gui.appendText(novel.window, "[INFO] Login...");
         }
         try {
-            Account account = Accounts.getInstance().getAccount("WattPad");
+            Account account = Accounts.getInstance().getAccount("WebNovel");
             if (!account.getUsername().isEmpty()) {
-                Connection.Response res = Jsoup.connect("https://www.wattpad.com/")
+                Connection.Response res = Jsoup.connect("https://www.webnovel.com/")
                         .method(Connection.Method.GET)
                         .execute();
-                res = Jsoup.connect("https://www.wattpad.com/login")
+                res = Jsoup.connect("https://passport.webnovel.com/emaillogin.html?appid=900&areaid=1%2FloginSuccess&auto=1&autotime=0&ver=2") //I'm not sure if all these Variables in the URL have to be sent, this is just a straight copy from my Browser and it works.
                         .data("username", account.getUsername())
                         .data("password", account.getPassword())
                         .cookies(res.cookies())
