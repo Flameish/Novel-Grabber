@@ -1,5 +1,6 @@
 package grabber;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -7,14 +8,13 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import system.init;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Selenium driver handler
@@ -61,6 +61,10 @@ public class Driver {
             case "IE":
                 WebDriverManager.iedriver().setup();
                 driver = new InternetExplorerDriver();
+                break;
+            case "Headless":
+                driver = new HtmlUnitDriver(BrowserVersion.BEST_SUPPORTED);
+                java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
                 break;
         }
     }
