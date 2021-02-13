@@ -17,7 +17,7 @@ import java.util.List;
  * Creates LibrarySystem instance.
  */
 public class init {
-    public static final String versionNumber = "3.3.1";
+    public static final String versionNumber = "3.4.0";
     public static GUI gui;
     public static LibrarySystem librarySystem;
     public static Telegram telegramBot;
