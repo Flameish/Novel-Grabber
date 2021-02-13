@@ -1,4 +1,8 @@
-package grabber;
+package grabber.formats;
+import grabber.Chapter;
+import grabber.GrabberUtils;
+import grabber.Novel;
+import grabber.NovelMetadata;
 import system.data.Settings;
 
 import nl.siegmann.epublib.domain.Author;
@@ -30,7 +34,7 @@ public class EPUB {
             "</head>" + NL +
             "<body>" + NL;
     static final String htmlFoot = "</body>" + NL + "</html>";
-    private final Novel novel;
+    private Novel novel;
     private final NovelMetadata novelMetadata;
     private final Book book;
 
@@ -45,7 +49,7 @@ public class EPUB {
         }
     }
 
-    public void writeEpub() {
+    public void write() {
         // Order is important
         addMetadata();
         addCover();
