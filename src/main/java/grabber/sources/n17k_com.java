@@ -13,23 +13,46 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class n17k_com implements Source {
-    private final Novel novel;
+    private final String name = "17k";
+    private final String url = "https://www.17k.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public n17k_com(Novel novel) {
         this.novel = novel;
     }
 
+    public n17k_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
             toc = Jsoup.connect(novel.novelLink)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             Document chapterPage = Jsoup.connect(toc.selectFirst("dt.read a").attr("abs:href"))
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             Elements chapterLinks = chapterPage.select("a:has(span.ellipsis):not(:has(span.vip))");
@@ -48,6 +71,7 @@ public class n17k_com implements Source {
         Element chapterBody = null;
         try {
             Document doc = Jsoup.connect(chapter.chapterURL)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             chapterBody = doc.selectFirst(".readAreaBox div.p");
@@ -71,7 +95,7 @@ public class n17k_com implements Source {
             metadata.setAuthor(author != null ? author.text() : "");
             metadata.setDescription(desc != null ? desc.text() : "");
             String imageUrl = toc.selectFirst("#bookCover img.book").attr("abs:src");
-            metadata.setBufferedCover(imageUrl.substring(0,imageUrl.indexOf("-")));
+            metadata.setBufferedCover(imageUrl.substring(0, imageUrl.indexOf("-")));
 
             Elements tags = toc.select(".cont tr.label a span");
             List<String> subjects = new ArrayList<>();
@@ -91,10 +115,6 @@ public class n17k_com implements Source {
         blacklistedTags.add(".chapter_text_ad");
         blacklistedTags.add(".qrcode");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

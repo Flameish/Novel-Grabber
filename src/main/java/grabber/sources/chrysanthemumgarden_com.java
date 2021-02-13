@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class chrysanthemumgarden_com implements Source {
-    private final Novel novel;
-    private final HashMap<String, String> charMap;
+    private final String name = "Chrysanthemum Garden";
+    private final String url = "https://chrysanthemumgarden.com";
+    private HashMap<String, String> charMap;
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public chrysanthemumgarden_com(Novel novel) {
@@ -78,10 +80,28 @@ public class chrysanthemumgarden_com implements Source {
         charMap.put("Z", "M");
     }
 
+    public chrysanthemumgarden_com() { }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
             Elements chapterLinks = toc.select(".translated-chapters a");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
@@ -97,7 +117,7 @@ public class chrysanthemumgarden_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
 
             Elements encodedStrings = doc.select(".jum");
 
@@ -154,10 +174,6 @@ public class chrysanthemumgarden_com implements Source {
         blacklistedTags.add("span[style=height:1px;width:0;overflow:hidden;display:inline-block]");
         blacklistedTags.add(".sharedaddy");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

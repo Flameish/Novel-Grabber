@@ -13,20 +13,41 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class honeyfeed_fm implements Source {
-    private final Novel novel;
+    private final String name = "Honeyfeed";
+    private final String url = "https://honeyfeed.fm";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public honeyfeed_fm(Novel novel) {
         this.novel = novel;
     }
 
+    public honeyfeed_fm() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
             Elements chapterLinks = toc.select(".list-group-item");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.select(".chapter-name").text(), chapterLink.attr("abs:href")));
@@ -42,7 +63,7 @@ public class honeyfeed_fm implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             chapterBody = doc.select(".wrap-body > div:nth-child(1)").first();
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
@@ -76,10 +97,6 @@ public class honeyfeed_fm implements Source {
         List blacklistedTags = new ArrayList();
         blacklistedTags.add("span.icon");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

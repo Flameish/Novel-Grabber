@@ -14,20 +14,41 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class scribblehub_com implements Source {
-    private final Novel novel;
+    private final String name = "Scribble Hub";
+    private final String url = "https://scribblehub.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public scribblehub_com(Novel novel) {
         this.novel = novel;
     }
 
+    public scribblehub_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).cookie("toc_show", "9999").timeout(30 * 1000).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).cookie("toc_show", "9999").timeout(30 * 1000).get();
             for (Element chapterLink : toc.select("a.toc_a")) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
@@ -43,7 +64,7 @@ public class scribblehub_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             chapterBody = doc.select("#chp_raw").first();
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
@@ -76,10 +97,6 @@ public class scribblehub_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -13,14 +13,35 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class readlightnovel_org implements Source {
-    private final Novel novel;
+    private final String name = "ReadLightNovel";
+    private final String url = "https://www.readlightnovel.org/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public readlightnovel_org(Novel novel) {
         this.novel = novel;
+    }
+
+    public readlightnovel_org() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -78,10 +99,6 @@ public class readlightnovel_org implements Source {
         List blacklistedTags = new ArrayList();
         blacklistedTags.add(".apester-media");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -13,21 +13,42 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class boxnovel_com implements Source {
-    private final Novel novel;
+    private final String name = "BoxNovel.com";
+    private final String url = "https://boxnovel.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
+
+    public boxnovel_com() {
+    }
 
     public boxnovel_com(Novel novel) {
         this.novel = novel;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).get();
-            Document firstChapterPage = Jsoup.connect(toc.selectFirst(".wp-manga-chapter a").attr("abs:href")).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
+            Document firstChapterPage = Jsoup.connect(toc.selectFirst(".wp-manga-chapter a").attr("abs:href")).cookies(novel.cookies).get();
             Elements chapterLinks = firstChapterPage.select("div.select-view:nth-child(2) > div:nth-child(1) > label:nth-child(1) > select:nth-child(1) option");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("data-redirect")));
@@ -43,7 +64,7 @@ public class boxnovel_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             chapterBody = doc.select(".text-left").first();
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
@@ -78,10 +99,6 @@ public class boxnovel_com implements Source {
         blacklistedTags.add("div.code-block");
         blacklistedTags.add(".adbox");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

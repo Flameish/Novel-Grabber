@@ -17,14 +17,35 @@ import org.jsoup.nodes.Element;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class fujossy_jp implements Source {
-    private final Novel novel;
+    private final String name = "fujossy";
+    private final String url = "https://fujossy.jp/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private JSONObject bookObj;
 
     public fujossy_jp(Novel novel) {
         this.novel = novel;
+    }
+
+    public fujossy_jp() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -32,6 +53,7 @@ public class fujossy_jp implements Source {
         try {
             String storyID = novel.novelLink.substring(GrabberUtils.ordinalIndexOf(novel.novelLink, "/", 4) + 1);
             String json = Jsoup.connect("https://fujossy.jp/api/books/" + storyID + ".json")
+                    .cookies(novel.cookies)
                     .ignoreContentType(true)
                     .method(Connection.Method.GET)
                     .execute().body();
@@ -57,6 +79,7 @@ public class fujossy_jp implements Source {
         Element chapterBody = null;
         try {
             Document doc = Jsoup.connect(chapter.chapterURL)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             doc.outputSettings().prettyPrint(false);
@@ -96,10 +119,6 @@ public class fujossy_jp implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

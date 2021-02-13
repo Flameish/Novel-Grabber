@@ -15,14 +15,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class foxaholic_com implements Source {
-    private final Novel novel;
+    private final String name = "Foxaholic";
+    private final String url = "https://foxaholic.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public foxaholic_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public foxaholic_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -30,6 +51,7 @@ public class foxaholic_com implements Source {
         try {
             toc = Jsoup.connect(novel.novelLink).get();
             Connection.Response res = Jsoup.connect("https://foxaholic.com/wp-admin/admin-ajax.php")
+                    .cookies(novel.cookies)
                     .method(Connection.Method.POST)
                     .referrer("novel.novelLink")
                     .data("action", "manga_get_chapters")
@@ -90,10 +112,6 @@ public class foxaholic_com implements Source {
         blacklistedTags.add("meta");
         blacklistedTags.add("center");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

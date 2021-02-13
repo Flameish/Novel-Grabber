@@ -12,22 +12,43 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class lightnovelworld_com implements Source {
-    private final Novel novel;
+    private final String name = "Light Novel World";
+    private final String url = "https://www.lightnovelworld.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
+
+    public lightnovelworld_com() {
+    }
 
     public lightnovelworld_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
             toc = Jsoup.connect(novel.novelLink)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             Elements chapterLinks;
@@ -38,9 +59,10 @@ public class lightnovelworld_com implements Source {
                     System.out.println(chapterLink.attr("title") + chapterLink.attr("abs:href"));
                     chapterList.add(new Chapter(chapterLink.attr("title"), chapterLink.attr("abs:href")));
                 }
-                if(toc.selectFirst(".PagedList-skipToNext") == null) break;
+                if (toc.selectFirst(".PagedList-skipToNext") == null) break;
                 System.out.println(toc.select(".PagedList-skipToNext a").attr("abs:href"));
                 toc = Jsoup.connect(toc.select(".PagedList-skipToNext a").attr("abs:href"))
+                        .cookies(novel.cookies)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .get();
             }
@@ -57,6 +79,7 @@ public class lightnovelworld_com implements Source {
         try {
             GrabberUtils.sleep(750);
             Document doc = Jsoup.connect(chapter.chapterURL)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             chapterBody = doc.selectFirst(".chapter-content");
@@ -98,10 +121,6 @@ public class lightnovelworld_com implements Source {
         blacklistedTags.add("p[class]");
         blacklistedTags.add(".adsbox");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -13,20 +13,42 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class novelsonline_net implements Source {
-    private final Novel novel;
+    private final String name = "Novels Online";
+    private final String url = "https://novelsonline.net/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public novelsonline_net(Novel novel) {
         this.novel = novel;
     }
 
+    public novelsonline_net() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
             toc = Jsoup.connect(novel.novelLink)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             Elements chapterLinks = toc.select(".tab-content a");
@@ -45,6 +67,7 @@ public class novelsonline_net implements Source {
         Element chapterBody = null;
         try {
             Document doc = Jsoup.connect(chapter.chapterURL)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             chapterBody = doc.selectFirst("#contentall");
@@ -85,10 +108,6 @@ public class novelsonline_net implements Source {
         blacklistedTags.add("noscript");
         blacklistedTags.add(".row");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

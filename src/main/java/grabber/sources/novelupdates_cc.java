@@ -9,25 +9,45 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import system.init;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class novelupdates_cc implements Source {
-    private final Novel novel;
+    private final String name = "NovelUpdates.cc";
+    private final String url = "https://www.novelupdates.cc/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public novelupdates_cc(Novel novel) {
         this.novel = novel;
     }
 
+    public novelupdates_cc() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
             Elements chapterLinks = toc.select(".chapter-list a");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
@@ -43,7 +63,7 @@ public class novelupdates_cc implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             chapterBody = doc.select(".chapter-entity").first();
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
@@ -74,10 +94,6 @@ public class novelupdates_cc implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -13,14 +13,35 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class n101novel_com implements Source {
-    private final Novel novel;
+    private final String name = "101novel";
+    private final String url = "https://www.101novel.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public n101novel_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public n101novel_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -38,7 +59,7 @@ public class n101novel_com implements Source {
                     chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
                 }
             }
-            if(novel.novelLink.contains("/ck101/")) {
+            if (novel.novelLink.contains("/ck101/")) {
                 toc = Jsoup.connect(novel.novelLink)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .get();
@@ -89,10 +110,6 @@ public class n101novel_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

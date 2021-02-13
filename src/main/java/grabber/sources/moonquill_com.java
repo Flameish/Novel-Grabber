@@ -7,20 +7,42 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class moonquill_com implements Source {
-    private final Novel novel;
+    private final String name = "MoonQuill";
+    private final String url = "https://moonquill.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public moonquill_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public moonquill_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -51,6 +73,8 @@ public class moonquill_com implements Source {
             novel.headlessDriver = new Driver(novel.window, novel.browser);
         }
         novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
+        novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
+        novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
         novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content p")));
         WebElement chapterElement = novel.headlessDriver.driver.findElement(By.cssSelector("body"));
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
@@ -80,10 +104,6 @@ public class moonquill_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

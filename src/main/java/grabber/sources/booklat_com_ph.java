@@ -4,27 +4,44 @@ import grabber.Chapter;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
-import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import system.data.accounts.Account;
-import system.data.accounts.Accounts;
-import system.init;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class booklat_com_ph implements Source {
-    private final Novel novel;
+    private final String name = "Booklat";
+    private final String url = "https://booklat.com.ph";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public booklat_com_ph(Novel novel) {
         this.novel = novel;
+    }
+
+    public booklat_com_ph() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -86,37 +103,6 @@ public class booklat_com_ph implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        GrabberUtils.info(novel.window, "Login...");
-        try {
-            Account account = Accounts.getInstance().getAccount("Booklat");
-            if (!account.getUsername().isEmpty()) {
-                Connection.Response res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
-                        .method(Connection.Method.GET)
-                        .execute();
-                String token = res.parse().select("input[name=__RequestVerificationToken]").attr("value");
-                res = Jsoup.connect("https://www.booklat.com.ph/Account/Login")
-                        .data("Email", account.getUsername())
-                        .data("Password", account.getPassword())
-                        .data("__RequestVerificationToken", token)
-                        .data("RememberMe", "false")
-                        .cookies(res.cookies())
-                        .method(Connection.Method.POST)
-                        .timeout(30 * 1000)
-                        .execute();
-                return res.cookies();
-            } else {
-                GrabberUtils.err(novel.window, "No account found");
-                return null;
-            }
-
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, e.getMessage(), e);
-        }
-        throw new UnsupportedOperationException();
-
     }
 
 }

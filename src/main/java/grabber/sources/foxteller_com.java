@@ -7,20 +7,42 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class foxteller_com implements Source {
-    private final Novel novel;
+    private final String name = "Foxteller";
+    private final String url = "https://foxteller.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public foxteller_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public foxteller_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -50,6 +72,8 @@ public class foxteller_com implements Source {
         if (novel.headlessDriver == null) {
             novel.headlessDriver = new Driver(novel.window, novel.browser);
         }
+        novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
+        novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
         novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
         novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#chapter-content p")));
         WebElement chapterElement = novel.headlessDriver.driver.findElement(By.cssSelector("body"));
@@ -81,10 +105,6 @@ public class foxteller_com implements Source {
         blacklistedTags.add("span");
         blacklistedTags.add(".in-article");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

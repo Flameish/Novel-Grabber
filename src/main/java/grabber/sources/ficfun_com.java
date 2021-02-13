@@ -9,21 +9,41 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import system.init;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 
 public class ficfun_com implements Source {
-    private final Novel novel;
+    private final String name = "FicFun";
+    private final String url = "https://ficfun.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public ficfun_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public ficfun_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -52,7 +72,7 @@ public class ficfun_com implements Source {
             doc = Jsoup.parse(decodedChapter);
             chapterBody = doc;
         } catch (IOException e) {
-GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
+            GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
         }
         return chapterBody;
     }
@@ -80,10 +100,6 @@ GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage(
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

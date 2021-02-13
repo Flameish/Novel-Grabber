@@ -13,14 +13,35 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class quotev_com implements Source {
-    private final Novel novel;
+    private final String name = "Quotev";
+    private final String url = "https://quotev.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public quotev_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public quotev_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -75,10 +96,6 @@ public class quotev_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

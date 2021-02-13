@@ -16,24 +16,46 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class tapas_io implements Source {
-    private final Novel novel;
+    private final String name = "Tapas";
+    private final String url = "https://tapas.io";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public tapas_io(Novel novel) {
         this.novel = novel;
     }
 
+    public tapas_io() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).timeout(30 * 1000).get();
             String seriesId = toc.select("meta[property=al:android:url]").attr("content");
             seriesId = seriesId.substring(seriesId.indexOf("eries/") + 6, seriesId.indexOf("/info"));
             try {
                 String json = Jsoup.connect("https://tapas.io/series/" + seriesId + "/episodes?page=1&sort=OLDEST&max_limit=9999")
+                        .cookies(novel.cookies)
                         .ignoreContentType(true)
                         .method(Connection.Method.GET)
                         .execute().body();
@@ -60,7 +82,7 @@ public class tapas_io implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             chapterBody = doc.select("article").first();
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
@@ -93,10 +115,6 @@ public class tapas_io implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

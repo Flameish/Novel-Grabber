@@ -13,14 +13,35 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class wenxue_iqiyi_com implements Source {
-    private final Novel novel;
+    private final String name = "Wenxue";
+    private final String url = "http://wenxue.iqiyi.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public wenxue_iqiyi_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public wenxue_iqiyi_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -33,12 +54,12 @@ public class wenxue_iqiyi_com implements Source {
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             Elements chapterLinks;
-            while(true) {
+            while (true) {
                 chapterLinks = chapterPage.select(".catalog-chapter:not(:has(i)) a");
                 for (Element chapterLink : chapterLinks) {
                     chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
                 }
-                if(chapterPage.selectFirst(".mod-page a:contains(下一页)") != null) {
+                if (chapterPage.selectFirst(".mod-page a:contains(下一页)") != null) {
                     chapterPage = Jsoup.connect(chapterPage.selectFirst(".mod-page a:contains(下一页)").attr("abs:href"))
                             .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                             .get();
@@ -97,10 +118,6 @@ public class wenxue_iqiyi_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

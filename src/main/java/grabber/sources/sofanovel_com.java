@@ -20,23 +20,45 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class sofanovel_com implements Source {
-    private final Novel novel;
+    private final String name = "SofaNovel";
+    private final String url = "https://www.sofanovel.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private JSONObject node;
 
     public sofanovel_com(Novel novel) {
         this.novel = novel;
     }
 
+    public sofanovel_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
-        String title = novel.novelLink.substring(novel.novelLink.indexOf("/book/")+6);
+        String title = novel.novelLink.substring(novel.novelLink.indexOf("/book/") + 6);
         try {
             // Book details
-            String response = Jsoup.connect("https://srv.sofanovel.com/bookinfo/book?nType=3&nNeedThrdTypeData=0&szNameKey="+title)
+            String response = Jsoup.connect("https://srv.sofanovel.com/bookinfo/book?nType=3&nNeedThrdTypeData=0&szNameKey=" + title)
                     .ignoreContentType(true)
+                    .cookies(novel.cookies)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json")
                     .method(Connection.Method.GET)
@@ -50,8 +72,9 @@ public class sofanovel_com implements Source {
             String bookId = String.valueOf(node.get("szBookId"));
             String trdBookId = (String) ((JSONObject) node.get("objExtend")).get("szTrdBookId");
             // Chapters
-            response = Jsoup.connect("https://srv.sofanovel.com/bookinfo/chapter?nType=2&szBookID="+bookId+"&nOffset=0&nLimit=9999&nSort=1&nIsSubscribe=1")
+            response = Jsoup.connect("https://srv.sofanovel.com/bookinfo/chapter?nType=2&szBookID=" + bookId + "&nOffset=0&nLimit=9999&nSort=1&nIsSubscribe=1")
                     .ignoreContentType(true)
+                    .cookies(novel.cookies)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json")
                     .method(Connection.Method.GET)
@@ -62,10 +85,10 @@ public class sofanovel_com implements Source {
             JSONArray chapterArr = (JSONArray) chapterAnyData.get("aryChapter");
             for (Object chapterObj : chapterArr) {
                 JSONObject chapter = (JSONObject) chapterObj;
-                if(String.valueOf(chapter.get("nLock")).equals("0")) {
+                if (String.valueOf(chapter.get("nLock")).equals("0")) {
                     String chapterName = String.valueOf(chapter.get("szChapterName"));
                     String chapterId = String.valueOf(chapter.get("szChapterID"));
-                    String chapterLink = "https://srv.sofanovel.com/chapter/getAry?bookID="+bookId+"&chapterID="+chapterId;
+                    String chapterLink = "https://srv.sofanovel.com/chapter/getAry?bookID=" + bookId + "&chapterID=" + chapterId;
                     chapterList.add(new Chapter(chapterName, chapterLink));
                 }
             }
@@ -80,8 +103,9 @@ public class sofanovel_com implements Source {
         Element chapterBody = null;
         try {
             // Book details
-            String response = Jsoup.connect(chapter.chapterURL+"&report=[{%22szCDNName%22:%22aliCDN%22,%22nErrCount%22:0,%22nTime%22:1873,%22nCount%22:10}]")
+            String response = Jsoup.connect(chapter.chapterURL + "&report=[{%22szCDNName%22:%22aliCDN%22,%22nErrCount%22:0,%22nTime%22:1873,%22nCount%22:10}]")
                     .ignoreContentType(true)
+                    .cookies(novel.cookies)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json")
                     .method(Connection.Method.GET)
@@ -93,11 +117,11 @@ public class sofanovel_com implements Source {
             JSONObject report = (JSONObject) chapterArr.get(0);
             String txtLink = String.valueOf(report.get("szContentURL"));
             StringBuilder chapterContent = new StringBuilder();
-            try(BufferedReader in = new BufferedReader(new InputStreamReader(new URL(txtLink).openStream()))) {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(txtLink).openStream()))) {
                 chapterContent.append("<div>");
                 String line = null;
-                while((line = in.readLine()) != null) {
-                    if(!line.trim().isEmpty()) chapterContent.append("<p>"+line+"</p>");
+                while ((line = in.readLine()) != null) {
+                    if (!line.trim().isEmpty()) chapterContent.append("<p>" + line + "</p>");
                 }
                 chapterContent.append("</div>");
             } catch (IOException e) {
@@ -137,10 +161,6 @@ public class sofanovel_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

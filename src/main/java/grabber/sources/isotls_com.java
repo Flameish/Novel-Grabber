@@ -13,14 +13,35 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class isotls_com implements Source {
-    private final Novel novel;
+    private final String name = "ISO Translations";
+    private final String url = "https://isotls.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public isotls_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public isotls_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -74,10 +95,6 @@ public class isotls_com implements Source {
         blacklistedTags.add(".adtester-container");
         blacklistedTags.add(".ezoic-ad");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -15,23 +15,45 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class daonovel_com implements Source {
-    private final Novel novel;
+    private final String name = "Dao Novel";
+    private final String url = "https://daonovel.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public daonovel_com(Novel novel) {
         this.novel = novel;
     }
 
+    public daonovel_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
             Connection.Response res = Jsoup.connect("https://daonovel.com/wp-admin/admin-ajax.php")
                     .data("action", "manga_get_chapters")
                     .data("manga", toc.select(".rating-post-id").attr("value"))
+                    .cookies(novel.cookies)
                     .method(Connection.Method.POST)
                     .execute();
             Elements chapterLinks = res.parse().select(".listing-chapters_wrap a");
@@ -50,7 +72,7 @@ public class daonovel_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             chapterBody = doc.select(".text-left").first();
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
@@ -86,10 +108,6 @@ public class daonovel_com implements Source {
         blacklistedTags.add("div.code-block");
         blacklistedTags.add(".adbox");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

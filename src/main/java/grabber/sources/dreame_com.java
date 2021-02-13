@@ -8,34 +8,54 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import system.init;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 
 public class dreame_com implements Source {
-    private final Novel novel;
+    private final String name = "Dreame";
+    private final String url = "https://dreame.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public dreame_com(Novel novel) {
         this.novel = novel;
     }
 
+    public dreame_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList<>();
         try {
-            toc = Jsoup.connect(novel.novelLink).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
             String firstChapterUrl = toc.select(".js-readBook-btn").attr("abs:href");
-            Document firstChapterPage = Jsoup.connect(firstChapterUrl).get();
+            Document firstChapterPage = Jsoup.connect(firstChapterUrl).cookies(novel.cookies).get();
             for (Element chapterLink : firstChapterPage.select(".chapter-list a")) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
         } catch (IOException e) {
-GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
+            GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
         }
         return chapterList;
     }
@@ -43,13 +63,13 @@ GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage(
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             String encodedChapter = doc.select("#contentTpl").html();
             String decodedChapter = new String(Base64.getMimeDecoder().decode(encodedChapter), StandardCharsets.UTF_8);
             doc = Jsoup.parse(decodedChapter);
             chapterBody = doc;
         } catch (IOException e) {
-GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
+            GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
         }
         return chapterBody;
     }
@@ -84,7 +104,4 @@ GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage(
         return blacklistedTags;
     }
 
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
 }

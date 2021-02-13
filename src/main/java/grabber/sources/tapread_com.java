@@ -14,7 +14,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import system.init;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,21 +22,44 @@ import java.util.List;
 import java.util.Map;
 
 public class tapread_com implements Source {
-    private final Novel novel;
+    private final String name = "TapRead";
+    private final String url = "https://tapread.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public tapread_com(Novel novel) {
         this.novel = novel;
     }
 
+    public tapread_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
             String bookID = novel.novelLink.substring(novel.novelLink.lastIndexOf("/") + 1);
             Map<String, String> chapterMap = null;
             try {
                 String json = Jsoup.connect("https://www.tapread.com/ajax/book/contents")
+                        .cookies(novel.cookies)
                         .ignoreContentType(true)
                         .data("bookId", bookID)
                         .method(Connection.Method.POST)
@@ -75,6 +97,7 @@ public class tapread_com implements Source {
             String json = Jsoup.connect("https://www.tapread.com/ajax/book/chapter")
                     .data("bookId", bookID)
                     .data("chapterId", chapterID)
+                    .cookies(novel.cookies)
                     .method(Connection.Method.POST)
                     .ignoreContentType(true)
                     .execute()
@@ -115,10 +138,6 @@ public class tapread_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -18,12 +18,17 @@ import system.init;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class manualSource implements Source {
-    private final String chapterContainer;
-    private final Novel novel;
+    private final String name = "";
+    private final String url = "";
+    private final boolean canHeadless = false;
+    private String chapterContainer;
+    private Novel novel;
+
+    public manualSource() {
+    }
 
     public manualSource(Novel novel) {
         this.novel = novel;
@@ -33,6 +38,22 @@ public class manualSource implements Source {
     /**
      * Retrieves all links containing a href tag and displays them on the GUI.
      */
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         init.gui.appendText("manual", "Retrieving links from: " + novel.novelLink);
         if (novel.useHeadless) {
@@ -69,6 +90,7 @@ public class manualSource implements Source {
     private Document getTocStatic() {
         try {
             return Jsoup.connect(novel.novelLink)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
         } catch (HttpStatusException httpEr) {
@@ -87,6 +109,7 @@ public class manualSource implements Source {
                 doc = getPageHeadless(chapter);
             } else {
                 doc = Jsoup.connect(chapter.chapterURL)
+                        .cookies(novel.cookies)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .get();
             }
@@ -144,8 +167,4 @@ public class manualSource implements Source {
         return blacklistedTags;
     }
 
-    // Dummy
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
 }

@@ -14,14 +14,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class liberspark_com implements Source {
-    private final Novel novel;
+    private final String name = "LiberSpark";
+    private final String url = "https://liberspark.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public liberspark_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public liberspark_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -71,10 +92,6 @@ public class liberspark_com implements Source {
         List blacklistedTags = new ArrayList();
         blacklistedTags.add("div.ad-wrapper");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

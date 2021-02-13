@@ -14,14 +14,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class wuxiaworld_online implements Source {
-    private final Novel novel;
+    private final String name = "WuxiaWorld.online";
+    private final String url = "https://wuxiaworld.online";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public wuxiaworld_online(Novel novel) {
         this.novel = novel;
+    }
+
+    public wuxiaworld_online() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -77,10 +98,6 @@ public class wuxiaworld_online implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

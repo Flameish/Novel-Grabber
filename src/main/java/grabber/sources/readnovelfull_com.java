@@ -13,14 +13,35 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class readnovelfull_com implements Source {
-    private final Novel novel;
+    private final String name = "ReadNovelFull";
+    private final String url = "https://readnovelfull.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public readnovelfull_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public readnovelfull_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -81,10 +102,6 @@ public class readnovelfull_com implements Source {
         blacklistedTags.add(".adsbygoogle");
         blacklistedTags.add(".cha-tit p");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

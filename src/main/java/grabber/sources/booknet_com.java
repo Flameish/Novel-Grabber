@@ -4,7 +4,6 @@ import grabber.Chapter;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -17,27 +16,48 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class booknet_com implements Source {
-    private final Novel novel;
+    private final String name = "BookNet";
+    private final String url = "https://booknet.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public booknet_com(Novel novel) {
         this.novel = novel;
     }
 
+    public booknet_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
             toc = Jsoup.connect(novel.novelLink)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             Elements chapterLinks = toc.select(".js-chapter-change option");
             for (Element chapterLink : chapterLinks) {
-                if(!chapterLink.attr("value").isEmpty()) {
+                if (!chapterLink.attr("value").isEmpty()) {
                     chapterList.add(new Chapter(
                             chapterLink.text(),
                             novel.novelLink.replace("/book/", "/reader/") + "?c=" + chapterLink.attr("value")
@@ -56,6 +76,7 @@ public class booknet_com implements Source {
         Element chapterBody = null;
         try {
             Connection.Response response = Jsoup.connect(chapter.chapterURL)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .method(Connection.Method.GET)
                     .execute();
@@ -64,7 +85,7 @@ public class booknet_com implements Source {
             String chapterId = doc.selectFirst(".js-chapter-change option[selected]").attr("value");
             StringBuilder content = new StringBuilder();
             int page = 1;
-            while(true) {
+            while (true) {
                 GrabberUtils.sleep(500);
                 String json = Jsoup.connect("https://booknet.com/reader/get-page")
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
@@ -120,10 +141,6 @@ public class booknet_com implements Source {
         blacklistedTags.add(".reader-pagination");
         blacklistedTags.add(".clearfix");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

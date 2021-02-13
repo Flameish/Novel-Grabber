@@ -13,14 +13,35 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class vipnovel_com implements Source {
-    private final Novel novel;
+    private final String name = "VipNovel";
+    private final String url = "https://vipnovel.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public vipnovel_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public vipnovel_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -78,10 +99,6 @@ public class vipnovel_com implements Source {
         blacklistedTags.add("div.code-block");
         blacklistedTags.add(".adbox");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

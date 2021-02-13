@@ -11,29 +11,51 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebElement;
 import system.data.Settings;
-import system.init;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class novelupdates_com implements Source {
-    private final Novel novel;
+    private final String name = "Novel Updates";
+    private final String url = "https://novelupdates.com";
+    private final boolean canHeadless = true;
+    private Novel novel;
     private Document toc;
 
     public novelupdates_com(Novel novel) {
         this.novel = novel;
     }
 
+    public novelupdates_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
             Connection.Response res = Jsoup.connect(novel.novelLink)
+                    .cookies(novel.cookies)
                     .method(Connection.Method.GET)
                     .execute();
             toc = res.parse();
@@ -60,10 +82,11 @@ public class novelupdates_com implements Source {
         Element chapterBody = null;
         try {
             Document doc;
-            if (Settings.getInstance().isNuHeadless()) {
+            if (Settings.getInstance().getHeadlessList().contains(name)) {
                 doc = getPageHeadless(chapter.chapterURL);
             } else {
                 doc = Jsoup.connect(chapter.chapterURL)
+                        .cookies(novel.cookies)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .get();
             }
@@ -86,6 +109,8 @@ public class novelupdates_com implements Source {
             novel.headlessDriver = new Driver(novel.window, novel.browser);
         }
         novel.headlessDriver.driver.navigate().to(chapterURL);
+        novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
+        novel.headlessDriver.driver.navigate().to(chapterURL);
         novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
         WebElement chapterElement = novel.headlessDriver.driver.findElement(By.cssSelector("body"));
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
@@ -102,10 +127,14 @@ public class novelupdates_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            metadata.setTitle(toc.select(".seriestitlenu").first().text());
-            metadata.setAuthor(toc.select("#authtag").first().text());
-            metadata.setDescription(toc.select("#editdescription").first().text());
-            metadata.setBufferedCover(toc.select(".seriesimg img").attr("abs:src"));
+            Element title = toc.selectFirst(".seriestitlenu");
+            Element author = toc.selectFirst("#authtag");
+            Element desc = toc.selectFirst("#editdescription");
+
+            metadata.setTitle(title != null ? title.text() : "");
+            metadata.setAuthor(author != null ? author.text() : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(toc.selectFirst(".seriesimg img").attr("abs:src"));
 
             Elements tags = toc.select("#seriesgenre a");
             List<String> subjects = new ArrayList<>();
@@ -121,10 +150,6 @@ public class novelupdates_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

@@ -14,23 +14,41 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import system.data.accounts.Account;
-import system.data.accounts.Accounts;
-import system.init;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class lnmtl_com implements Source {
-    private final Novel novel;
+    private final String name = "LNMTL";
+    private final String url = "https://lnmtl.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
+
+    public lnmtl_com() {
+    }
 
     public lnmtl_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -52,6 +70,7 @@ public class lnmtl_com implements Source {
                 int page = 1;
                 while (true) {
                     String json = Jsoup.connect("https://lnmtl.com/chapter?page=" + (page++) + "&volumeId=" + matcher.group(1))
+                            .cookies(novel.cookies)
                             .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                             .ignoreContentType(true)
                             .method(Connection.Method.GET)
@@ -127,35 +146,6 @@ public class lnmtl_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        GrabberUtils.info(novel.window, "Login...");
-        try {
-            Account account = Accounts.getInstance().getAccount("LNMTL");
-            if (!account.getUsername().isEmpty()) {
-                Connection.Response res = Jsoup.connect("https://lnmtl.com/auth/login")
-                        .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
-                        .method(Connection.Method.GET)
-                        .execute();
-                String token = res.parse().select("input[name=_token]").attr("value");
-                res = Jsoup.connect("https://lnmtl.com/auth/login")
-                        .data("email", account.getUsername())
-                        .data("password", account.getPassword())
-                        .data("_token", token)
-                        .cookies(res.cookies())
-                        .method(Connection.Method.POST)
-                        .execute();
-                return res.cookies();
-            } else {
-                GrabberUtils.err(novel.window, "No account found");
-                return null;
-            }
-
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, e.getMessage(), e);
-        }
-        throw new UnsupportedOperationException();
     }
 
 }

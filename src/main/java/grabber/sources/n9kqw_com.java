@@ -13,20 +13,42 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class n9kqw_com implements Source {
-    private final Novel novel;
+    private final String name = "9kqw";
+    private final String url = "https://9kqw.com/";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public n9kqw_com(Novel novel) {
         this.novel = novel;
     }
 
+    public n9kqw_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
             toc = Jsoup.connect(novel.novelLink)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             Elements chapterLinks = toc.select(".contents-tab");
@@ -45,6 +67,7 @@ public class n9kqw_com implements Source {
         Element chapterBody = null;
         try {
             Document doc = Jsoup.connect(chapter.chapterURL)
+                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             chapterBody = doc.selectFirst(".book-content");
@@ -65,14 +88,14 @@ public class n9kqw_com implements Source {
             Element desc = toc.selectFirst("#info_long_txt");
 
             metadata.setTitle(title != null ? title.text() : "");
-            metadata.setAuthor(author != null ? author.text().replace("作者：","")  : "");
+            metadata.setAuthor(author != null ? author.text().replace("作者：", "") : "");
             metadata.setDescription(desc != null ? desc.text() : "");
             metadata.setBufferedCover(toc.selectFirst(".detail-wrap .detail-thumb-box img").attr("abs:data-echo"));
 
             Elements tags = toc.select(".detail-profile td:contains(类型)");
             List<String> subjects = new ArrayList<>();
             for (Element tag : tags) {
-                subjects.add(tag.text().replace("类型：",""));
+                subjects.add(tag.text().replace("类型：", ""));
             }
             metadata.setSubjects(subjects);
         }
@@ -83,10 +106,6 @@ public class n9kqw_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }

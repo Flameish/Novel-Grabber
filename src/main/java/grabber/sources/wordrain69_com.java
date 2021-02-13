@@ -15,14 +15,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class wordrain69_com implements Source {
-    private final Novel novel;
+    private final String name = "Wordrain";
+    private final String url = "https://wordrain69.com";
+    private final boolean canHeadless = false;
+    private Novel novel;
     private Document toc;
 
     public wordrain69_com(Novel novel) {
         this.novel = novel;
+    }
+
+    public wordrain69_com() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean canHeadless() {
+        return canHeadless;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public List<Chapter> getChapterList() {
@@ -30,6 +51,7 @@ public class wordrain69_com implements Source {
         try {
             toc = Jsoup.connect(novel.novelLink).timeout(30 * 1000).get();
             Connection.Response res = Jsoup.connect("https://wordrain69.com/wp-admin/admin-ajax.php")
+                    .cookies(novel.cookies)
                     .method(Connection.Method.POST)
                     .referrer("novel.novelLink")
                     .data("action", "manga_get_chapters")
@@ -91,10 +113,6 @@ public class wordrain69_com implements Source {
         blacklistedTags.add(".google-auto-placed");
         blacklistedTags.add(".sharedaddy");
         return blacklistedTags;
-    }
-
-    public Map<String, String> getLoginCookies() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
     }
 
 }
