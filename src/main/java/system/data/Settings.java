@@ -4,16 +4,13 @@ import grabber.GrabberUtils;
 import system.init;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.Base64;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Handles persistent setting data.
  */
 public class Settings {
-    private static String settingsFile;
+    private final static String settingsFile = GrabberUtils.getCurrentPath() + "/settings.ini";
     private static Settings settings;
     private String browser = "";
     private String saveLocation = "";
@@ -27,10 +24,9 @@ public class Settings {
     private boolean removeStyling = false;
     private boolean useStandardLocation = false;
     private boolean pollingEnabled = true;
-    private boolean nuHeadless = true;
-    private boolean wuxiaHeadless = false;
-    private boolean wattHeadless = false;
+    private List<String> headlessList = new ArrayList<>();
     private int filenameFormat = 0;
+    private int outputFormat = 0;
     private int port = 25;
     private int frequency = 20;
 
@@ -39,12 +35,6 @@ public class Settings {
     public static Settings getInstance() {
         if(settings == null) {
             settings = new Settings();
-            try {
-                settingsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/settings.ini";
-            } catch (URISyntaxException e) {
-                settingsFile = "settings.ini";
-                GrabberUtils.err(e.getMessage(), e);
-            }
             settings.load();
         }
         return settings;
@@ -66,17 +56,16 @@ public class Settings {
             setPort(Integer.parseInt(prop.getProperty("port")));
             setBrowser(prop.getProperty("browser"));
             setFilenameFormat(Integer.parseInt(prop.getProperty("filenameFormat")));
+            setOutputFormat(Integer.parseInt(prop.getProperty("outputFormat")));
             setAutoGetImages(Boolean.parseBoolean(prop.getProperty("autoGetImages")));
             setSaveLocation(prop.getProperty("saveLocation"));
             setRemoveStyling(Boolean.parseBoolean(prop.getProperty("removeStyling")));
             setUseStandardLocation(Boolean.parseBoolean(prop.getProperty("useStandardLocation")));
             setFrequency(Integer.parseInt(prop.getProperty("frequency")));
             setPollingEnabled(Boolean.parseBoolean(prop.getProperty("pollingEnabled")));
-            setNuHeadless(Boolean.parseBoolean(prop.getProperty("nuHeadless")));
-            setWuxiaHeadless(Boolean.parseBoolean(prop.getProperty("wuxiaHeadless")));
-            setWattHeadless(Boolean.parseBoolean(prop.getProperty("wattHeadless")));
             setTelegramApiToken(prop.getProperty("telegramApiToken"));
             setSaveLocation(prop.getProperty("saveLocation"));
+            setHeadlessList(new ArrayList<>(Arrays.asList(prop.getProperty("headlessList").split(","))));
         } catch (IOException e) {
             GrabberUtils.err("No settings file found.");
         }
@@ -97,47 +86,55 @@ public class Settings {
             prop.setProperty("port", String.valueOf(getPort()));
             prop.setProperty("browser", getBrowser());
             prop.setProperty("filenameFormat", String.valueOf(getFilenameFormat()));
+            prop.setProperty("outputFormat", String.valueOf(getOutputFormat()));
             prop.setProperty("autoGetImages", String.valueOf(isAutoGetImages()));
             prop.setProperty("saveLocation", getSaveLocation());
             prop.setProperty("removeStyling", String.valueOf(isRemoveStyling()));
             prop.setProperty("useStandardLocation", String.valueOf(isUseStandardLocation()));
             prop.setProperty("frequency", String.valueOf(getFrequency()));
             prop.setProperty("pollingEnabled", String.valueOf(isPollingEnabled()));
-            prop.setProperty("nuHeadless", String.valueOf(isNuHeadless()));
-            prop.setProperty("wuxiaHeadless", String.valueOf(isWuxiaHeadless()));
-            prop.setProperty("wattHeadless", String.valueOf(isWattHeadless()));
+            prop.setProperty("headlessList", String.join(",", headlessList));
             prop.store(writer, "Novel-Grabber version: " + init.versionNumber);
         } catch (IOException e) {
             GrabberUtils.err(e.getMessage(), e);
         }
     }
     // Getter
-    public String getBrowser() {
-        return browser;
+    public int getFrequency() {
+        return frequency;
+    }
+    public int getPort() {
+        return port;
     }
     public int getFilenameFormat() {
         return filenameFormat;
     }
+    public int getOutputFormat() {
+        return outputFormat;
+    }
+    public boolean isPollingEnabled() {
+        return pollingEnabled;
+    }
     public boolean isAutoGetImages() {
         return autoGetImages;
-    }
-    public boolean isNuHeadless() {
-        return nuHeadless;
-    }
-    public boolean isWuxiaHeadless() {
-        return wuxiaHeadless;
-    }
-    public boolean isWattHeadless() {
-        return wattHeadless;
-    }
-    public String getSaveLocation() {
-        return saveLocation;
     }
     public boolean isRemoveStyling() {
         return removeStyling;
     }
     public boolean isUseStandardLocation() {
         return useStandardLocation;
+    }
+    public String getBrowser() {
+        return browser;
+    }
+    public String getSsl() {
+        return ssl;
+    }
+    public String getTelegramApiToken() {
+        return telegramApiToken;
+    }
+    public String getSaveLocation() {
+        return saveLocation;
     }
     public String getHost() {
         return host;
@@ -151,34 +148,27 @@ public class Settings {
     public String getReceiverEmail() {
         return receiverEmail;
     }
-    public int getFrequency() {
-        return frequency;
+    public List<String> getHeadlessList() {
+        return headlessList;
     }
-    public int getPort() {
-        return port;
-    }
-    public boolean isPollingEnabled() {
-        return pollingEnabled;
-    }
-    public String getSsl() {
-        return ssl;
-    }
-    public String getTelegramApiToken() {
-        return telegramApiToken;
-    }
-
     // Setter
-    public void setBrowser(String browser) {
-        this.browser = browser;
+    public void setPort(int port) {
+        this.port = port;
+    }
+    public void setFrequency(int frequency) {
+        this.frequency = frequency;
+    }
+    public void setOutputFormat(int outputFormat) {
+        this.outputFormat = outputFormat;
     }
     public void setFilenameFormat(int filenameFormat) {
         this.filenameFormat = filenameFormat;
     }
+    public void setPollingEnabled(boolean pollingEnabled) {
+        this.pollingEnabled = pollingEnabled;
+    }
     public void setAutoGetImages(boolean autoGetImages) {
         this.autoGetImages = autoGetImages;
-    }
-    public void setSaveLocation(String saveLocation) {
-        this.saveLocation = saveLocation;
     }
     public void setRemoveStyling(boolean removeStyling) {
         this.removeStyling = removeStyling;
@@ -198,28 +188,19 @@ public class Settings {
     public void setReceiverEmail(String receiverEmail) {
         this.receiverEmail = receiverEmail;
     }
-    public void setPort(int port) {
-        this.port = port;
-    }
     public void setSsl(String ssl) {
         this.ssl = ssl;
     }
-    public void setFrequency(int frequency) {
-        this.frequency = frequency;
-    }
-    public void setPollingEnabled(boolean pollingEnabled) {
-        this.pollingEnabled = pollingEnabled;
-    }
-    public void setNuHeadless(boolean nuHeadless) {
-        this.nuHeadless = nuHeadless;
-    }
-    public void setWuxiaHeadless(boolean wuxiaHeadless) {
-        this.wuxiaHeadless = wuxiaHeadless;
-    }
-    public void setWattHeadless(boolean wattHeadless) {
-        this.wattHeadless = wattHeadless;
+    public void setBrowser(String browser) {
+        this.browser = browser;
     }
     public void setTelegramApiToken(String token) {
         this.telegramApiToken = token;
+    }
+    public void setSaveLocation(String saveLocation) {
+        this.saveLocation = saveLocation;
+    }
+    public void setHeadlessList(List<String> headlessList) {
+        this.headlessList = headlessList;
     }
 }
