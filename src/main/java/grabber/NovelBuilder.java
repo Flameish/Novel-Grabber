@@ -55,6 +55,9 @@ public class NovelBuilder {
                 case "ie":
                     novel.browser = "IE";
                     break;
+                case "headless":
+                    novel.browser = "Headless";
+                    break;
             }
             if(params.get("headless").size() > 1) {
                 novel.headlessGUI = params.get("headless").get(1).toLowerCase().equals("gui");
