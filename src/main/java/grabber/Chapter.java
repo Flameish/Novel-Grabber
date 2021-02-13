@@ -1,5 +1,6 @@
 package grabber;
 
+import grabber.formats.EPUB;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
@@ -131,7 +132,7 @@ public class Chapter implements Serializable {
                 settings);
 
         if(displayChapterTitle) {
-            chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>" + EPUB.NL + chapterString;
+            chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>\n" + chapterString;
         }
         return chapterString;
     }
