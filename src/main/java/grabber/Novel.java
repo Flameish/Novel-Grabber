@@ -1,7 +1,11 @@
 package grabber;
 
+import grabber.formats.EPUB;
+import grabber.formats.Text;
 import grabber.sources.Source;
 import org.jsoup.nodes.Document;
+import system.data.Settings;
+import system.data.accounts.Accounts;
 import system.init;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -10,7 +14,7 @@ public class Novel {
     public Source source;
     public Driver headlessDriver;
     public Document tableOfContent;
-    public Map<String, String> cookies;
+    public Map<String, String> cookies = new HashMap<>();
     public List<Chapter> chapterList;
     public List<Chapter> successfulChapters;
     public List<Chapter> failedChapters;
@@ -68,13 +72,7 @@ public class Novel {
      */
     public void check() {
         if(source != null) {
-            if(useAccount) {
-                try {
-                    cookies = source.getLoginCookies();
-                } catch (UnsupportedOperationException e) {
-                    GrabberUtils.err(window,"Source does not support login.", e);
-                }
-            }
+            if(useAccount) cookies = Accounts.getInstance().getAccount(source.getName()).getCookies();
             chapterList = source.getChapterList();
             // Are created in GUI for manual
             if(!window.equals("manual")) {
@@ -190,8 +188,16 @@ public class Novel {
         } else {
             // Output EPUB if at least one chapter was downloaded
             if(!successfulChapters.isEmpty()) {
-                EPUB epub = new EPUB(this);
-                epub.writeEpub();
+                // EPUB
+                if(Settings.getInstance().getOutputFormat() == 0) {
+                    EPUB book = new EPUB(this);
+                    book.write();
+                }
+                // Text
+                if(Settings.getInstance().getOutputFormat() == 1) {
+                    Text book = new Text(this);
+                    book.write();
+                }
             }
         }
     }
@@ -240,8 +246,16 @@ public class Novel {
         } else {
             // Output EPUB if at least one chapter was downloaded
             if(!successfulChapters.isEmpty()) {
-                EPUB epub = new EPUB(this);
-                epub.writeEpub();
+                // EPUB
+                if(Settings.getInstance().getOutputFormat() == 0) {
+                    EPUB book = new EPUB(this);
+                    book.write();
+                }
+                // Text
+                if(Settings.getInstance().getOutputFormat() == 1) {
+                    Text book = new Text(this);
+                    book.write();
+                }
             }
         }
     }

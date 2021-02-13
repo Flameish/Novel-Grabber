@@ -10,7 +10,6 @@ import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Metadata;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubWriter;
-import system.init;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

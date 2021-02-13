@@ -1,9 +1,11 @@
 package gui;
 
 import grabber.Chapter;
-import grabber.EPUB;
+import grabber.formats.EPUB;
 import grabber.GrabberUtils;
 import grabber.Novel;
+import grabber.formats.Text;
+import system.data.Settings;
 import system.init;
 
 import javax.swing.*;
@@ -30,8 +32,16 @@ public class failedChaptersWindow extends JDialog {
         getRootPane().setDefaultButton(buttonOutput);
 
         buttonOutput.addActionListener(e -> {
-            EPUB epub = new EPUB(novel);
-            epub.writeEpub();
+            // EPUB
+            if(Settings.getInstance().getOutputFormat() == 0) {
+                EPUB book = new EPUB(novel);
+                book.write();
+            }
+            // Text
+            if(Settings.getInstance().getOutputFormat() == 1) {
+                Text book = new Text(novel);
+                book.write();
+            }
             dispose();
         });
         buttonRetry.addActionListener(e -> {
