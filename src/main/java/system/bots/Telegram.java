@@ -11,6 +11,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import grabber.CLI;
 import grabber.GrabberUtils;
 import grabber.Novel;
+import grabber.sources.Source;
 import system.data.Settings;
 
 import java.io.*;
@@ -27,11 +28,10 @@ import java.util.concurrent.Executors;
 public class Telegram {
     private static Telegram telegramBot;
     public TelegramBot novelly;
-    private static final String supportedSourcesFile = "supported_Sources.txt";
     private static final String infoFile = "info.txt";
     private static final String telegramDir = "./telegram";
     private static final String cliText = "" +
-            "Needs to start with \"-link\". All arguments are case sensitive." +
+            "Input needs to start with '-link'. All parameter are case sensitive.\n\n" +
             "[-link] | {novel_URL} | URL to the novel's table of contents page. Every other parameter is optional.\n" +
             "[-wait] | {miliseconds} | Time between each chapter grab.\n" +
             "[-chapters] | {all}, {5 27}, {12 last} | Specify which chapters to download.\n" +
@@ -40,7 +40,8 @@ public class Telegram {
             "[-getImages] | Grab images from chapter body as well.\n" +
             "[-displayTitle] | Write the chapter title at the top of each chapter text.\n" +
             "[-invertOrder] | Invert the chapter order.\n\n" +
-            "Example: -link http://novelhost.com/anovel/ -chapters 5 10 -getImages";
+            "Example:\n" +
+            " -link http://novelhost.com/novel/ -chapters 5 10 -getImages";
     private ConcurrentHashMap currentlyDownloading = new ConcurrentHashMap<>();
     private ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
 
@@ -90,12 +91,13 @@ public class Telegram {
                     .disableWebPagePreview(true));
         }
         else if(messageTxt.startsWith("/sources")) {
-            novelly.execute(new SendMessage(chatId, getStringFromFile(supportedSourcesFile))
+            novelly.execute(new SendMessage(chatId, getSourcesString())
                     .parseMode(ParseMode.Markdown)
                     .disableWebPagePreview(true));
         }
         else if(messageTxt.startsWith("/cli")) {
-            novelly.execute(new SendMessage(chatId, cliText));
+            novelly.execute(new SendMessage(chatId, cliText)
+                    .disableWebPagePreview(true));
         }
         else if(messageTxt.startsWith("/stop")) {
             if(currentlyDownloading.containsKey(chatId)) {
@@ -235,6 +237,7 @@ public class Telegram {
         novelly.execute(new EditMessageText(chatId, messageId, "Progress: "+(currChapter+1)+"/"+lastChapter));
     }
 
+
     public static void log(String msg) {
         String time = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         try {
@@ -263,6 +266,14 @@ public class Telegram {
 
     public void sendMsg(long chatId, String msg) {
         novelly.execute(new SendMessage(chatId, msg));
+    }
+
+    private String getSourcesString() {
+        StringBuilder sources = new StringBuilder();
+        for(Source source: GrabberUtils.getSources()) {
+            sources.append("[" + source.getName() + "](" + source.getUrl() + ")\n");
+        }
+        return sources.toString();
     }
 
 }
