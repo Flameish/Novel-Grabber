@@ -1,6 +1,8 @@
 package gui;
 
 import grabber.*;
+import grabber.sources.Source;
+import org.openqa.selenium.Cookie;
 import system.data.accounts.Account;
 import system.data.accounts.Accounts;
 import system.data.library.LibrarySettings;
@@ -11,7 +13,6 @@ import system.library.LibrarySystem;
 
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultFormatter;
@@ -26,19 +27,16 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 public class GUI extends JFrame {
-    private static final String[] headerlessBrowserWebsites = {"FoxTeller","MoonQuill"};
-    private static final String[] noHeaderlessBrowserWebsites = {"WattPad", "FanFiction", "FanFiktion"};
-    private static final String[] loginWebsites = {"Booklat","Wuxiaworld","LNMTL","WattPad","WebNovel"};
-    private static final String[] sourcesList = {"NovelUpdates","Wuxiaworld.com","WattPad"};
-    public static List<String> loginWebsitesList = Arrays.asList(loginWebsites);
     public static DefaultListModel<Chapter> manLinkListModel = new DefaultListModel<>();
     public static DefaultListModel<String> accountWebsiteListModel = new DefaultListModel<>();
-    public static DefaultListModel<String> sourcesListModel = new DefaultListModel<>();
+    public static DefaultListModel<Source> sourcesListModel = new DefaultListModel<>();
     public static DefaultListModel<String> settingsMenuModel = new DefaultListModel<>();
     public static List<String> blacklistedTags = new ArrayList<>();
+    private Driver guiDriver;
     public static TrayIcon trayIcon;
     public static Integer chapterToChapterNumber = 1;
     private static String[] epubFilenameFormats = {"<author> - <title>", "<title> - <author>", "<title>"};
+    private static String[] epubFormats = {"EPUB", "txt"};
     private static String[] sslList = {"SMTP","SMTPS","SMTP TLS",};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");
@@ -143,10 +141,9 @@ public class GUI extends JFrame {
     public JCheckBox useAccountCheckBox;
     private JList settingsMenuList;
     private JScrollPane settingsMenuScrollPane;
-    private JPanel settingsAccountsPanel;
     private JPanel settingsHeadlessPanel;
     private JButton emailSaveBtn;
-    private JComboBox settingsOutputFormatComboBox;
+    private JComboBox settingsNameOutputFormatComboBox;
     private JPanel settingsGeneralPanel;
     private JCheckBox settingsAlwaysGetImagesCheckBox;
     private JCheckBox settingsAlwaysRemoveStylingCheckBox;
@@ -188,7 +185,6 @@ public class GUI extends JFrame {
     private JButton stopButton1;
     private JButton libraryStopBtn;
     private JButton libraryStartBtn;
-    private JButton settingsAccountsBtn;
     private JButton settingsGeneralBtn;
     private JButton settingsLibraryBtn;
     private JButton settingsEmailBtn;
@@ -199,12 +195,12 @@ public class GUI extends JFrame {
     private JPanel settingsSourcesPanel;
     private JScrollPane sourcesScrollPane;
     private JList sourcesJList;
-    private JPanel sourcesNUPanel;
-    private JCheckBox sourcesNUHeadlessCheckBox;
-    private JCheckBox sourcesWuxiaHeadlessCheckBox;
-    private JCheckBox sourcesWattHeadlessCheckBox;
-    private JPanel sourcesWuxiaPanel;
-    private JPanel sourcesWattPanel;
+    private JComboBox settingsOutputFormatComboBox;
+    private JButton openBrowserButton;
+    private JButton editCookiesButton;
+    private JPanel sourcesLoginPanel;
+    private JCheckBox useHeadlessCheckBox;
+    private JPanel sourceCanUseHeadlessPanel;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -595,30 +591,6 @@ public class GUI extends JFrame {
         });
 
 
-
-        // Accounts
-        accountWebsiteList.addListSelectionListener(listSelectionEvent -> {
-            accountEditPanel.setVisible(true);
-            Border border = BorderFactory.createTitledBorder(accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex()));
-            accountEditPanel.setBorder(border);
-            Account account = Accounts.getInstance().getAccount(accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex()));
-            accountUsernameField.setText(account.getUsername());
-            accountPasswordField.setText(account.getPassword());
-            accountAddBtn.setVisible(true);
-            if(!accountUsernameField.getText().isEmpty()) {
-                accountAddBtn.setText("Edit");
-            } else {
-                accountAddBtn.setText("Add");
-            }
-        });
-
-        accountAddBtn.addActionListener(actionEvent -> {
-            String domain = accountWebsiteListModel.get(accountWebsiteList.getSelectedIndex());
-            Account account = Accounts.getInstance().getAccount(domain);
-            account.setUsername(accountUsernameField.getText());
-            account.setPassword(accountPasswordField.getText());
-            Accounts.getInstance().addAccount(account);
-        });
         settingsBrowseSaveLocationBtn.addActionListener(actionEvent -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -637,7 +609,8 @@ public class GUI extends JFrame {
             settings.setRemoveStyling(settingsAlwaysRemoveStylingCheckBox.isSelected());
             settings.setAutoGetImages(settingsAlwaysGetImagesCheckBox.isSelected());
             settings.setBrowser(settingsBrowserComboBox.getSelectedItem().toString());
-            settings.setFilenameFormat(settingsOutputFormatComboBox.getSelectedIndex());
+            settings.setFilenameFormat(settingsNameOutputFormatComboBox.getSelectedIndex());
+            settings.setOutputFormat(settingsOutputFormatComboBox.getSelectedIndex());
             settings.save();
         });
 
@@ -708,16 +681,8 @@ public class GUI extends JFrame {
             settings.save();
             init.librarySystem = new LibrarySystem();
         });
-        settingsAccountsBtn.addActionListener(actionEvent -> {
-            settingsGeneralPanel.setVisible(false);
-            settingsEmailPanel.setVisible(false);
-            settingsLibraryPanel.setVisible(false);
-            settingsSourcesPanel.setVisible(false);
 
-            settingsAccountsPanel.setVisible(true);
-        });
         settingsGeneralBtn.addActionListener(actionEvent -> {
-            settingsAccountsPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
@@ -725,7 +690,6 @@ public class GUI extends JFrame {
             settingsGeneralPanel.setVisible(true);
         });
         settingsLibraryBtn.addActionListener(actionEvent -> {
-            settingsAccountsPanel.setVisible(false);
             settingsGeneralPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
@@ -733,7 +697,6 @@ public class GUI extends JFrame {
             settingsLibraryPanel.setVisible(true);
         });
         settingsEmailBtn.addActionListener(actionEvent -> {
-            settingsAccountsPanel.setVisible(false);
             settingsGeneralPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
@@ -741,7 +704,6 @@ public class GUI extends JFrame {
             settingsEmailPanel.setVisible(true);
         });
         settingsSourcesBtn.addActionListener(actionEvent -> {
-            settingsAccountsPanel.setVisible(false);
             settingsGeneralPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
@@ -751,35 +713,24 @@ public class GUI extends JFrame {
 
         // Sources Panels
         sourcesJList.addListSelectionListener(listSelectionEvent -> {
-            sourcesNUPanel.setVisible(false);
-            sourcesWuxiaPanel.setVisible(false);
-            sourcesWattPanel.setVisible(false);
-            if(sourcesListModel.get(sourcesJList.getSelectedIndex()).equals("NovelUpdates")) {
-                sourcesNUPanel.setVisible(true);
+            int selected = sourcesJList.getSelectedIndex();
+            if(selected != -1) {
+                sourcesLoginPanel.setVisible(true);
+                if(sourcesListModel.get(selected).canHeadless()) {
+                    sourceCanUseHeadlessPanel.setVisible(true);
+                    String domain = sourcesListModel.get(selected).getName();
+                    if(settings.getHeadlessList().contains(domain)) {
+                        useHeadlessCheckBox.setSelected(true);
+                    } else {
+                        useHeadlessCheckBox.setSelected(false);
+                    }
+                } else {
+                    sourceCanUseHeadlessPanel.setVisible(false);
+                }
+            } else {
+                sourcesLoginPanel.setVisible(false);
             }
-            if(sourcesListModel.get(sourcesJList.getSelectedIndex()).equals("Wuxiaworld.com")) {
-                sourcesWuxiaPanel.setVisible(true);
-            }
-            if(sourcesListModel.get(sourcesJList.getSelectedIndex()).equals("WattPad")) {
-                sourcesWattPanel.setVisible(true);
-            }
         });
-
-        sourcesNUHeadlessCheckBox.addActionListener(e -> {
-            Settings.getInstance().setNuHeadless(sourcesNUHeadlessCheckBox.isSelected());
-            Settings.getInstance().save();
-        });
-
-        sourcesWuxiaHeadlessCheckBox.addActionListener(e -> {
-            Settings.getInstance().setWuxiaHeadless(sourcesWuxiaHeadlessCheckBox.isSelected());
-            Settings.getInstance().save();
-        });
-
-        sourcesWattHeadlessCheckBox.addActionListener(e -> {
-            Settings.getInstance().setWattHeadless(sourcesWattHeadlessCheckBox.isSelected());
-            Settings.getInstance().save();
-        });
-
 
         // Contribute button logic
         settingsContributeBtn.addActionListener(e -> {
@@ -790,6 +741,52 @@ public class GUI extends JFrame {
             }
         });
 
+        openBrowserButton.addActionListener(e -> {
+            int selected = sourcesJList.getSelectedIndex();
+            if(selected != -1) {
+                String sourceName = sourcesListModel.get(selected).getName();
+                if (guiDriver == null) guiDriver = new Driver("", settings.getBrowser());
+                guiDriver.driver.navigate().to(sourcesListModel.get(selected).getUrl());
+                Set<Cookie> cookies = new HashSet<>();
+                // Keeps browser open until manually closed
+                while (true) {
+                    try {
+                        cookies = guiDriver.driver.manage().getCookies();
+                        GrabberUtils.sleep(1000);
+                    } catch (Exception ex) {
+                        break;
+                    }
+                }
+                Map<String, String> loginCookies = new HashMap();
+                for (Cookie cookie : cookies) {
+                    loginCookies.put(cookie.getName(), cookie.getValue());
+                }
+                Accounts.getInstance().addAccount(new Account(sourceName, loginCookies));
+                guiDriver = null;
+            }
+        });
+        editCookiesButton.addActionListener(e -> {
+            int selected = sourcesJList.getSelectedIndex();
+            if(selected != -1) {
+                String sourceName = sourcesListModel.get(selected).getName();
+                editCookies.main(sourceName);
+            }
+
+        });
+
+        useHeadlessCheckBox.addActionListener(e -> {
+            int selected = sourcesJList.getSelectedIndex();
+            if(selected != -1) {
+                String domain = sourcesListModel.get(selected).getName();
+                if(useHeadlessCheckBox.isSelected()) {
+                    settings.getHeadlessList().add(domain);
+                    settings.save();
+                } else {
+                    settings.getHeadlessList().remove(domain);
+                    settings.save();
+                }
+            }
+        });
     }
 
     public void buildLibrary() {
@@ -1351,14 +1348,6 @@ public class GUI extends JFrame {
         manWaitTime = new JTextField("0");
         manWaitTime.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Settins Tab
-        settingsAccountsBtn = new JButton("Accounts", new ImageIcon(getClass().getResource("/images/accounts_icon.png")));
-        settingsAccountsBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
-        settingsAccountsBtn.setHorizontalTextPosition(SwingConstants.CENTER);
-        settingsAccountsBtn.setBorder(BorderFactory.createEmptyBorder());
-        settingsAccountsBtn.setContentAreaFilled(false);
-        settingsAccountsBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
         settingsGeneralBtn = new JButton("General", new ImageIcon(getClass().getResource("/images/settings_icon.png")));
         settingsGeneralBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
         settingsGeneralBtn.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -1426,16 +1415,11 @@ public class GUI extends JFrame {
         settingsBrowseSaveLocationBtn.setContentAreaFilled(false);
         settingsBrowseSaveLocationBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        settingsOutputFormatComboBox = new JComboBox(epubFilenameFormats);
-        settingsOutputFormatComboBox.setSelectedIndex(settings.getFilenameFormat());
+        settingsNameOutputFormatComboBox = new JComboBox(epubFilenameFormats);
+        settingsNameOutputFormatComboBox.setSelectedIndex(settings.getFilenameFormat());
 
-        accountPasswordField = new JPasswordField();
-        for(String accountDomain: loginWebsitesList) {
-            accountWebsiteListModel.addElement(accountDomain);
-        }
-        accountWebsiteList = new JList<>(accountWebsiteListModel);
-        accountWebsiteList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        accountWebsiteScrollPane = new JScrollPane(accountWebsiteList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        settingsOutputFormatComboBox = new JComboBox(epubFormats);
+        settingsOutputFormatComboBox.setSelectedIndex(settings.getOutputFormat());
 
         // Email settings
         emailHostField = new JTextField(settings.getHost());
@@ -1488,21 +1472,11 @@ public class GUI extends JFrame {
         libraryFrequencySpinner.addChangeListener(e -> settings.setFrequency((Integer) libraryFrequencySpinner.getValue()));
 
         //Sources
-        for(String source: sourcesList) {
+        for(Source source: GrabberUtils.getSources()) {
             sourcesListModel.addElement(source);
         }
         sourcesJList = new JList<>(sourcesListModel);
         sourcesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sourcesScrollPane = new JScrollPane(sourcesJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        //NovelUpdates
-        sourcesNUHeadlessCheckBox = new JCheckBox();
-        sourcesNUHeadlessCheckBox.setSelected(Settings.getInstance().isNuHeadless());
-        //Wuxiaworld.com
-        sourcesWuxiaHeadlessCheckBox = new JCheckBox();
-        sourcesWuxiaHeadlessCheckBox.setSelected(Settings.getInstance().isWuxiaHeadless());
-        //WattPad
-        sourcesWattHeadlessCheckBox = new JCheckBox();
-        sourcesWattHeadlessCheckBox.setSelected(Settings.getInstance().isWattHeadless());
     }
 }

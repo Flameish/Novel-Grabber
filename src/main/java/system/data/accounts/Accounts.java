@@ -5,15 +5,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import system.init;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Accounts {
-    private static String accountsFile;
+    private final static String accountsFile = GrabberUtils.getCurrentPath() + "/accounts.json";
     private static Accounts accounts;
     private List<Account> accountList = new ArrayList<>();
 
@@ -22,12 +21,6 @@ public class Accounts {
     public static Accounts getInstance() {
         if(accounts == null) {
             accounts = new Accounts();
-            try {
-                accountsFile = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/accounts.json";
-            } catch (URISyntaxException e) {
-                accountsFile = "accounts.json";
-                GrabberUtils.err(e.getMessage(), e);
-            }
             accounts.load();
         }
         return accounts;
@@ -69,8 +62,7 @@ public class Accounts {
         if(!accountList.contains(newAccount)) {
             accountList.add(newAccount);
         } else {
-            getAccount(newAccount.getDomain()).setUsername(newAccount.getUsername());
-            getAccount(newAccount.getDomain()).setPassword(newAccount.getPassword());
+            getAccount(newAccount.getDomain()).setCookies(newAccount.getCookies());
         }
         save();
     }
@@ -84,6 +76,6 @@ public class Accounts {
         for(Account account: accountList) {
             if(account.getDomain().equals(domain)) return account;
         }
-        return new Account(domain, "", "");
+        return new Account(domain, new HashMap<>());
     }
 }
