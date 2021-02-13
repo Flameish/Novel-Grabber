@@ -1,5 +1,6 @@
 package grabber;
 
+import grabber.sources.Source;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,16 +14,13 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Collection of shared utility methods
  */
 public class GrabberUtils {
-    static void createDir(String filepath) {
-        File dir = new File(filepath);
-        if (!dir.exists()) dir.mkdirs();
-    }
 
     public static String getFilenameFromUrl(String urlString) {
         try {
@@ -95,14 +93,6 @@ public class GrabberUtils {
         if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
             return fileName.substring(fileName.lastIndexOf(".")+1);
         else return null;
-    }
-
-    public static void sleep(int waitTime) {
-        try {
-            Thread.sleep(waitTime);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     static String getFileName(String imageName) {
@@ -195,4 +185,79 @@ public class GrabberUtils {
         return errorMsg;
     }
 
+    /**
+     * Returns found sources.
+     * @return {@code ArrayList<Source>} or empty list
+     */
+    public static List<Source> getSources() {
+        List<Source> sources = new ArrayList<>();
+        try {
+            String curPath = getCurrentPath();
+            // Create ClassLoader
+            File dir = new File(curPath + "/sources");
+            URL loadPath = dir.toURI().toURL();
+            URL[] urls = new URL[]{loadPath};
+            URLClassLoader classLoader = new URLClassLoader(urls);
+            // Loop through class files in source folder and load them via ClassLoader
+            for (File file: getSourceFiles(curPath + "/sources/grabber/sources")) {
+                // Ignore source interface and manual files
+                if(file.getName().equals("Source.class")
+                        || file.getName().equals("manualSource.class")
+                        || file.getName().equals("example_com.class")) continue;
+                // Create a temporary Source object of interface to get name of host/source
+                String className = "grabber.sources." + file.getName().replace(".class","");
+                sources.add((Source) classLoader.loadClass(className).getConstructor().newInstance());
+            }
+            sources.sort(Comparator.comparing(Source::getName));
+            return sources;
+        } catch (Exception e) {
+            err(e.getMessage(), e);
+            // Return list of added entries up until exception / empty list
+            return sources;
+        }
+    }
+
+    /**
+     * Returns source files inside a directory.
+     * @param pathname A pathname String
+     * @return {@code File[]} with .class files or empty array
+     */
+    private static File[] getSourceFiles(String pathname) {
+        try {
+            File dir = new File(pathname);
+            FilenameFilter filter = (file, name) -> name.endsWith(".class");
+            return dir.listFiles(filter);
+        } catch (Exception e) {
+            err(e.getMessage(), e);
+            return new File[0];
+        }
+    }
+
+    /**
+     * Returns the current working directory.
+     * @return Absolute path as {@code String} or "."
+     */
+    public static String getCurrentPath() {
+        try {
+            return new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                    .getParentFile()
+                    .getPath();
+        } catch (URISyntaxException e) {
+            err(e.getMessage(), e);
+            return ".";
+        }
+    }
+
+    public static void createDir(String filepath) {
+        File dir = new File(filepath);
+        if (!dir.exists()) dir.mkdirs();
+    }
+
+    public static void sleep(int waitTime) {
+        try {
+            Thread.sleep(waitTime);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }
