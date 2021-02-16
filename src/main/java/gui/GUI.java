@@ -217,17 +217,20 @@ public class GUI extends JFrame {
         autoCheckAvailability.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             if (!chapterListURL.getText().isEmpty()) {
                 autoBusyLabel.setVisible(true);
-
-                // Create novel object with settings
-                autoNovel = Novel.builder()
-                        .novelLink(chapterListURL.getText())
-                        .window("auto")
-                        .browser(settings.getBrowser())
-                        .useAccount(useAccountCheckBox.isSelected())
-                        .build();
-                autoNovel.check();
-                updateMetadataDisplay();
-                autoBusyLabel.setVisible(false);
+                try {
+                    // Create novel object with settings
+                    autoNovel = Novel.builder()
+                            .novelLink(chapterListURL.getText())
+                            .window("auto")
+                            .browser(settings.getBrowser())
+                            .useAccount(useAccountCheckBox.isSelected())
+                            .build();
+                    autoNovel.check();
+                } catch (Exception ex) {
+                    GrabberUtils.err("auto", "Something went wrong, see log for more information.", ex);
+                } finally {
+                    updateMetadataDisplay();
+                }
             }
         }));
 
