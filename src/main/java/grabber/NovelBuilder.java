@@ -176,7 +176,7 @@ public class NovelBuilder {
                 novel.source = (Source) classLoader.loadClass("grabber.sources."+domain).getConstructor(Novel.class).newInstance(novel);
             }
         } catch (Exception e) {
-            GrabberUtils.err(novel.window, "Host not supported: " + GrabberUtils.getDomainName(novel.novelLink), e);
+            GrabberUtils.err(novel.window, "Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
             if(init.telegramBot != null) {
                 init.telegramBot.sendMsg(novel.telegramChatId,"Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
             }
