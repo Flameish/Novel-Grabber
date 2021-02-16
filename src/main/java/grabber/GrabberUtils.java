@@ -8,11 +8,13 @@ import org.jsoup.nodes.Element;
 import system.init;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -128,10 +130,12 @@ public class GrabberUtils {
     }
 
     public static void err(String msg) {
+        log(msg);
         System.err.println("[ERROR]" + msg);
     }
     public static void err(String window, String msg) {
         System.err.println("[ERROR]" + msg);
+        log(msg);
         if(init.gui != null && window != null) {
             init.gui.appendText(window,"[ERROR]" + msg);
         }
@@ -140,11 +144,17 @@ public class GrabberUtils {
     public static void err(String msg, Exception e) {
         System.err.println("[ERROR]" + msg);
         e.printStackTrace();
+        StringWriter errors = new StringWriter();
+        e.printStackTrace(new PrintWriter(errors));
+        log(errors.toString());
     }
 
     public static void err(String window, String msg, Exception e) {
         System.err.println("[ERROR]" + msg);
         e.printStackTrace();
+        StringWriter errors = new StringWriter();
+        e.printStackTrace(new PrintWriter(errors));
+        log(errors.toString());
         if(init.gui != null && window != null) {
             init.gui.appendText(window,"[ERROR]" + msg);
         }
@@ -260,4 +270,15 @@ public class GrabberUtils {
             Thread.currentThread().interrupt();
         }
     }
+
+    public static void log(String msg) {
+        String time = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("log.txt", true))) {
+            writer.write("[" + time + "] " + msg);
+            writer.write("\n");
+        } catch (IOException e) {
+            err(e.getMessage(), e);
+        }
+    }
+
 }
