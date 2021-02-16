@@ -1072,6 +1072,9 @@ public class GUI extends JFrame {
             progressBar.setStringPainted(true);
             grabChaptersButton.setEnabled(false);
             grabChaptersButton.setVisible(false);
+            pagesCountLbl.setText("");
+            pagesCountLbl.setVisible(true);
+            pagesLbl.setVisible(true);
             stopButton.setEnabled(true);
             stopButton.setVisible(true);
         } else {
