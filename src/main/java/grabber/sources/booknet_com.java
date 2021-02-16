@@ -81,6 +81,10 @@ public class booknet_com implements Source {
                     .method(Connection.Method.GET)
                     .execute();
             Document doc = response.parse();
+            if(doc.selectFirst("title").text().equals("Mature")) {
+                GrabberUtils.err(novel.window, "Mature story. Requires an account to access.");
+                return chapterBody; // Return empty chapter body
+            }
             String csrf = doc.selectFirst("meta[name=csrf-token]").attr("content");
             String chapterId = doc.selectFirst(".js-chapter-change option[selected]").attr("value");
             StringBuilder content = new StringBuilder();
@@ -94,6 +98,7 @@ public class booknet_com implements Source {
                         .data("page", String.valueOf(page++))
                         .data("_csrf", csrf)
                         .cookies(response.cookies())
+                        .cookies(novel.cookies)
                         .method(Connection.Method.POST)
                         .execute().body();
                 JSONObject jsonObject = (JSONObject) new JSONParser().parse(json);
