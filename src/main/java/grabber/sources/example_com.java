@@ -86,11 +86,12 @@ public class example_com implements Source {
             Element title = toc.selectFirst("");
             Element author = toc.selectFirst("");
             Element desc = toc.selectFirst("");
+            Element cover = toc.selectFirst("");
 
             metadata.setTitle(title != null ? title.text() : "");
             metadata.setAuthor(author != null ? author.text() : "");
             metadata.setDescription(desc != null ? desc.text() : "");
-            metadata.setBufferedCover(toc.selectFirst("").attr("abs:src"));
+            metadata.setBufferedCover(cover != null ? cover.attr("") : "");
 
             Elements tags = toc.select("");
             List<String> subjects = new ArrayList<>();
