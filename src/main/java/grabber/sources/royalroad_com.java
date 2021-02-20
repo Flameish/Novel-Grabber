@@ -47,7 +47,7 @@ public class royalroad_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).get();
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
             Elements chapterLinks = toc.select("td:not([class]) a");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
@@ -63,7 +63,7 @@ public class royalroad_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
             chapterBody = doc.select(".chapter-content").first();
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
