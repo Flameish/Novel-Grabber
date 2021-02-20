@@ -20,6 +20,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -201,6 +202,7 @@ public class GUI extends JFrame {
     private JPanel sourcesLoginPanel;
     private JCheckBox useHeadlessCheckBox;
     private JPanel sourceCanUseHeadlessPanel;
+    private JButton saveCookiesButton;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -216,16 +218,19 @@ public class GUI extends JFrame {
         // First Auto-Novel initialization, fetching info and chapter list
         autoCheckAvailability.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             if (!chapterListURL.getText().isEmpty()) {
-                autoBusyLabel.setVisible(true);
                 try {
+                    autoBusyLabel.setVisible(true);
                     // Create novel object with settings
                     autoNovel = Novel.builder()
                             .novelLink(chapterListURL.getText())
                             .window("auto")
                             .browser(settings.getBrowser())
                             .useAccount(useAccountCheckBox.isSelected())
+                            .setSource(chapterListURL.getText())
                             .build();
                     autoNovel.check();
+                } catch (IOException | ClassNotFoundException ex) {
+                    GrabberUtils.err("auto", ex.getMessage(), ex);
                 } catch (Exception ex) {
                     GrabberUtils.err("auto", "Something went wrong, see log for more information.", ex);
                 } finally {
@@ -276,18 +281,8 @@ public class GUI extends JFrame {
                 showPopup("Wait time must contain numbers.", "warning");
                 return;
             }
-            autoDownloadInProgress(true);
             try {
-                autoNovel = Novel.modifier(autoNovel)
-                        .saveLocation(autoSaveLocation.getText())
-                        .waitTime(Integer.parseInt(waitTime.getText()))
-                        .displayChapterTitle(displayChapterTitleCheckBox.isSelected())
-                        .removeStyling(autoRemoveStyling.isSelected())
-                        .getImages(autoGetImages.isSelected())
-                        .browser(settings.getBrowser())
-                        .useAccount(useAccountCheckBox.isSelected())
-                        .build();
-                // Get chapter range
+                autoDownloadInProgress(true);
                 int tempFirstChapter;
                 int tempLastChapter;
                 if(chapterAllCheckBox.isSelected()) {
@@ -303,18 +298,26 @@ public class GUI extends JFrame {
                 }
                 // Set chapter range
                 autoNovel = Novel.modifier(autoNovel)
+                        .saveLocation(autoSaveLocation.getText())
+                        .waitTime(Integer.parseInt(waitTime.getText()))
+                        .displayChapterTitle(displayChapterTitleCheckBox.isSelected())
+                        .removeStyling(autoRemoveStyling.isSelected())
+                        .getImages(autoGetImages.isSelected())
+                        .browser(settings.getBrowser())
+                        .useAccount(useAccountCheckBox.isSelected())
                         .firstChapter(tempFirstChapter)
                         .lastChapter(tempLastChapter)
                         .build();
                 autoNovel.downloadChapters(); // Throws exception if grabbing was stopped
                 autoNovel.output();
-            } catch (Exception  e) {
+            } catch (InterruptedException e) {
                 GrabberUtils.err("auto",e.getMessage(), e);
                 autoNovel.killTask = false;
+            } finally {
+                autoDownloadInProgress(false);
             }
-            autoDownloadInProgress(false);
-
         }));
+
         browseButton.addActionListener(arg0 -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -326,11 +329,14 @@ public class GUI extends JFrame {
                 autoSaveLocation.setText(chooser.getSelectedFile().toString());
             }
         });
+
         autoEditBlacklistBtn.addActionListener(e -> editBlacklistedTags.main(autoNovel.blacklistedTags));
+
         autoEditMetaBtn.addActionListener(e -> {
             editMetadata.main(autoNovel.metadata);
             updateMetadataDisplay();
         });
+
         autoChapterToChapterNumberField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -348,6 +354,7 @@ public class GUI extends JFrame {
                 }
             }
         });
+
         chapterAllCheckBox.addActionListener(arg0 -> {
             if (chapterAllCheckBox.isSelected()) {
                 firstChapter.setEnabled(false);
@@ -359,6 +366,7 @@ public class GUI extends JFrame {
                 toLastChapter.setEnabled(true);
             }
         });
+
         toLastChapter.addActionListener(arg0 -> {
             if (toLastChapter.isSelected()) {
                 chapterAllCheckBox.setEnabled(false);
@@ -368,6 +376,7 @@ public class GUI extends JFrame {
                 lastChapter.setEnabled(true);
             }
         });
+
         stopButton.addActionListener(e -> {
             stopButton.setEnabled(false);
             autoNovel.killTask = true;
@@ -376,7 +385,6 @@ public class GUI extends JFrame {
         autoGetNumberButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> autoChapterOrder.main(autoNovel)));
 
         // manual chapter download
-
         manNovel.metadata = new NovelMetadata();
         manNovel.blacklistedTags = new ArrayList<>();
 
@@ -393,9 +401,10 @@ public class GUI extends JFrame {
                             .window("manual")
                             .useHeadless(manUseHeaderlessBrowser.isSelected())
                             .browser(settings.getBrowser())
+                            .setSource()
                             .build();
                     manNovel.check();
-                } catch (NullPointerException ex) {
+                } catch (NullPointerException | ClassNotFoundException | IOException ex) {
                     GrabberUtils.err("manual", ex.getMessage(), ex);
                 } finally {
                     if (!manLinkListModel.isEmpty()) {
@@ -403,7 +412,7 @@ public class GUI extends JFrame {
                         manDetectChaptersBtn.setEnabled(true);
                         manReverseBtn.setEnabled(true);
                         manChapterAmountLbl.setVisible(true);
-                        manChapterAmountLbl.setText("Chapters: "+manLinkListModel.size());
+                        manChapterAmountLbl.setText("Chapters: " + manLinkListModel.size());
                     }
                 }
             }
@@ -440,11 +449,16 @@ public class GUI extends JFrame {
                                 .getImages(manGetImages.isSelected())
                                 .autoDetectContainer(manDetectChapterContainerCheckBox.isSelected())
                                 .saveLocation(manSaveLocation.getText())
+                                .setSource()
                                 .build();
-                        manNovel.processChaptersToChapters(firstChapterField.getText(), lastChapterField.getText(), nextChapterButtonField.getText(), manChapterToChapterNumberField.getText());
+                        manNovel.processChaptersToChapters(
+                                firstChapterField.getText(),
+                                lastChapterField.getText(),
+                                nextChapterButtonField.getText(),
+                                manChapterToChapterNumberField.getText());
                         manNovel.output();
-                    } catch (Exception err) {
-                        GrabberUtils.err("manual", err.getMessage(), err);
+                    } catch (Exception ex) {
+                        GrabberUtils.err("manual", ex.getMessage(), ex);
                         manNovel.killTask = false;
                     } finally {
                         manDownloadInProgress(false);
@@ -490,12 +504,15 @@ public class GUI extends JFrame {
                                 .saveLocation(manSaveLocation.getText())
                                 .firstChapter(1)
                                 .lastChapter(manNovel.chapterList.size())
+                                .setSource()
                                 .build();
                         manNovel.downloadChapters();
                         manNovel.output();
-                    } catch (Exception err) {
+                    } catch (InterruptedException err) {
                         GrabberUtils.err("manual", err.getMessage(), err);
                         manNovel.killTask = false;
+                    } catch (IOException | ClassNotFoundException err) {
+                        GrabberUtils.err("manual", err.getMessage(), err);
                     } finally {
                         manDownloadInProgress(false);
                     }
@@ -744,30 +761,46 @@ public class GUI extends JFrame {
             }
         });
 
-        openBrowserButton.addActionListener(e -> {
+        openBrowserButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             int selected = sourcesJList.getSelectedIndex();
             if(selected != -1) {
-                String sourceName = sourcesListModel.get(selected).getName();
                 if (guiDriver == null) guiDriver = new Driver("", settings.getBrowser());
                 guiDriver.driver.navigate().to(sourcesListModel.get(selected).getUrl());
-                Set<Cookie> cookies = new HashSet<>();
+                openBrowserButton.setVisible(false);
+                saveCookiesButton.setVisible(true);
                 // Keeps browser open until manually closed
                 while (true) {
                     try {
-                        cookies = guiDriver.driver.manage().getCookies();
+                        guiDriver.driver.getTitle();
                         GrabberUtils.sleep(1000);
                     } catch (Exception ex) {
+                        saveCookiesButton.setVisible(false);
+                        openBrowserButton.setVisible(true);
+                        guiDriver = null;
                         break;
                     }
                 }
-                Map<String, String> loginCookies = new HashMap();
-                for (Cookie cookie : cookies) {
-                    loginCookies.put(cookie.getName(), cookie.getValue());
+            }
+        }));
+
+        saveCookiesButton.addActionListener(e -> {
+            int selected = sourcesJList.getSelectedIndex();
+            if(selected != -1) {
+                if (guiDriver != null) {
+                    String sourceName = sourcesListModel.get(selected).getName();
+                    Set<Cookie> cookies = guiDriver.driver.manage().getCookies();
+                    Map<String, String> loginCookies = new HashMap();
+                    for (Cookie cookie : cookies) {
+                        loginCookies.put(cookie.getName(), cookie.getValue());
+                    }
+                    Accounts.getInstance().addAccount(new Account(sourceName, loginCookies));
+                    guiDriver.close();
+                    saveCookiesButton.setVisible(false);
+                    openBrowserButton.setVisible(true);
                 }
-                Accounts.getInstance().addAccount(new Account(sourceName, loginCookies));
-                guiDriver = null;
             }
         });
+
         editCookiesButton.addActionListener(e -> {
             int selected = sourcesJList.getSelectedIndex();
             if(selected != -1) {
@@ -851,7 +884,14 @@ public class GUI extends JFrame {
                 if(lastDownloadedChapter != lastestChapter) {
                     String adjustedCliString = libNovel.getCliString()+" -window checker -chapters "+(lastDownloadedChapter+1)+" last";
                     String[] args = CLI.createArgsFromString(adjustedCliString);
-                    Novel cliNovel = CLI.downloadNovel(CLI.createParamsFromArgs(args));
+                    Novel cliNovel = null;
+                    try {
+                        cliNovel = CLI.downloadNovel(CLI.createParamsFromArgs(args));
+                    } catch (ClassNotFoundException e) {
+                        GrabberUtils.err(e.getMessage());
+                    } catch (IOException e) {
+                        GrabberUtils.err(e.getMessage(), e);
+                    }
 
                     if(libNovel.isUpdateLast()) {
                         libNovel.setLastChapter(cliNovel.chapterList.size());
