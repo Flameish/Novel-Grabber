@@ -35,6 +35,8 @@ public class editCookies extends JDialog {
             if(chapterNames.size() == chapterLinks.size()) {
                 Map<String, String> cookies = new HashMap<>();
                 for(int i = 0; i < chapterNames.size(); i++) {
+                    // Cookie name (key) can't be empty
+                    if(chapterNames.get(i).trim().isEmpty()) continue;
                     cookies.put(chapterNames.get(i), chapterLinks.get(i));
                 }
                 Accounts.getInstance().addAccount(new Account(domain, cookies));
