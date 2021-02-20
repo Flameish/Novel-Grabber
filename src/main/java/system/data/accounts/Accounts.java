@@ -47,7 +47,6 @@ public class Accounts {
      */
     public void save() {
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(accountsFile))) {
-            // Create JSON array from starred novels
             JSONArray accountArray = new JSONArray();
             for(Account account: accountList) {
                 accountArray.add(account.getAsJSONObject());
