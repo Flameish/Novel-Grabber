@@ -84,13 +84,13 @@ public class manualSource implements Source {
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
         Document toc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
         novel.headlessDriver.driver.close();
+        novel.headlessDriver = null;
         return toc;
     }
 
     private Document getTocStatic() {
         try {
             return Jsoup.connect(novel.novelLink)
-                    .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
         } catch (HttpStatusException httpEr) {
@@ -109,7 +109,6 @@ public class manualSource implements Source {
                 doc = getPageHeadless(chapter);
             } else {
                 doc = Jsoup.connect(chapter.chapterURL)
-                        .cookies(novel.cookies)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .get();
             }
@@ -141,9 +140,7 @@ public class manualSource implements Source {
     }
 
     private Document getPageHeadless(Chapter chapter) {
-        if (novel.headlessDriver == null) {
-            novel.headlessDriver = new Driver(novel.window, novel.browser);
-        }
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
         novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
         if (chapterContainer.isEmpty()) { // Wait 5 seconds for everything to finish loading
             novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
