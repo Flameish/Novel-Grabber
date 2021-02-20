@@ -7,6 +7,7 @@ import system.library.LibrarySystem;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -47,7 +48,13 @@ public class init {
         }
         else {
             if(!params.get("link").get(0).isEmpty()) {
-                CLI.downloadNovel(params);
+                try {
+                    CLI.downloadNovel(params);
+                } catch (ClassNotFoundException e) {
+                    GrabberUtils.err(e.getMessage());
+                } catch (IOException e) {
+                    GrabberUtils.err(e.getMessage(), e);
+                }
             } else {
                 GrabberUtils.err("No novel link.");
             }

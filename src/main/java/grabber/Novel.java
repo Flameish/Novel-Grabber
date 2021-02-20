@@ -84,9 +84,9 @@ public class Novel {
 
     /**
      * Downloads chapters from list.
-     * @throws Exception on stopped grabbing.
+     * @throws InterruptedException on stopped grabbing.
      */
-    public void downloadChapters() throws Exception {
+    public void downloadChapters() throws InterruptedException{
         GrabberUtils.info(window,"Starting download...");
         // Preparation
         if(init.gui != null) {
@@ -99,8 +99,9 @@ public class Novel {
         if(reverseOrder) Collections.reverse(chapterList);
         // Download handling
         for(int i = firstChapter-1; i < lastChapter; i++) { // -1 since chapter numbers start at 1
+            // replace with actual interrupted
             if(killTask) {
-                throw new Exception("Download stopped.");
+                throw new InterruptedException("Download stopped.");
             }
             chapterList.get(i).saveChapter(this);
             if(init.gui != null) {
@@ -120,7 +121,7 @@ public class Novel {
     public void processChaptersToChapters(String firstChapterURL,
                                           String lastChapterURL,
                                           String nextChapterBtn,
-                                          String chapterNumberString) throws Exception {
+                                          String chapterNumberString) throws InterruptedException {
         GrabberUtils.info(window, "Connecting...");
         init.gui.setMaxProgress(window, 9001);
 
@@ -133,10 +134,10 @@ public class Novel {
 
         chapterList = new ArrayList<>();
         while (true) {
+            // replace with actual interrupted
             if(killTask) {
-                throw new Exception("Grabbing stopped.");
+                throw new InterruptedException("Download stopped.");
             }
-
             Chapter currentChapter = new Chapter("Chapter " + chapterNumber++, nextChapterURL);
             chapterList.add(currentChapter);
             currentChapter.saveChapter(this);
@@ -157,7 +158,7 @@ public class Novel {
         }
     }
 
-    public void retry() throws Exception {
+    public void retry() throws InterruptedException {
         GrabberUtils.info(window,"Retrying failed chapters...");
 
         if(init.gui != null) {
@@ -176,8 +177,9 @@ public class Novel {
             if((telegramChatId) != 0 && (i % 10 == 0 || i == failedChapters.size()-1)) {
                 init.telegramBot.updateProgress(telegramChatId, i, failedChapters.size());
             }
+            // replace with actual interrupted
             if(killTask) {
-                throw new Exception("Download stopped.");
+                throw new InterruptedException("Download stopped.");
             }
             GrabberUtils.sleep(waitTime);
         }

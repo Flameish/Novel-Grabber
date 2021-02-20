@@ -131,7 +131,7 @@ public class Telegram {
                     try {
                         downloadNovelCLI(chatId, messageTxt);
                     } catch(Exception e) {
-                        novelly.execute(new SendMessage(chatId, "Error: " + e.getMessage()));
+                        novelly.execute(new SendMessage(chatId, e.getMessage()));
                     }
                     currentlyDownloading.remove(chatId);
                 } else {
@@ -143,17 +143,19 @@ public class Telegram {
         }
     }
 
-    private void downloadNovel(long chatId, String messageTxt) throws  Exception {
+    private void downloadNovel(long chatId, String messageTxt) throws IllegalStateException, IOException,
+            ClassNotFoundException, InterruptedException {
         Novel novel = Novel.builder()
                 .novelLink(messageTxt)
                 .window("auto")
                 .saveLocation("./telegram/requests/"+ chatId)
                 .getImages(true)
                 .telegramChatId(chatId)
+                .setSource(messageTxt)
                 .build();
         novel.check();
 
-        if(novel.chapterList.isEmpty()) throw new Exception();
+        if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
         currentlyDownloading.put(chatId, novel);
         // Send confirmation message and store message id
         novelly.execute(new SendMessage(chatId, "Downloading: "+novel.metadata.getTitle()));
@@ -166,20 +168,19 @@ public class Telegram {
                 .build();
         novel.downloadChapters();
 
-        if(!novel.killTask) {
-            novel.output();
-            File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
-            if(epub.exists()) {
-                novelly.execute(new SendDocument(chatId, epub));
-                GrabberUtils.info("EPUB sent: " + novel.epubFilename);
-            } else {
-                novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
-                GrabberUtils.err("EPUB not downloaded: " + messageTxt);
-            }
+        novel.output();
+        File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
+        if(epub.exists()) {
+            novelly.execute(new SendDocument(chatId, epub));
+            GrabberUtils.info("EPUB sent: " + novel.epubFilename);
+        } else {
+            novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
+            GrabberUtils.err("EPUB not downloaded: " + messageTxt);
         }
     }
 
-    private void downloadNovelCLI(long chatId, String messageTxt) throws  Exception {
+    private void downloadNovelCLI(long chatId, String messageTxt) throws IllegalStateException, IOException,
+            ClassNotFoundException, InterruptedException {
         String[] args = CLI.createArgsFromString(messageTxt);
         Map<String, List<String>> params = CLI.createParamsFromArgs(args);
 
@@ -190,9 +191,8 @@ public class Telegram {
                 .telegramChatId(chatId)
                 .saveLocation("./telegram/requests/"+ chatId)
                 .build();
-
         novel.check();
-        if(novel.chapterList.isEmpty()) throw new Exception();
+        if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
         currentlyDownloading.put(chatId, novel);
 
         // Chapter range needs to be set after fetching the chapter list
@@ -219,16 +219,14 @@ public class Telegram {
         downloadMsgIds.put(chatId, messageId);
         novel.downloadChapters();
 
-        if(!novel.killTask) {
-            novel.output();
-            File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
-            if(epub.exists()) {
-                novelly.execute(new SendDocument(chatId, epub));
-                GrabberUtils.info("EPUB sent: " + novel.epubFilename);
-            } else {
-                novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
-                GrabberUtils.err("EPUB not downloaded: " + messageTxt);
-            }
+        novel.output();
+        File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
+        if(epub.exists()) {
+            novelly.execute(new SendDocument(chatId, epub));
+            GrabberUtils.info("EPUB sent: " + novel.epubFilename);
+        } else {
+            novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
+            GrabberUtils.err("EPUB not downloaded: " + messageTxt);
         }
     }
 

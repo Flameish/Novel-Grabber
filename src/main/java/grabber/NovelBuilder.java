@@ -6,6 +6,9 @@ import system.data.accounts.Accounts;
 import system.init;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -31,8 +34,9 @@ public class NovelBuilder {
     /**
      * Set novel options from a given CLI string.
      */
-    public NovelBuilder fromCLI(Map<String, List<String>> params) {
+    public NovelBuilder fromCLI(Map<String, List<String>> params) throws IOException, ClassNotFoundException {
         novel.novelLink = params.get("link").get(0);
+        setSource(novel.novelLink);
         novel.window = "auto";
         novel.displayChapterTitle = params.containsKey("displayTitle");
         novel.reverseOrder = params.containsKey("invertOrder");
@@ -92,7 +96,6 @@ public class NovelBuilder {
     }
 
     public Novel build() {
-        setSource();
         return novel;
     }
     public NovelBuilder novelLink(String novelLink) {
@@ -157,30 +160,52 @@ public class NovelBuilder {
         return this;
     }
 
-    private void setSource() {
+    public NovelBuilder setSource() throws ClassNotFoundException, IOException {
+        Source source;
         try {
-            String sourcesFolder = new File(init.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/sources";
+            String sourcesFolder = GrabberUtils.getCurrentPath() + "/sources";
             File dir = new File(sourcesFolder);
             URL loadPath = dir.toURI().toURL();
             URL[] urls = new URL[]{loadPath};
             URLClassLoader classLoader = new URLClassLoader(urls);
 
-            if(novel.window.equals("manual")) {
-                novel.source = (Source) classLoader.loadClass("grabber.sources.manualSource").getConstructor(Novel.class).newInstance(novel);
-            }
-            if(novel.window.equals("auto") || novel.window.equals("checker")) {
-                String domain = GrabberUtils.getDomainName(novel.novelLink).replaceAll("[^A-Za-z0-9]", "_");
-                // Supported sources have their domain name as their class name and java does not allow class names
-                // to start with digits, which is possible for domain names, we need to add a 'n' for number in front.
-                if(domain.substring(0, 1).matches("\\d")) domain = "n" + domain;
-                novel.source = (Source) classLoader.loadClass("grabber.sources."+domain).getConstructor(Novel.class).newInstance(novel);
-            }
-        } catch (Exception e) {
-            GrabberUtils.err(novel.window, "Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
-            if(init.telegramBot != null) {
-                init.telegramBot.sendMsg(novel.telegramChatId,"Host not supported: " + GrabberUtils.getDomainName(novel.novelLink));
-            }
-            novel.source = null;
+            source = (Source) classLoader.loadClass("grabber.sources.manualSource")
+                    .getConstructor(Novel.class)
+                    .newInstance(novel);
+        } catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException("Manual source not found.", e);
+        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException |
+                MalformedURLException | IllegalAccessException e) {
+            throw new IOException("Could not access or load source file(s)", e);
         }
+        novel.source = source;
+        return this;
+    }
+
+    public NovelBuilder setSource(String hostUrl) throws ClassNotFoundException, IOException {
+        Source source;
+        try {
+            String sourcesFolder = GrabberUtils.getCurrentPath() + "/sources";
+            File dir = new File(sourcesFolder);
+            URL loadPath = dir.toURI().toURL();
+            URL[] urls = new URL[]{loadPath};
+            URLClassLoader classLoader = new URLClassLoader(urls);
+
+            String domain = GrabberUtils.getDomainName(hostUrl)
+                    .replaceAll("[^A-Za-z0-9]", "_");
+            // Supported sources have their domain name as their class name and java does not allow class names
+            // to start with digits, which is possible for domain names, we need to add a 'n' for number in front.
+            if (domain.substring(0, 1).matches("\\d")) domain = "n" + domain;
+            source = (Source) classLoader.loadClass("grabber.sources." + domain)
+                    .getConstructor(Novel.class)
+                    .newInstance(novel);
+        } catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException("Host not supported: " + GrabberUtils.getDomainName(novel.novelLink), e);
+        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException |
+                MalformedURLException | IllegalAccessException e) {
+            throw new IOException("Could not access or load source file(s)", e);
+        }
+        novel.source = source;
+        return this;
     }
 }

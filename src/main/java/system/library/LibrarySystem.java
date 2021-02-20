@@ -10,6 +10,7 @@ import system.data.library.LibraryNovel;
 import system.notifications.DesktopNotification;
 import system.notifications.EmailNotification;
 
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +45,16 @@ public class LibrarySystem {
 
             // Build a Novel object from CLI parameters and fetch chapter list
             String[] cliParams = CLI.createArgsFromString(libraryNovel.getCliString());
-            Novel autoNovel = Novel.builder().fromCLI(CLI.createParamsFromArgs(cliParams)).window("checker").build();
+            Novel autoNovel;
+            try {
+                autoNovel = Novel.builder().fromCLI(CLI.createParamsFromArgs(cliParams)).window("checker").build();
+            } catch (ClassNotFoundException e) {
+                GrabberUtils.err(e.getMessage());
+                continue;
+            } catch (IOException e) {
+                GrabberUtils.err(e.getMessage(), e);
+                continue;
+            }
             autoNovel.check();
 
             libraryNovel.setNewestChapter(autoNovel.chapterList.size());
@@ -90,11 +100,12 @@ public class LibrarySystem {
                 .firstChapter(libraryNovel.getLastLocalChapterNumber())
                 .lastChapter(autoNovel.chapterList.size())
                 .build();
+
         try {
             autoNovel.downloadChapters();
             autoNovel.output();
             // downloadChapters throws an Exception when grabbing was stopped midway, not possible here
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             GrabberUtils.err(e.getMessage(), e);
         }
     }
