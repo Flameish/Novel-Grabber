@@ -52,7 +52,7 @@ public class init {
                     CLI.downloadNovel(params);
                 } catch (ClassNotFoundException e) {
                     GrabberUtils.err(e.getMessage());
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     GrabberUtils.err(e.getMessage(), e);
                 }
             } else {

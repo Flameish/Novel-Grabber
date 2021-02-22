@@ -11,7 +11,7 @@ public class CLI {
     /**
      * Downloads a novel fully automatic based on CLI input.
      */
-    public static Novel downloadNovel(Map<String, List<String>> params) throws ClassNotFoundException, IOException {
+    public static Novel downloadNovel(Map<String, List<String>> params) throws ClassNotFoundException, IOException, InterruptedException {
         Novel novel = new NovelBuilder().fromCLI(params).build();
         novel.check();
         NovelMetadata metadata = novel.metadata;
@@ -35,11 +35,8 @@ public class CLI {
             novel.lastChapter = novel.chapterList.size();
         }
 
-        try {
-            novel.downloadChapters();
-        } catch (InterruptedException e) {
-            GrabberUtils.err(e.getMessage(), e);
-        }
+        novel.downloadChapters();
+
         // Change bookTitle temporarily to include chapter names
         // when creating the EPUB for system.library auto grabs
         String oldBookTitle = metadata.getTitle();
