@@ -43,8 +43,8 @@ public class chapterPreview extends JDialog {
 
     public static void main(Chapter chapter) {
         chapterPreview dialog = new chapterPreview(chapter);
-        dialog.setLocationRelativeTo(null);
         dialog.pack();
+        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 
