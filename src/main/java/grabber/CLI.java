@@ -75,7 +75,7 @@ public class CLI {
 
     public static String[] createArgsFromString(String cliString) {
         List<String> args = new ArrayList<>();
-        for (String s : cliString.split(" (?=(([^'\"]*['\"]){2})*[^'\"]*$)")) {
+        for (String s : cliString.split(" (?=(([^\"]*[\"]){2})*[^\"]*$)")) {
             if(s.startsWith("\"")) s = s.substring(1, s.lastIndexOf("\""));
             args.add(s);
         }
