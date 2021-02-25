@@ -18,7 +18,7 @@ import java.util.List;
  * Creates LibrarySystem instance.
  */
 public class init {
-    public static final String versionNumber = "3.4.1";
+    public static final String versionNumber = "3.5.0";
     public static GUI gui;
     public static LibrarySystem librarySystem;
     public static Telegram telegramBot;
@@ -50,9 +50,9 @@ public class init {
             if(!params.get("link").get(0).isEmpty()) {
                 try {
                     CLI.downloadNovel(params);
-                } catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException | InterruptedException e) {
                     GrabberUtils.err(e.getMessage());
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException e) {
                     GrabberUtils.err(e.getMessage(), e);
                 }
             } else {
@@ -72,6 +72,7 @@ public class init {
                 UIManager.setLookAndFeel(new FlatIntelliJLaf());
                 setUIFont (new javax.swing.plaf.FontUIResource("Tahoma",Font.PLAIN,12));
                 gui = new GUI();
+                gui.pack();
                 gui.setLocationRelativeTo(null);
                 gui.setVisible(true);
             } catch (Exception e) {
