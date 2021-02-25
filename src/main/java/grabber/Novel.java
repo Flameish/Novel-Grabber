@@ -133,8 +133,6 @@ public class Novel {
         int chapterNumber = 1;
         if(chapterNumberString != null && !chapterNumberString.isEmpty()) chapterNumber = Integer.parseInt(chapterNumberString);
 
-        if (useHeadless) headlessDriver = new Driver(window);
-
         chapterList = new ArrayList<>();
         while (true) {
             // replace with actual interrupted
