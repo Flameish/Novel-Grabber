@@ -12,6 +12,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import system.data.Settings;
 
 import java.util.Collections;
 import java.util.logging.Level;
@@ -24,17 +25,17 @@ public class Driver {
     public WebDriver driver;
     public WebDriverWait wait;
 
-    public Driver(String window, String browser) {
-        driverSetup(window, browser);
+    public Driver(String window) {
+        driverSetup(window);
         wait = new WebDriverWait(driver, 30);
     }
 
     /**
      * Selenium driver creation for selected browser.
      */
-    private void driverSetup(String window, String browser) {
+    private void driverSetup(String window) {
         GrabberUtils.info(window, "Starting browser...");
-        switch (browser) {
+        switch (Settings.getInstance().getBrowser()) {
             case "Chrome":
                 WebDriverManager.chromedriver().setup();
                 ChromeOptions chromeOptions = new ChromeOptions();

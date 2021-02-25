@@ -44,7 +44,7 @@ public class comrademao_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
 
-        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window);
         novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
         novel.headlessDriver.driver.navigate().to(novel.novelLink);
         novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tbody a")));
@@ -72,7 +72,7 @@ public class comrademao_com implements Source {
     }
 
     public Element getChapterContent(Chapter chapter) {
-        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window);
         novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
         novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
         novel.headlessDriver.driver.navigate().to(chapter.chapterURL);

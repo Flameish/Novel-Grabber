@@ -106,7 +106,7 @@ public class novelupdates_com implements Source {
 
     private Document getPageHeadless(String chapterURL) {
         if (novel.headlessDriver == null) {
-            novel.headlessDriver = new Driver(novel.window, novel.browser);
+            novel.headlessDriver = new Driver(novel.window);
         }
         novel.headlessDriver.driver.navigate().to(chapterURL);
         novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));

@@ -16,7 +16,6 @@ import org.openqa.selenium.WebElement;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class alphapolis_co_jp implements Source {
@@ -76,7 +75,7 @@ public class alphapolis_co_jp implements Source {
 
     private Document getPageHeadless(String chapterURL) {
         if (novel.headlessDriver == null) {
-            novel.headlessDriver = new Driver(novel.window, novel.browser);
+            novel.headlessDriver = new Driver(novel.window);
         }
         novel.headlessDriver.driver.navigate().to(chapterURL);
         novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));

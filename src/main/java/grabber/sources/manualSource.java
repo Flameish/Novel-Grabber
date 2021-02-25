@@ -78,7 +78,7 @@ public class manualSource implements Source {
     }
 
     private Document getTocHeadless() {
-        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window);
         novel.headlessDriver.driver.navigate().to(novel.novelLink);
         novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
@@ -140,7 +140,7 @@ public class manualSource implements Source {
     }
 
     private Document getPageHeadless(Chapter chapter) {
-        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window);
         novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
         if (chapterContainer.isEmpty()) { // Wait 5 seconds for everything to finish loading
             novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);

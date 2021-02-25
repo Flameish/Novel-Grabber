@@ -66,7 +66,7 @@ public class fanfiction_net implements Source {
     }
 
     private Document getTocHeadless() {
-        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window, novel.browser);
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window);
         novel.headlessDriver.driver.navigate().to(novel.novelLink);
         novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
         novel.headlessDriver.driver.navigate().to(novel.novelLink);

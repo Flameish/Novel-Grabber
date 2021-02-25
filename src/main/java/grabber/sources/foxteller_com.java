@@ -70,7 +70,7 @@ public class foxteller_com implements Source {
 
     private Document getPageHeadless(Chapter chapter) {
         if (novel.headlessDriver == null) {
-            novel.headlessDriver = new Driver(novel.window, novel.browser);
+            novel.headlessDriver = new Driver(novel.window);
         }
         novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
         novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
