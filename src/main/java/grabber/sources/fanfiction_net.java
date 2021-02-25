@@ -74,6 +74,7 @@ public class fanfiction_net implements Source {
         String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
         Document toc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
         novel.headlessDriver.driver.close();
+        novel.headlessDriver = null;
         return toc;
     }
 
