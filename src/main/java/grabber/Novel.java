@@ -72,7 +72,10 @@ public class Novel {
      */
     public void check() {
         if(source != null) {
-            if(useAccount) cookies = Accounts.getInstance().getAccount(source.getName()).getCookies();
+            if(useAccount) {
+                GrabberUtils.info("Using account");
+                cookies = Accounts.getInstance().getAccount(source.getName()).getCookies();
+            }
             chapterList = source.getChapterList();
             // Are created in GUI for manual
             if(!window.equals("manual")) {
