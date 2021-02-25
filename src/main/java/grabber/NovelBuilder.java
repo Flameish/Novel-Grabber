@@ -36,7 +36,7 @@ public class NovelBuilder {
      */
     public NovelBuilder fromCLI(Map<String, List<String>> params) throws IOException, ClassNotFoundException {
         novel.novelLink = params.get("link").get(0);
-        setSource(novel.novelLink);
+        novel.source = setSource(novel.novelLink).novel.source; //It's ugly, I know
         novel.window = "auto";
         novel.displayChapterTitle = params.containsKey("displayTitle");
         novel.reverseOrder = params.containsKey("invertOrder");
