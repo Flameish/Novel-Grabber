@@ -40,6 +40,9 @@ public class LibrarySystem {
      * Downloads new chapters and sends emails if selected.
      */
     private void run() {
+        if(init.gui != null) {
+            init.gui.libraryIsChecking(true);
+        }
         for(LibraryNovel libraryNovel: librarySettings.getStarredNovels()) {
             GrabberUtils.info("Checking "+ libraryNovel.getTitle());
 
@@ -86,6 +89,7 @@ public class LibrarySystem {
         // Update library gui
         if(init.gui != null) {
             init.gui.buildLibrary();
+            init.gui.libraryIsChecking(false);
         }
         // Write changes to file
         librarySettings.save();
