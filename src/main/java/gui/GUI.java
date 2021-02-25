@@ -766,16 +766,16 @@ public class GUI extends JFrame {
             if(selected != -1) {
                 if (guiDriver == null) guiDriver = new Driver("", settings.getBrowser());
                 guiDriver.driver.navigate().to(sourcesListModel.get(selected).getUrl());
-                openBrowserButton.setVisible(false);
-                saveCookiesButton.setVisible(true);
+                openBrowserButton.setEnabled(false);
+                saveCookiesButton.setEnabled(true);
                 // Keeps browser open until manually closed
                 while (true) {
                     try {
                         guiDriver.driver.getTitle();
                         GrabberUtils.sleep(1000);
                     } catch (Exception ex) {
-                        saveCookiesButton.setVisible(false);
-                        openBrowserButton.setVisible(true);
+                        saveCookiesButton.setEnabled(false);
+                        openBrowserButton.setEnabled(true);
                         guiDriver = null;
                         break;
                     }
@@ -795,8 +795,8 @@ public class GUI extends JFrame {
                     }
                     Accounts.getInstance().addAccount(new Account(sourceName, loginCookies));
                     guiDriver.close();
-                    saveCookiesButton.setVisible(false);
-                    openBrowserButton.setVisible(true);
+                    saveCookiesButton.setEnabled(false);
+                    openBrowserButton.setEnabled(true);
                 }
             }
         });
