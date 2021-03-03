@@ -1,6 +1,5 @@
 package grabber;
 
-import grabber.formats.EPUB;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
