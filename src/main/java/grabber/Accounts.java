@@ -1,39 +1,37 @@
-package system.data.accounts;
+package grabber;
 
-import grabber.GrabberUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 public class Accounts {
     private final static String accountsFile = GrabberUtils.getCurrentPath() + "/accounts.json";
     private static Accounts accounts;
-    private List<Account> accountList = new ArrayList<>();
+    private Map<String, Map<String, String>> domainCookies = new HashMap<>();
 
     private Accounts() { }
 
     public static Accounts getInstance() {
         if(accounts == null) {
             accounts = new Accounts();
-            accounts.load();
+            accounts.readAccountsFile();
         }
         return accounts;
     }
 
-    /**
-     * Reads accounts file(JSON) and creates Accounts object.
-     */
-    private void load() {
+    private void readAccountsFile() {
         try (BufferedReader reader = new BufferedReader(new FileReader(accountsFile))) {
             JSONArray accounts = (JSONArray) new JSONParser().parse(reader);
             for (Object loadedAccount: accounts) {
-                accountList.add(new Account((JSONObject) loadedAccount));
+                JSONObject accountObj = (JSONObject) loadedAccount;
+                String domain = (String) accountObj.get("domain");
+                HashMap cookies = (HashMap<String, String>) accountObj.get("cookies");
+                domainCookies.put(domain, cookies);
             }
         } catch (IOException e) {
             GrabberUtils.err("No accounts file found.");
@@ -42,39 +40,29 @@ public class Accounts {
         }
     }
 
-    /**
-     * Saves accounts as JSON file.
-     */
-    public void save() {
+    public void writeAccountsFile() {
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(accountsFile))) {
             JSONArray accountArray = new JSONArray();
-            for(Account account: accountList) {
-                accountArray.add(account.getAsJSONObject());
-            }
+            domainCookies.forEach((domain, cookies) -> {
+                JSONObject accountObj = new JSONObject();
+                accountObj.put("domain", domain);
+                accountObj.put("cookies", new JSONObject(cookies));
+                accountArray.add(accountObj);
+            });
             writer.write(accountArray.toJSONString());
         } catch(IOException e) {
             GrabberUtils.err(e.getMessage(), e);
         }
     }
 
-    public void addAccount(Account newAccount) {
-        if(!accountList.contains(newAccount)) {
-            accountList.add(newAccount);
-        } else {
-            getAccount(newAccount.getDomain()).setCookies(newAccount.getCookies());
-        }
-        save();
+    public void addAccount(String domain, Map<String, String> cookies) {
+        domainCookies.put(domain, cookies);
+        writeAccountsFile();
     }
 
-    /**
-     * Get account for domain if it exists.
-     * @param domain Account domain
-     * @return Found account or empty account
-     */
-    public Account getAccount(String domain) {
-        for(Account account: accountList) {
-            if(account.getDomain().equals(domain)) return account;
-        }
-        return new Account(domain, new HashMap<>());
+    public Map<String, String> getCookiesForDomain(String domain) {
+        Map<String, String> cookies = domainCookies.get(domain);
+        if (cookies != null) return cookies;
+        return new HashMap<>();
     }
 }
