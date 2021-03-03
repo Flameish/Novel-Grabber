@@ -9,7 +9,7 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import system.data.Settings;
+import system.Config;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class wuxiaworld_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            if (Settings.getInstance().getHeadlessList().contains(name)) {
+            if (Config.getInstance().getHeadlessList().contains(name)) {
                 toc = getTocHeadless();
             } else {
                 toc = getPageStatic();

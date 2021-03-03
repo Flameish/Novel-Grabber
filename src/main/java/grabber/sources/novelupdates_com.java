@@ -13,7 +13,7 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebElement;
-import system.data.Settings;
+import system.Config;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -82,7 +82,7 @@ public class novelupdates_com implements Source {
         Element chapterBody = null;
         try {
             Document doc;
-            if (Settings.getInstance().getHeadlessList().contains(name)) {
+            if (Config.getInstance().getHeadlessList().contains(name)) {
                 doc = getPageHeadless(chapter.chapterURL);
             } else {
                 doc = Jsoup.connect(chapter.chapterURL)

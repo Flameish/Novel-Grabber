@@ -5,7 +5,7 @@ import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
 import org.jsoup.Jsoup;
-import system.data.Settings;
+import system.Config;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +40,7 @@ public class Text {
 
     private String setFilename() {
         String filename = "Unknown.txt";
-        switch (Settings.getInstance().getFilenameFormat()) {
+        switch (Config.getInstance().getFilenameFormat()) {
             case 0:
                 filename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle() + ".txt";
                 if(novel.window.equals("checker")) filename =

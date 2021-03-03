@@ -3,7 +3,7 @@ import grabber.Chapter;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
-import system.data.Settings;
+import system.Config;
 
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
@@ -101,7 +101,7 @@ public class EPUB {
 
     private String setFilename() {
         String epubFilename = "Unknown.epub";
-        switch (Settings.getInstance().getFilenameFormat()) {
+        switch (Config.getInstance().getFilenameFormat()) {
             case 0:
                 epubFilename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle() + ".epub";
                 if(novel.window.equals("checker")) epubFilename =

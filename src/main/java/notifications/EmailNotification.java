@@ -1,4 +1,4 @@
-package system.notifications;
+package notifications;
 
 import grabber.GrabberUtils;
 import grabber.Novel;
@@ -7,26 +7,26 @@ import org.simplejavamail.api.mailer.Mailer;
 import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
-import system.data.Settings;
-import system.data.library.LibrarySettings;
-import system.data.library.LibraryNovel;
+import system.Config;
+import library.Library;
+import library.LibraryNovel;
 
 import javax.activation.FileDataSource;
 import java.io.File;
 
 public class EmailNotification {
     private final Mailer mailer;
-    private final Settings settings;
+    private final Config config;
 
     /**
      * Creates Mailer from email config.
      * @throws Exception if connection test to SMTP server fails.
      */
     public EmailNotification() throws IllegalArgumentException {
-        this.settings = Settings.getInstance();
-        if(settings.getHost().isEmpty()) throw new IllegalArgumentException("SMTP server host missing");
+        this.config = Config.getInstance();
+        if(config.getHost().isEmpty()) throw new IllegalArgumentException("SMTP server host missing");
         TransportStrategy SSL = TransportStrategy.SMTP;
-        switch(settings.getSsl()) {
+        switch(config.getSsl()) {
             case "SMTP":
                 SSL = TransportStrategy.SMTP;
                 break;
@@ -38,7 +38,7 @@ public class EmailNotification {
                 break;
         }
         mailer = MailerBuilder
-                .withSMTPServer(settings.getHost(), settings.getPort(), settings.getUsername(), settings.getPassword())
+                .withSMTPServer(config.getHost(), config.getPort(), config.getUsername(), config.getPassword())
                 .withTransportStrategy(SSL)
                 .withSessionTimeout(100 * 1000)
                 .buildMailer();
@@ -49,15 +49,15 @@ public class EmailNotification {
      * Sends Email with chapter names & links.
      */
     public void sendNotification(Novel novel) {
-        LibraryNovel libraryNovel = LibrarySettings.getInstance().getNovel(novel.novelLink);
+        LibraryNovel libNovel = Library.getInstance().getNovel(novel.novelLink);
         StringBuilder links = new StringBuilder();
 
-        for (int i = libraryNovel.getLastLocalChapterNumber(); i < libraryNovel.getNewestChapterNumber(); i++) {
+        for (int i = libNovel.getLastLocalChapterNumber(); i < libNovel.getNewestChapterNumber(); i++) {
             links.append("<a href=\""+novel.chapterList.get(i).chapterURL+"\">"+novel.chapterList.get(i).name+"</a><br>");
         }
         Email email = EmailBuilder.startingBlank()
-                .to(settings.getInstance().getReceiverEmail())
-                .from(settings.getInstance().getReceiverEmail())
+                .to(config.getInstance().getReceiverEmail())
+                .from(config.getInstance().getReceiverEmail())
                 .withSubject("[Novel-Grabber]"+novel.metadata.getTitle() + " - Update")
                 .withHTMLText(links.toString())
                 .buildEmail();
@@ -76,8 +76,8 @@ public class EmailNotification {
         }
         File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
         Email email = EmailBuilder.startingBlank()
-                .to(settings.getInstance().getReceiverEmail())
-                .from(settings.getInstance().getReceiverEmail())
+                .to(config.getInstance().getReceiverEmail())
+                .from(config.getInstance().getReceiverEmail())
                 .withSubject("[Novel-Grabber]"+novel.metadata.getTitle() +" - Update")
                 .withHTMLText(links.toString())
                 .withAttachment(epub.getName(), new FileDataSource(epub))
