@@ -1,4 +1,4 @@
-package system.bots;
+package bots;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -12,7 +12,7 @@ import grabber.CLI;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.sources.Source;
-import system.data.Settings;
+import system.Config;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -49,7 +49,7 @@ public class Telegram {
     // Initialization with api token
     private Telegram() {
         GrabberUtils.info("Starting Telegram bot...");
-        String token = Settings.getInstance().getTelegramApiToken();
+        String token = Config.getInstance().getTelegramApiToken();
         if(!token.isEmpty()) {
             novelly = new TelegramBot(token);
             GrabberUtils.info("Telegram bot started.");
@@ -113,7 +113,7 @@ public class Telegram {
             }
             if(messageTxt.startsWith("http")) {
                 if(!currentlyDownloading.containsKey(chatId)) {
-                    log(messageTxt);
+                    log(String.format("[%s] %s", chatId, messageTxt));
                     currentlyDownloading.put(chatId, "");
                     try {
                         downloadNovel(chatId, messageTxt);
@@ -126,7 +126,7 @@ public class Telegram {
                 }
             } else if(messageTxt.startsWith("-link")) {
                 if(!currentlyDownloading.containsKey(chatId)) {
-                    log(messageTxt);
+                    log(String.format("[%s] %s", chatId, messageTxt));
                     currentlyDownloading.put(chatId, "");
                     try {
                         downloadNovelCLI(chatId, messageTxt);
@@ -152,6 +152,7 @@ public class Telegram {
                 .getImages(true)
                 .telegramChatId(chatId)
                 .setSource(messageTxt)
+                .waitTime(1000)
                 .build();
         novel.check();
 
@@ -190,6 +191,7 @@ public class Telegram {
                 .useAccount(false)
                 .telegramChatId(chatId)
                 .saveLocation("./telegram/requests/"+ chatId)
+                .waitTime(1000)
                 .build();
         novel.check();
         if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
