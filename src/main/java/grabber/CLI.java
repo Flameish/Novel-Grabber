@@ -38,7 +38,7 @@ public class CLI {
         novel.downloadChapters();
 
         // Change bookTitle temporarily to include chapter names
-        // when creating the EPUB for system.library auto grabs
+        // when creating the EPUB for library auto grabs
         String oldBookTitle = metadata.getTitle();
         if(novel.window.equals("checker")) {
             metadata.setTitle(novel.firstChapter +"-"+ novel.lastChapter +"-"+ metadata.getTitle());
