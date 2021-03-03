@@ -2,6 +2,7 @@ package grabber;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ public class NovelMetadata {
     private String author = "Unknown";
     private String description = "";
     private String coverFormat = "png";
+    private String coverName = "cover";
     private List<String> subjects = new ArrayList<>();
     private BufferedImage bufferedCover;
 
@@ -19,6 +21,20 @@ public class NovelMetadata {
             bufferedCover = ImageIO.read(this.getClass().getResource("/images/cover_placeholder.png"));
         } catch (IOException e) {
             GrabberUtils.err(e.getMessage(), e);
+        }
+    }
+    /**
+     * Writes BufferedImage cover to file.
+     */
+    public void saveCover(String destDir) {
+        // Save cover
+        File outputfile = new File(destDir + coverName + "." + coverFormat);
+        outputfile.mkdirs();
+        try {
+            // cover name + file extension
+            ImageIO.write(getBufferedCover(), getCoverFormat(), outputfile);
+        } catch (IOException e) {
+            GrabberUtils.err("Could not save cover.", e);
         }
     }
 
@@ -33,6 +49,9 @@ public class NovelMetadata {
     }
     public String getCoverFormat() {
         return coverFormat;
+    }
+    public String getCoverName() {
+        return coverName;
     }
     public List<String> getSubjects() {
         return subjects;
@@ -49,6 +68,12 @@ public class NovelMetadata {
     }
     public void setDescription(String description) {
         this.description = description.isEmpty() ? "": description;
+    }
+    public void setCoverFormat(String coverFormat) {
+        this.coverFormat = coverFormat;
+    }
+    public void setCoverName(String coverName) {
+        this.coverName = coverName;
     }
     public void setSubjects(List<String> subjects) {
         this.subjects = subjects;
@@ -68,7 +93,6 @@ public class NovelMetadata {
             }
         }
     }
-
     public void setBufferedCover(BufferedImage coverImage, String coverFormat) {
         this.bufferedCover = coverImage;
         this.coverFormat = coverFormat;
