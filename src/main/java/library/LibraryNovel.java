@@ -1,64 +1,27 @@
-package system.data.library;
+package library;
 
-import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
 import org.json.simple.JSONObject;
-import system.data.Settings;
-import system.init;
-
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
- * Followed novel in system.library.
+ * Followed novel in library.
  */
-public class LibraryNovel {
-    private String novelUrl;
-    private String title;
-    private String coverName;
+public class LibraryNovel extends Novel {
+    private String lastChapterName;
+    private String newestChapterName;
     private boolean autoDownloadEnabled;
     private boolean sendEmailNotification;
     private boolean sendDesktopNotification;
     private boolean sendAttachmentEnabled;
     private boolean updateLast;
-    private String cliString;
-    private int lastChapter;
-    private int newestChapter;
+    private int lastChapterNumber;
+    private int newestChapterNumber;
     private int threshold;
 
-    /**
-     * Creates a new system.library novel.
-     * Writes the cover to file.
-     */
-    public LibraryNovel(Novel novel) {
-        NovelMetadata metadata = novel.metadata;
-        novelUrl = novel.novelLink;
-        title = metadata.getTitle();
-        coverName = "cover."+metadata.getCoverFormat();
-        lastChapter = novel.chapterList.size();
-        newestChapter = lastChapter;
+    LibraryNovel() {
 
-        // Build cli command
-        String tempCli = "-link "+novel.novelLink +" -path \""+ LibrarySettings.libraryFolder+ "/" + title +"/\"";
-
-        if(Settings.getInstance().isUseStandardLocation()) {
-            tempCli = "-link "+novel.novelLink +" -path \"" + Settings.getInstance().getSaveLocation() + "/"+ title +"/\"";
-        }
-
-        if(novel.useHeadless) {
-            tempCli = tempCli + " -headless " + Settings.getInstance().getBrowser();
-        }
-        if(novel.useAccount) {
-            tempCli = tempCli + " -login";
-        }
-        cliString = tempCli;
-
-        saveCover(metadata);
     }
-
 
     /**
      * Creates a library novel from a JSON object.
@@ -66,77 +29,59 @@ public class LibraryNovel {
      * This method is called for already existing novels.
      */
     public LibraryNovel(JSONObject libNovel) {
-        novelUrl = (String) libNovel.get("novelUrl");
-        title = (String) libNovel.get("title");
-        coverName = (String) libNovel.get("cover");
-        cliString = (String) libNovel.get("cliString");
+        novelLink = (String) libNovel.get("novelUrl");
+        saveLocation = (String) libNovel.get("saveLocation");
+        lastChapterName = (String) libNovel.get("lastChapterName");
+        newestChapterName = (String) libNovel.get("newestChapterName");
         autoDownloadEnabled = (boolean) libNovel.get("autoDownloadEnabled");
         sendEmailNotification = (boolean) libNovel.get("sendEmailNotification");
         sendDesktopNotification = (boolean) libNovel.get("sendDesktopNotification");
         sendAttachmentEnabled = (boolean) libNovel.get("sendAttachmentEnabled");
         updateLast = (boolean) libNovel.get("updateLast");
-        lastChapter = (((Long) libNovel.get("lastChapter")).intValue());
-        newestChapter = (((Long) libNovel.get("newestChapter")).intValue());
+        useAccount = (boolean) libNovel.get("useAccount");
+        lastChapterNumber = (((Long) libNovel.get("lastChapter")).intValue());
+        newestChapterNumber = (((Long) libNovel.get("newestChapter")).intValue());
         threshold = (((Long) libNovel.get("threshold")).intValue());
+
+        metadata = new NovelMetadata();
+        metadata.setTitle((String) libNovel.get("title"));
+        metadata.setCoverFormat((String) libNovel.get("coverFormat"));
     }
 
     /**
-     *Returns this system.library novel as a JSON Object.
+     * Returns this library novel as a JSON Object.
      */
     public JSONObject getAsJSONObject() {
         JSONObject libraryNovel = new JSONObject();
         libraryNovel.put("novelUrl", getNovelUrl());
-        libraryNovel.put("title", getTitle());
-        libraryNovel.put("cover", getCover());
-        libraryNovel.put("cliString", getCliString());
+        libraryNovel.put("saveLocation", getSaveLocation());
+        libraryNovel.put("title", metadata.getTitle());
+        libraryNovel.put("coverFormat", metadata.getCoverFormat());
+        libraryNovel.put("lastChapterName", getLastChapterName());
+        libraryNovel.put("newestChapterName", getNewestChapterName());
         libraryNovel.put("autoDownloadEnabled", isAutoDownloadEnabled());
         libraryNovel.put("sendEmailNotification", isSendEmailNotification());
         libraryNovel.put("sendDesktopNotification", isSendDesktopNotification());
         libraryNovel.put("sendAttachmentEnabled", isSendAttachmentEnabled());
         libraryNovel.put("updateLast", isUpdateLast());
+        libraryNovel.put("useAccount", isUseAccount());
         libraryNovel.put("lastChapter", getLastLocalChapterNumber());
         libraryNovel.put("newestChapter", getNewestChapterNumber());
         libraryNovel.put("threshold", getThreshold());
         return libraryNovel;
     }
 
-    /**
-     * Writes BufferedCover to file.
-     */
-    private void saveCover(NovelMetadata metadata) {
-        // Save cover
-        File outputfile = new File(LibrarySettings.libraryFolder + "/"+ metadata.getTitle() + "/" + coverName);
-        outputfile.mkdirs();
-        try {
-            // cover name + file extension
-            ImageIO.write(metadata.getBufferedCover(), metadata.getCoverFormat(), outputfile);
-        } catch (IOException e) {
-            GrabberUtils.err("Could not save cover.", e);
-        }
-    }
 
     public String getNovelUrl() {
-        return novelUrl;
+        return novelLink;
     }
 
     public void setNovelUrl(String novelUrl) {
-        this.novelUrl = novelUrl;
+        this.novelLink = novelUrl;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getCover() {
-        return coverName;
-    }
-
-    public void setCover(String cover) {
-        this.coverName = cover;
+    public NovelMetadata getMetadata() {
+        return metadata;
     }
 
     public boolean isAutoDownloadEnabled() {
@@ -147,28 +92,20 @@ public class LibraryNovel {
         this.autoDownloadEnabled = autoDownloadEnabled;
     }
 
-    public String getCliString() {
-        return cliString;
-    }
-
-    public void setCliString(String cliString) {
-        this.cliString = cliString;
-    }
-
     public int getLastLocalChapterNumber() {
-        return lastChapter;
+        return lastChapterNumber;
     }
 
-    public void setLastChapter(int lastChapter) {
-        this.lastChapter = lastChapter;
+    public void setLastChapterNumber(int lastChapterNumber) {
+        this.lastChapterNumber = lastChapterNumber;
     }
 
     public int getNewestChapterNumber() {
-        return newestChapter;
+        return newestChapterNumber;
     }
 
-    public void setNewestChapter(int newestChapter) {
-        this.newestChapter = newestChapter;
+    public void setNewestChapterNumber(int newestChapterNumber) {
+        this.newestChapterNumber = newestChapterNumber;
     }
 
     public int getThreshold() {
@@ -211,7 +148,41 @@ public class LibraryNovel {
         this.updateLast = updateLast;
     }
 
+    public String getLastChapterName() {
+        if(lastChapterName == null) return String.valueOf(lastChapterNumber);
+        return lastChapterName;
+    }
+
+    public void setLastChapterName(String lastChapterName) {
+        this.lastChapterName = lastChapterName;
+    }
+
+    public String getNewestChapterName() {
+        if(newestChapterName == null) return String.valueOf(newestChapterNumber);
+        return newestChapterName;
+    }
+
+    public void setNewestChapterName(String newestChapterName) {
+        this.newestChapterName = newestChapterName;
+    }
+
     public boolean notificationsEnabled() {
         return (isSendDesktopNotification() || isSendEmailNotification());
+    }
+
+    public String getSaveLocation() {
+        return saveLocation;
+    }
+
+    public boolean isUseAccount() {
+        return useAccount;
+    }
+
+    public void setUseAccount(boolean useAccount) {
+        this.useAccount = useAccount;
+    }
+
+    public void setSaveLocation(String saveLocation) {
+        this.saveLocation = saveLocation;
     }
 }

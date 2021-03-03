@@ -1,9 +1,10 @@
 package system;
+
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import grabber.*;
 import gui.GUI;
-import system.bots.Telegram;
-import system.library.LibrarySystem;
+import bots.Telegram;
+import library.Library;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,12 +16,13 @@ import java.util.List;
  * Initially called class.
  * Handles cli input.
  * Creates GUI instance.
- * Creates LibrarySystem instance.
+ * Creates Library instance.
  */
 public class init {
     public static final String versionNumber = "3.5.0";
+    public static final Library library =  Library.getInstance();
+    public static final Config config = Config.getInstance();
     public static GUI gui;
-    public static LibrarySystem librarySystem;
     public static Telegram telegramBot;
 
     public static void main(String[] args) {
@@ -34,13 +36,17 @@ public class init {
     public static void processParams(Map<String, List<String>> params) {
         if(params.containsKey("gui") || params.isEmpty()) {
             startGUI();
-            librarySystem = new LibrarySystem();
+            if(config.isPollingEnabled()) {
+                library.startPolling();
+            }
         }
         else if(params.containsKey("help")) {
             printHelp();
         }
         else if(params.containsKey("libraryEnabled")) {
-            librarySystem = new LibrarySystem();
+            if(config.isPollingEnabled()) {
+                library.startPolling();
+            }
         }
         else if(params.containsKey("telegramBot")) {
             telegramBot = Telegram.getInstance();

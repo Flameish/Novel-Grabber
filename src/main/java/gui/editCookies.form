@@ -27,7 +27,7 @@
             </properties>
             <border type="none"/>
             <children>
-              <component id="763c3" class="javax.swing.JLabel" binding="chapterNamesAreaLbl">
+              <component id="763c3" class="javax.swing.JLabel" binding="cookieNamesAreaLbl">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -35,7 +35,7 @@
                   <text value="Cookie name"/>
                 </properties>
               </component>
-              <component id="3d566" class="javax.swing.JLabel" binding="chapterLinksAreaLbl">
+              <component id="3d566" class="javax.swing.JLabel" binding="cookieValuesAreaLbl">
                 <constraints>
                   <grid row="0" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -52,7 +52,7 @@
                 </properties>
                 <border type="none"/>
                 <children>
-                  <component id="9b263" class="javax.swing.JTextArea" binding="chapterNamesArea" custom-create="true">
+                  <component id="9b263" class="javax.swing.JTextArea" binding="cookieNamesArea" custom-create="true">
                     <constraints/>
                     <properties>
                       <margin top="0" left="0" bottom="0" right="0"/>
@@ -67,7 +67,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="8e39c" class="javax.swing.JTextArea" binding="chapterLinksArea" custom-create="true">
+                  <component id="8e39c" class="javax.swing.JTextArea" binding="cookieValuesArea" custom-create="true">
                     <constraints/>
                     <properties>
                       <margin top="0" left="0" bottom="0" right="0"/>

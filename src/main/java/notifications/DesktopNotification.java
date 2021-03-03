@@ -1,11 +1,11 @@
-package system.notifications;
+package notifications;
 
 import dorkbox.notify.Notify;
 import dorkbox.util.ImageUtil;
 import grabber.GrabberUtils;
 import grabber.Novel;
-import system.data.library.LibraryNovel;
-import system.data.library.LibrarySettings;
+import library.Library;
+import library.LibraryNovel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,14 +21,16 @@ public class DesktopNotification {
     public static void sendChapterReleaseNotification(LibraryNovel libNovel, Novel autoNovel) {
         try {
             URI uri = new URI(autoNovel.chapterList.get(libNovel.getLastLocalChapterNumber()).chapterURL);
-            File imageFile = new File(LibrarySettings.libraryFolder + "/"
-                    + libNovel.getTitle() + "/" + libNovel.getCover());
+            File imageFile = new File(Library.libraryFolder + "/"
+                    + libNovel.getMetadata().getTitle() + "/"
+                    + libNovel.getMetadata().getCoverName() + "."
+                    + libNovel.getMetadata().getCoverFormat());
             InputStream resourceAsStream = new FileInputStream(imageFile);
             Image image = ImageUtil.getImageImmediate(ImageIO.read(resourceAsStream));
             image = image.getScaledInstance(100, 133, Image.SCALE_SMOOTH);
 
             Notify.create()
-                    .title(libNovel.getTitle())
+                    .title(libNovel.getMetadata().getTitle())
                     .text(autoNovel.chapterList.get(libNovel.getLastLocalChapterNumber()).name)
                     .darkStyle()
                     .image(image)

@@ -3,13 +3,11 @@ package gui;
 import grabber.*;
 import grabber.sources.Source;
 import org.openqa.selenium.Cookie;
-import system.data.accounts.Account;
-import system.data.accounts.Accounts;
-import system.data.library.LibrarySettings;
-import system.data.library.LibraryNovel;
-import system.data.*;
+import grabber.Accounts;
+import library.Library;
+import library.LibraryNovel;
+import system.Config;
 import system.init;
-import system.library.LibrarySystem;
 
 
 import javax.swing.*;
@@ -41,8 +39,8 @@ public class GUI extends JFrame {
     private static String[] sslList = {"SMTP","SMTPS","SMTP TLS",};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");
-    private static final Settings settings = Settings.getInstance();
-    private static final LibrarySettings librarySettings = LibrarySettings.getInstance();
+    private static final Config settings = Config.getInstance();
+    private static final Library library = Library.getInstance();
     public static Novel autoNovel = null;
     public static Novel manNovel = new Novel();
     public JTextField chapterListURL;
@@ -635,12 +633,12 @@ public class GUI extends JFrame {
         });
 
         autoStarredBtn.addActionListener(actionEvent -> {
-            if(librarySettings.isStarred(autoNovel.novelLink)) {
-                librarySettings.removeStarred(autoNovel.novelLink);
+            if(library.isStarred(autoNovel.novelLink)) {
+                library.removeNovel(autoNovel.novelLink);
                 autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/unstarred_icon.png")));
             } else {
-                librarySettings.setStarred(autoNovel);
-                librarySettings.save();
+                library.addNovel(autoNovel);
+                library.writeLibraryFile();
                 autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/starred_icon.png")));
             }
         });
@@ -689,7 +687,7 @@ public class GUI extends JFrame {
             settings.setFrequency((Integer) libraryFrequencySpinner.getValue());
             settings.setPollingEnabled(false);
             settings.save();
-            init.librarySystem.scheduler.shutdown();
+            library.stopPolling();
         });
         libraryStartBtn.addActionListener(actionEvent -> {
             libraryStartBtn.setEnabled(false);
@@ -699,7 +697,7 @@ public class GUI extends JFrame {
             settings.setFrequency((Integer) libraryFrequencySpinner.getValue());
             settings.setPollingEnabled(true);
             settings.save();
-            init.librarySystem = new LibrarySystem();
+            library.startPolling();
         });
 
         settingsGeneralBtn.addActionListener(actionEvent -> {
@@ -764,7 +762,7 @@ public class GUI extends JFrame {
         openBrowserButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             int selected = sourcesJList.getSelectedIndex();
             if(selected != -1) {
-                if (guiDriver == null) guiDriver = new Driver("", settings.getBrowser());
+                if (guiDriver == null) guiDriver = new Driver("");
                 guiDriver.driver.navigate().to(sourcesListModel.get(selected).getUrl());
                 openBrowserButton.setEnabled(false);
                 saveCookiesButton.setEnabled(true);
@@ -793,7 +791,7 @@ public class GUI extends JFrame {
                     for (Cookie cookie : cookies) {
                         loginCookies.put(cookie.getName(), cookie.getValue());
                     }
-                    Accounts.getInstance().addAccount(new Account(sourceName, loginCookies));
+                    Accounts.getInstance().addAccount(sourceName, loginCookies);
                     guiDriver.close();
                     saveCookiesButton.setEnabled(false);
                     openBrowserButton.setEnabled(true);
@@ -804,8 +802,8 @@ public class GUI extends JFrame {
         editCookiesButton.addActionListener(e -> {
             int selected = sourcesJList.getSelectedIndex();
             if(selected != -1) {
-                String sourceName = sourcesListModel.get(selected).getName();
-                editCookies.main(sourceName);
+                String domain = sourcesListModel.get(selected).getName();
+                editCookies.main(domain);
             }
 
         });
@@ -826,157 +824,171 @@ public class GUI extends JFrame {
     }
 
     public void buildLibrary() {
-        //libraryPanel.setVisible(false);
         libraryPanel.removeAll();
-        libraryPanel.setVisible(true);
         int gridRow = 0;
         int gridCol = 0;
-        for(LibraryNovel libNovel: librarySettings.getStarredNovels()) {
-            JPanel novelPane = new JPanel();
-            novelPane.setLayout(new GridBagLayout());
-            GridBagConstraints gbc = new GridBagConstraints();
+        for(LibraryNovel libNovel: library.getNovels()) {
+            GridBagConstraints c;
+            JPanel novelPane = new JPanel(new GridBagLayout());
 
-            JPanel infoPanel = new JPanel();
-            infoPanel.setLayout(new GridBagLayout());
-
-            JLabel novelTitle = new JLabel(libNovel.getTitle());
-            novelTitle.setFont(new Font("Calibri", Font.BOLD, 17));
-            novelTitle.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            novelTitle.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    GrabberUtils.openWebpage(URI.create(libNovel.getNovelUrl()));
-                }
-
-            });
-
-            JLabel lastChapter = new JLabel("Last chapter: "+ libNovel.getLastLocalChapterNumber());
-            JLabel newestChapter = new JLabel("Newest chapter: "+ libNovel.getNewestChapterNumber());
-
-            JButton changeCLIBtn = new JButton(new ImageIcon(getClass().getResource("/images/settings_icon.png")));
-            changeCLIBtn.setBorder(BorderFactory.createEmptyBorder());
-            changeCLIBtn.setContentAreaFilled(false);
-            changeCLIBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            changeCLIBtn.setToolTipText("Change the CLI command to adjust download parameters");
-            changeCLIBtn.addActionListener(actionEvent -> {
-                libraryNovelSettings.main(libNovel);
-            });
-
-            JButton removeFromFavBtn = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));
-            removeFromFavBtn.setBorder(BorderFactory.createEmptyBorder());
-            removeFromFavBtn.setContentAreaFilled(false);
-            removeFromFavBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            removeFromFavBtn.setToolTipText("Remove novel from system.library");
-            removeFromFavBtn.addActionListener(actionEvent -> {
-                librarySettings.removeStarred(libNovel.getNovelUrl());
-                librarySettings.save();
-                buildLibrary();
-            });
-
-            JButton getLatestChapterBtn = new JButton(new ImageIcon(getClass().getResource("/images/download_icon.png")));
-            getLatestChapterBtn.setBorder(BorderFactory.createEmptyBorder());
-            getLatestChapterBtn.setContentAreaFilled(false);
-            getLatestChapterBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            getLatestChapterBtn.setToolTipText("Download chapters from last downloaded to latest");
-            getLatestChapterBtn.addActionListener(actionEvent -> {
-                int lastDownloadedChapter = Integer.parseInt(lastChapter.getText().substring(lastChapter.getText().lastIndexOf(" ")+1));
-                int lastestChapter = Integer.parseInt(newestChapter.getText().substring(newestChapter.getText().lastIndexOf(" ")+1));
-                if(lastDownloadedChapter != lastestChapter) {
-                    String adjustedCliString = libNovel.getCliString()+" -window checker -chapters "+(lastDownloadedChapter+1)+" last";
-                    String[] args = CLI.createArgsFromString(adjustedCliString);
-                    Novel cliNovel = null;
-                    try {
-                        cliNovel = CLI.downloadNovel(CLI.createParamsFromArgs(args));
-                    } catch (ClassNotFoundException e) {
-                        GrabberUtils.err(e.getMessage());
-                    } catch (IOException e) {
-                        GrabberUtils.err(e.getMessage(), e);
-                    }
-
-                    if(libNovel.isUpdateLast()) {
-                        libNovel.setLastChapter(cliNovel.chapterList.size());
-                        librarySettings.save();
-                    }
-
-                    buildLibrary();
-                }
-            });
-
-            JPanel imagePanel = new JPanel();
-            imagePanel.setLayout(new GridBagLayout());
-
-            JLabel novelImage;
-            String novelCover = LibrarySettings.libraryFolder + "/"+ libNovel.getTitle()+"/"+ libNovel.getCover();
+            // Cover
+            c = new GridBagConstraints();
+            String novelCover = Library.libraryFolder + "/"
+                    + libNovel.getMetadata().getTitle() + "/cover."
+                    + libNovel.getMetadata().getCoverFormat();
+            JButton novelImage;
             if(novelCover.isEmpty()) {
-                novelImage = new JLabel(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
+                novelImage = new JButton(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
             } else {
                 ImageIcon imageIcon = new ImageIcon(novelCover); // load the image to a imageIcon
                 Image image = imageIcon.getImage(); // transform it
-                Image newimg = image.getScaledInstance(100, 133,  Image.SCALE_SMOOTH); // scale it the smooth way
+                Image newimg = image.getScaledInstance(120, 180,  Image.SCALE_SMOOTH);
                 imageIcon = new ImageIcon(newimg);  // transform it back
-                novelImage = new JLabel(imageIcon);
+                novelImage = new JButton(imageIcon);
             }
             novelImage.setBorder(BorderFactory.createEmptyBorder());
-            imagePanel.add(novelImage);
+            novelImage.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            // Show novel settings
+            novelImage.addActionListener(actionEvent -> {
+                libraryNovelSettings.main(libNovel);
+            });
+            c.gridx = 0;
+            c.gridy = 0;
+            c.fill = GridBagConstraints.BOTH;
+            c.gridheight = GridBagConstraints.REMAINDER;
+            novelPane.add(novelImage, c);
 
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.NORTHWEST;
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            infoPanel.add(novelTitle, gbc);
+            // Name
+            c = new GridBagConstraints();
+            JLabel novelTitle = new JLabel("<html><p style=\"width:275px\">" + libNovel.getMetadata().getTitle() + "</p></html>");
+            novelTitle.setFont(new Font("SansSerif", Font.BOLD, 17));
+            c.gridx = 1;
+            c.gridy = 0;
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.insets = new Insets(0,12,0,0);
+            novelPane.add(novelTitle, c);
 
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.NORTHEAST;
-            gbc.gridx = 1;
-            gbc.gridy = 0;
-            infoPanel.add(getLatestChapterBtn, gbc);
+            // Last chapter
+            c = new GridBagConstraints();
+            JLabel lastChapter = new JLabel("<html>Last chapter: <br>" +
+                    "<p style=\"width:275px\">" + libNovel.getLastChapterName() + "</p></html>");
+            c.gridx = 1;
+            c.gridy = 1;
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.insets = new Insets(5,12,0,0);
+            novelPane.add(lastChapter, c);
 
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.NORTHEAST;
-            gbc.gridx = 2;
-            gbc.gridy = 0;
-            infoPanel.add(changeCLIBtn, gbc);
+            // Newest chapter
+            c = new GridBagConstraints();
+            JLabel newestChapter = new JLabel("<html>Newest chapter: <br>" +
+                    "<p style=\"width:275px\">" + libNovel.getNewestChapterName() + "</p></html>");
+            c.gridx = 1;
+            c.gridy = 2;
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.insets = new Insets(5,12,0,0);
+            novelPane.add(newestChapter, c);
 
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.NORTHEAST;
-            gbc.gridx = 3;
-            gbc.gridy = 0;
-            infoPanel.add(removeFromFavBtn, gbc);
 
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.NORTHWEST;
-            gbc.gridx = 0;
-            gbc.gridy = 1;
-            infoPanel.add(lastChapter, gbc);
 
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.NORTHWEST;
-            gbc.gridx = 0;
-            gbc.gridy = 2;
-            infoPanel.add(newestChapter, gbc);
+            c = new GridBagConstraints();
+            // FlowLayout to remove border padding inside panel
+            JPanel downloadPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            c.gridx = 1;
+            c.gridy = 3;
+            c.anchor = GridBagConstraints.SOUTHWEST;
+            c.insets = new Insets(0,10,0,0);
+            novelPane.add(downloadPanel, c);
 
-            gbc.fill = GridBagConstraints.NONE;
-            //gbc.anchor = GridBagConstraints.WEST;
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            novelPane.add(imagePanel, gbc);
+            // Set default text
+            JLabel newChapterAmountLbl = new JLabel("No new chapters");
 
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            gbc.anchor = GridBagConstraints.NORTHWEST;
-            gbc.gridx = 1;
-            gbc.gridy = 0;
-            gbc.insets = new Insets( 0, 10, 0, 0);
-            novelPane.add(infoPanel, gbc);
+            // Show manual download button if new chapters available
+            int chapterDiff = libNovel.getNewestChapterNumber() - libNovel.getLastLocalChapterNumber();
+            if(chapterDiff > 0) {
+                // Overwrite default text with new chapter amount
+                newChapterAmountLbl.setText(chapterDiff + " new chapters");
 
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.gridx = gridCol++ % 2 == 0 ? 0 : 1;
-            gbc.gridy = gridRow++ % 2 == 0 ? gridRow : gridRow-1;
-            gbc.weightx = 1.0;
-            gbc.anchor = GridBagConstraints.NORTHWEST;
-            gbc.weighty = 1;
-            gbc.insets = new Insets( 10, 10, 10, 10);
-            libraryPanel.add(novelPane, gbc);
-            //libraryPanel.add(novelPane);
+                // Download button
+                c = new GridBagConstraints();
+                JButton getLatestChapterBtn = new JButton(new ImageIcon(getClass().getResource("/images/download_icon.png")));
+                getLatestChapterBtn.setBorder(BorderFactory.createEmptyBorder());
+                getLatestChapterBtn.setContentAreaFilled(false);
+                getLatestChapterBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                getLatestChapterBtn.setToolTipText("Download chapters from last downloaded to latest");
+                getLatestChapterBtn.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
+                    try {
+                        newChapterAmountLbl.setVisible(false);
+                        getLatestChapterBtn.setIcon(new ImageIcon(getClass().getResource("/images/busy.gif")));
+
+                        Novel novel = Novel.builder()
+                                .novelLink(libNovel.getNovelUrl())
+                                .saveLocation(libNovel.getSaveLocation())
+                                .setSource(libNovel.getNovelUrl())
+                                .useAccount(libNovel.isUseAccount())
+                                .firstChapter(libNovel.getLastLocalChapterNumber() + 1)
+                                .lastChapter(libNovel.getNewestChapterNumber())
+                                .window("checker")
+                                .build();
+                        novel.check();
+                        novel.downloadChapters();
+                        novel.output();
+
+                        if(libNovel.isUpdateLast()) {
+                            libNovel.setLastChapterNumber(libNovel.getNewestChapterNumber());
+                            libNovel.setLastChapterName(libNovel.getNewestChapterName());
+                            lastChapter.setText("<html>Last chapter: <br>" +
+                                    "<p style=\"width:275px\">" + libNovel.getLastChapterName() + "</p></html>");
+                            library.writeLibraryFile();
+                            // Show no new chapters available again
+                            newChapterAmountLbl.setText("No new chapters");
+                            getLatestChapterBtn.setVisible(false);
+                        } else {
+                            getLatestChapterBtn.setIcon(new ImageIcon(getClass().getResource("/images/download_icon.png")));
+                            getLatestChapterBtn.setVisible(true);
+                        }
+                    } catch (ClassNotFoundException | IOException | InterruptedException ex) {
+                        showPopup(ex.getMessage(), "error");
+                        GrabberUtils.err(ex.getMessage(), ex);
+                    } finally {
+                        newChapterAmountLbl.setVisible(true);
+                    }
+                }));
+                c = new GridBagConstraints();
+                c.gridx = 0;
+                c.gridy = 0;
+                c.anchor = GridBagConstraints.SOUTHWEST;
+                downloadPanel.add(getLatestChapterBtn, c);
+            }
+            // Add chapter amount label to panel
+            c.gridx = 1;
+            c.gridy = 0;
+            c.anchor = GridBagConstraints.SOUTH;
+            downloadPanel.add(newChapterAmountLbl, c);
+
+            // Add novel panel to library panel
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.NONE;
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.gridx = gridCol++ % 2 == 0 ? 0 : 1;
+            c.gridy = gridRow++ % 2 == 0 ? gridRow : gridRow-1;
+            c.weightx = 0.5;
+            c.weighty = 0.5;
+            c.insets = new Insets( 10, 5, 0, 0);
+            novelPane.setPreferredSize(new Dimension(500, 180));
+            libraryPanel.add(novelPane, c);
+        }
+        libraryPanel.validate();
+        libraryPanel.repaint();
+    }
+
+    public void libraryIsChecking(boolean isChecking) {
+        if (isChecking) {
+            tabbedPane.setIconAt(2, new ImageIcon(getClass().getResource("/images/busy.gif")));
+        } else {
+            tabbedPane.setIconAt(2, null);
         }
     }
 
@@ -1142,14 +1154,14 @@ public class GUI extends JFrame {
             pagesCountLbl.setText("");
             pagesCountLbl.setVisible(false);
             pagesLbl.setVisible(false);
-            if(librarySettings.isStarred(autoNovel.novelLink)) {
+            if(library.isStarred(autoNovel.novelLink)) {
                 autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/starred_icon.png")));
                 autoStarredBtn.setEnabled(true);
-                autoStarredBtn.setToolTipText("Remove novel from system.library");
+                autoStarredBtn.setToolTipText("Remove novel from library");
             } else {
                 autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/unstarred_icon.png")));
                 autoStarredBtn.setEnabled(true);
-                autoStarredBtn.setToolTipText("Add novel to system.library");
+                autoStarredBtn.setToolTipText("Add novel to library");
             }
             autoBookTitle.setText("<html><p style=\"width:200px\">"+metadata.getTitle()+"</p></html>");
             autoAuthor.setText(metadata.getAuthor());
@@ -1394,6 +1406,11 @@ public class GUI extends JFrame {
         manWaitTime = new JTextField("0");
         manWaitTime.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Library Tab
+        libraryScrollPane = new JScrollPane(libraryPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        libraryScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        // Settings Tab
         settingsGeneralBtn = new JButton("General", new ImageIcon(getClass().getResource("/images/settings_icon.png")));
         settingsGeneralBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
         settingsGeneralBtn.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -1433,7 +1450,15 @@ public class GUI extends JFrame {
 
         settingsBrowserComboBox = new JComboBox(Driver.browserList);
         if(settings.getBrowser().isEmpty()) {
-            String browserSelection = (String)JOptionPane.showInputDialog(this, "Please select your browser:","Browser selection",JOptionPane.PLAIN_MESSAGE, null, Driver.browserList,"Crhome");
+            String browserSelection = (String)JOptionPane.showInputDialog(this,
+                    "A browser is required for logins and browser based grabbing in some cases. \n\n" +
+                            "Alternatively you can select \"Headless\" to use an in-build one, it is unable to perform logins through. \n\n" +
+                            "You can change your selection in the settings at any point.\n\n",
+                    "Pick your browser",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    Driver.browserList,
+                    "Chrome");
             settings.setBrowser(browserSelection);
             settings.save();
         }
@@ -1492,7 +1517,7 @@ public class GUI extends JFrame {
         }
         emailSLLComboBox.setSelectedIndex(selectedIndex);
 
-        // Library
+        // Library settings
         enableCheckingCheckBox = new JCheckBox();
         enableCheckingCheckBox.setSelected(settings.isPollingEnabled());
 

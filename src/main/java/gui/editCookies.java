@@ -1,21 +1,19 @@
 package gui;
 
-import system.data.accounts.Account;
-import system.data.accounts.Accounts;
+import grabber.Accounts;
 
 import javax.swing.*;
 import java.awt.event.*;
 import java.util.*;
 
 public class editCookies extends JDialog {
+    private JLabel cookieNamesAreaLbl;
+    private JLabel cookieValuesAreaLbl;
     private JPanel contentPane;
-    private JLabel chapterNamesAreaLbl;
-    private JLabel chapterLinksAreaLbl;
     private JButton buttonSave;
     private JButton buttonClose;
-    private JTextArea chapterNamesArea;
-    private JTextArea chapterLinksArea;
-    private Account account;
+    private JTextArea cookieNamesArea;
+    private JTextArea cookieValuesArea;
     private String domain;
 
     public editCookies(String domain) {
@@ -28,10 +26,10 @@ public class editCookies extends JDialog {
 
         buttonSave.addActionListener(actionEvent -> {
             // Remove empty lines from textAreas
-            chapterNamesArea.setText(chapterNamesArea.getText().replaceAll("(?m)^\\s+$", ""));
-            chapterLinksArea.setText(chapterLinksArea.getText().replaceAll("(?m)^\\s+$", ""));
-            List<String> chapterNames = new ArrayList<>(Arrays.asList(chapterNamesArea.getText().split("\\n")));
-            List<String> chapterLinks = new ArrayList<>(Arrays.asList(chapterLinksArea.getText().split("\\n")));
+            cookieNamesArea.setText(cookieNamesArea.getText().replaceAll("(?m)^\\s+$", ""));
+            cookieValuesArea.setText(cookieValuesArea.getText().replaceAll("(?m)^\\s+$", ""));
+            List<String> chapterNames = new ArrayList<>(Arrays.asList(cookieNamesArea.getText().split("\\n")));
+            List<String> chapterLinks = new ArrayList<>(Arrays.asList(cookieValuesArea.getText().split("\\n")));
             if(chapterNames.size() == chapterLinks.size()) {
                 Map<String, String> cookies = new HashMap<>();
                 for(int i = 0; i < chapterNames.size(); i++) {
@@ -39,7 +37,7 @@ public class editCookies extends JDialog {
                     if(chapterNames.get(i).trim().isEmpty()) continue;
                     cookies.put(chapterNames.get(i), chapterLinks.get(i));
                 }
-                Accounts.getInstance().addAccount(new Account(domain, cookies));
+                Accounts.getInstance().addAccount(domain, cookies);
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(contentPane, "Lists are not the same length.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -73,12 +71,12 @@ public class editCookies extends JDialog {
     }
 
     private void createUIComponents() {
-        chapterNamesArea = new JTextArea();
-        chapterLinksArea = new JTextArea();
-        account = Accounts.getInstance().getAccount(domain);
-        for (Map.Entry<String, String> cookie : account.getCookies().entrySet()) {
-            chapterNamesArea.append(cookie.getKey() + "\n");
-            chapterLinksArea.append(cookie.getValue() + "\n");
-        }
+        cookieNamesArea = new JTextArea();
+        cookieValuesArea = new JTextArea();
+        Map<String, String> cookies = Accounts.getInstance().getCookiesForDomain(domain);
+        cookies.forEach((name, value) -> {
+            cookieNamesArea.append(name + "\n");
+            cookieValuesArea.append(value + "\n");
+        });
     }
 }
