@@ -1,17 +1,17 @@
-package system.data;
+package system;
 
 import grabber.GrabberUtils;
-import system.init;
 
 import java.io.*;
 import java.util.*;
 
 /**
- * Handles persistent setting data.
+ * Configuration class of persistent variables
  */
-public class Settings {
-    private final static String settingsFile = GrabberUtils.getCurrentPath() + "/settings.ini";
-    private static Settings settings;
+public class Config {
+    private static Config config;
+    private final static String configFile = GrabberUtils.getCurrentPath() + "/config.ini";
+    private List<String> headlessList = new ArrayList<>();
     private String browser = "";
     private String saveLocation = "";
     private String username = "";
@@ -20,31 +20,30 @@ public class Settings {
     private String receiverEmail = "";
     private String ssl = "SMTP";
     private String telegramApiToken = "";
-    private boolean autoGetImages = false;
-    private boolean removeStyling = false;
-    private boolean useStandardLocation = false;
-    private boolean pollingEnabled = true;
-    private List<String> headlessList = new ArrayList<>();
     private int filenameFormat = 0;
     private int outputFormat = 0;
     private int port = 25;
     private int frequency = 20;
+    private boolean autoGetImages = false;
+    private boolean removeStyling = false;
+    private boolean useStandardLocation = false;
+    private boolean pollingEnabled = true;
 
-    private Settings() { }
+    private Config() { }
 
-    public static Settings getInstance() {
-        if(settings == null) {
-            settings = new Settings();
-            settings.load();
+    public static Config getInstance() {
+        if(config == null) {
+            config = new Config();
+            config.load();
         }
-        return settings;
+        return config;
     }
 
     /**
-     * Reads settings from file.
+     * Reads config from file.
      */
     private void load() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(settingsFile))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             Properties prop = new Properties();
             prop.load(reader);
 
@@ -72,10 +71,10 @@ public class Settings {
     }
 
     /**
-     * Saves settings to file.
+     * Saves config to file.
      */
     public void save() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(settingsFile))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
             Properties prop = new Properties();
 
             prop.setProperty("username", getUsername());
