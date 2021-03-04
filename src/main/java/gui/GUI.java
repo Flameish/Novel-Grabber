@@ -833,8 +833,7 @@ public class GUI extends JFrame {
 
             // Cover
             c = new GridBagConstraints();
-            String novelCover = Library.libraryFolder + "/"
-                    + libNovel.getMetadata().getTitle() + "/cover."
+            String novelCover = Library.libraryFolder + "/" + libNovel.getMetadata().getTitle() + "/cover."
                     + libNovel.getMetadata().getCoverFormat();
             JButton novelImage;
             if(novelCover.isEmpty()) {
@@ -862,6 +861,13 @@ public class GUI extends JFrame {
             c = new GridBagConstraints();
             JLabel novelTitle = new JLabel("<html><p style=\"width:275px\">" + libNovel.getMetadata().getTitle() + "</p></html>");
             novelTitle.setFont(new Font("SansSerif", Font.BOLD, 17));
+            novelTitle.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            MouseListener mouseListener = new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    libraryNovelSettings.main(libNovel);
+                }
+            };
+            novelTitle.addMouseListener(mouseListener);
             c.gridx = 1;
             c.gridy = 0;
             c.fill = GridBagConstraints.HORIZONTAL;
