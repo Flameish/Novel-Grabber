@@ -51,10 +51,9 @@ Usage:
 -gui / `none` | | Starts the Graphical User Interface.
 -link | {novel_URL} | URL to the novel's table of contents page. Starts download.
 [-wait] | {miliseconds} | Time between each chapter grab.
-[-headless] | {chrome/firefox/opera/edge/IE} | Visit the website in your browser. Executes javascript etc.
+[-headless] | {chrome/firefox/opera/edge/IE/headless} | Visit the website in your browser. Executes javascript etc.
 [-chapters] | {all}, {5 27}, {12 last}	| Specify which chapters to download.
 [-path] | {directory_path} | Output directory for the EPUB.
-[-account] | {username password} | Add a new account for the host.
 [-login] | | Log in on website with saved account. -account is not needed if an account for this domain was added previously.
 [-noDesc] | | Don't create a description page.
 [-removeStyle] | | Remove all styling from chapter body.
@@ -66,7 +65,7 @@ Usage:
 <br>
 <strong>Telegram bot:</strong>
 
-To host your own Telegram bot you need to add the line `telegramApiToken=your_token ` to `settings.ini`
+To host your own Telegram bot you need to add the line `telegramApiToken=your_token ` to `config.ini`
 
 By default the bot will read the output for `/info` and `/sources` from files inside the telegram folder. 
 The files need to be named `info.txt` and `supported_Sources.txt` respectively.
