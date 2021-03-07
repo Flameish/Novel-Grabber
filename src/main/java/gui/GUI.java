@@ -35,7 +35,7 @@ public class GUI extends JFrame {
     public static TrayIcon trayIcon;
     public static Integer chapterToChapterNumber = 1;
     private static String[] epubFilenameFormats = {"<author> - <title>", "<title> - <author>", "<title>"};
-    private static String[] epubFormats = {"EPUB", "txt"};
+    private static String[] epubFormats = {"EPUB", "txt", "PDF"};
     private static String[] sslList = {"SMTP","SMTPS","SMTP TLS",};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");

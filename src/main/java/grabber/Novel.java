@@ -1,6 +1,7 @@
 package grabber;
 
 import grabber.formats.EPUB;
+import grabber.formats.PDF;
 import grabber.formats.Text;
 import grabber.sources.Source;
 import org.jsoup.nodes.Document;
@@ -201,6 +202,11 @@ public class Novel {
                     Text book = new Text(this);
                     book.write();
                 }
+                // PDF
+                if(Config.getInstance().getOutputFormat() == 2) {
+                    PDF book = new PDF(this);
+                    book.write();
+                }
             }
         }
     }
@@ -249,6 +255,7 @@ public class Novel {
         } else {
             // Output EPUB if at least one chapter was downloaded
             if(!successfulChapters.isEmpty()) {
+                // Make interface
                 // EPUB
                 if(Config.getInstance().getOutputFormat() == 0) {
                     EPUB book = new EPUB(this);
@@ -257,6 +264,11 @@ public class Novel {
                 // Text
                 if(Config.getInstance().getOutputFormat() == 1) {
                     Text book = new Text(this);
+                    book.write();
+                }
+                // PDF
+                if(Config.getInstance().getOutputFormat() == 2) {
+                    PDF book = new PDF(this);
                     book.write();
                 }
             }
