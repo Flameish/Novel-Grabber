@@ -72,7 +72,7 @@ public class boxnovel_org implements Source {
         Element chapterBody = null;
         try {
             Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
-            chapterBody = doc.select("#chapter-content").first();
+            chapterBody = doc.select("#chr-content").first();
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
