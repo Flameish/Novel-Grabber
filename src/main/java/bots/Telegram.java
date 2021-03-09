@@ -44,7 +44,7 @@ public class Telegram {
             " -link http://novelhost.com/novel/ -chapters 5 10 -getImages";
     private ConcurrentHashMap currentlyDownloading = new ConcurrentHashMap<>();
     private ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
-
+    ExecutorService executor = Executors.newFixedThreadPool(10);
 
     // Initialization with api token
     private Telegram() {
@@ -69,12 +69,11 @@ public class Telegram {
     public void run() {
         // Poll for new messages
         novelly.setUpdatesListener(updates -> {
-            ExecutorService executor = Executors.newFixedThreadPool(10);
             // Process each update in new thread
             for(Update update: updates) {
                 executor.execute(() -> processMessage(update.message()));
             }
-            executor.shutdown();
+
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         });
     }
@@ -104,7 +103,7 @@ public class Telegram {
                 ((Novel) currentlyDownloading.get(chatId)).killTask = true;
                 currentlyDownloading.remove(chatId);
             } else {
-                novelly.execute(new SendMessage(chatId, "No current download."));
+                novelly.execute(new SendMessage(chatId, "No download in progress."));
             }
         }
         else {
@@ -114,26 +113,26 @@ public class Telegram {
             if(messageTxt.startsWith("http")) {
                 if(!currentlyDownloading.containsKey(chatId)) {
                     log(String.format("[%s] %s", chatId, messageTxt));
-                    currentlyDownloading.put(chatId, "");
                     try {
                         downloadNovel(chatId, messageTxt);
                     } catch(Exception e) {
-                        novelly.execute(new SendMessage(chatId, "Error: " + e.getMessage()));
+                        novelly.execute(new SendMessage(chatId, e.getMessage()));
+                    } finally {
+                        currentlyDownloading.remove(chatId);
                     }
-                    currentlyDownloading.remove(chatId);
                 } else {
                     novelly.execute(new SendMessage(chatId, "Only one download at a time allowed."));
                 }
             } else if(messageTxt.startsWith("-link")) {
                 if(!currentlyDownloading.containsKey(chatId)) {
                     log(String.format("[%s] %s", chatId, messageTxt));
-                    currentlyDownloading.put(chatId, "");
                     try {
                         downloadNovelCLI(chatId, messageTxt);
                     } catch(Exception e) {
                         novelly.execute(new SendMessage(chatId, e.getMessage()));
+                    } finally {
+                        currentlyDownloading.remove(chatId);
                     }
-                    currentlyDownloading.remove(chatId);
                 } else {
                     novelly.execute(new SendMessage(chatId, "Only one download at a time allowed."));
                 }
@@ -154,10 +153,11 @@ public class Telegram {
                 .setSource(messageTxt)
                 .waitTime(1000)
                 .build();
+        currentlyDownloading.put(chatId, novel);
         novel.check();
 
         if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
-        currentlyDownloading.put(chatId, novel);
+
         // Send confirmation message and store message id
         novelly.execute(new SendMessage(chatId, "Downloading: "+novel.metadata.getTitle()));
         int messageId = novelly.execute(new SendMessage(chatId, "Progress: ")).message().messageId();
@@ -193,9 +193,10 @@ public class Telegram {
                 .saveLocation("./telegram/requests/"+ chatId)
                 .waitTime(1000)
                 .build();
+        currentlyDownloading.put(chatId, novel);
         novel.check();
         if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
-        currentlyDownloading.put(chatId, novel);
+
 
         // Chapter range needs to be set after fetching the chapter list
         if(params.containsKey("chapters")) {
