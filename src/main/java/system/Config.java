@@ -11,7 +11,7 @@ import java.util.*;
 public class Config {
     private static Config config;
     private final static String configFile = GrabberUtils.getCurrentPath() + "/config.ini";
-    private List<String> headlessList = new ArrayList<>();
+    private List<String> headlessList;
     private String browser = "";
     private String saveLocation = "";
     private String username = "";
@@ -46,25 +46,29 @@ public class Config {
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             Properties prop = new Properties();
             prop.load(reader);
-
-            setUsername(prop.getProperty("username"));
-            setPassword(prop.getProperty("password"));
-            setReceiverEmail(prop.getProperty("receiverEmail"));
-            setHost(prop.getProperty("host"));
-            setSsl(prop.getProperty("ssl"));
-            setPort(Integer.parseInt(prop.getProperty("port")));
-            setBrowser(prop.getProperty("browser"));
-            setFilenameFormat(Integer.parseInt(prop.getProperty("filenameFormat")));
-            setOutputFormat(Integer.parseInt(prop.getProperty("outputFormat")));
-            setAutoGetImages(Boolean.parseBoolean(prop.getProperty("autoGetImages")));
-            setSaveLocation(prop.getProperty("saveLocation"));
-            setRemoveStyling(Boolean.parseBoolean(prop.getProperty("removeStyling")));
-            setUseStandardLocation(Boolean.parseBoolean(prop.getProperty("useStandardLocation")));
-            setFrequency(Integer.parseInt(prop.getProperty("frequency")));
-            setPollingEnabled(Boolean.parseBoolean(prop.getProperty("pollingEnabled")));
-            setTelegramApiToken(prop.getProperty("telegramApiToken"));
-            setSaveLocation(prop.getProperty("saveLocation"));
-            setHeadlessList(new ArrayList<>(Arrays.asList(prop.getProperty("headlessList").split(","))));
+            // If property is not found in file, use default value from fields
+            // Email
+            setUsername(prop.getProperty("username", username));
+            setPassword(prop.getProperty("password", password));
+            setReceiverEmail(prop.getProperty("receiverEmail", receiverEmail));
+            setHost(prop.getProperty("host", host));
+            setSsl(prop.getProperty("ssl", ssl));
+            setPort(Integer.parseInt(prop.getProperty("port", String.valueOf(port))));
+            // Grabber
+            setBrowser(prop.getProperty("browser", browser));
+            setFilenameFormat(Integer.parseInt(prop.getProperty("filenameFormat", String.valueOf(filenameFormat))));
+            setOutputFormat(Integer.parseInt(prop.getProperty("outputFormat", String.valueOf(outputFormat))));
+            setAutoGetImages(Boolean.parseBoolean(prop.getProperty("autoGetImages", String.valueOf(autoGetImages))));
+            setSaveLocation(prop.getProperty("saveLocation", saveLocation));
+            setRemoveStyling(Boolean.parseBoolean(prop.getProperty("removeStyling", String.valueOf(removeStyling))));
+            setUseStandardLocation(Boolean.parseBoolean(prop.getProperty("useStandardLocation", String.valueOf(useStandardLocation))));
+            setHeadlessList(new ArrayList<>(Arrays.asList(prop.getProperty("headlessList", "").split(","))));
+            // Library
+            setFrequency(Integer.parseInt(prop.getProperty("frequency", String.valueOf(frequency))));
+            setPollingEnabled(Boolean.parseBoolean(prop.getProperty("pollingEnabled", String.valueOf(pollingEnabled))));
+            // Telegram
+            setTelegramApiToken(prop.getProperty("telegramApiToken", telegramApiToken));
+            setTelegramWait(Integer.parseInt(prop.getProperty("telegramWait", String.valueOf(telegramWait))));
         } catch (IOException e) {
             GrabberUtils.err("No settings file found.");
         }
@@ -76,13 +80,14 @@ public class Config {
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
             Properties prop = new Properties();
-
+            // Email
             prop.setProperty("username", getUsername());
             prop.setProperty("password", getPassword());
             prop.setProperty("receiverEmail", getReceiverEmail());
             prop.setProperty("host", getHost());
             prop.setProperty("ssl", getSsl());
             prop.setProperty("port", String.valueOf(getPort()));
+            // Grabber
             prop.setProperty("browser", getBrowser());
             prop.setProperty("filenameFormat", String.valueOf(getFilenameFormat()));
             prop.setProperty("outputFormat", String.valueOf(getOutputFormat()));
@@ -90,6 +95,8 @@ public class Config {
             prop.setProperty("saveLocation", getSaveLocation());
             prop.setProperty("removeStyling", String.valueOf(isRemoveStyling()));
             prop.setProperty("useStandardLocation", String.valueOf(isUseStandardLocation()));
+            prop.setProperty("headlessList", String.join(",", headlessList));
+            // Library
             prop.setProperty("frequency", String.valueOf(getFrequency()));
             prop.setProperty("pollingEnabled", String.valueOf(isPollingEnabled()));
             prop.setProperty("headlessList", String.join(",", headlessList));
@@ -98,7 +105,7 @@ public class Config {
             GrabberUtils.err(e.getMessage(), e);
         }
     }
-    // Getter
+
     public int getFrequency() {
         return frequency;
     }
