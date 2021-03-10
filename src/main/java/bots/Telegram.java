@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 public class Telegram {
     private static Telegram telegramBot;
     public TelegramBot novelly;
+    private Config config = Config.getInstance();
     private static final String infoFile = "info.txt";
     private static final String telegramDir = "./telegram";
     private static final String cliText = "" +
@@ -42,14 +43,14 @@ public class Telegram {
             "[-invertOrder] | Invert the chapter order.\n\n" +
             "Example:\n" +
             " -link http://novelhost.com/novel/ -chapters 5 10 -getImages";
-    private ConcurrentHashMap currentlyDownloading = new ConcurrentHashMap<>();
-    private ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
-    ExecutorService executor = Executors.newFixedThreadPool(10);
+    private final ConcurrentHashMap currentlyDownloading = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
+    private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     // Initialization with api token
     private Telegram() {
         GrabberUtils.info("Starting Telegram bot...");
-        String token = Config.getInstance().getTelegramApiToken();
+        String token = config.getTelegramApiToken();
         if(!token.isEmpty()) {
             novelly = new TelegramBot(token);
             GrabberUtils.info("Telegram bot started.");
@@ -82,6 +83,8 @@ public class Telegram {
         long chatId = message.chat().id();
         String messageTxt = message.text();
 
+        if (messageTxt == null) return;
+        
         GrabberUtils.info(messageTxt);
 
         if(messageTxt.startsWith("/info") || messageTxt.startsWith("/start")) {
@@ -151,7 +154,7 @@ public class Telegram {
                 .getImages(true)
                 .telegramChatId(chatId)
                 .setSource(messageTxt)
-                .waitTime(1000)
+                .waitTime(config.getTelegramWait())
                 .build();
         currentlyDownloading.put(chatId, novel);
         novel.check();
