@@ -19,8 +19,8 @@ import java.util.List;
  * Creates Library instance.
  */
 public class init {
-    public static final String versionNumber = "3.6.0";
-    public static final Library library =  Library.getInstance();
+    public static final String versionNumber = "3.6.1";
+    public static final Library library = Library.getInstance();;
     public static final Config config = Config.getInstance();
     public static GUI gui;
     public static Telegram telegramBot;
