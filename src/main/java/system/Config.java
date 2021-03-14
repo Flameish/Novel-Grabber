@@ -12,6 +12,7 @@ public class Config {
     private static Config config;
     private final static String configFile = GrabberUtils.getCurrentPath() + "/config.ini";
     private List<String> headlessList;
+    private List<String> telegramAdminIds;
     private String browser = "";
     private String saveLocation = "";
     private String username = "";
@@ -20,6 +21,9 @@ public class Config {
     private String receiverEmail = "";
     private String ssl = "SMTP";
     private String telegramApiToken = "";
+    private int telegramWait = 0;
+    private int telegramNovelMaxChapter = -1;
+    private int telegramMaxChapterPerDay = -1;
     private int filenameFormat = 0;
     private int outputFormat = 0;
     private int port = 25;
@@ -69,6 +73,9 @@ public class Config {
             // Telegram
             setTelegramApiToken(prop.getProperty("telegramApiToken", telegramApiToken));
             setTelegramWait(Integer.parseInt(prop.getProperty("telegramWait", String.valueOf(telegramWait))));
+            setTelegramNovelMaxChapter(Integer.parseInt(prop.getProperty("telegramNovelMaxChapter", String.valueOf(telegramNovelMaxChapter))));
+            setTelegramMaxChapterPerDay(Integer.parseInt(prop.getProperty("telegramMaxChapterPerDay", String.valueOf(telegramMaxChapterPerDay))));
+            setTelegramAdminIds(new ArrayList<>(Arrays.asList(prop.getProperty("telegramAdminIds", "").split(","))));
         } catch (IOException e) {
             GrabberUtils.err("No settings file found.");
         }
@@ -99,7 +106,13 @@ public class Config {
             // Library
             prop.setProperty("frequency", String.valueOf(getFrequency()));
             prop.setProperty("pollingEnabled", String.valueOf(isPollingEnabled()));
-            prop.setProperty("headlessList", String.join(",", headlessList));
+            // Telegram
+            prop.setProperty("telegramApiToken", String.valueOf(getTelegramApiToken()));
+            prop.setProperty("telegramWait", String.valueOf(getTelegramWait()));
+            prop.setProperty("telegramNovelMaxChapter", String.valueOf(getTelegramNovelMaxChapter()));
+            prop.setProperty("telegramMaxChapterPerDay", String.valueOf(getTelegramMaxChapterPerDay()));
+            prop.setProperty("telegramAdminIds", String.join(",", telegramAdminIds));
+
             prop.store(writer, "Novel-Grabber version: " + init.versionNumber);
         } catch (IOException e) {
             GrabberUtils.err(e.getMessage(), e);
@@ -117,6 +130,9 @@ public class Config {
     }
     public int getOutputFormat() {
         return outputFormat;
+    }
+    public int getTelegramWait() {
+        return telegramWait;
     }
     public boolean isPollingEnabled() {
         return pollingEnabled;
@@ -157,6 +173,15 @@ public class Config {
     public List<String> getHeadlessList() {
         return headlessList;
     }
+    public int getTelegramNovelMaxChapter() {
+        return telegramNovelMaxChapter;
+    }
+    public int getTelegramMaxChapterPerDay() {
+        return telegramMaxChapterPerDay;
+    }
+    public List<String> getTelegramAdminIds() {
+        return telegramAdminIds;
+    }
     // Setter
     public void setPort(int port) {
         this.port = port;
@@ -169,6 +194,9 @@ public class Config {
     }
     public void setFilenameFormat(int filenameFormat) {
         this.filenameFormat = filenameFormat;
+    }
+    public void setTelegramWait(int telegramWait) {
+        this.telegramWait = telegramWait;
     }
     public void setPollingEnabled(boolean pollingEnabled) {
         this.pollingEnabled = pollingEnabled;
@@ -208,5 +236,14 @@ public class Config {
     }
     public void setHeadlessList(List<String> headlessList) {
         this.headlessList = headlessList;
+    }
+    public void setTelegramNovelMaxChapter(int telegramNovelMaxChapter) {
+        this.telegramNovelMaxChapter = telegramNovelMaxChapter;
+    }
+    public void setTelegramMaxChapterPerDay(int telegramMaxChapterPerDay) {
+        this.telegramMaxChapterPerDay = telegramMaxChapterPerDay;
+    }
+    public void setTelegramAdminIds(List<String> telegramAdminIds) {
+        this.telegramAdminIds = telegramAdminIds;
     }
 }

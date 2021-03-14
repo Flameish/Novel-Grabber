@@ -17,6 +17,8 @@ import system.Config;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -24,12 +26,15 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Telegram {
     private static Telegram telegramBot;
     public TelegramBot novelly;
     private Config config = Config.getInstance();
     private static final String infoFile = "info.txt";
+    private static final String vipFile = "vip.txt";
     private static final String telegramDir = "./telegram";
     private static final String cliText = "" +
             "Input needs to start with '-link'. All parameter are case sensitive.\n\n" +
@@ -46,11 +51,15 @@ public class Telegram {
     private final ConcurrentHashMap currentlyDownloading = new ConcurrentHashMap<>();
     private final ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
+    private final ConcurrentHashMap userChapterCount = new ConcurrentHashMap<>();
+    private LocalDate yesterday = LocalDate.now(ZoneId.systemDefault());
+    private List<String> vipList = new ArrayList<>();
 
     // Initialization with api token
     private Telegram() {
         GrabberUtils.info("Starting Telegram bot...");
         String token = config.getTelegramApiToken();
+        updateVipList();
         if(!token.isEmpty()) {
             novelly = new TelegramBot(token);
             GrabberUtils.info("Telegram bot started.");
@@ -72,7 +81,10 @@ public class Telegram {
         novelly.setUpdatesListener(updates -> {
             // Process each update in new thread
             for(Update update: updates) {
-                executor.execute(() -> processMessage(update.message()));
+                executor.execute(() -> {
+                    if (isNewDay()) resetLimits();
+                    processMessage(update.message());
+                });
             }
 
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -80,6 +92,7 @@ public class Telegram {
     }
 
     private void processMessage(Message message) {
+        int userId = message.from().id();
         long chatId = message.chat().id();
         String messageTxt = message.text();
 
@@ -98,13 +111,21 @@ public class Telegram {
                     .disableWebPagePreview(true));
         }
         else if(messageTxt.startsWith("/cli")) {
-            novelly.execute(new SendMessage(chatId, cliText)
-                    .disableWebPagePreview(true));
+            novelly.execute(new SendMessage(chatId, cliText).disableWebPagePreview(true));
+        }
+        else if(messageTxt.startsWith("/limits")) {
+            novelly.execute(new SendMessage(chatId, getLimitString(userId)).disableWebPagePreview(true));
+        }
+        else if(messageTxt.startsWith("/updateVips")) {
+            if (config.getTelegramAdminIds().contains(String.valueOf(userId))) {
+                updateVipList();
+                novelly.execute(new SendMessage(chatId, String.format("Updated. (%d vips)", vipList.size())));
+            }
         }
         else if(messageTxt.startsWith("/stop")) {
-            if(currentlyDownloading.containsKey(chatId)) {
-                ((Novel) currentlyDownloading.get(chatId)).killTask = true;
-                currentlyDownloading.remove(chatId);
+            if(currentlyDownloading.containsKey(userId)) {
+                ((Novel) currentlyDownloading.get(userId)).killTask = true;
+                currentlyDownloading.remove(userId);
             } else {
                 novelly.execute(new SendMessage(chatId, "No download in progress."));
             }
@@ -113,28 +134,15 @@ public class Telegram {
             if(messageTxt.startsWith("/download")) {
                 messageTxt = messageTxt.substring(messageTxt.indexOf(" ")+1);
             }
-            if(messageTxt.startsWith("http")) {
-                if(!currentlyDownloading.containsKey(chatId)) {
+            if(messageTxt.startsWith("http") || messageTxt.startsWith("-link")) {
+                if(!currentlyDownloading.containsKey(userId)) {
                     log(String.format("[%s] %s", chatId, messageTxt));
                     try {
-                        downloadNovel(chatId, messageTxt);
+                        downloadNovel(chatId, userId, messageTxt);
                     } catch(Exception e) {
                         novelly.execute(new SendMessage(chatId, e.getMessage()));
                     } finally {
-                        currentlyDownloading.remove(chatId);
-                    }
-                } else {
-                    novelly.execute(new SendMessage(chatId, "Only one download at a time allowed."));
-                }
-            } else if(messageTxt.startsWith("-link")) {
-                if(!currentlyDownloading.containsKey(chatId)) {
-                    log(String.format("[%s] %s", chatId, messageTxt));
-                    try {
-                        downloadNovelCLI(chatId, messageTxt);
-                    } catch(Exception e) {
-                        novelly.execute(new SendMessage(chatId, e.getMessage()));
-                    } finally {
-                        currentlyDownloading.remove(chatId);
+                        currentlyDownloading.remove(userId);
                     }
                 } else {
                     novelly.execute(new SendMessage(chatId, "Only one download at a time allowed."));
@@ -145,91 +153,95 @@ public class Telegram {
         }
     }
 
-    private void downloadNovel(long chatId, String messageTxt) throws IllegalStateException, IOException,
+    private void downloadNovel(long chatId, int userId, String messageTxt) throws IllegalStateException, IOException,
             ClassNotFoundException, InterruptedException {
-        Novel novel = Novel.builder()
-                .novelLink(messageTxt)
-                .window("auto")
-                .saveLocation("./telegram/requests/"+ chatId)
-                .getImages(true)
-                .telegramChatId(chatId)
-                .setSource(messageTxt)
-                .waitTime(config.getTelegramWait())
-                .build();
-        currentlyDownloading.put(chatId, novel);
-        novel.check();
+        Novel novel = null;
+        // CLI
+        if (messageTxt.startsWith("-link")) {
+            String[] args = CLI.createArgsFromString(messageTxt);
+            Map<String, List<String>> params = CLI.createParamsFromArgs(args);
 
-        if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
+             novel = Novel.builder().fromCLI(params)
+                    .window("auto")
+                    .useHeadless(false)
+                    .useAccount(false)
+                    .telegramChatId(chatId)
+                    .saveLocation("./telegram/requests/"+ chatId)
+                    .waitTime(isVip(userId) ? 0 : config.getTelegramWait())
+                    .build();
+             novel.check();
+            currentlyDownloading.put(userId, novel);
+            if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
 
-        // Send confirmation message and store message id
-        novelly.execute(new SendMessage(chatId, "Downloading: "+novel.metadata.getTitle()));
-        int messageId = novelly.execute(new SendMessage(chatId, "Progress: ")).message().messageId();
-        downloadMsgIds.put(chatId, messageId);
-
-        novel = Novel.modifier(novel)
-                .firstChapter(1)
-                .lastChapter(novel.chapterList.size())
-                .build();
-        novel.downloadChapters();
-
-        novel.output();
-        File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
-        if(epub.exists()) {
-            novelly.execute(new SendDocument(chatId, epub));
-            GrabberUtils.info("EPUB sent: " + novel.epubFilename);
-        } else {
-            novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
-            GrabberUtils.err("EPUB not downloaded: " + messageTxt);
-        }
-    }
-
-    private void downloadNovelCLI(long chatId, String messageTxt) throws IllegalStateException, IOException,
-            ClassNotFoundException, InterruptedException {
-        String[] args = CLI.createArgsFromString(messageTxt);
-        Map<String, List<String>> params = CLI.createParamsFromArgs(args);
-
-        Novel novel = Novel.builder().fromCLI(params)
-                .window("auto")
-                .useHeadless(false)
-                .useAccount(false)
-                .telegramChatId(chatId)
-                .saveLocation("./telegram/requests/"+ chatId)
-                .waitTime(1000)
-                .build();
-        currentlyDownloading.put(chatId, novel);
-        novel.check();
-        if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
-
-
-        // Chapter range needs to be set after fetching the chapter list
-        if(params.containsKey("chapters")) {
-            if(params.get("chapters").get(0).equals("all")) {
-                novel.firstChapter = 1;
-                novel.lastChapter = novel.chapterList.size();
-            } else {
-                novel.firstChapter = Integer.parseInt(params.get("chapters").get(0));
-                if(params.get("chapters").get(1).equals("last")) {
+            // Chapter range needs to be set after fetching the chapter list
+            if(params.containsKey("chapters")) {
+                if(params.get("chapters").get(0).equals("all")) {
+                    novel.firstChapter = 1;
                     novel.lastChapter = novel.chapterList.size();
                 } else {
-                    novel.lastChapter = Integer.parseInt(params.get("chapters").get(1));
+                    novel.firstChapter = Integer.parseInt(params.get("chapters").get(0));
+                    if(params.get("chapters").get(1).equals("last")) {
+                        novel.lastChapter = novel.chapterList.size();
+                    } else {
+                        novel.lastChapter = Integer.parseInt(params.get("chapters").get(1));
+                    }
                 }
+            } else {
+                novel.firstChapter = 1;
+                novel.lastChapter = novel.chapterList.size();
             }
-        } else {
-            novel.firstChapter = 1;
-            novel.lastChapter = novel.chapterList.size();
-        }
 
-        // Send confirmation message and store message id
+        }
+        // Normal
+        if (messageTxt.startsWith("http")){
+            novel = Novel.builder()
+                    .novelLink(messageTxt)
+                    .window("auto")
+                    .saveLocation("./telegram/requests/"+ chatId)
+                    .getImages(true)
+                    .telegramChatId(chatId)
+                    .setSource(messageTxt)
+                    .waitTime(isVip(userId) ? 0 : config.getTelegramWait())
+                    .build();
+            novel.check();
+            currentlyDownloading.put(userId, novel);
+            if(novel.chapterList.isEmpty()) throw new IllegalStateException("Chapter list empty.");
+
+            novel = Novel.modifier(novel)
+                    .firstChapter(1)
+                    .lastChapter(novel.chapterList.size())
+                    .build();
+        }
+        // Limits
+        int chaptersToDownload = novel.lastChapter - novel.firstChapter+1;
+        // Chapter limit per novel
+        if (chaptersToDownload > config.getTelegramNovelMaxChapter()
+                && !isVip(userId)
+                && config.getTelegramNovelMaxChapter() != -1) {
+            throw new IllegalStateException("Above chapter limit! (max. chapter per novel: " + config.getTelegramNovelMaxChapter() + ")");
+        }
+        // Chapter limit per user
+        int chapterDownloadedToday = (int) userChapterCount.getOrDefault(userId, 0);
+        if (chapterDownloadedToday + chaptersToDownload > config.getTelegramMaxChapterPerDay()
+                && !isVip(userId)
+                && config.getTelegramMaxChapterPerDay() != -1) {
+            throw new IllegalStateException(String.format("Above chapter quota! (%d chapters left today)",
+                    config.getTelegramMaxChapterPerDay() - chapterDownloadedToday));
+        }
+        // Send confirmation message and store messageId to update progress
         novelly.execute(new SendMessage(chatId, "Downloading: "+novel.metadata.getTitle()));
         int messageId = novelly.execute(new SendMessage(chatId, "Progress: ")).message().messageId();
         downloadMsgIds.put(chatId, messageId);
-        novel.downloadChapters();
 
+        novel.downloadChapters();
         novel.output();
+        // Send file
         File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
         if(epub.exists()) {
             novelly.execute(new SendDocument(chatId, epub));
             GrabberUtils.info("EPUB sent: " + novel.epubFilename);
+            // Update downloaded chapter amount
+            userChapterCount.put(userId, chapterDownloadedToday + novel.successfulChapters.size());
         } else {
             novelly.execute(new SendMessage(chatId, "Sorry. Could not download the novel."));
             GrabberUtils.err("EPUB not downloaded: " + messageTxt);
@@ -240,7 +252,6 @@ public class Telegram {
         int messageId = (int) downloadMsgIds.get(chatId);
         novelly.execute(new EditMessageText(chatId, messageId, "Progress: "+(currChapter+1)+"/"+lastChapter));
     }
-
 
     public static void log(String msg) {
         String time = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -278,6 +289,39 @@ public class Telegram {
             sources.append("[" + source.getName() + "](" + source.getUrl() + ")\n");
         }
         return sources.toString();
+    }
+
+    private String getLimitString(int userId) {
+        String msgMaxChNovel = String.format("Max. chapters per novel: %s \n",
+                config.getTelegramNovelMaxChapter() != -1 && !isVip(userId) ?
+                        String.valueOf(config.getTelegramNovelMaxChapter()) : "Unlimited");
+        int chapterDownloadedToday = (int) userChapterCount.getOrDefault(userId, 0);
+        String msgChLeft = String.format("Chapters left today: %s \n",
+                config.getTelegramMaxChapterPerDay() != -1  && !isVip(userId) ?
+                        String.valueOf(config.getTelegramMaxChapterPerDay() - chapterDownloadedToday) : "Unlimited");
+        String msgChSpeed = String.format("Wait time between chapters: %s \n",
+                (isVip(userId) ? 0 : config.getTelegramWait()) + " milliseconds");
+        return msgChLeft + msgMaxChNovel + msgChSpeed;
+    }
+
+    private void resetLimits() {
+        userChapterCount.clear();
+    }
+
+    private boolean isNewDay() {
+        return LocalDate.now(ZoneId.systemDefault()).isAfter(yesterday);
+    }
+
+    private void updateVipList() {
+        try (Stream<String> lines = Files.lines(Paths.get(telegramDir + "/" + vipFile))) {
+            vipList = lines.collect(Collectors.toList());
+        } catch (IOException e) {
+            GrabberUtils.err("VIP file not found!");
+        }
+    }
+
+    private boolean isVip(int userId) {
+        return vipList.contains(String.valueOf(userId));
     }
 
 }
