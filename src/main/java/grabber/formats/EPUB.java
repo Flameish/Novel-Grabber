@@ -3,6 +3,7 @@ import grabber.Chapter;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
+import nl.siegmann.epublib.epub.EpubReader;
 import system.Config;
 
 import nl.siegmann.epublib.domain.Author;
@@ -35,16 +36,27 @@ public class EPUB {
     static final String htmlFoot = "</body>" + NL + "</html>";
     private Novel novel;
     private final NovelMetadata novelMetadata;
-    private final Book book;
+    private Book book;
 
     public EPUB(Novel novel) {
         this.novel = novel;
         this.novelMetadata = novel.metadata;
-        book = new Book();
-        try {
-            book.getResources().add(new Resource(getClass().getResourceAsStream("/default.css"), "default.css"));
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. "+e.getMessage(), e);
+        // Library novels try to update existing files
+        if (novel.window.equals("checker")) {
+            try {
+                book = readOldFile();
+            } catch (IOException e) {
+                GrabberUtils.err("Could not read old book file.");
+                GrabberUtils.info("Creating new file.");
+            }
+        }
+        if (book == null) {
+            book = new Book();
+            try {
+                book.getResources().add(new Resource(getClass().getResourceAsStream("/default.css"), "default.css"));
+            } catch (IOException e) {
+                GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. " + e.getMessage(), e);
+            }
         }
     }
 
@@ -52,8 +64,11 @@ public class EPUB {
         // Order is important
         addMetadata();
         addCover();
-        addToc();
-        if(!novel.noDescription && !novelMetadata.getDescription().isEmpty()) addDesc();
+        // Not re-adding for existing epubs
+        if (!novel.window.equals("checker")) {
+            addToc();
+            if(!novel.noDescription && !novelMetadata.getDescription().isEmpty()) addDesc();
+        }
         if (novel.getImages) addImages();
         addChapters();
 
@@ -63,12 +78,20 @@ public class EPUB {
         try {
             EpubWriter epubWriter = new EpubWriter();
             epubWriter.write(book, new FileOutputStream(novel.saveLocation + "/" + epubFilename));
+            novel.epubFilename = epubFilename;
+            GrabberUtils.info("Output: " + novel.saveLocation+"/"+ epubFilename);
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not write EPUB. "+e.getMessage(), e);
         }
-        novel.epubFilename = epubFilename;
-        GrabberUtils.info("Output: " + novel.saveLocation+"/"+ epubFilename);
     }
+
+    public Book readOldFile() throws IOException {
+        File epubFile = new File(novel.saveLocation + "/" + setFilename());
+        InputStream inputStream = new FileInputStream(epubFile);
+        Book oldBook = new EpubReader().readEpub(inputStream);
+        return oldBook;
+    }
+
 
     private void addImages() {
         for (Map.Entry<String, BufferedImage> entry : novel.images.entrySet()) {
@@ -104,18 +127,12 @@ public class EPUB {
         switch (Config.getInstance().getFilenameFormat()) {
             case 0:
                 epubFilename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle() + ".epub";
-                if(novel.window.equals("checker")) epubFilename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
                 break;
             case 1:
                 epubFilename = novelMetadata.getTitle() + " - " + novelMetadata.getAuthor() + ".epub";
-                if(novel.window.equals("checker")) epubFilename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
                 break;
             case 2:
                 epubFilename = novelMetadata.getTitle() + ".epub";
-                if(novel.window.equals("checker")) epubFilename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
                 break;
         }
         return epubFilename.replaceAll("[\\\\/:*?\"<>|]", "");
