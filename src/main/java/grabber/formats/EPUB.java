@@ -88,7 +88,7 @@ public class EPUB {
     public Book readOldFile() throws IOException {
         File epubFile = new File(novel.saveLocation + "/" + setFilename());
         InputStream inputStream = new FileInputStream(epubFile);
-        Book oldBook = new EpubReader().readEpub(inputStream);
+        Book oldBook = new EpubReader().readEpub(inputStream, "UTF-8");
         return oldBook;
     }
 
