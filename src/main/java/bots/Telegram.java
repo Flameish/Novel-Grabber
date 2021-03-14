@@ -140,6 +140,7 @@ public class Telegram {
                     try {
                         downloadNovel(chatId, userId, messageTxt);
                     } catch(Exception e) {
+                        GrabberUtils.err(e.getMessage(), e);
                         novelly.execute(new SendMessage(chatId, e.getMessage()));
                     } finally {
                         currentlyDownloading.remove(userId);
@@ -235,6 +236,14 @@ public class Telegram {
 
         novel.downloadChapters();
         novel.output();
+        if (!novel.failedChapters.isEmpty()) {
+            novelly.execute(new SendMessage(chatId, "Retrying failed chapters..."));
+            novel.retry();
+            if (!novel.failedChapters.isEmpty()) {
+                novelly.execute(new SendMessage(chatId, "Remaining failed chapters: " + novel.failedChapters.size()));
+            }
+        }
+
         // Send file
         File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
         if(epub.exists()) {
