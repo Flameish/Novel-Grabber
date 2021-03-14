@@ -833,8 +833,7 @@ public class GUI extends JFrame {
 
             // Cover
             c = new GridBagConstraints();
-            String novelCover = Library.libraryFolder + "/" + libNovel.getMetadata().getTitle() + "/cover."
-                    + libNovel.getMetadata().getCoverFormat();
+            String novelCover = libNovel.getSaveLocation() + "/cover." + libNovel.getMetadata().getCoverFormat();
             JButton novelImage;
             if(novelCover.isEmpty()) {
                 novelImage = new JButton(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
