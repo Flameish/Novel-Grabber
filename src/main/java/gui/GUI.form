@@ -838,7 +838,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <grid id="5bf" layout-manager="GridLayoutManager" row-count="2" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="5bf" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -846,7 +846,32 @@
                     <properties/>
                     <border type="none" title="Options"/>
                     <children>
-                      <component id="ca71" class="javax.swing.JCheckBox" binding="manGetImages">
+                      <component id="138fc" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Wait time:"/>
+                        </properties>
+                      </component>
+                      <component id="535c8" class="javax.swing.JTextField" binding="manWaitTime" custom-create="true">
+                        <constraints>
+                          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                            <preferred-size width="100" height="-1"/>
+                          </grid>
+                        </constraints>
+                        <properties/>
+                      </component>
+                      <component id="aee8c" class="javax.swing.JCheckBox" binding="manUseAccountCheckBox">
+                        <constraints>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Use Account"/>
+                          <toolTipText value="You can set the cookies for manual grabbing on &quot;Manual&quot; source in the options."/>
+                        </properties>
+                      </component>
+                      <component id="ee013" class="javax.swing.JCheckBox" binding="manGetImages">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
@@ -854,24 +879,7 @@
                           <text value="Get images"/>
                         </properties>
                       </component>
-                      <component id="d01a2" class="javax.swing.JCheckBox" binding="manDispalyChapterTitleCheckbox">
-                        <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Display chapter title"/>
-                        </properties>
-                      </component>
-                      <component id="563b1" class="javax.swing.JCheckBox" binding="manNoStyling">
-                        <constraints>
-                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Remove styling"/>
-                          <toolTipText value="Removes style attribute from all elements"/>
-                        </properties>
-                      </component>
-                      <component id="d49f8" class="javax.swing.JCheckBox" binding="manUseHeaderlessBrowser">
+                      <component id="a7428" class="javax.swing.JCheckBox" binding="manUseHeaderlessBrowser">
                         <constraints>
                           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
@@ -880,21 +888,22 @@
                           <toolTipText value="Novel-Grabber will visit the websites in a browser."/>
                         </properties>
                       </component>
-                      <component id="138fc" class="javax.swing.JLabel">
+                      <component id="a99dd" class="javax.swing.JCheckBox" binding="manDispalyChapterTitleCheckbox">
                         <constraints>
-                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text value="Wait time:"/>
+                          <text value="Display chapter title"/>
                         </properties>
                       </component>
-                      <component id="535c8" class="javax.swing.JTextField" binding="manWaitTime" custom-create="true">
+                      <component id="8de93" class="javax.swing.JCheckBox" binding="manNoStyling">
                         <constraints>
-                          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="100" height="-1"/>
-                          </grid>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
-                        <properties/>
+                        <properties>
+                          <text value="Remove styling"/>
+                          <toolTipText value="Removes style attribute from all elements"/>
+                        </properties>
                       </component>
                     </children>
                   </grid>

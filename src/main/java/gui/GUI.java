@@ -201,6 +201,7 @@ public class GUI extends JFrame {
     private JCheckBox useHeadlessCheckBox;
     private JPanel sourceCanUseHeadlessPanel;
     private JButton saveCookiesButton;
+    private JCheckBox manUseAccountCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -396,6 +397,7 @@ public class GUI extends JFrame {
                 try {
                     manNovel = Novel.modifier(manNovel)
                             .novelLink(manNovelURL.getText())
+                            .useAccount(manUseAccountCheckBox.isSelected())
                             .window("manual")
                             .useHeadless(manUseHeaderlessBrowser.isSelected())
                             .browser(settings.getBrowser())
@@ -449,6 +451,7 @@ public class GUI extends JFrame {
                                 .saveLocation(manSaveLocation.getText())
                                 .setSource()
                                 .build();
+                        if (manUseAccountCheckBox.isSelected()) manNovel.getLoginCookies();
                         manNovel.processChaptersToChapters(
                                 firstChapterField.getText(),
                                 lastChapterField.getText(),

@@ -211,9 +211,7 @@ public class GrabberUtils {
             // Loop through class files in source folder and load them via ClassLoader
             for (File file: getSourceFiles(curPath + "/sources/grabber/sources")) {
                 // Ignore source interface and manual files
-                if(file.getName().equals("Source.class")
-                        || file.getName().equals("manualSource.class")
-                        || file.getName().equals("example_com.class")) continue;
+                if(file.getName().equals("Source.class") || file.getName().equals("example_com.class")) continue;
                 // Create a temporary Source object of interface to get name of host/source
                 String className = "grabber.sources." + file.getName().replace(".class","");
                 sources.add((Source) classLoader.loadClass(className).getConstructor().newInstance());

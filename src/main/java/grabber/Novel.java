@@ -72,8 +72,7 @@ public class Novel {
     public void check() {
         if(source != null) {
             if(useAccount) {
-                GrabberUtils.info("Using account");
-                cookies = Accounts.getInstance().getCookiesForDomain(source.getName());
+                getLoginCookies();
             }
             chapterList = source.getChapterList();
             // Are created in GUI for manual
@@ -84,6 +83,11 @@ public class Novel {
         } else {
             GrabberUtils.err(window, "No source!");
         }
+    }
+
+    public void getLoginCookies() {
+        GrabberUtils.info("Fetching cookies");
+        cookies = Accounts.getInstance().getCookiesForDomain(source.getName());
     }
 
     /**
