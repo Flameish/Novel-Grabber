@@ -11,8 +11,8 @@ import java.util.*;
 public class Config {
     private static Config config;
     private final static String configFile = GrabberUtils.getCurrentPath() + "/config.ini";
-    private List<String> headlessList;
-    private List<String> telegramAdminIds;
+    private List<String> headlessList = new ArrayList<>();
+    private List<String> telegramAdminIds = new ArrayList<>();
     private String browser = "";
     private String saveLocation = "";
     private String username = "";

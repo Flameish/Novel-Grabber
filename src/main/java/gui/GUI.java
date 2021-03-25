@@ -228,7 +228,9 @@ public class GUI extends JFrame {
                             .setSource(chapterListURL.getText())
                             .build();
                     autoNovel.check();
-                } catch (IOException | ClassNotFoundException ex) {
+                } catch (ClassNotFoundException ex) {
+                    GrabberUtils.err("auto", ex.getMessage());
+                } catch (IOException ex) {
                     GrabberUtils.err("auto", ex.getMessage(), ex);
                 } catch (Exception ex) {
                     GrabberUtils.err("auto", "Something went wrong, see log for more information.", ex);
@@ -404,7 +406,9 @@ public class GUI extends JFrame {
                             .setSource()
                             .build();
                     manNovel.check();
-                } catch (NullPointerException | ClassNotFoundException | IOException ex) {
+                } catch (ClassNotFoundException ex) {
+                    GrabberUtils.err("manual", ex.getMessage());
+                } catch (NullPointerException | IOException ex) {
                     GrabberUtils.err("manual", ex.getMessage(), ex);
                 } finally {
                     if (!manLinkListModel.isEmpty()) {
@@ -1153,7 +1157,8 @@ public class GUI extends JFrame {
 
     public void updateMetadataDisplay() {
         autoBusyLabel.setVisible(false);
-        NovelMetadata metadata = autoNovel.metadata;
+        NovelMetadata metadata = null;
+        if (autoNovel != null) metadata = autoNovel.metadata;
         if(metadata != null) {
             grabChaptersButton.setEnabled(true);
             autoGetNumberButton.setEnabled(true);

@@ -209,7 +209,12 @@ public class GrabberUtils {
             URL[] urls = new URL[]{loadPath};
             URLClassLoader classLoader = new URLClassLoader(urls);
             // Loop through class files in source folder and load them via ClassLoader
-            for (File file: getSourceFiles(curPath + "/sources/grabber/sources")) {
+            File[] sourceFiles = getSourceFiles(curPath + "/sources/grabber/sources");
+            if (sourceFiles == null) {
+                err("No source files found!");
+                return sources;
+            }
+            for (File file: sourceFiles) {
                 // Ignore source interface and manual files
                 if(file.getName().equals("Source.class") || file.getName().equals("example_com.class")) continue;
                 // Create a temporary Source object of interface to get name of host/source
@@ -220,7 +225,6 @@ public class GrabberUtils {
             return sources;
         } catch (Exception e) {
             err(e.getMessage(), e);
-            // Return list of added entries up until exception / empty list
             return sources;
         }
     }
