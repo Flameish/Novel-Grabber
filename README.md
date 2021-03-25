@@ -67,8 +67,7 @@ Usage:
 
 To host your own Telegram bot you need to add the line `telegramApiToken=your_token ` to `config.ini`
 
-By default the bot will read the output for `/info` and `/sources` from files inside the telegram folder. 
-The files need to be named `info.txt` and `supported_Sources.txt` respectively.
+By default the bot will read the output for `/info` from a `info.txt` file inside the telegram folder which you can adjust.
 
 To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-Grabber.jar -telegramBot`
 
