@@ -76,7 +76,7 @@ public class init {
                 System.setProperty("awt.useSystemAAFontSettings","on");
                 System.setProperty("swing.aatext", "true");
                 UIManager.setLookAndFeel(new FlatIntelliJLaf());
-                setUIFont (new javax.swing.plaf.FontUIResource("Tahoma",Font.PLAIN,12));
+                setUIFont (new javax.swing.plaf.FontUIResource("DejaVuSans", Font.PLAIN,13));
                 gui = new GUI();
                 gui.pack();
                 gui.setLocationRelativeTo(null);

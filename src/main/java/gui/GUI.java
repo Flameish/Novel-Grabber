@@ -866,7 +866,7 @@ public class GUI extends JFrame {
             // Name
             c = new GridBagConstraints();
             JLabel novelTitle = new JLabel("<html><p style=\"width:275px\">" + libNovel.getMetadata().getTitle() + "</p></html>");
-            novelTitle.setFont(new Font("SansSerif", Font.BOLD, 17));
+            novelTitle.setFont(new Font("DejaVuSans", Font.BOLD, 17));
             novelTitle.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             MouseListener mouseListener = new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
