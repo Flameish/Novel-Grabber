@@ -1208,7 +1208,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <grid id="d9b8c" binding="settingsGeneralPanel" layout-manager="GridLayoutManager" row-count="7" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="d9b8c" binding="settingsGeneralPanel" layout-manager="GridLayoutManager" row-count="7" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="15" left="15" bottom="15" right="15"/>
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -1218,64 +1218,57 @@
                     </properties>
                     <border type="none" title="General settings"/>
                     <children>
-                      <component id="45879" class="javax.swing.JCheckBox" binding="settingsAlwaysGetImagesCheckBox" custom-create="true">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Always get images"/>
-                          <toolTipText value="Download potential images from a chapter"/>
-                        </properties>
-                      </component>
-                      <component id="7399f" class="javax.swing.JCheckBox" binding="settingsAlwaysRemoveStylingCheckBox" custom-create="true">
-                        <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Always remove styling"/>
-                          <toolTipText value="Removes style attribute from all elements"/>
-                        </properties>
-                      </component>
                       <component id="659e7" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="-1" height="28"/>
+                          </grid>
                         </constraints>
                         <properties>
                           <text value="EPUB filename format:"/>
                         </properties>
                       </component>
-                      <component id="53521" class="javax.swing.JCheckBox" binding="standardSaveLocationCheckBox" custom-create="true" default-binding="true">
+                      <component id="c6d95" class="javax.swing.JComboBox" binding="settingsNameOutputFormatComboBox" custom-create="true">
                         <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                      </component>
+                      <vspacer id="9e454">
+                        <constraints>
+                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </vspacer>
+                      <component id="5c7bc" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="-1" height="28"/>
+                          </grid>
                         </constraints>
                         <properties>
-                          <text value="Use default save location:"/>
+                          <text value="EPUB  format:"/>
                         </properties>
                       </component>
-                      <component id="c6d95" class="javax.swing.JComboBox" binding="settingsNameOutputFormatComboBox" custom-create="true">
+                      <component id="d3655" class="javax.swing.JComboBox" binding="settingsOutputFormatComboBox" custom-create="true">
                         <constraints>
                           <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties/>
                       </component>
-                      <component id="b4b34" class="javax.swing.JTextField" binding="settingsSavelocationField" custom-create="true">
+                      <component id="887a2" class="javax.swing.JCheckBox" binding="settingsSeperateChaptersCheckBox" custom-create="true">
                         <constraints>
-                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties/>
-                      </component>
-                      <component id="49759" class="javax.swing.JButton" binding="settingsBrowseSaveLocationBtn" custom-create="true">
-                        <constraints>
-                          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text value=""/>
-                          <toolTipText value="Browse files"/>
+                          <text value="Seperate chapters"/>
+                          <visible value="true"/>
                         </properties>
                       </component>
                       <component id="c0f39" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="-1" height="28"/>
+                          </grid>
                         </constraints>
                         <properties>
                           <text value="Browser:"/>
@@ -1284,53 +1277,104 @@
                       </component>
                       <component id="8a43c" class="javax.swing.JComboBox" binding="settingsBrowserComboBox" custom-create="true">
                         <constraints>
-                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <toolTipText value="Pick your browser if you have selected 'Use Headerless Browser'"/>
                         </properties>
                       </component>
-                      <vspacer id="9e454">
+                      <grid id="4520" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                        <margin top="0" left="0" bottom="0" right="0"/>
                         <constraints>
-                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </vspacer>
-                      <component id="8447a" class="javax.swing.JButton" binding="settingsSaveBtn">
-                        <constraints>
-                          <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="Save"/>
-                        </properties>
-                      </component>
-                      <hspacer id="9eb01">
-                        <constraints>
-                          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </hspacer>
-                      <component id="5c7bc" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text value="EPUB  format:"/>
-                        </properties>
-                      </component>
-                      <component id="d3655" class="javax.swing.JComboBox" binding="settingsOutputFormatComboBox" custom-create="true">
-                        <constraints>
-                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="3" column="1" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties/>
-                      </component>
-                      <component id="887a2" class="javax.swing.JCheckBox" binding="settingsSeperateChaptersCheckBox" custom-create="true">
+                        <border type="none"/>
+                        <children>
+                          <component id="b4b34" class="javax.swing.JTextField" binding="settingsSavelocationField" custom-create="true">
+                            <constraints>
+                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                                <preferred-size width="250" height="-1"/>
+                              </grid>
+                            </constraints>
+                            <properties/>
+                          </component>
+                          <hspacer id="f5269">
+                            <constraints>
+                              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                          </hspacer>
+                          <component id="49759" class="javax.swing.JButton" binding="settingsBrowseSaveLocationBtn" custom-create="true">
+                            <constraints>
+                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <text value=""/>
+                              <toolTipText value="Browse files"/>
+                            </properties>
+                          </component>
+                        </children>
+                      </grid>
+                      <component id="53521" class="javax.swing.JCheckBox" binding="standardSaveLocationCheckBox" custom-create="true" default-binding="true">
                         <constraints>
-                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="-1" height="28"/>
+                          </grid>
                         </constraints>
                         <properties>
-                          <text value="Seperate chapters"/>
-                          <visible value="true"/>
+                          <text value="Use default save location:"/>
                         </properties>
                       </component>
+                      <component id="45879" class="javax.swing.JCheckBox" binding="settingsAlwaysGetImagesCheckBox" custom-create="true">
+                        <constraints>
+                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="-1" height="28"/>
+                          </grid>
+                        </constraints>
+                        <properties>
+                          <text value="Always get images"/>
+                          <toolTipText value="Download potential images from a chapter"/>
+                        </properties>
+                      </component>
+                      <component id="7399f" class="javax.swing.JCheckBox" binding="settingsAlwaysRemoveStylingCheckBox" custom-create="true">
+                        <constraints>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="-1" height="28"/>
+                          </grid>
+                        </constraints>
+                        <properties>
+                          <text value="Always remove styling"/>
+                          <toolTipText value="Removes style attribute from all elements"/>
+                        </properties>
+                      </component>
+                      <grid id="43595" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                        <margin top="0" left="0" bottom="0" right="0"/>
+                        <constraints>
+                          <grid row="5" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <component id="4ab1a" class="javax.swing.JButton" binding="settingsSaveBtn">
+                            <constraints>
+                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <text value="Save"/>
+                            </properties>
+                          </component>
+                          <hspacer id="78b32">
+                            <constraints>
+                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                          </hspacer>
+                        </children>
+                      </grid>
+                      <hspacer id="adcc0">
+                        <constraints>
+                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </hspacer>
                     </children>
                   </grid>
                   <grid id="24164" binding="settingsLibraryPanel" layout-manager="GridLayoutManager" row-count="4" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
