@@ -71,6 +71,8 @@ public class Novel {
      */
     public void check() {
         if(source != null) {
+            // Reset chapter numbering
+            Chapter.chapterCounter = 0;
             if(useAccount) {
                 getLoginCookies();
             }
@@ -137,7 +139,8 @@ public class Novel {
         this.nextChapterBtn = nextChapterBtn;
         int chapterNumber = 1;
         if(chapterNumberString != null && !chapterNumberString.isEmpty()) chapterNumber = Integer.parseInt(chapterNumberString);
-
+        // Reset chapter numbering
+        Chapter.chapterCounter = 0;
         chapterList = new ArrayList<>();
         while (true) {
             // replace with actual interrupted

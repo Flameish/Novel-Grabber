@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Chapter implements Serializable {
-    private static int chapterId = 0;  // Used to set unique filenames
+    public static int chapterCounter = 0;  // Used to set unique filenames
     public Element chapterContainer;
     public String chapterContent;
     public String name;
@@ -22,9 +22,9 @@ public class Chapter implements Serializable {
     public int status = 0; // 0 = not downloaded, 1 = successfully downloaded, 2 = failed download
 
     public Chapter(String name, String link) {
-        this.name = name;
+        this.name = name.trim();
         this.chapterURL = link;
-        fileName = String.format("%05d", ++chapterId) + "-" + name.replaceAll("[^\\w]+", "-");
+        fileName = String.format("%05d", ++chapterCounter) + "-" + this.name.replaceAll("[^\\w]+", "-");
     }
 
     /**
@@ -33,7 +33,6 @@ public class Chapter implements Serializable {
      * Downloads images if selected.
      * Cleans broken HTML
      * Updates page count on GUI.
-     * Adds html header/footer to chapter text.
      */
     public void saveChapter(Novel novel) {
         chapterContainer = novel.source.getChapterContent(this);
