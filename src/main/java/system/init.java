@@ -19,7 +19,7 @@ import java.util.List;
  * Creates Library instance.
  */
 public class init {
-    public static final String versionNumber = "3.6.2";
+    public static final String versionNumber = "3.6.3";
     public static final Library library = Library.getInstance();;
     public static final Config config = Config.getInstance();
     public static GUI gui;
