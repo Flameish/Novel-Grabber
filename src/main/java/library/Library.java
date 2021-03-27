@@ -113,10 +113,10 @@ public class Library {
         LibraryNovel libNovel = toLibraryNovel(novel);
         starredNovels.add(libNovel);
         // Try to move file to library folder if previously downloaded
-        File epub = new File(novel.saveLocation + "/" + novel.epubFilename);
+        File epub = new File(novel.saveLocation + "/" + novel.filename);
         if (epub.exists()) {
             try {
-                Files.move(Paths.get(epub.getPath()), Paths.get(libNovel.getSaveLocation() + novel.epubFilename));
+                Files.move(Paths.get(epub.getPath()), Paths.get(libNovel.getSaveLocation() + novel.filename));
             } catch (IOException e) {
                 GrabberUtils.err("Could not move novel file. " + e.getMessage(), e);
             }

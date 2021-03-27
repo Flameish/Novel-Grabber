@@ -32,6 +32,7 @@ public class Config {
     private boolean removeStyling = false;
     private boolean useStandardLocation = false;
     private boolean pollingEnabled = true;
+    private boolean separateChapters = false;
 
     private Config() { }
 
@@ -50,7 +51,7 @@ public class Config {
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
             Properties prop = new Properties();
             prop.load(reader);
-            // If property is not found in file, use default value from fields
+            //  Use default value from field if property is not found in file
             // Email
             setUsername(prop.getProperty("username", username));
             setPassword(prop.getProperty("password", password));
@@ -67,6 +68,7 @@ public class Config {
             setRemoveStyling(Boolean.parseBoolean(prop.getProperty("removeStyling", String.valueOf(removeStyling))));
             setUseStandardLocation(Boolean.parseBoolean(prop.getProperty("useStandardLocation", String.valueOf(useStandardLocation))));
             setHeadlessList(new ArrayList<>(Arrays.asList(prop.getProperty("headlessList", "").split(","))));
+            setSeparateChapters(Boolean.parseBoolean(prop.getProperty("separateChapters", String.valueOf(separateChapters))));
             // Library
             setFrequency(Integer.parseInt(prop.getProperty("frequency", String.valueOf(frequency))));
             setPollingEnabled(Boolean.parseBoolean(prop.getProperty("pollingEnabled", String.valueOf(pollingEnabled))));
@@ -103,6 +105,7 @@ public class Config {
             prop.setProperty("removeStyling", String.valueOf(isRemoveStyling()));
             prop.setProperty("useStandardLocation", String.valueOf(isUseStandardLocation()));
             prop.setProperty("headlessList", String.join(",", headlessList));
+            prop.setProperty("separateChapters", String.valueOf(isSeparateChapters()));
             // Library
             prop.setProperty("frequency", String.valueOf(getFrequency()));
             prop.setProperty("pollingEnabled", String.valueOf(isPollingEnabled()));
@@ -245,5 +248,13 @@ public class Config {
     }
     public void setTelegramAdminIds(List<String> telegramAdminIds) {
         this.telegramAdminIds = telegramAdminIds;
+    }
+
+    public boolean isSeparateChapters() {
+        return separateChapters;
+    }
+
+    public void setSeparateChapters(boolean separateChapters) {
+        this.separateChapters = separateChapters;
     }
 }

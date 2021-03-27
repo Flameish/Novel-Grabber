@@ -78,7 +78,7 @@ public class EPUB {
         try {
             EpubWriter epubWriter = new EpubWriter();
             epubWriter.write(book, new FileOutputStream(novel.saveLocation + "/" + epubFilename));
-            novel.epubFilename = epubFilename;
+            novel.filename = epubFilename;
             GrabberUtils.info("Output: " + novel.saveLocation+"/"+ epubFilename);
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not write EPUB. "+e.getMessage(), e);

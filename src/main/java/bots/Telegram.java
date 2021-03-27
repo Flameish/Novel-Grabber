@@ -245,10 +245,10 @@ public class Telegram {
         }
 
         // Send file
-        File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
+        File epub = new File(novel.saveLocation+"/"+novel.filename);
         if(epub.exists()) {
             novelly.execute(new SendDocument(chatId, epub));
-            GrabberUtils.info("EPUB sent: " + novel.epubFilename);
+            GrabberUtils.info("EPUB sent: " + novel.filename);
             // Update downloaded chapter amount
             userChapterCount.put(userId, chapterDownloadedToday + novel.successfulChapters.size());
         } else {

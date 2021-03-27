@@ -74,7 +74,7 @@ public class EmailNotification {
         for (int i = novel.firstChapter-1; i < novel.lastChapter; i++) {
             links.append("<a href=\""+novel.chapterList.get(i).chapterURL+"\">"+novel.chapterList.get(i).name+"</a><br>");
         }
-        File epub = new File(novel.saveLocation+"/"+novel.epubFilename);
+        File epub = new File(novel.saveLocation+"/"+novel.filename);
         Email email = EmailBuilder.startingBlank()
                 .to(config.getInstance().getReceiverEmail())
                 .from(config.getInstance().getReceiverEmail())

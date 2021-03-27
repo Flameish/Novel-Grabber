@@ -42,7 +42,7 @@ public class Novel {
     public String novelLink;
     public String nextChapterBtn = "NOT_SET";
     public String nextChapterURL;
-    public String epubFilename;
+    public String filename;
     public long telegramChatId;
 
     /**
