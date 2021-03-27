@@ -839,6 +839,15 @@ public class GUI extends JFrame {
                 settingsSeperateChaptersCheckBox.setVisible(false);
             }
         });
+        standardSaveLocationCheckBox.addActionListener(e -> {
+            if (standardSaveLocationCheckBox.isSelected()) {
+                settingsSavelocationField.setVisible(true);
+                settingsBrowseSaveLocationBtn.setVisible(true);
+            } else {
+                settingsSavelocationField.setVisible(false);
+                settingsBrowseSaveLocationBtn.setVisible(false);
+            }
+        });
     }
 
     public void buildLibrary() {
@@ -1494,21 +1503,25 @@ public class GUI extends JFrame {
         settingsAlwaysRemoveStylingCheckBox = new JCheckBox();
         settingsAlwaysRemoveStylingCheckBox.setSelected(settings.isRemoveStyling());
 
+        settingsSavelocationField = new JTextField();
+        settingsSavelocationField.setVisible(false);
+        settingsSavelocationField.setText(settings.getSaveLocation());
+
+        settingsBrowseSaveLocationBtn = new JButton(new ImageIcon(getClass().getResource("/images/folder_icon.png")));
+        settingsBrowseSaveLocationBtn.setVisible(false);
+        settingsBrowseSaveLocationBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsBrowseSaveLocationBtn.setContentAreaFilled(false);
+        settingsBrowseSaveLocationBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         standardSaveLocationCheckBox = new JCheckBox();
         standardSaveLocationCheckBox.setSelected(settings.isUseStandardLocation());
 
         if(settings.isUseStandardLocation()) {
+            settingsSavelocationField.setVisible(true);
+            settingsBrowseSaveLocationBtn.setVisible(true);
             autoSaveLocation.setText(settings.getSaveLocation());
             manSaveLocation.setText(settings.getSaveLocation());
         }
-
-        settingsSavelocationField = new JTextField();
-        settingsSavelocationField.setText(settings.getSaveLocation());
-
-        settingsBrowseSaveLocationBtn = new JButton(new ImageIcon(getClass().getResource("/images/folder_icon.png")));
-        settingsBrowseSaveLocationBtn.setBorder(BorderFactory.createEmptyBorder());
-        settingsBrowseSaveLocationBtn.setContentAreaFilled(false);
-        settingsBrowseSaveLocationBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         settingsNameOutputFormatComboBox = new JComboBox(epubFilenameFormats);
         settingsNameOutputFormatComboBox.setSelectedIndex(settings.getFilenameFormat());
