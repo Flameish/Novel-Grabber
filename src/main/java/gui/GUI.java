@@ -202,6 +202,7 @@ public class GUI extends JFrame {
     private JPanel sourceCanUseHeadlessPanel;
     private JButton saveCookiesButton;
     private JCheckBox manUseAccountCheckBox;
+    private JCheckBox settingsSeperateChaptersCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -636,6 +637,7 @@ public class GUI extends JFrame {
             settings.setBrowser(settingsBrowserComboBox.getSelectedItem().toString());
             settings.setFilenameFormat(settingsNameOutputFormatComboBox.getSelectedIndex());
             settings.setOutputFormat(settingsOutputFormatComboBox.getSelectedIndex());
+            settings.setSeparateChapters(settingsSeperateChaptersCheckBox.isSelected());
             settings.save();
         });
 
@@ -826,6 +828,15 @@ public class GUI extends JFrame {
                     settings.getHeadlessList().remove(domain);
                     settings.save();
                 }
+            }
+        });
+
+        settingsOutputFormatComboBox.addActionListener(e -> {
+            // Show separate chapters checkbox if TXT selected
+            if (settingsOutputFormatComboBox.getSelectedIndex() == 1) {
+                settingsSeperateChaptersCheckBox.setVisible(true);
+            } else {
+                settingsSeperateChaptersCheckBox.setVisible(false);
             }
         });
     }
@@ -1504,6 +1515,13 @@ public class GUI extends JFrame {
 
         settingsOutputFormatComboBox = new JComboBox(epubFormats);
         settingsOutputFormatComboBox.setSelectedIndex(settings.getOutputFormat());
+
+        settingsSeperateChaptersCheckBox = new JCheckBox();
+        settingsSeperateChaptersCheckBox.setVisible(false);
+        if (settingsOutputFormatComboBox.getSelectedIndex() == 1) {
+            settingsSeperateChaptersCheckBox.setVisible(true);
+            settingsSeperateChaptersCheckBox.setSelected(settings.isSeparateChapters());
+        }
 
         // Email settings
         emailHostField = new JTextField(settings.getHost());
