@@ -68,7 +68,7 @@ public class webnovel_com implements Source {
         Element chapterBody = null;
         try {
             Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
-            chapterBody = doc.select("div[class^=chapter_content]").first();
+            chapterBody = doc.select("div.cha-words").first();
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
@@ -81,19 +81,20 @@ public class webnovel_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            Element title = toc.selectFirst("p.lh24.fs16.pt24.pb24.ell.c_000 span:not(span:contains(/))");
-            Element author = toc.selectFirst("address:contains(Author:)");
+            Element title = toc.selectFirst("p:has(a[title=home]) > span:last-child");
+            Element author = toc.selectFirst("p:has(*:contains(Author)) > *:not(:contains(Author))");
             Element desc = toc.selectFirst("#about p");
+            Element cover = toc.selectFirst(".g_thumb img:eq(1)");
 
             metadata.setTitle(title != null ? title.text() : "");
-            metadata.setAuthor(author != null ? author.text().replace("Author: ", "") : "");
+            metadata.setAuthor(author != null ? author.text() : "");
             metadata.setDescription(desc != null ? desc.text() : "");
-            metadata.setBufferedCover(toc.selectFirst(".g_thumb img:eq(1)").attr("abs:src"));
+            metadata.setBufferedCover(cover != null ? cover.attr("abs:src") : "");
 
             Elements tags = toc.select(".m-tags a");
             List<String> subjects = new ArrayList<>();
             for (Element tag : tags) {
-                subjects.add(tag.attr("title"));
+                subjects.add(tag.text());
             }
             metadata.setSubjects(subjects);
         }
