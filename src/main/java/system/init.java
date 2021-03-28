@@ -49,8 +49,13 @@ public class init {
             }
         }
         else if(params.containsKey("telegramBot")) {
-            telegramBot = Telegram.getInstance();
-            telegramBot.run();
+            try {
+                telegramBot = Telegram.getInstance();
+                telegramBot.run();
+            } catch (InterruptedException e) {
+                GrabberUtils.err(e.getMessage());
+                e.printStackTrace();
+            }
         }
         else {
             if(!params.get("link").get(0).isEmpty()) {

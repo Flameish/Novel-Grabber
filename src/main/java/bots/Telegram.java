@@ -56,7 +56,7 @@ public class Telegram {
     private List<String> vipList = new ArrayList<>();
 
     // Initialization with api token
-    private Telegram() {
+    private Telegram() throws InterruptedException {
         GrabberUtils.info("Starting Telegram bot...");
         String token = config.getTelegramApiToken();
         updateVipList();
@@ -65,15 +65,20 @@ public class Telegram {
             GrabberUtils.info("Telegram bot started.");
         } else {
             GrabberUtils.err("Token empty");
+            throw new InterruptedException("Telegram API token empty.");
         }
     }
 
     // Singleton
-    public static Telegram getInstance() {
+    public static Telegram getInstance() throws InterruptedException {
         if(telegramBot == null) {
             telegramBot = new Telegram();
         }
         return telegramBot;
+    }
+
+    public void stop() {
+        novelly.removeGetUpdatesListener();
     }
 
     public void run() {
@@ -139,6 +144,9 @@ public class Telegram {
                     log(String.format("[%s] %s", chatId, messageTxt));
                     try {
                         downloadNovel(chatId, userId, messageTxt);
+                    } catch(IllegalStateException | InterruptedException | ClassNotFoundException e) {
+                        GrabberUtils.err(e.getMessage());
+                        novelly.execute(new SendMessage(chatId, e.getMessage()));
                     } catch(Exception e) {
                         GrabberUtils.err(e.getMessage(), e);
                         novelly.execute(new SendMessage(chatId, e.getMessage()));
