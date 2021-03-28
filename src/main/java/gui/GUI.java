@@ -1,5 +1,6 @@
 package gui;
 
+import bots.Telegram;
 import grabber.*;
 import grabber.sources.Source;
 import org.openqa.selenium.Cookie;
@@ -180,8 +181,8 @@ public class GUI extends JFrame {
     private JLabel manPageLbl;
     private JButton manReverseBtn;
     private JLabel manChapterAmountLbl;
-    private JButton startButton;
-    private JButton stopButton1;
+    private JButton settingsTeleStartBtn;
+    private JButton settingsTeleStopBtn;
     private JButton libraryStopBtn;
     private JButton libraryStartBtn;
     private JButton settingsGeneralBtn;
@@ -203,6 +204,19 @@ public class GUI extends JFrame {
     private JButton saveCookiesButton;
     private JCheckBox manUseAccountCheckBox;
     private JCheckBox settingsSeperateChaptersCheckBox;
+    private JButton settingsTelegramBotBtn;
+    private JPanel settingsTelegramPanel;
+    private JTextField settingsTeleApiTknField;
+    private JTextField settingsTeleMaxChapterPerDayField;
+    private JTextField settingsTeleMaxChapterPerNovelField;
+    private JTextField settingsTeleWaitTimeField;
+    private JButton saveButton;
+    private JCheckBox settingsTeleMaxChapterPerDayCheckBox;
+    private JCheckBox settingsTeleMaxChapterPerNovelCheckBox;
+    private JCheckBox settingsTeleWaitTimeCheckBox;
+    private JLabel settingsTeleStatusLbl;
+    private JButton settingsTeleInfoBtn;
+    private JTextField textField1;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -713,6 +727,7 @@ public class GUI extends JFrame {
             settingsEmailPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
+            settingsTelegramPanel.setVisible(false);
 
             settingsGeneralPanel.setVisible(true);
         });
@@ -720,6 +735,7 @@ public class GUI extends JFrame {
             settingsGeneralPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
+            settingsTelegramPanel.setVisible(false);
 
             settingsLibraryPanel.setVisible(true);
         });
@@ -727,13 +743,23 @@ public class GUI extends JFrame {
             settingsGeneralPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
+            settingsTelegramPanel.setVisible(false);
 
             settingsEmailPanel.setVisible(true);
+        });
+        settingsTelegramBotBtn.addActionListener(actionEvent -> {
+            settingsGeneralPanel.setVisible(false);
+            settingsLibraryPanel.setVisible(false);
+            settingsSourcesPanel.setVisible(false);
+            settingsEmailPanel.setVisible(false);
+
+            settingsTelegramPanel.setVisible(true);
         });
         settingsSourcesBtn.addActionListener(actionEvent -> {
             settingsGeneralPanel.setVisible(false);
             settingsLibraryPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
+            settingsTelegramPanel.setVisible(false);
 
             settingsSourcesPanel.setVisible(true);
         });
@@ -846,6 +872,57 @@ public class GUI extends JFrame {
             } else {
                 settingsSavelocationField.setVisible(false);
                 settingsBrowseSaveLocationBtn.setVisible(false);
+            }
+        });
+        saveButton.addActionListener(e -> {
+            if (settingsTeleApiTknField.getText().trim().isEmpty()) {
+                showPopup("Telegram API token empty!", "warning");
+            }
+            else if (!settingsTeleMaxChapterPerDayField.getText().matches("\\d+")
+                    && !settingsTeleMaxChapterPerDayField.getText().equals("-1")) {
+                showPopup("Max. chapter per day must contain numbers.", "warning");
+            }
+            else if (!settingsTeleMaxChapterPerNovelField.getText().matches("\\d+")
+                    && !settingsTeleMaxChapterPerNovelField.getText().equals("-1")) {
+                showPopup("Max. chapter per novel must contain numbers.", "warning");
+            }
+            else if (!settingsTeleWaitTimeField.getText().matches("\\d+")) {
+                showPopup("Wait time must contain numbers.", "warning");
+            } else {
+                settings.setTelegramApiToken(settingsTeleApiTknField.getText().trim());
+                settings.setTelegramMaxChapterPerDay(Integer.parseInt(settingsTeleMaxChapterPerDayField.getText()));
+                settings.setTelegramNovelMaxChapter(Integer.parseInt(settingsTeleMaxChapterPerNovelField.getText()));
+                settings.setTelegramWait(Integer.parseInt(settingsTeleWaitTimeField.getText()));
+                settings.save();
+            }
+        });
+        settingsTeleStartBtn.addActionListener(e -> {
+            settingsTeleStartBtn.setEnabled(false);
+            try {
+                init.telegramBot = Telegram.getInstance();
+                init.telegramBot.run();
+                settingsTeleStatusLbl.setText("Status: Running");
+                settingsTeleStopBtn.setVisible(true);
+                settingsTeleStartBtn.setVisible(false);
+            } catch (InterruptedException ex) {
+                showPopup(ex.getMessage(), "error");
+                settingsTeleStartBtn.setEnabled(true);
+            }
+        });
+        settingsTeleStopBtn.addActionListener(e -> {
+            if (init.telegramBot != null) {
+                init.telegramBot.stop();
+                settingsTeleStatusLbl.setText("Status: Stopped");
+                settingsTeleStartBtn.setVisible(true);
+                settingsTeleStartBtn.setEnabled(true);
+                settingsTeleStopBtn.setVisible(false);
+            }
+        });
+        settingsTeleInfoBtn.addActionListener(e -> {
+            try {
+                GrabberUtils.openWebpage(new URI("https://core.telegram.org/bots#3-how-do-i-create-a-bot"));
+            } catch (URISyntaxException ex) {
+                GrabberUtils.err(ex.getMessage(), ex);
             }
         });
     }
@@ -1458,6 +1535,13 @@ public class GUI extends JFrame {
         settingsEmailBtn.setContentAreaFilled(false);
         settingsEmailBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        settingsTelegramBotBtn = new JButton("Telegram Bot", new ImageIcon(getClass().getResource("/images/bot_icon.png")));
+        settingsTelegramBotBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsTelegramBotBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsTelegramBotBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsTelegramBotBtn.setContentAreaFilled(false);
+        settingsTelegramBotBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         settingsLibraryBtn = new JButton("Library", new ImageIcon(getClass().getResource("/images/library_icon.png")));
         settingsLibraryBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
         settingsLibraryBtn.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -1535,6 +1619,17 @@ public class GUI extends JFrame {
             settingsSeperateChaptersCheckBox.setVisible(true);
             settingsSeperateChaptersCheckBox.setSelected(settings.isSeparateChapters());
         }
+
+        // Telegram settings
+        settingsTeleApiTknField = new JTextField(settings.getTelegramApiToken());
+        settingsTeleMaxChapterPerDayField = new JTextField(String.valueOf(settings.getTelegramMaxChapterPerDay()));
+        settingsTeleMaxChapterPerNovelField = new JTextField(String.valueOf(settings.getTelegramNovelMaxChapter()));
+        settingsTeleWaitTimeField = new JTextField(String.valueOf(settings.getTelegramWait()));
+
+        settingsTeleInfoBtn = new JButton(new ImageIcon(getClass().getResource("/images/info_icon.png")));
+        settingsTeleInfoBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsTeleInfoBtn.setContentAreaFilled(false);
+        settingsTeleInfoBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         // Email settings
         emailHostField = new JTextField(settings.getHost());
