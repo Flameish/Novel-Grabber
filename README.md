@@ -174,3 +174,4 @@ Novel Grabber was build in java with: <br>
  * [Notify](https://github.com/dorkbox/Notify)
  * [icons8](https://icons8.com)
  * [FlatLaf](https://www.formdev.com/flatlaf/)
+ * [Java Telegram Bot API](https://github.com/pengrad/java-telegram-bot-api/)
