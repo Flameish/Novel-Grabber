@@ -220,6 +220,7 @@ public class GUI extends JFrame {
     private JTextField librarySearchField;
     private JButton searchButton;
     private JCheckBox libraryDoNotDisplayCoversCheckBox;
+    private JPanel libraryNovelPanel;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
