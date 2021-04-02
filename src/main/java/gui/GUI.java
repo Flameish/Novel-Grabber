@@ -216,7 +216,10 @@ public class GUI extends JFrame {
     private JCheckBox settingsTeleWaitTimeCheckBox;
     private JLabel settingsTeleStatusLbl;
     private JButton settingsTeleInfoBtn;
-    private JTextField textField1;
+    private JCheckBox libraryOnlyShowNovelsWithCheckBox;
+    private JTextField librarySearchField;
+    private JButton searchButton;
+    private JCheckBox libraryDoNotDisplayCoversCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -925,6 +928,26 @@ public class GUI extends JFrame {
                 GrabberUtils.err(ex.getMessage(), ex);
             }
         });
+        libraryOnlyShowNovelsWithCheckBox.addActionListener(e -> {
+            settings.setLibraryShowOnlyUpdatable(libraryOnlyShowNovelsWithCheckBox.isSelected());
+            settings.save();
+            buildLibrary();
+        });
+        searchButton.addActionListener(e -> {
+            buildLibrary();
+        });
+        librarySearchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode()==KeyEvent.VK_ENTER){
+                    buildLibrary();
+                }
+            }
+        });
+        libraryDoNotDisplayCoversCheckBox.addActionListener(e -> {
+            settings.setLibraryNoCovers(libraryDoNotDisplayCoversCheckBox.isSelected());
+            settings.save();
+        });
     }
 
     public void buildLibrary() {
@@ -932,6 +955,17 @@ public class GUI extends JFrame {
         int gridRow = 0;
         int gridCol = 0;
         for(LibraryNovel libNovel: library.getNovels()) {
+            // Skip if novel has no new updates and "Show only new releases" is selected
+            int chapterDiff = libNovel.getNewestChapterNumber() - libNovel.getLastLocalChapterNumber();
+            if (chapterDiff == 0 && settings.isLibraryShowOnlyUpdatable()) {
+                continue;
+            }
+            // Novel search
+            if (!librarySearchField.getText().isEmpty() &&
+                    !libNovel.getMetadata().getTitle().toLowerCase().contains(librarySearchField.getText().toLowerCase())) {
+                continue;
+            }
+
             GridBagConstraints c;
             JPanel novelPane = new JPanel(new GridBagLayout());
 
@@ -939,26 +973,29 @@ public class GUI extends JFrame {
             c = new GridBagConstraints();
             String novelCover = libNovel.getSaveLocation() + "/cover." + libNovel.getMetadata().getCoverFormat();
             JButton novelImage;
-            if(novelCover.isEmpty()) {
-                novelImage = new JButton(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
-            } else {
-                ImageIcon imageIcon = new ImageIcon(novelCover); // load the image to a imageIcon
-                Image image = imageIcon.getImage(); // transform it
-                Image newimg = image.getScaledInstance(120, 180,  Image.SCALE_SMOOTH);
-                imageIcon = new ImageIcon(newimg);  // transform it back
-                novelImage = new JButton(imageIcon);
+            if (!settings.isLibraryNoCovers()) {
+                if(novelCover.isEmpty()) {
+                    novelImage = new JButton(new ImageIcon(getClass().getResource("/images/cover_placeholder.png")));
+                } else {
+                    // Cache ?
+                    ImageIcon imageIcon = new ImageIcon(novelCover); // load the image to a imageIcon
+                    Image image = imageIcon.getImage(); // transform it
+                    Image newimg = image.getScaledInstance(120, 180,  Image.SCALE_SMOOTH);
+                    imageIcon = new ImageIcon(newimg);  // transform it back
+                    novelImage = new JButton(imageIcon);
+                }
+                novelImage.setBorder(BorderFactory.createEmptyBorder());
+                novelImage.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                // Show novel settings
+                novelImage.addActionListener(actionEvent -> {
+                    libraryNovelSettings.main(libNovel);
+                });
+                c.gridx = 0;
+                c.gridy = 0;
+                c.fill = GridBagConstraints.BOTH;
+                c.gridheight = GridBagConstraints.REMAINDER;
+                novelPane.add(novelImage, c);
             }
-            novelImage.setBorder(BorderFactory.createEmptyBorder());
-            novelImage.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            // Show novel settings
-            novelImage.addActionListener(actionEvent -> {
-                libraryNovelSettings.main(libNovel);
-            });
-            c.gridx = 0;
-            c.gridy = 0;
-            c.fill = GridBagConstraints.BOTH;
-            c.gridheight = GridBagConstraints.REMAINDER;
-            novelPane.add(novelImage, c);
 
             // Name
             c = new GridBagConstraints();
@@ -1015,7 +1052,6 @@ public class GUI extends JFrame {
             JLabel newChapterAmountLbl = new JLabel("No new chapters");
 
             // Show manual download button if new chapters available
-            int chapterDiff = libNovel.getNewestChapterNumber() - libNovel.getLastLocalChapterNumber();
             if(chapterDiff > 0) {
                 // Overwrite default text with new chapter amount
                 newChapterAmountLbl.setText(chapterDiff + " new chapters");
@@ -1089,8 +1125,9 @@ public class GUI extends JFrame {
             novelPane.setPreferredSize(new Dimension(500, 180));
             libraryPanel.add(novelPane, c);
         }
-        libraryPanel.validate();
-        libraryPanel.repaint();
+
+        libraryTab.validate();
+        libraryTab.repaint();
     }
 
     public void libraryIsChecking(boolean isChecking) {
@@ -1520,6 +1557,9 @@ public class GUI extends JFrame {
         libraryScrollPane = new JScrollPane(libraryPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         libraryScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
+        libraryOnlyShowNovelsWithCheckBox = new JCheckBox();
+        libraryOnlyShowNovelsWithCheckBox.setSelected(settings.isLibraryShowOnlyUpdatable());
+
         // Settings Tab
         settingsGeneralBtn = new JButton("General", new ImageIcon(getClass().getResource("/images/settings_icon.png")));
         settingsGeneralBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -1680,6 +1720,9 @@ public class GUI extends JFrame {
         DefaultFormatter formatter = (DefaultFormatter) field.getFormatter();
         formatter.setCommitsOnValidEdit(true);
         libraryFrequencySpinner.addChangeListener(e -> settings.setFrequency((Integer) libraryFrequencySpinner.getValue()));
+
+        libraryDoNotDisplayCoversCheckBox = new JCheckBox();
+        libraryDoNotDisplayCoversCheckBox.setSelected(settings.isLibraryNoCovers());
 
         //Sources
         for(Source source: GrabberUtils.getSources()) {

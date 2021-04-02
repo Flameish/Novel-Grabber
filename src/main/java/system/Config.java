@@ -33,6 +33,8 @@ public class Config {
     private boolean useStandardLocation = false;
     private boolean pollingEnabled = true;
     private boolean separateChapters = false;
+    private boolean libraryShowOnlyUpdatable = false;
+    private boolean libraryNoCovers = false;
 
     private Config() { }
 
@@ -72,6 +74,8 @@ public class Config {
             // Library
             setFrequency(Integer.parseInt(prop.getProperty("frequency", String.valueOf(frequency))));
             setPollingEnabled(Boolean.parseBoolean(prop.getProperty("pollingEnabled", String.valueOf(pollingEnabled))));
+            setLibraryShowOnlyUpdatable(Boolean.parseBoolean(prop.getProperty("libraryShowOnlyUpdatable", String.valueOf(libraryShowOnlyUpdatable))));
+            setLibraryNoCovers(Boolean.parseBoolean(prop.getProperty("libraryNoCovers", String.valueOf(libraryNoCovers))));
             // Telegram
             setTelegramApiToken(prop.getProperty("telegramApiToken", telegramApiToken));
             setTelegramWait(Integer.parseInt(prop.getProperty("telegramWait", String.valueOf(telegramWait))));
@@ -109,6 +113,8 @@ public class Config {
             // Library
             prop.setProperty("frequency", String.valueOf(getFrequency()));
             prop.setProperty("pollingEnabled", String.valueOf(isPollingEnabled()));
+            prop.setProperty("libraryShowOnlyUpdatable", String.valueOf(isLibraryShowOnlyUpdatable()));
+            prop.setProperty("libraryNoCovers", String.valueOf(isLibraryNoCovers()));
             // Telegram
             prop.setProperty("telegramApiToken", String.valueOf(getTelegramApiToken()));
             prop.setProperty("telegramWait", String.valueOf(getTelegramWait()));
@@ -185,7 +191,6 @@ public class Config {
     public List<String> getTelegramAdminIds() {
         return telegramAdminIds;
     }
-    // Setter
     public void setPort(int port) {
         this.port = port;
     }
@@ -256,5 +261,21 @@ public class Config {
 
     public void setSeparateChapters(boolean separateChapters) {
         this.separateChapters = separateChapters;
+    }
+
+    public boolean isLibraryShowOnlyUpdatable() {
+        return libraryShowOnlyUpdatable;
+    }
+
+    public boolean isLibraryNoCovers() {
+        return libraryNoCovers;
+    }
+
+    public void setLibraryNoCovers(boolean libraryNoCovers) {
+        this.libraryNoCovers = libraryNoCovers;
+    }
+
+    public void setLibraryShowOnlyUpdatable(boolean libraryShowOnlyUpdatable) {
+        this.libraryShowOnlyUpdatable = libraryShowOnlyUpdatable;
     }
 }
