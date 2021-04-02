@@ -98,6 +98,8 @@ public class readlightnovel_org implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         blacklistedTags.add(".apester-media");
+        blacklistedTags.add("#growfoodsmart");
+        blacklistedTags.add(".ads-title");
         return blacklistedTags;
     }
 
