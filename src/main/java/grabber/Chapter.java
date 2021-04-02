@@ -72,7 +72,7 @@ public class Chapter implements Serializable {
         }
         // Remove empty block elements
         for (Element element : chapterContainer.select("*")) {
-            if (!element.hasText() && element.isBlock()) {
+            if (!element.hasText() && element.isBlock() && element.select("img") == null) {
                 element.remove();
             }
         }
