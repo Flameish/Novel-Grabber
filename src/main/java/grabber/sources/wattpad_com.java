@@ -53,7 +53,8 @@ public class wattpad_com implements Source {
                     .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
-            Elements chapterLinks = toc.select(".table-of-contents a");
+            // Only get chapters which are not locked
+            Elements chapterLinks = toc.select(".table-of-contents a:not(:has(span.fa-lock))");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
@@ -76,15 +77,10 @@ public class wattpad_com implements Source {
             Object obj = parser.parse(json);
             JSONObject jsonObject = (JSONObject) obj;
             JSONObject results = (JSONObject) jsonObject.get("text_url");
-            Document doc;
-            if (novel.cookies != null) {
-                doc = Jsoup.connect(String.valueOf(results.get("text")))
-                        .cookies(novel.cookies)
-                        .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
-                        .get();
-            } else {
-                doc = Jsoup.connect(String.valueOf(results.get("text"))).cookies(novel.cookies).get();
-            }
+            Document doc = Jsoup.connect(String.valueOf(results.get("text")))
+                    .cookies(novel.cookies)
+                    .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                    .get();;
             chapterBody = doc.select("body").first();
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
@@ -98,10 +94,15 @@ public class wattpad_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            metadata.setTitle(toc.select(".container h1").first().text());
-            metadata.setAuthor(toc.select("a.send-author-event.on-navigate:not(.avatar)").first().text());
-            metadata.setDescription(toc.select("h2.description").first().text());
-            metadata.setBufferedCover(toc.select(".cover.cover-lg img").attr("abs:src"));
+            Element title = toc.selectFirst(".container h1");
+            Element author = toc.selectFirst("a.send-author-event.on-navigate:not(.avatar)");
+            Element desc = toc.selectFirst("h2.description");
+            Element cover = toc.selectFirst(".cover.cover-lg img");
+
+            metadata.setTitle(title != null ? title.text() : "");
+            metadata.setAuthor(author != null ? author.text() : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(cover != null ? cover.attr("abs:src") : "");
 
             Elements tags = toc.select(".tag-items li div.tag-item");
             List<String> subjects = new ArrayList<>();
