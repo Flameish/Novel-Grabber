@@ -70,9 +70,10 @@ public class Chapter implements Serializable {
         for (String tag : blacklistedTags) {
             chapterContainer.select(tag).remove();
         }
+
         // Remove empty block elements
-        for (Element element : chapterContainer.select("*")) {
-            if (!element.hasText() && element.isBlock() && element.select("img") == null) {
+        for (Element element : chapterContainer.select("*:not(:has(img))")) {
+            if (!element.hasText() && element.isBlock()) {
                 element.remove();
             }
         }
