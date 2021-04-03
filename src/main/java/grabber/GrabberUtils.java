@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -226,6 +227,35 @@ public class GrabberUtils {
         } catch (Exception e) {
             err(e.getMessage(), e);
             return sources;
+        }
+    }
+
+    /**
+     * Returns Source based on domain name.
+     * @return {@code Source} or null
+     */
+    public static Source getSource(String domain) throws ClassNotFoundException, IOException, NoSuchMethodException,
+            IllegalAccessException, InvocationTargetException, InstantiationException {
+        String curPath = getCurrentPath();
+        // Create ClassLoader
+        File dir = new File(curPath + "/sources");
+        URL loadPath = dir.toURI().toURL();
+        URL[] urls = new URL[]{loadPath};
+        URLClassLoader classLoader = new URLClassLoader(urls);
+
+        // Convert url to filename format
+        domain = domain.replaceAll("[^A-Za-z0-9]", "_");
+        // Supported sources have their domain name as their class name and java does not allow class names
+        // to start with digits, which is possible for domain names, we need to add a 'n' for number in front.
+        if (domain.substring(0, 1).matches("\\d")) domain = "n" + domain;
+
+        File sourceFile = new File(curPath + "/sources/grabber/sources/" + domain + ".class");
+        if (!sourceFile.exists()) {
+            err("No source file found for: " + domain);
+            return null;
+        } else {
+            String className = "grabber.sources." + sourceFile.getName().replace(".class", "");
+            return (Source) classLoader.loadClass(className).getConstructor().newInstance();
         }
     }
 
