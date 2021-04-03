@@ -53,6 +53,7 @@ public class libraryNovelSettings extends JDialog {
             if(input == 0) {
                 library.removeNovel(libraryNovel.getNovelUrl());
                 library.writeLibraryFile();
+                init.gui.buildLibHostComboBox();
                 init.gui.buildLibrary();
                 dispose();
             }

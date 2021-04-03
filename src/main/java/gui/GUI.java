@@ -221,6 +221,7 @@ public class GUI extends JFrame {
     private JButton searchButton;
     private JCheckBox libraryDoNotDisplayCoversCheckBox;
     private JPanel libraryNovelPanel;
+    private JComboBox libraryHostListComboBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -668,6 +669,7 @@ public class GUI extends JFrame {
                 library.writeLibraryFile();
                 autoStarredBtn.setIcon(new ImageIcon(getClass().getResource("/images/starred_icon.png")));
             }
+            buildLibHostComboBox();
         });
 
         tabbedPane.addChangeListener(e -> {
@@ -951,21 +953,46 @@ public class GUI extends JFrame {
         });
     }
 
+    /**
+     * Checks various filter settings for a novel
+     * @return {@code true} if novel gets caught
+     */
+    public boolean checkLibFilter(LibraryNovel libNovel) {
+        // Check for new releases if "Only new releases" is selected
+        int chapterDiff = libNovel.getNewestChapterNumber() - libNovel.getLastLocalChapterNumber();
+        if (chapterDiff == 0 && settings.isLibraryShowOnlyUpdatable()) {
+            return true;
+        }
+        // Check if novel title contains search word
+        if (!librarySearchField.getText().isEmpty() &&
+                !libNovel.getMetadata().getTitle().toLowerCase().contains(librarySearchField.getText().toLowerCase())) {
+            return true;
+        }
+        // Check if host domain of novel is valid for selected item from dropdown
+        if (!libraryHostListComboBox.getSelectedItem().toString().equals("All")) {
+            try {
+                // Get pretty source name from source class
+                Source source = GrabberUtils.getSource(GrabberUtils.getDomainName(libNovel.getNovelUrl()));
+                if (source != null) {
+                    // Check hostname is already in combobox
+                    String hostname = source.getName();
+                    if (!hostname.equals(libraryHostListComboBox.getSelectedItem().toString())) {
+                        return true;
+                    }
+                }
+            } catch (Exception e) {
+                GrabberUtils.err(e.getMessage(), e);
+            }
+        }
+        return false;
+    }
+
     public void buildLibrary() {
         libraryPanel.removeAll();
         int gridRow = 0;
         int gridCol = 0;
         for(LibraryNovel libNovel: library.getNovels()) {
-            // Skip if novel has no new updates and "Show only new releases" is selected
-            int chapterDiff = libNovel.getNewestChapterNumber() - libNovel.getLastLocalChapterNumber();
-            if (chapterDiff == 0 && settings.isLibraryShowOnlyUpdatable()) {
-                continue;
-            }
-            // Novel search
-            if (!librarySearchField.getText().isEmpty() &&
-                    !libNovel.getMetadata().getTitle().toLowerCase().contains(librarySearchField.getText().toLowerCase())) {
-                continue;
-            }
+            if (checkLibFilter(libNovel)) continue;
 
             GridBagConstraints c;
             JPanel novelPane = new JPanel(new GridBagLayout());
@@ -1051,7 +1078,7 @@ public class GUI extends JFrame {
 
             // Set default text
             JLabel newChapterAmountLbl = new JLabel("No new chapters");
-
+            int chapterDiff = libNovel.getNewestChapterNumber() - libNovel.getLastLocalChapterNumber();
             // Show manual download button if new chapters available
             if(chapterDiff > 0) {
                 // Overwrite default text with new chapter amount
@@ -1129,6 +1156,32 @@ public class GUI extends JFrame {
 
         libraryTab.validate();
         libraryTab.repaint();
+    }
+
+    public void buildLibHostComboBox() {
+        // Get list of all hostnames of library novels
+        Set<String> hostList = new LinkedHashSet<>();
+        for (LibraryNovel libNovel: library.getNovels()) {
+            hostList.add(GrabberUtils.getDomainName(libNovel.getNovelUrl()));
+        }
+        // Add entries to ComboBox
+        libraryHostListComboBox.removeAllItems();
+        libraryHostListComboBox.addItem("All");
+        for (String hostName: hostList) {
+            try {
+                // Get pretty source name from source class
+                Source source = GrabberUtils.getSource(hostName);
+                if (source != null) {
+                    // Check hostname is already in combobox
+                    String hostname = source.getName();
+                    if(((DefaultComboBoxModel)libraryHostListComboBox.getModel()).getIndexOf(hostname) == -1) {
+                        libraryHostListComboBox.addItem(hostname);
+                    }
+                }
+            } catch (Exception e) {
+                GrabberUtils.err(e.getMessage(), e);
+            }
+        }
     }
 
     public void libraryIsChecking(boolean isChecking) {
@@ -1724,6 +1777,9 @@ public class GUI extends JFrame {
 
         libraryDoNotDisplayCoversCheckBox = new JCheckBox();
         libraryDoNotDisplayCoversCheckBox.setSelected(settings.isLibraryNoCovers());
+
+        libraryHostListComboBox =  new JComboBox();
+        buildLibHostComboBox();
 
         //Sources
         for(Source source: GrabberUtils.getSources()) {
