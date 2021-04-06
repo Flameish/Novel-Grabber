@@ -16,8 +16,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class ranobes_net implements Source {
-    private final String name = "";
-    private final String url = "";
+    private final String name = "Ranobes";
+    private final String url = "https://ranobes.net/";
     private final boolean canHeadless = false;
     private Novel novel;
     private Document toc;
