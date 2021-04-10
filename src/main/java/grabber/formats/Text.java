@@ -23,6 +23,7 @@ public class Text {
     public void write() {
         String filename = setFilename();
         GrabberUtils.createDir(novel.saveLocation);
+        GrabberUtils.info(novel.window,"Writing TXT...");
         if (init.config.isSeparateChapters()) {
             // Create dir for chapter files
             String saveLocation = novel.saveLocation + "/" + filename;
@@ -48,7 +49,7 @@ public class Text {
                     writer.write(Jsoup.parse(chapter.chapterContent).wholeText());
                 }
                 novel.filename = filename;
-                GrabberUtils.info("Output: " + novel.saveLocation + "/" + filename);
+                GrabberUtils.info(novel.window, "Output: " + novel.saveLocation + "/" + filename);
             } catch (UnsupportedEncodingException | FileNotFoundException e) {
                 GrabberUtils.err(novel.window, e.getMessage(), e);
             } catch (IOException e) {

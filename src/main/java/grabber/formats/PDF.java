@@ -49,12 +49,13 @@ public class PDF {
     public void write() {
         String filename = setFilename();
         try (OutputStream os = new FileOutputStream(novel.saveLocation + "/" + filename)) {
+            GrabberUtils.info(novel.window,"Writing PDF...");
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
             builder.withW3cDocument(buildHtmlFile(), novel.saveLocation);
             builder.toStream(os);
             builder.run();
-            GrabberUtils.info("Output: " + novel.saveLocation+"/"+ filename);
+            GrabberUtils.info(novel.window, "Output: " + novel.saveLocation+"/"+ filename);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
