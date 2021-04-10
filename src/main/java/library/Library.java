@@ -238,7 +238,7 @@ public class Library {
                     emailClient.sendNotification(novel);
                 }
                 if(libNovel.isSendDesktopNotification()) {
-                    DesktopNotification.sendChapterReleaseNotification(libNovel, novel);
+                    DesktopNotification.sendChapterReleaseNotification(novel);
                 }
                 // Update last local chapter number to newest
                 if(libNovel.isUpdateLast()) {
