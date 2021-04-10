@@ -44,7 +44,7 @@ public class LibraryNovel extends Novel {
         displayChapterTitle = (boolean) libNovel.getOrDefault("displayChapterTitle", isDisplayChapterTitle());
         removeStyling = (boolean) libNovel.getOrDefault("removeStyling", isRemoveStyling());
         checkingActive = (boolean) libNovel.getOrDefault("checkingActive", isCheckingActive());
-        waitTime = (((Long) libNovel.getOrDefault("waitTime", getWaitTime())).intValue());
+        waitTime = (int) libNovel.getOrDefault("waitTime", getWaitTime());
         lastChapterNumber = (((Long) libNovel.get("lastChapter")).intValue());
         newestChapterNumber = (((Long) libNovel.get("newestChapter")).intValue());
         threshold = (((Long) libNovel.get("threshold")).intValue());
