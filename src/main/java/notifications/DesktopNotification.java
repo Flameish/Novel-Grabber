@@ -18,28 +18,19 @@ import java.net.URISyntaxException;
 
 public class DesktopNotification {
 
-    public static void sendChapterReleaseNotification(LibraryNovel libNovel, Novel autoNovel) {
+    public static void sendChapterReleaseNotification(Novel novel) {
         try {
-            URI uri = new URI(autoNovel.chapterList.get(libNovel.getLastLocalChapterNumber()).chapterURL);
-            File imageFile = new File(Library.libraryFolder + "/"
-                    + libNovel.getMetadata().getTitle() + "/"
-                    + libNovel.getMetadata().getCoverName() + "."
-                    + libNovel.getMetadata().getCoverFormat());
-            InputStream resourceAsStream = new FileInputStream(imageFile);
-            Image image = ImageUtil.getImageImmediate(ImageIO.read(resourceAsStream));
-            image = image.getScaledInstance(100, 133, Image.SCALE_SMOOTH);
-
+            URI uri = new URI(novel.chapterList.get(novel.chapterList.size()-1).chapterURL);
             Notify.create()
-                    .title(libNovel.getMetadata().getTitle())
-                    .text(autoNovel.chapterList.get(libNovel.getLastLocalChapterNumber()).name)
+                    .title(novel.metadata.getTitle())
+                    .text(novel.chapterList.get(novel.chapterList.size()-1).name)
                     .darkStyle()
-                    .image(image)
+                    .image(novel.metadata.getBufferedCover())
                     .hideAfter(5000)
                     .hideCloseButton()
                     .onAction(arg0 -> GrabberUtils.openWebpage(uri))
                     .show();
-
-        } catch (IOException | URISyntaxException e) {
+        } catch (URISyntaxException e) {
             GrabberUtils.err(e.getMessage(), e);
         }
     }
