@@ -13,12 +13,11 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import system.Config;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class novelupdates_com implements Source {
@@ -53,49 +52,30 @@ public class novelupdates_com implements Source {
 
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
-        try {
-            Connection.Response res = Jsoup.connect(novel.novelLink)
-                    .cookies(novel.cookies)
-                    .method(Connection.Method.GET)
-                    .execute();
-            toc = res.parse();
-            res = Jsoup.connect("https://www.novelupdates.com/wp-admin/admin-ajax.php")
-                    .method(Connection.Method.POST)
-                    .cookies(res.cookies())
-                    .data("action", "nd_getchapters")
-                    .data("mypostid", toc.select("#mypostid").attr("value"))
-                    .execute();
-            Document doc = res.parse();
-            for (Element chapterLink : doc.select("li a:not([title])")) {
-                chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
-            }
-            Collections.reverse(chapterList);
-        } catch (HttpStatusException httpEr) {
-            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window);
+        novel.headlessDriver.driver.navigate().to(novel.novelLink);
+        novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
+        novel.headlessDriver.driver.navigate().to(novel.novelLink);
+        novel.headlessDriver.driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+        String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
+        novel.headlessDriver.driver.findElement(By.cssSelector("span.my_popupreading_open")).click();
+        novel.headlessDriver.wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div#my_popupreading ol.sp_chp li a[href]")));
+        toc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
+        for (Element chapterLink : toc.select("div#my_popupreading ol.sp_chp li a[href]:not(:has(i))")) {
+            chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
         }
+        novel.headlessDriver.driver.close();
+        novel.headlessDriver = null;
+        Collections.reverse(chapterList);
         return chapterList;
     }
 
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc;
-            if (Config.getInstance().getHeadlessList().contains(name)) {
-                doc = getPageHeadless(chapter.chapterURL);
-            } else {
-                doc = Jsoup.connect(chapter.chapterURL)
-                        .cookies(novel.cookies)
-                        .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
-                        .get();
-            }
+            Document doc = getPageHeadless(chapter.chapterURL);
             String extractedContentHtml = findChapter(doc, chapter.chapterURL);
             chapterBody = Jsoup.parse(extractedContentHtml);
-        } catch (HttpStatusException httpEr) {
-            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         } catch (NullPointerException e) {
             GrabberUtils.err(novel.window, "Could not detect chapter on: "
                     + chapter.chapterURL + "(" + e.getMessage() + ")", e);
