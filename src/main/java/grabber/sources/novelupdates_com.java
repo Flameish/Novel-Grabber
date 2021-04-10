@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class novelupdates_com implements Source {
     private final String name = "Novel Updates";
     private final String url = "https://novelupdates.com";
-    private final boolean canHeadless = true;
+    private final boolean canHeadless = false;
     private Novel novel;
     private Document toc;
 
