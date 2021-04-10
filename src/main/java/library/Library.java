@@ -59,7 +59,11 @@ public class Library {
             // Create starred novels from json objects
             JSONArray libraryNovels = (JSONArray) libraryObj.get("starredNovels");
             for (Object loadedNovel: libraryNovels) {
-                starredNovels.add(new LibraryNovel((JSONObject) loadedNovel));
+                try {
+                    starredNovels.add(new LibraryNovel((JSONObject) loadedNovel));
+                } catch (NullPointerException e) {
+                    GrabberUtils.err("Could not convert novel JSON: " + loadedNovel);
+                }
             }
         } catch (IOException e) {
             GrabberUtils.err("No library file found.");
@@ -132,7 +136,12 @@ public class Library {
         libNovel.setNewestChapterNumber(chapterAmount);
         libNovel.setNewestChapterName(novel.chapterList.get(chapterAmount-1).name);
         libNovel.setUpdateLast(true);
+        libNovel.setCheckingActive(true);
         libNovel.setUseAccount(novel.useAccount);
+        libNovel.setRemoveStyling(novel.removeStyling);
+        libNovel.setDisplayChapterTitle(novel.displayChapterTitle);
+        libNovel.setWaitTime(novel.waitTime);
+        libNovel.setGetImages(novel.getImages);
         libNovel.metadata = novel.metadata;
         String destDir;
         if(Config.getInstance().isUseStandardLocation()) {
@@ -162,6 +171,9 @@ public class Library {
             init.gui.libraryIsChecking(true);
         }
         for(LibraryNovel libNovel: getNovels()) {
+            // Skip novel if checking is disabled for it
+            if (!libNovel.isCheckingActive()) continue;
+
             GrabberUtils.info("Checking "+ libNovel.getMetadata().getTitle());
 
             // Make novel builder generic to handle libNovel in future
@@ -172,6 +184,10 @@ public class Library {
                         .saveLocation(libNovel.getSaveLocation())
                         .setSource(libNovel.getNovelUrl())
                         .useAccount(libNovel.isUseAccount())
+                        .getImages(libNovel.isGetImages())
+                        .displayChapterTitle(libNovel.isDisplayChapterTitle())
+                        .waitTime(libNovel.getWaitTime())
+                        .removeStyling(libNovel.isRemoveStyling())
                         .window("checker")
                         .build();
             } catch (ClassNotFoundException e) {
@@ -231,6 +247,39 @@ public class Library {
                 }
             }
 
+        }
+        // Update library gui
+        if(init.gui != null) {
+            init.gui.buildLibrary();
+            init.gui.libraryIsChecking(false);
+        }
+        // Write changes to file
+        writeLibraryFile();
+    }
+
+    /**
+     * Checks specific novel for new releases
+     */
+    public void checkNovel(LibraryNovel libNovel) throws IOException, ClassNotFoundException {
+        if(init.gui != null) {
+            init.gui.libraryIsChecking(true);
+        }
+        GrabberUtils.info("Checking "+ libNovel.getMetadata().getTitle());
+
+        Novel novel = Novel.builder()
+                .novelLink(libNovel.getNovelUrl())
+                .saveLocation(libNovel.getSaveLocation())
+                .setSource(libNovel.getNovelUrl())
+                .useAccount(libNovel.isUseAccount())
+                .window("checker")
+                .build();
+        // Get chapter list
+        novel.check();
+        if(!novel.chapterList.isEmpty()) {
+            int newestChapterNumber = novel.chapterList.size();
+            String newestChapterName = novel.chapterList.get(newestChapterNumber-1).name;
+            libNovel.setNewestChapterNumber(newestChapterNumber);
+            libNovel.setNewestChapterName(newestChapterName);
         }
         // Update library gui
         if(init.gui != null) {

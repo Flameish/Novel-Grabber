@@ -1028,6 +1028,9 @@ public class GUI extends JFrame {
             // Name
             c = new GridBagConstraints();
             JLabel novelTitle = new JLabel("<html><p style=\"width:275px\">" + libNovel.getMetadata().getTitle() + "</p></html>");
+            if (!libNovel.isCheckingActive()) {
+                novelTitle.setForeground(Color.GRAY);
+            }
             novelTitle.setFont(new Font("DejaVuSans", Font.BOLD, 17));
             novelTitle.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             MouseListener mouseListener = new MouseAdapter() {
@@ -1065,8 +1068,6 @@ public class GUI extends JFrame {
             c.insets = new Insets(5,12,0,0);
             novelPane.add(newestChapter, c);
 
-
-
             c = new GridBagConstraints();
             // FlowLayout to remove border padding inside panel
             JPanel downloadPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -1100,9 +1101,13 @@ public class GUI extends JFrame {
                                 .novelLink(libNovel.getNovelUrl())
                                 .saveLocation(libNovel.getSaveLocation())
                                 .setSource(libNovel.getNovelUrl())
-                                .useAccount(libNovel.isUseAccount())
                                 .firstChapter(libNovel.getLastLocalChapterNumber() + 1)
                                 .lastChapter(libNovel.getNewestChapterNumber())
+                                .useAccount(libNovel.isUseAccount())
+                                .getImages(libNovel.isGetImages())
+                                .displayChapterTitle(libNovel.isDisplayChapterTitle())
+                                .waitTime(libNovel.getWaitTime())
+                                .removeStyling(libNovel.isRemoveStyling())
                                 .window("checker")
                                 .build();
                         novel.check();

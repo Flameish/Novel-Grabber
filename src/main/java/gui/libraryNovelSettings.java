@@ -10,8 +10,10 @@ import javax.swing.text.DefaultFormatter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.Executors;
 
 public class libraryNovelSettings extends JDialog {
     private LibraryNovel libraryNovel;
@@ -31,6 +33,14 @@ public class libraryNovelSettings extends JDialog {
     private JButton browseSaveLocationBtn;
     private JCheckBox useLoginCheckBox;
     private JButton visitPageBtn;
+    private JCheckBox checkThisNovelCheckBox;
+    private JButton checkNowBtn;
+    private JLabel checkingBusyLbl;
+    private JLabel tresholdLbl;
+    private JTextField waitTimeField;
+    private JCheckBox getImagesCheckBox;
+    private JCheckBox displayChapterTitleCheckBox;
+    private JCheckBox removeStylingCheckBox;
 
     public libraryNovelSettings(LibraryNovel libraryNovel) {
         this.libraryNovel = libraryNovel;
@@ -82,7 +92,12 @@ public class libraryNovelSettings extends JDialog {
             }
         });
         // Disable send attachment if download chapters is disabled
-        downloadChaptersCheckBox.addActionListener(e -> attachmentCheckBox.setEnabled(downloadChaptersCheckBox.isSelected()));
+        downloadChaptersCheckBox.addActionListener(e -> {
+            attachmentCheckBox.setVisible(downloadChaptersCheckBox.isSelected());
+            tresholdLbl.setVisible(downloadChaptersCheckBox.isSelected());
+            tresholdSpinner.setVisible(downloadChaptersCheckBox.isSelected());
+
+        });
         visitPageBtn.addActionListener(e -> {
             try {
                 GrabberUtils.openWebpage(new URI(urlField.getText()));
@@ -90,20 +105,47 @@ public class libraryNovelSettings extends JDialog {
                 GrabberUtils.err(ex.getMessage(), ex);
             }
         });
+        checkNowBtn.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                checkNowBtn.setVisible(false);
+                checkingBusyLbl.setVisible(true);
+                Library.getInstance().checkNovel(libraryNovel);
+            } catch (ClassNotFoundException | IOException ex) {
+                init.gui.showPopup(ex.getMessage(), "error");
+                GrabberUtils.err(ex.getMessage(), ex);
+            } finally {
+                checkingBusyLbl.setVisible(false);
+                checkNowBtn.setVisible(true);
+            }
+        }));
     }
 
     private void onOK() {
+        if (waitTimeField.getText().isEmpty()) {
+            init.gui.showPopup("Wait time cannot be empty.", "warning");
+            return;
+        }
+        if (!waitTimeField.getText().matches("\\d+") && !waitTimeField.getText().isEmpty()) {
+            init.gui.showPopup("Wait time must contain numbers.", "warning");
+            return;
+        }
         libraryNovel.setNovelUrl(urlField.getText());
         libraryNovel.setSaveLocation(saveLocationField.getText());
         libraryNovel.setUpdateLast(updateLastChapterCheckBox.isSelected());
+        libraryNovel.setCheckingActive(checkThisNovelCheckBox.isSelected());
         libraryNovel.setUseAccount(useLoginCheckBox.isSelected());
         libraryNovel.setAutoDownloadEnabled(downloadChaptersCheckBox.isSelected());
         libraryNovel.setSendAttachmentEnabled(attachmentCheckBox.isSelected());
         libraryNovel.setSendEmailNotification(emailNotificationCheckBox.isSelected());
         libraryNovel.setSendDesktopNotification(desktopNotificationCheckBox.isSelected());
         libraryNovel.setThreshold((Integer) tresholdSpinner.getValue());
+        libraryNovel.setWaitTime(Integer.valueOf(waitTimeField.getText()));
+        libraryNovel.setGetImages(getImagesCheckBox.isSelected());
+        libraryNovel.setDisplayChapterTitle(displayChapterTitleCheckBox.isSelected());
+        libraryNovel.setRemoveStyling(removeStylingCheckBox.isSelected());
         Library.getInstance().writeLibraryFile();
         dispose();
+        init.gui.buildLibrary();
     }
 
     private void onCancel() {
@@ -135,6 +177,19 @@ public class libraryNovelSettings extends JDialog {
         useLoginCheckBox = new JCheckBox();
         useLoginCheckBox.setSelected(libraryNovel.isUseAccount());
 
+        getImagesCheckBox = new JCheckBox();
+        getImagesCheckBox.setSelected(libraryNovel.isGetImages());
+
+        removeStylingCheckBox = new JCheckBox();
+        removeStylingCheckBox.setSelected(libraryNovel.isRemoveStyling());
+
+        displayChapterTitleCheckBox = new JCheckBox();
+        displayChapterTitleCheckBox.setSelected(libraryNovel.isDisplayChapterTitle());
+
+        waitTimeField = new JTextField();
+        waitTimeField.setText(String.valueOf(libraryNovel.getWaitTime()));
+        waitTimeField.setHorizontalAlignment(SwingConstants.CENTER);
+
         downloadChaptersCheckBox = new JCheckBox();
         downloadChaptersCheckBox.setSelected(libraryNovel.isAutoDownloadEnabled());
 
@@ -160,10 +215,24 @@ public class libraryNovelSettings extends JDialog {
         updateLastChapterCheckBox = new JCheckBox();
         updateLastChapterCheckBox.setSelected(libraryNovel.isUpdateLast());
 
+        checkThisNovelCheckBox = new JCheckBox();
+        checkThisNovelCheckBox.setSelected(libraryNovel.isCheckingActive());
+
         removeBtn = new JButton(new ImageIcon(getClass().getResource("/images/remove_icon.png")));
         removeBtn.setBorder(BorderFactory.createEmptyBorder());
         removeBtn.setContentAreaFilled(false);
         removeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         removeBtn.setToolTipText("Remove novel from library");
+
+        checkNowBtn = new JButton(new ImageIcon(getClass().getResource("/images/check_icon.png")));
+        checkNowBtn.setBorder(BorderFactory.createEmptyBorder());
+        checkNowBtn.setContentAreaFilled(false);
+        checkNowBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        checkNowBtn.setToolTipText("Check for new releases now");
+
+        checkingBusyLbl = new JLabel(new ImageIcon(getClass().getResource("/images/busy.gif")));
+        checkingBusyLbl.setBorder(BorderFactory.createEmptyBorder());
+        checkingBusyLbl.setVisible(false);
+
     }
 }

@@ -15,6 +15,7 @@ public class LibraryNovel extends Novel {
     private boolean sendDesktopNotification;
     private boolean sendAttachmentEnabled;
     private boolean updateLast;
+    private boolean checkingActive = true;
     private int lastChapterNumber;
     private int newestChapterNumber;
     private int threshold;
@@ -38,7 +39,12 @@ public class LibraryNovel extends Novel {
         sendDesktopNotification = (boolean) libNovel.get("sendDesktopNotification");
         sendAttachmentEnabled = (boolean) libNovel.get("sendAttachmentEnabled");
         updateLast = (boolean) libNovel.get("updateLast");
-        useAccount = (boolean) libNovel.get("useAccount");
+        useAccount = (boolean) libNovel.getOrDefault("useAccount", isUseAccount());
+        getImages = (boolean) libNovel.getOrDefault("getImages", isGetImages());
+        displayChapterTitle = (boolean) libNovel.getOrDefault("displayChapterTitle", isDisplayChapterTitle());
+        removeStyling = (boolean) libNovel.getOrDefault("removeStyling", isRemoveStyling());
+        checkingActive = (boolean) libNovel.getOrDefault("checkingActive", isCheckingActive());
+        waitTime = (((Long) libNovel.getOrDefault("waitTime", getWaitTime())).intValue());
         lastChapterNumber = (((Long) libNovel.get("lastChapter")).intValue());
         newestChapterNumber = (((Long) libNovel.get("newestChapter")).intValue());
         threshold = (((Long) libNovel.get("threshold")).intValue());
@@ -64,10 +70,15 @@ public class LibraryNovel extends Novel {
         libraryNovel.put("sendDesktopNotification", isSendDesktopNotification());
         libraryNovel.put("sendAttachmentEnabled", isSendAttachmentEnabled());
         libraryNovel.put("updateLast", isUpdateLast());
-        libraryNovel.put("useAccount", isUseAccount());
         libraryNovel.put("lastChapter", getLastLocalChapterNumber());
         libraryNovel.put("newestChapter", getNewestChapterNumber());
         libraryNovel.put("threshold", getThreshold());
+        libraryNovel.put("checkingActive", isCheckingActive());
+        libraryNovel.put("useAccount", isUseAccount());
+        libraryNovel.put("getImages", isGetImages());
+        libraryNovel.put("displayChapterTitle", isDisplayChapterTitle());
+        libraryNovel.put("removeStyling", isRemoveStyling());
+        libraryNovel.put("waitTime", getWaitTime());
         return libraryNovel;
     }
 
@@ -184,5 +195,45 @@ public class LibraryNovel extends Novel {
 
     public void setSaveLocation(String saveLocation) {
         this.saveLocation = saveLocation;
+    }
+
+    public boolean isCheckingActive() {
+        return checkingActive;
+    }
+
+    public void setCheckingActive(boolean checkingActive) {
+        this.checkingActive = checkingActive;
+    }
+
+    public boolean isDisplayChapterTitle() {
+        return displayChapterTitle;
+    }
+
+    public void setDisplayChapterTitle(boolean displayChapterTitle) {
+        this.displayChapterTitle = displayChapterTitle;
+    }
+
+    public boolean isGetImages() {
+        return getImages;
+    }
+
+    public void setGetImages(boolean getImages) {
+        this.getImages = getImages;
+    }
+
+    public boolean isRemoveStyling() {
+        return removeStyling;
+    }
+
+    public void setRemoveStyling(boolean removeStyling) {
+        this.removeStyling = removeStyling;
+    }
+
+    public int getWaitTime() {
+        return waitTime;
+    }
+
+    public void setWaitTime(int waitTime) {
+        this.waitTime = waitTime;
     }
 }
