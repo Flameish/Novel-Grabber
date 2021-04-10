@@ -28,6 +28,7 @@ public class Config {
     private int outputFormat = 0;
     private int port = 25;
     private int frequency = 20;
+    private int telegramDownloadLimit = 1;
     private boolean autoGetImages = false;
     private boolean removeStyling = false;
     private boolean useStandardLocation = false;
@@ -84,6 +85,7 @@ public class Config {
             setTelegramNovelMaxChapter(Integer.parseInt(prop.getProperty("telegramNovelMaxChapter", String.valueOf(telegramNovelMaxChapter))));
             setTelegramMaxChapterPerDay(Integer.parseInt(prop.getProperty("telegramMaxChapterPerDay", String.valueOf(telegramMaxChapterPerDay))));
             setTelegramAdminIds(new ArrayList<>(Arrays.asList(prop.getProperty("telegramAdminIds", "").split(","))));
+            setTelegramDownloadLimit(Integer.parseInt(prop.getProperty("telegramDownloadLimit", String.valueOf(getTelegramDownloadLimit()))));
         } catch (IOException e) {
             GrabberUtils.err("No settings file found.");
         }
@@ -124,6 +126,7 @@ public class Config {
             prop.setProperty("telegramNovelMaxChapter", String.valueOf(getTelegramNovelMaxChapter()));
             prop.setProperty("telegramMaxChapterPerDay", String.valueOf(getTelegramMaxChapterPerDay()));
             prop.setProperty("telegramAdminIds", String.join(",", telegramAdminIds));
+            prop.setProperty("telegramDownloadLimit", String.valueOf(getTelegramDownloadLimit()));
 
             prop.store(writer, "Novel-Grabber version: " + init.versionNumber);
         } catch (IOException e) {
@@ -288,5 +291,13 @@ public class Config {
 
     public void setShowNovelFinishedNotification(boolean showNovelFinishedNotification) {
         this.showNovelFinishedNotification = showNovelFinishedNotification;
+    }
+
+    public int getTelegramDownloadLimit() {
+        return telegramDownloadLimit;
+    }
+
+    public void setTelegramDownloadLimit(int telegramDownloadLimit) {
+        this.telegramDownloadLimit = telegramDownloadLimit;
     }
 }

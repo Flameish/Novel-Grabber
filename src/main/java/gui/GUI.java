@@ -223,6 +223,7 @@ public class GUI extends JFrame {
     private JPanel libraryNovelPanel;
     private JComboBox libraryHostListComboBox;
     private JCheckBox settingsNotificationWhenFinishedCheckBox;
+    private JSpinner settingsTeleDownloadLimitSpinner;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -896,11 +897,15 @@ public class GUI extends JFrame {
             }
             else if (!settingsTeleWaitTimeField.getText().matches("\\d+")) {
                 showPopup("Wait time must contain numbers.", "warning");
-            } else {
+            }
+            else if ((Integer) settingsTeleDownloadLimitSpinner.getValue() < 1) {
+                showPopup("Concurrent download limit can't be lower than 1", "warning");
+            }  else {
                 settings.setTelegramApiToken(settingsTeleApiTknField.getText().trim());
                 settings.setTelegramMaxChapterPerDay(Integer.parseInt(settingsTeleMaxChapterPerDayField.getText()));
                 settings.setTelegramNovelMaxChapter(Integer.parseInt(settingsTeleMaxChapterPerNovelField.getText()));
                 settings.setTelegramWait(Integer.parseInt(settingsTeleWaitTimeField.getText()));
+                settings.setTelegramDownloadLimit((Integer) settingsTeleDownloadLimitSpinner.getValue());
                 settings.save();
             }
         });
@@ -1729,6 +1734,13 @@ public class GUI extends JFrame {
         settingsTeleMaxChapterPerDayField = new JTextField(String.valueOf(settings.getTelegramMaxChapterPerDay()));
         settingsTeleMaxChapterPerNovelField = new JTextField(String.valueOf(settings.getTelegramNovelMaxChapter()));
         settingsTeleWaitTimeField = new JTextField(String.valueOf(settings.getTelegramWait()));
+        settingsTeleDownloadLimitSpinner = new JSpinner();
+        settingsTeleDownloadLimitSpinner.setValue(settings.getTelegramDownloadLimit());
+        JComponent teleDownloadSpinnerComp = settingsTeleDownloadLimitSpinner.getEditor();
+        JFormattedTextField teleDownloadSpinnerField = (JFormattedTextField) teleDownloadSpinnerComp.getComponent(0);
+        teleDownloadSpinnerField.setColumns(4);
+        DefaultFormatter teleDownloadSpinnerFormatter = (DefaultFormatter) teleDownloadSpinnerField.getFormatter();
+        teleDownloadSpinnerFormatter.setCommitsOnValidEdit(true);
 
         settingsTeleInfoBtn = new JButton(new ImageIcon(getClass().getResource("/images/info_icon.png")));
         settingsTeleInfoBtn.setBorder(BorderFactory.createEmptyBorder());
