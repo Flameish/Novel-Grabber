@@ -35,6 +35,7 @@ public class Config {
     private boolean separateChapters = false;
     private boolean libraryShowOnlyUpdatable = false;
     private boolean libraryNoCovers = false;
+    private boolean showNovelFinishedNotification = false;
 
     private Config() { }
 
@@ -71,6 +72,7 @@ public class Config {
             setUseStandardLocation(Boolean.parseBoolean(prop.getProperty("useStandardLocation", String.valueOf(useStandardLocation))));
             setHeadlessList(new ArrayList<>(Arrays.asList(prop.getProperty("headlessList", "").split(","))));
             setSeparateChapters(Boolean.parseBoolean(prop.getProperty("separateChapters", String.valueOf(separateChapters))));
+            setShowNovelFinishedNotification(Boolean.parseBoolean(prop.getProperty("showNovelFinishedNotification", String.valueOf(showNovelFinishedNotification))));
             // Library
             setFrequency(Integer.parseInt(prop.getProperty("frequency", String.valueOf(frequency))));
             setPollingEnabled(Boolean.parseBoolean(prop.getProperty("pollingEnabled", String.valueOf(pollingEnabled))));
@@ -110,6 +112,7 @@ public class Config {
             prop.setProperty("useStandardLocation", String.valueOf(isUseStandardLocation()));
             prop.setProperty("headlessList", String.join(",", headlessList));
             prop.setProperty("separateChapters", String.valueOf(isSeparateChapters()));
+            prop.setProperty("showNovelFinishedNotification", String.valueOf(isShowNovelFinishedNotification()));
             // Library
             prop.setProperty("frequency", String.valueOf(getFrequency()));
             prop.setProperty("pollingEnabled", String.valueOf(isPollingEnabled()));
@@ -277,5 +280,13 @@ public class Config {
 
     public void setLibraryShowOnlyUpdatable(boolean libraryShowOnlyUpdatable) {
         this.libraryShowOnlyUpdatable = libraryShowOnlyUpdatable;
+    }
+
+    public boolean isShowNovelFinishedNotification() {
+        return showNovelFinishedNotification;
+    }
+
+    public void setShowNovelFinishedNotification(boolean showNovelFinishedNotification) {
+        this.showNovelFinishedNotification = showNovelFinishedNotification;
     }
 }

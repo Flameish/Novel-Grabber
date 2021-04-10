@@ -222,6 +222,7 @@ public class GUI extends JFrame {
     private JCheckBox libraryDoNotDisplayCoversCheckBox;
     private JPanel libraryNovelPanel;
     private JComboBox libraryHostListComboBox;
+    private JCheckBox settingsNotificationWhenFinishedCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -657,6 +658,7 @@ public class GUI extends JFrame {
             settings.setFilenameFormat(settingsNameOutputFormatComboBox.getSelectedIndex());
             settings.setOutputFormat(settingsOutputFormatComboBox.getSelectedIndex());
             settings.setSeparateChapters(settingsSeperateChaptersCheckBox.isSelected());
+            settings.setShowNovelFinishedNotification(settingsNotificationWhenFinishedCheckBox.isSelected());
             settings.save();
         });
 
@@ -1718,6 +1720,9 @@ public class GUI extends JFrame {
             settingsSeperateChaptersCheckBox.setVisible(true);
             settingsSeperateChaptersCheckBox.setSelected(settings.isSeparateChapters());
         }
+
+        settingsNotificationWhenFinishedCheckBox = new JCheckBox();
+        settingsNotificationWhenFinishedCheckBox.setSelected(settings.isShowNovelFinishedNotification());
 
         // Telegram settings
         settingsTeleApiTknField = new JTextField(settings.getTelegramApiToken());

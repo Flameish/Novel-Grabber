@@ -4,6 +4,7 @@ import grabber.formats.EPUB;
 import grabber.formats.PDF;
 import grabber.formats.Text;
 import grabber.sources.Source;
+import notifications.DesktopNotification;
 import org.jsoup.nodes.Document;
 import system.Config;
 import system.init;
@@ -226,7 +227,7 @@ public class Novel {
      */
     public void output() {
         // Print finishing information
-        GrabberUtils.info(window,"Finished.");
+        GrabberUtils.info(window,"Download finished.");
 
         // Reverse chapter order if needed for potential re-grabbing
         if(reverseOrder) Collections.reverse(chapterList);
@@ -277,6 +278,9 @@ public class Novel {
                 if(Config.getInstance().getOutputFormat() == 2) {
                     PDF book = new PDF(this);
                     book.write();
+                }
+                if (init.gui != null && Config.getInstance().isShowNovelFinishedNotification()) {
+                    DesktopNotification.sendDownloadFinishedNotification(this);
                 }
             }
         }

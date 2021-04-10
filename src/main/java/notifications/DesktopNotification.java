@@ -1,18 +1,9 @@
 package notifications;
 
 import dorkbox.notify.Notify;
-import dorkbox.util.ImageUtil;
 import grabber.GrabberUtils;
 import grabber.Novel;
-import library.Library;
-import library.LibraryNovel;
-
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -33,5 +24,16 @@ public class DesktopNotification {
         } catch (URISyntaxException e) {
             GrabberUtils.err(e.getMessage(), e);
         }
+    }
+    public static void sendDownloadFinishedNotification(Novel novel) {
+        Image image = novel.metadata.getBufferedCover();
+        Notify.create()
+                .title(novel.metadata.getTitle())
+                .text("Download finished!")
+                .darkStyle()
+                .image(image)
+                .hideAfter(5000)
+                .hideCloseButton()
+                .show();
     }
 }
