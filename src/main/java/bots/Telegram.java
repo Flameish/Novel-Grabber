@@ -202,7 +202,7 @@ public class Telegram {
             Map<String, List<String>> params = CLI.createParamsFromArgs(args);
 
             novel = Novel.builder().fromCLI(params)
-                    .window("checker")
+                    .window("telegram")
                     .useHeadless(false)
                     .useAccount(false)
                     .telegramChatId(chatId)
@@ -236,7 +236,7 @@ public class Telegram {
         if (messageTxt.startsWith("http")){
             novel = Novel.builder()
                     .novelLink(messageTxt)
-                    .window("checker")
+                    .window("telegram")
                     .saveLocation("./telegram/requests/"+ chatId)
                     .getImages(true)
                     .telegramChatId(chatId)
