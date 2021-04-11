@@ -6,8 +6,8 @@
       <xy x="48" y="54" width="783" height="528"/>
     </constraints>
     <properties>
-      <minimumSize width="750" height="500"/>
-      <preferredSize width="750" height="500"/>
+      <minimumSize width="530" height="450"/>
+      <preferredSize width="530" height="450"/>
     </properties>
     <border type="none"/>
     <children>
@@ -123,7 +123,7 @@
             <properties/>
             <border type="none" title="Novel"/>
             <children>
-              <grid id="a0d6d" layout-manager="GridLayoutManager" row-count="1" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="a0d6d" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="10" bottom="5" right="10"/>
                 <constraints>
                   <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -140,26 +140,26 @@
                       <toolTipText value="Download potential images from a chapter"/>
                     </properties>
                   </component>
-                  <component id="754d4" class="javax.swing.JCheckBox" binding="removeStylingCheckBox" custom-create="true">
+                  <component id="1154f" class="javax.swing.JCheckBox" binding="displayChapterTitleCheckBox" custom-create="true" default-binding="true">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Add chapter title"/>
+                    </properties>
+                  </component>
+                  <component id="754d4" class="javax.swing.JCheckBox" binding="removeStylingCheckBox" custom-create="true">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text value="Remove styling"/>
                       <toolTipText value="Removes style attribute from all elements"/>
                     </properties>
                   </component>
-                  <component id="1154f" class="javax.swing.JCheckBox" binding="displayChapterTitleCheckBox" custom-create="true" default-binding="true">
-                    <constraints>
-                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <text value="Add chapter title"/>
-                    </properties>
-                  </component>
                   <component id="dbcf8" class="javax.swing.JCheckBox" binding="useLoginCheckBox" custom-create="true" default-binding="true">
                     <constraints>
-                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text value="Use account"/>
@@ -168,7 +168,7 @@
                   <grid id="3539f" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
-                      <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties/>
                     <border type="none"/>
@@ -193,11 +193,6 @@
                       </component>
                     </children>
                   </grid>
-                  <hspacer id="acc9e">
-                    <constraints>
-                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                  </hspacer>
                 </children>
               </grid>
               <component id="549d2" class="javax.swing.JLabel">
@@ -279,7 +274,7 @@
                   <text value="Check this novel"/>
                 </properties>
               </component>
-              <grid id="bb73" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="bb73" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -305,15 +300,6 @@
                       <visible value="false"/>
                     </properties>
                   </component>
-                  <component id="c8418" class="javax.swing.JCheckBox" binding="attachmentCheckBox" custom-create="true">
-                    <constraints>
-                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <text value="Send novel file to email"/>
-                      <visible value="false"/>
-                    </properties>
-                  </component>
                   <component id="4f6b4" class="javax.swing.JCheckBox" binding="downloadChaptersCheckBox" custom-create="true">
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -325,9 +311,18 @@
                   </component>
                   <component id="d2a72" class="javax.swing.JSeparator">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="0" row-span="1" col-span="4" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties/>
+                  </component>
+                  <component id="c8418" class="javax.swing.JCheckBox" binding="attachmentCheckBox" custom-create="true">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Send novel file to email"/>
+                      <visible value="false"/>
+                    </properties>
                   </component>
                 </children>
               </grid>
