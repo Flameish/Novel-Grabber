@@ -2,7 +2,7 @@
 Novel-Grabber is a gui based web scrapper that can download and convert chapters into EPUB from various supported web/light novel sites or from any other site manually.
 
 ## Features
-- Over 100 supported sites
+- Over 100 supported [sites](https://github.com/Flameish/Novel-Grabber/tree/master/src/main/java/grabber/sources)
 - A manual mode for unsupported sites
 - Image support
 - Blacklist HTML tags to remove unwanted content
