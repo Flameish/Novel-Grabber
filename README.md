@@ -75,7 +75,7 @@ To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-
 
 ![Manual Tab](https://i.imgur.com/jDm2ABW.png)
 
-![Library Tab](https://i.imgur.com/25LPqEs.png)
+![Library Tab](https://i.imgur.com/8OUQe9E.png)
 
 ## Disclaimer & Warning
 Most sites prohibit the scrapping for their content. Use at your own risk. 
