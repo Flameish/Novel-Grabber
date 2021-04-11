@@ -2,16 +2,13 @@
 Novel-Grabber is a gui based web scrapper that can download and convert chapters into EPUB from various supported web/light novel sites or from any other site manually.
 
 ## Features
-- Extensive and easy to use manual grabbing
+- Over 100 supported sites
+- A manual mode for unsupported sites
 - Image support
-- Style removal
-- Unwanted content removal via blacklisted HTML tags
-- EPUB metadata
-- Desktop and email notifications for new chapter releases of followed novels
-- Automatic chapter body detection 
-- Headless browser support
-- Login support for certain host sites
-- CLI 
+- Blacklist HTML tags to remove unwanted content
+- A library to keep track of new releases for your favorite novels
+- Login support via cookies
+- CLI
 - Telegram Bot: [@NovelGrabbyBot](http://t.me/NovelGrabbyBot)
 
 ## How to use
@@ -65,7 +62,8 @@ Usage:
 <br>
 <strong>Telegram bot:</strong>
 
-To host your own Telegram bot you need to add the line `telegramApiToken=your_token ` to `config.ini`
+To host your own Telegram bot you need to add the line `telegramApiToken=your_token ` to your `config.ini` 
+or on the GUI via the Telegram Bot settings tab.
 
 By default the bot will read the output for `/info` from a `info.txt` file inside the telegram folder which you can adjust.
 
@@ -77,83 +75,7 @@ To start the bot you need to use the `-telegramBot` parameter: `java -jar Novel-
 
 ![Manual Tab](https://i.imgur.com/jDm2ABW.png)
 
-![Library Tab](https://i.imgur.com/ef5P4mf.png)
-
-## Natively supported sites
-- [101novel](https://www.101novel.com/)
-- [17k](https://www.17k.com/)
-- [9kqw](https://9kqw.com/)
-- [AlphaPolis](https://www.alphapolis.co.jp/novel/)
-- [Asian Hobbyist](https://www.asianhobbyist.com/)
-- [Biquge](http://www.biquge.se/)
-- [Blackbox Translations](https://blackbox-tl.com/)
-- [Booklat](https://booklat.com.ph)
-- [booknet](https://booknet.com/)
-- [BoxNovel.com](https://boxnovel.com)
-- [BoxNovel.net](https://boxnovel.net)
-- [BoxNovel.org](https://boxnovel.org/)
-- [Chicken Gege](https://www.chickengege.org/)
-- [Chrysanthemum Garden](https://chrysanthemumgarden.com)
-- [Comrade Mao](https://comrademao.com)
-- [Creative Novels](https://creativenovels.com)
-- [Dao Novel](https://daonovel.com/)
-- [Dreame](https://dreame.com)
-- [Dummy Novels](https://dummynovels.com/)
-- [Exiled Rebels Scanlations](https://exiledrebelsscanlations.com/)
-- [FanFiction](https://fanfiction.net)
-- [FanFiktion](https://fanfiktion.de)
-- [FastNovel](https://fastnovel.net/)
-- [FicFun](https://ficfun.com)
-- [Foxaholic](https://foxaholic.com)
-- [Foxteller](https://foxteller.com)
-- [fujossy](https://fujossy.jp/)
-- [Honeyfeed](https://honeyfeed.fm)
-- [Inkitt](https://inkitt.com)
-- [ISO Translations](https://isotls.com)
-- [jjwxc](https://www.jjwxc.net/)
-- [JPMTL](https://jpmtl.com/)
-- [LiberSpark](https://liberspark.com)
-- [Light Novels Translations](https://lightnovelstranslations.com)
-- [Light Novel World](https://www.lightnovelworld.com/)
-- [LNMTL](https://lnmtl.com/)
-- [Machine-Translation](https://www.machine-translation.org/)
-- [MoboReader](https://www.moboreader.net/)
-- [MoonQuill](https://moonquill.com)
-- [MTLNovel](https://mtlnovel.com)
-- [Novel Full](https://novelfull.com)
-- [NovelFun](https://novelfun.net/)
-- [Novelhall](https://novelhall.com)
-- [Novels Online](https://novelsonline.net/)
-- [Novelsrock](https://novelsrock.com/)
-- [NovelUpdates.cc](https://www.novelupdates.cc/)
-- [Novel Updates](https://novelupdates.com)
-- [Quotev](https://quotev.com)
-- [ReadLightNovel](https://www.readlightnovel.org/)
-- [ReadNovelFull.Com](https://readnovelfull.com/)
-- [Re:Library](https://re-library.com)
-- [Royal Road](https://royalroad.com)
-- [Scribble Hub](https://scribblehub.com)
-- [shu111](http://shu111.com/)
-- [shubaow](https://www.shubaow.net/)
-- [Snowy Codex](https://snowycodex.com/)
-- [SofaNovel](https://www.sofanovel.com/)
-- [Tapas](https://tapas.io)
-- [TapRead](https://tapread.com)
-- [Truyen Full](https://truyenfull.vn/)
-- [UntamedAlley](https://untamedalley.com/)
-- [Veratales](https://veratales.com/)
-- [VipNovel](https://vipnovel.com/)
-- [Volare Novels](https://volarenovels.com)
-- [Wattpad](https://wattpad.com)
-- [Webnovel](https://webnovel.com)
-- [WebTruyen](https://webtruyen.com/)
-- [Wenxue](http://wenxue.iqiyi.com/)
-- [Wordrain](https://wordrain69.com)
-- [WuxiaWorld.co](https://wuxiaworld.co)
-- [Wuxiaworld.com](https://wuxiaworld.com)
-- [WuxiaWorld.online](https://wuxiaworld.online)
-- [WuxiaWorld.site](https://wuxiaworld.site)
-- [xiaoshuo](https://www.zhenhunxiaoshuo.com/)
+![Library Tab](https://i.imgur.com/25LPqEs.png)
 
 ## Disclaimer & Warning
 Most sites prohibit the scrapping for their content. Use at your own risk. 
