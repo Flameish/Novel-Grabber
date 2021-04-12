@@ -48,7 +48,7 @@ public class lightnovelstranslations_com implements Source {
         List<Chapter> chapterList = new ArrayList();
         try {
             toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
-            Elements chapterLinks = toc.select(".su-spoiler-content a");
+            Elements chapterLinks = toc.select(".su-spoiler-content a[href]");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
