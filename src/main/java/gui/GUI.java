@@ -1,6 +1,10 @@
 package gui;
 
 import bots.Telegram;
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import grabber.*;
 import grabber.sources.Source;
 import org.openqa.selenium.Cookie;
@@ -37,7 +41,8 @@ public class GUI extends JFrame {
     public static Integer chapterToChapterNumber = 1;
     private static String[] epubFilenameFormats = {"<author> - <title>", "<title> - <author>", "<title>"};
     private static String[] epubFormats = {"EPUB", "txt", "PDF"};
-    private static String[] sslList = {"SMTP","SMTPS","SMTP TLS",};
+    private static String[] sslList = {"SMTP","SMTPS","SMTP TLS"};
+    private static String[] guiThemes = {"Flat IntelliJ", "Flat Light","Flat Dark","Flat Darcula"};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");
     private static final Config settings = Config.getInstance();
@@ -224,6 +229,7 @@ public class GUI extends JFrame {
     private JComboBox libraryHostListComboBox;
     private JCheckBox settingsNotificationWhenFinishedCheckBox;
     private JSpinner settingsTeleDownloadLimitSpinner;
+    private JComboBox settingsGuiThemeComboBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -660,6 +666,28 @@ public class GUI extends JFrame {
             settings.setOutputFormat(settingsOutputFormatComboBox.getSelectedIndex());
             settings.setSeparateChapters(settingsSeperateChaptersCheckBox.isSelected());
             settings.setShowNovelFinishedNotification(settingsNotificationWhenFinishedCheckBox.isSelected());
+            settings.setGuiTheme(settingsGuiThemeComboBox.getSelectedIndex());
+            try {
+                switch (settingsGuiThemeComboBox.getSelectedIndex()) {
+                    case 0:
+                        UIManager.setLookAndFeel(new FlatIntelliJLaf());
+                        break;
+                    case 1:
+                        UIManager.setLookAndFeel(new FlatLightLaf());
+                        break;
+                    case 2:
+                        UIManager.setLookAndFeel(new FlatDarkLaf());
+                        break;
+                    case 3:
+                        UIManager.setLookAndFeel(new FlatDarculaLaf());
+                        break;
+                }
+                SwingUtilities.updateComponentTreeUI(init.gui);
+            } catch (UnsupportedLookAndFeelException ex) {
+                showPopup("Error switching themes:" + ex.getMessage(), "error");
+                GrabberUtils.err("Error switching themes:" + ex.getMessage(), ex);
+                ex.printStackTrace();
+            }
             settings.save();
         });
 
@@ -1728,6 +1756,9 @@ public class GUI extends JFrame {
 
         settingsNotificationWhenFinishedCheckBox = new JCheckBox();
         settingsNotificationWhenFinishedCheckBox.setSelected(settings.isShowNovelFinishedNotification());
+
+        settingsGuiThemeComboBox = new JComboBox(guiThemes);
+        settingsGuiThemeComboBox.setSelectedIndex(settings.getGuiTheme());
 
         // Telegram settings
         settingsTeleApiTknField = new JTextField(settings.getTelegramApiToken());

@@ -1,6 +1,9 @@
 package system;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import grabber.*;
 import gui.GUI;
 import bots.Telegram;
@@ -19,7 +22,7 @@ import java.util.List;
  * Creates Library instance.
  */
 public class init {
-    public static final String versionNumber = "3.9.0";
+    public static final String versionNumber = "3.9.1";
     public static final Library library = Library.getInstance();;
     public static final Config config = Config.getInstance();
     public static GUI gui;
@@ -80,7 +83,20 @@ public class init {
             try {
                 System.setProperty("awt.useSystemAAFontSettings","on");
                 System.setProperty("swing.aatext", "true");
-                UIManager.setLookAndFeel(new FlatIntelliJLaf());
+                switch (config.getGuiTheme()) {
+                    case 0:
+                        UIManager.setLookAndFeel(new FlatIntelliJLaf());
+                        break;
+                    case 1:
+                        UIManager.setLookAndFeel(new FlatLightLaf());
+                        break;
+                    case 2:
+                        UIManager.setLookAndFeel(new FlatDarkLaf());
+                        break;
+                    case 3:
+                        UIManager.setLookAndFeel(new FlatDarculaLaf());
+                        break;
+                }
                 setUIFont (new javax.swing.plaf.FontUIResource("DejaVuSans", Font.PLAIN,13));
                 gui = new GUI();
                 gui.pack();

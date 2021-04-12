@@ -29,6 +29,7 @@ public class Config {
     private int port = 25;
     private int frequency = 20;
     private int telegramDownloadLimit = 1;
+    private int guiTheme = 0;
     private boolean autoGetImages = false;
     private boolean removeStyling = false;
     private boolean useStandardLocation = false;
@@ -56,6 +57,8 @@ public class Config {
             Properties prop = new Properties();
             prop.load(reader);
             //  Use default value from field if property is not found in file
+            // General
+            setGuiTheme(Integer.parseInt(prop.getProperty("guiTheme", String.valueOf(guiTheme))));
             // Email
             setUsername(prop.getProperty("username", username));
             setPassword(prop.getProperty("password", password));
@@ -97,6 +100,8 @@ public class Config {
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
             Properties prop = new Properties();
+            // General
+            prop.setProperty("guiTheme", String.valueOf(getGuiTheme()));
             // Email
             prop.setProperty("username", getUsername());
             prop.setProperty("password", getPassword());
@@ -299,5 +304,13 @@ public class Config {
 
     public void setTelegramDownloadLimit(int telegramDownloadLimit) {
         this.telegramDownloadLimit = telegramDownloadLimit;
+    }
+
+    public int getGuiTheme() {
+        return guiTheme;
+    }
+
+    public void setGuiTheme(int guiTheme) {
+        this.guiTheme = guiTheme;
     }
 }
