@@ -230,6 +230,7 @@ public class GUI extends JFrame {
     private JCheckBox settingsNotificationWhenFinishedCheckBox;
     private JSpinner settingsTeleDownloadLimitSpinner;
     private JComboBox settingsGuiThemeComboBox;
+    private JCheckBox settingsTeleImagesAllowedCheckBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -934,6 +935,7 @@ public class GUI extends JFrame {
                 settings.setTelegramNovelMaxChapter(Integer.parseInt(settingsTeleMaxChapterPerNovelField.getText()));
                 settings.setTelegramWait(Integer.parseInt(settingsTeleWaitTimeField.getText()));
                 settings.setTelegramDownloadLimit((Integer) settingsTeleDownloadLimitSpinner.getValue());
+                settings.setTelegramImagesAllowed(settingsTeleImagesAllowedCheckBox.isSelected());
                 settings.save();
             }
         });
@@ -1772,6 +1774,9 @@ public class GUI extends JFrame {
         teleDownloadSpinnerField.setColumns(4);
         DefaultFormatter teleDownloadSpinnerFormatter = (DefaultFormatter) teleDownloadSpinnerField.getFormatter();
         teleDownloadSpinnerFormatter.setCommitsOnValidEdit(true);
+
+        settingsTeleImagesAllowedCheckBox =  new JCheckBox();
+        settingsTeleImagesAllowedCheckBox.setSelected(settings.isTelegramImagesAllowed());
 
         settingsTeleInfoBtn = new JButton(new ImageIcon(getClass().getResource("/images/info_icon.png")));
         settingsTeleInfoBtn.setBorder(BorderFactory.createEmptyBorder());
