@@ -13,6 +13,7 @@ import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.sources.Source;
 import system.Config;
+import system.init;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -134,7 +135,7 @@ public class Telegram {
                 int runningDownloadNr = 0;
                 for (int i = 0; i < currentlyDownloading.get(userId).length; i++) {
                     Novel novel = currentlyDownloading.get(userId)[i];
-                    if (novel == null || !novel.killTask) {
+                    if (novel != null) {
                         runningDownloads++;
                         runningDownloadNr = i;
                     }
@@ -180,7 +181,7 @@ public class Telegram {
                             GrabberUtils.err(e.getMessage(), e);
                             novelly.execute(new SendMessage(chatId, e.getMessage()));
                         } finally {
-                            currentlyDownloading.get(userId)[downloadNr].killTask = true;
+                            currentlyDownloading.get(userId)[downloadNr] = null;
                         }
                         return;
                     }
@@ -205,6 +206,7 @@ public class Telegram {
                     .window("telegram")
                     .useHeadless(false)
                     .useAccount(false)
+                    .getImages(config.isTelegramImagesAllowed() && params.containsKey("getImages") || isVip(userId))
                     .telegramChatId(chatId)
                     .saveLocation("./telegram/requests/"+ chatId)
                     .waitTime(isVip(userId) ? 0 : config.getTelegramWait())
@@ -230,7 +232,6 @@ public class Telegram {
                 novel.firstChapter = 1;
                 novel.lastChapter = novel.chapterList.size();
             }
-
         }
         // Normal
         if (messageTxt.startsWith("http")){
@@ -238,7 +239,7 @@ public class Telegram {
                     .novelLink(messageTxt)
                     .window("telegram")
                     .saveLocation("./telegram/requests/"+ chatId)
-                    .getImages(true)
+                    .getImages(config.isTelegramImagesAllowed() || isVip(userId))
                     .telegramChatId(chatId)
                     .setSource(messageTxt)
                     .waitTime(isVip(userId) ? 0 : config.getTelegramWait())
@@ -351,7 +352,9 @@ public class Telegram {
                 (isVip(userId) ? 0 : config.getTelegramWait()) + " milliseconds");
         String msgDwnLimit = String.format("Concurrent downloads: %s \n",
                 (isVip(userId) ? 999 : config.getTelegramDownloadLimit()));
-        return msgChLeft + msgMaxChNovel + msgChSpeed + msgDwnLimit;
+        String msgImagesAllowed = String.format("Images allowed: %s \n",
+                config.isTelegramImagesAllowed() || isVip(userId) ? "Yes" : "No");
+        return msgChLeft + msgMaxChNovel + msgChSpeed + msgDwnLimit + msgImagesAllowed;
     }
 
     private void resetLimits() {

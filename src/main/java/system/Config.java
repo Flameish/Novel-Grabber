@@ -38,6 +38,7 @@ public class Config {
     private boolean libraryShowOnlyUpdatable = false;
     private boolean libraryNoCovers = false;
     private boolean showNovelFinishedNotification = false;
+    private boolean telegramImagesAllowed = true;
 
     private Config() { }
 
@@ -88,7 +89,8 @@ public class Config {
             setTelegramNovelMaxChapter(Integer.parseInt(prop.getProperty("telegramNovelMaxChapter", String.valueOf(telegramNovelMaxChapter))));
             setTelegramMaxChapterPerDay(Integer.parseInt(prop.getProperty("telegramMaxChapterPerDay", String.valueOf(telegramMaxChapterPerDay))));
             setTelegramAdminIds(new ArrayList<>(Arrays.asList(prop.getProperty("telegramAdminIds", "").split(","))));
-            setTelegramDownloadLimit(Integer.parseInt(prop.getProperty("telegramDownloadLimit", String.valueOf(getTelegramDownloadLimit()))));
+            setTelegramDownloadLimit(Integer.parseInt(prop.getProperty("telegramDownloadLimit", String.valueOf(telegramDownloadLimit))));
+            setTelegramImagesAllowed(Boolean.parseBoolean(prop.getProperty("telegramImagesAllowed", String.valueOf(telegramImagesAllowed))));
         } catch (IOException e) {
             GrabberUtils.err("No settings file found.");
         }
@@ -132,6 +134,7 @@ public class Config {
             prop.setProperty("telegramMaxChapterPerDay", String.valueOf(getTelegramMaxChapterPerDay()));
             prop.setProperty("telegramAdminIds", String.join(",", telegramAdminIds));
             prop.setProperty("telegramDownloadLimit", String.valueOf(getTelegramDownloadLimit()));
+            prop.setProperty("telegramImagesAllowed", String.valueOf(isTelegramImagesAllowed()));
 
             prop.store(writer, "Novel-Grabber version: " + init.versionNumber);
         } catch (IOException e) {
@@ -312,5 +315,13 @@ public class Config {
 
     public void setGuiTheme(int guiTheme) {
         this.guiTheme = guiTheme;
+    }
+
+    public boolean isTelegramImagesAllowed() {
+        return telegramImagesAllowed;
+    }
+
+    public void setTelegramImagesAllowed(boolean telegramImagesAllowed) {
+        this.telegramImagesAllowed = telegramImagesAllowed;
     }
 }
