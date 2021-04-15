@@ -41,6 +41,7 @@ Using Chapter-To-Chapter navigation:
 
 Usage:
 Use these arguments with the main Novel-Grabber.jar from inside the bin folder! NG-Launcher.jar is just the updater.
+
 [] = optional paramaters 
 {} = arguments for paramater
 
