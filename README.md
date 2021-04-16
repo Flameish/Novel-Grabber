@@ -40,6 +40,9 @@ Using Chapter-To-Chapter navigation:
 <strong>CLI:</strong>
 
 Usage:
+
+Use these arguments with the main Novel-Grabber.jar from inside the bin folder! NG-Launcher.jar is just the updater.
+
 [] = optional paramaters 
 {} = arguments for paramater
 
@@ -58,6 +61,8 @@ Usage:
 [-displayTitle]| | Write the chapter title at the top of each chapter text.
 [-invertOrder] | | Invert the chapter order.
 -help | | Shows the help page.
+
+Example: `java -jar Novel-Grabber.jar -link https://yourhost.com/novel/ -chapters 15 20 -getImages`
 
 <br>
 <strong>Telegram bot:</strong>
