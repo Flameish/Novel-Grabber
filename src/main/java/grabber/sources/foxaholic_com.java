@@ -88,10 +88,15 @@ public class foxaholic_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            metadata.setTitle(toc.select("title").first().text().replace(" – Foxaholic", ""));
-            metadata.setAuthor(toc.select(".author-content a").first().text());
-            metadata.setDescription(toc.select(".summary__content").first().text());
-            metadata.setBufferedCover(toc.select(".summary_image img").attr("abs:data-src"));
+            Element title = toc.selectFirst(".breadcrumb > :last-child");
+            Element author = toc.selectFirst(".author-content a");
+            Element desc = toc.selectFirst(".summary__content");
+            Element cover = toc.selectFirst(".summary_image img");
+
+            metadata.setTitle(title != null ? title.text() : "");
+            metadata.setAuthor(author != null ? author.text() : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(cover != null ? cover.attr("abs:data-src") : "");
 
             Elements tags = toc.select(".genres-content a");
             List<String> subjects = new ArrayList<>();
