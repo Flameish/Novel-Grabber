@@ -28,8 +28,8 @@ public class NovelMetadata {
      */
     public void saveCover(String destDir) {
         // Save cover
+        GrabberUtils.createDir(destDir);
         File outputfile = new File(destDir + coverName + "." + coverFormat);
-        outputfile.mkdirs();
         try {
             // cover name + file extension
             ImageIO.write(getBufferedCover(), getCoverFormat(), outputfile);

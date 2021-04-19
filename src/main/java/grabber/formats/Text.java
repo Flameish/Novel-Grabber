@@ -26,7 +26,11 @@ public class Text {
         GrabberUtils.info(novel.window,"Writing TXT...");
         if (init.config.isSeparateChapters()) {
             // Create dir for chapter files
-            String saveLocation = novel.saveLocation + "/" + filename;
+            String cleanFolderName = filename
+                    .replace("^\\.+", "")
+                    .replaceAll("[\\\\/:*?\"<>|]", "");
+            if (cleanFolderName.length() > 240) cleanFolderName = cleanFolderName.substring(0,240);
+            String saveLocation = novel.saveLocation + "/" + cleanFolderName;
             GrabberUtils.createDir(saveLocation);
 
             for(Chapter chapter: novel.successfulChapters) {

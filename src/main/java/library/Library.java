@@ -143,11 +143,16 @@ public class Library {
         libNovel.setWaitTime(novel.waitTime);
         libNovel.setGetImages(novel.getImages);
         libNovel.metadata = novel.metadata;
+
         String destDir;
+        String cleanFolderName = libNovel.metadata.getTitle().trim()
+                .replace("^\\.+", "")
+                .replaceAll("[\\\\/:*?\"<>|]", "");
+        if (cleanFolderName.length() > 240) cleanFolderName = cleanFolderName.substring(0,240);
         if(Config.getInstance().isUseStandardLocation()) {
-            destDir = Config.getInstance().getSaveLocation() + "/" + libNovel.metadata.getTitle() + "/";
+            destDir = Config.getInstance().getSaveLocation() + "/" + cleanFolderName + "/";
         } else {
-            destDir = Library.libraryFolder+ "/" + libNovel.metadata.getTitle() + "/";
+            destDir = Library.libraryFolder+ "/" + cleanFolderName + "/";
         }
         libNovel.metadata.saveCover(destDir);
         libNovel.setSaveLocation(destDir);
