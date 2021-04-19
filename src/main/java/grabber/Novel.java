@@ -45,6 +45,7 @@ public class Novel {
     public String nextChapterURL;
     public String filename;
     public long telegramChatId;
+    public int telegramProgressMsgId;
 
     /**
      * Main novel download handling object.
@@ -119,7 +120,7 @@ public class Novel {
                 init.gui.updateProgress(window);
             }
             if((telegramChatId) != 0 && (i % 10 == 0 || i == lastChapter-1)) {
-                init.telegramBot.updateProgress(telegramChatId, i, lastChapter);
+                init.telegramBot.updateProgress(telegramChatId, telegramProgressMsgId, i, lastChapter);
             }
             GrabberUtils.sleep(waitTime);
         }
@@ -185,7 +186,7 @@ public class Novel {
                 init.gui.updateProgress(window);
             }
             if((telegramChatId) != 0 && (i % 10 == 0 || i == failedChapters.size()-1)) {
-                init.telegramBot.updateProgress(telegramChatId, i, failedChapters.size());
+                init.telegramBot.updateProgress(telegramChatId, telegramProgressMsgId, i, failedChapters.size());
             }
             // replace with actual interrupted
             if(killTask) {

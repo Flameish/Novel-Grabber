@@ -13,7 +13,6 @@ import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.sources.Source;
 import system.Config;
-import system.init;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -50,7 +49,6 @@ public class Telegram {
             "Example:\n" +
             " -link http://novelhost.com/novel/ -chapters 5 10 -getImages";
     private final ConcurrentHashMap<Integer, Novel[]> currentlyDownloading = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap downloadMsgIds = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
     private final ConcurrentHashMap userChapterCount = new ConcurrentHashMap<>();
     private LocalDate yesterday = LocalDate.now(ZoneId.systemDefault());
@@ -271,8 +269,8 @@ public class Telegram {
         }
         // Send confirmation message and store messageId to update progress
         novelly.execute(new SendMessage(chatId, "Downloading: "+novel.metadata.getTitle()));
-        int messageId = novelly.execute(new SendMessage(chatId, "Progress: ")).message().messageId();
-        downloadMsgIds.put(chatId, messageId);
+        novel.telegramProgressMsgId = novelly.execute(new SendMessage(chatId, "Progress: ")).message().messageId();
+
 
         novel.downloadChapters();
         novel.output();
@@ -297,9 +295,8 @@ public class Telegram {
         }
     }
 
-    public void updateProgress(long chatId, int currChapter, int lastChapter) {
-        int messageId = (int) downloadMsgIds.get(chatId);
-        novelly.execute(new EditMessageText(chatId, messageId, "Progress: "+(currChapter+1)+"/"+lastChapter));
+    public void updateProgress(long chatId, int msgId,int currChapter, int lastChapter) {
+        novelly.execute(new EditMessageText(chatId, msgId, "Progress: "+(currChapter+1)+"/"+lastChapter));
     }
 
     public static void log(String msg) {
