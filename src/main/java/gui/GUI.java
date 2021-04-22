@@ -231,6 +231,7 @@ public class GUI extends JFrame {
     private JSpinner settingsTeleDownloadLimitSpinner;
     private JComboBox settingsGuiThemeComboBox;
     private JCheckBox settingsTeleImagesAllowedCheckBox;
+    private JComboBox settingsGuiFontComboBox;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -668,6 +669,7 @@ public class GUI extends JFrame {
             settings.setSeparateChapters(settingsSeperateChaptersCheckBox.isSelected());
             settings.setShowNovelFinishedNotification(settingsNotificationWhenFinishedCheckBox.isSelected());
             settings.setGuiTheme(settingsGuiThemeComboBox.getSelectedIndex());
+            settings.setFontName(settingsGuiFontComboBox.getSelectedItem().toString());
             try {
                 switch (settingsGuiThemeComboBox.getSelectedIndex()) {
                     case 0:
@@ -683,12 +685,14 @@ public class GUI extends JFrame {
                         UIManager.setLookAndFeel(new FlatDarculaLaf());
                         break;
                 }
+                init.setUIFont(new javax.swing.plaf.FontUIResource(settings.getFontName(), Font.PLAIN,13));
                 SwingUtilities.updateComponentTreeUI(init.gui);
             } catch (UnsupportedLookAndFeelException ex) {
                 showPopup("Error switching themes:" + ex.getMessage(), "error");
                 GrabberUtils.err("Error switching themes:" + ex.getMessage(), ex);
                 ex.printStackTrace();
             }
+
             settings.save();
         });
 
@@ -1761,6 +1765,11 @@ public class GUI extends JFrame {
 
         settingsGuiThemeComboBox = new JComboBox(guiThemes);
         settingsGuiThemeComboBox.setSelectedIndex(settings.getGuiTheme());
+
+        String[] installedFontFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+        settingsGuiFontComboBox = new JComboBox(installedFontFamilies);
+        int selectedFontIndex = Arrays.asList(installedFontFamilies).indexOf(settings.getFontName());
+        settingsGuiFontComboBox.setSelectedIndex(selectedFontIndex);
 
         // Telegram settings
         settingsTeleApiTknField = new JTextField(settings.getTelegramApiToken());
