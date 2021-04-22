@@ -21,6 +21,7 @@ public class Config {
     private String receiverEmail = "";
     private String ssl = "SMTP";
     private String telegramApiToken = "";
+    private String fontName = "DejaVu Sans";
     private int telegramWait = 0;
     private int telegramNovelMaxChapter = -1;
     private int telegramMaxChapterPerDay = -1;
@@ -60,6 +61,7 @@ public class Config {
             //  Use default value from field if property is not found in file
             // General
             setGuiTheme(Integer.parseInt(prop.getProperty("guiTheme", String.valueOf(guiTheme))));
+            setFontName(prop.getProperty("fontName", fontName));
             // Email
             setUsername(prop.getProperty("username", username));
             setPassword(prop.getProperty("password", password));
@@ -104,6 +106,7 @@ public class Config {
             Properties prop = new Properties();
             // General
             prop.setProperty("guiTheme", String.valueOf(getGuiTheme()));
+            prop.setProperty("fontName", getFontName());
             // Email
             prop.setProperty("username", getUsername());
             prop.setProperty("password", getPassword());
@@ -323,5 +326,13 @@ public class Config {
 
     public void setTelegramImagesAllowed(boolean telegramImagesAllowed) {
         this.telegramImagesAllowed = telegramImagesAllowed;
+    }
+
+    public String getFontName() {
+        return fontName;
+    }
+
+    public void setFontName(String fontName) {
+        this.fontName = fontName;
     }
 }
