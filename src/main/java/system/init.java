@@ -38,9 +38,13 @@ public class init {
      */
     public static void processParams(Map<String, List<String>> params) {
         if(params.containsKey("gui") || params.isEmpty()) {
-            startGUI();
-            if(config.isPollingEnabled()) {
-                library.startPolling();
+            if (!GraphicsEnvironment.isHeadless()) {
+                startGUI();
+                if(config.isPollingEnabled()) {
+                    library.startPolling();
+                }
+            } else {
+                printHelp();
             }
         }
         else if(params.containsKey("help")) {
