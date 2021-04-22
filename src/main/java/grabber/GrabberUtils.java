@@ -303,6 +303,21 @@ public class GrabberUtils {
         }
     }
 
+    public static void loadFontsFromFolder() {
+        File fontFolder =  new File(getCurrentPath() + "/fonts/");
+        if (!fontFolder.exists()) return;
+
+        FilenameFilter filter = (f, name) -> name.endsWith(".ttf");
+        File[] fontFiles = fontFolder.listFiles(filter);
+        for (File fontFile: fontFiles) {
+            try {
+                GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(Font.createFont(Font.TRUETYPE_FONT, fontFile));
+            } catch (FontFormatException | IOException e) {
+                GrabberUtils.err(e.getMessage(), e);
+            }
+        }
+    }
+
     public static void log(String msg) {
         String time = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("log.txt", true))) {
