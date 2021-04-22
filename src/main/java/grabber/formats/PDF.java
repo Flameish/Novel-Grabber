@@ -10,10 +10,7 @@ import org.jsoup.helper.W3CDom;
 import org.w3c.dom.Document;
 import system.Config;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 public class PDF {
     private Novel novel;
@@ -25,8 +22,12 @@ public class PDF {
             "\n" +
             "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + NL +
             "<head>" + NL +
+            "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>" + NL +
             "<title></title>" + NL +
             "<style>" +
+            "* {" +
+            "font-family: 'cjk', sans-serif;" +
+            "}" +
             "body {" +
             "font-size:1em;" +
             "line-height:1.25;" +
@@ -51,6 +52,10 @@ public class PDF {
         try (OutputStream os = new FileOutputStream(novel.saveLocation + "/" + filename)) {
             GrabberUtils.info(novel.window,"Writing PDF...");
             PdfRendererBuilder builder = new PdfRendererBuilder();
+            File cjkFont = new File(GrabberUtils.getCurrentPath() + "/fonts/NotoSansCJKtc-Regular.ttf");
+            if (cjkFont.exists()) {
+                builder.useFont(cjkFont, "cjk");
+            }
             builder.useFastMode();
             builder.withW3cDocument(buildHtmlFile(), novel.saveLocation);
             builder.toStream(os);
