@@ -101,7 +101,8 @@ public class init {
                         UIManager.setLookAndFeel(new FlatDarculaLaf());
                         break;
                 }
-                setUIFont (new javax.swing.plaf.FontUIResource("DejaVuSans", Font.PLAIN,13));
+                GrabberUtils.loadFontsFromFolder();
+                setUIFont (new javax.swing.plaf.FontUIResource(config.getFontName(), Font.PLAIN,13));
                 gui = new GUI();
                 gui.pack();
                 gui.setLocationRelativeTo(null);
@@ -135,10 +136,10 @@ public class init {
                 "  \n" +
                 "Examples:\n" +
                 "java -jar Novel-Grabber.jar -link https://myhost.com/novel/a-novel\n" +
-                "java -jar Novel-Grabber.jar -link https://myhost.com/novel/a-novel -chapters 5 last -displayTitle -wait 3000\n" +
-                "java -jar Novel-Grabber.jar -link https://myhost.com/novel/a-novel -path /home/flameish/novels -account flameish kovzhvwlmzgv");
+                "java -jar Novel-Grabber.jar -link https://myhost.com/novel/a-novel -chapters 5 last -displayTitle -wait 3000");
     }
 
+    // Set font for each swing element
     public static void setUIFont(javax.swing.plaf.FontUIResource f){
         java.util.Enumeration keys = UIManager.getDefaults().keys();
         while (keys.hasMoreElements()) {
