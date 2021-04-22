@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class Chapter implements Serializable {
     public static int chapterCounter = 0;  // Used to set unique filenames
@@ -97,7 +98,11 @@ public class Chapter implements Serializable {
             String imageFilename = GrabberUtils.getFilenameFromUrl(imageURL);
             BufferedImage bufferedImage = GrabberUtils.getImage(imageURL);
 
-            if(imageFilename != null && bufferedImage != null) {
+            if(bufferedImage != null) {
+                // Sometimes image names can be empty. Create random name for it then.
+                if (imageFilename == null || imageFilename.isEmpty()) {
+                    imageFilename = UUID.randomUUID().toString();
+                }
                 // Check if image has file extension. If not set as png.
                 if(GrabberUtils.getFileExtension(imageFilename) == null) imageFilename += ".png";
                 // Modify href of image src to downloaded image
