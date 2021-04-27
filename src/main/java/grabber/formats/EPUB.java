@@ -4,6 +4,9 @@ import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
 import nl.siegmann.epublib.epub.EpubReader;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.safety.Whitelist;
 import system.Config;
 
 import nl.siegmann.epublib.domain.Author;
@@ -164,18 +167,28 @@ public class EPUB {
     }
 
     public void addToc() {
-        StringBuilder tocString = new StringBuilder(htmlHead + "<b>Table of Contents</b>" + NL + "<p style=\"text-indent:0pt\">" + NL);
+        StringBuilder tocBuilder = new StringBuilder(htmlHead + NL +
+                "<b>Table of Contents</b>" + NL +
+                "<p style=\"text-indent:0pt\">" + NL);
         for (Chapter chapter: novel.chapterList) {
             if(chapter.status == 1)
-               tocString.append("<a href=\"").append(chapter.fileName).append(".html\">").append(chapter.name).append("</a><br/>").append(NL);
+                tocBuilder.append("<a href=\"").append(chapter.fileName).append(".html\">").append(chapter.name).append("</a><br/>").append(NL);
         }
-        tocString.append("</p>").append(NL).append(htmlFoot);
+        tocBuilder.append("</p>").append(NL).append(htmlFoot);
 
-        try (InputStream inputStream = new ByteArrayInputStream(tocString.toString().getBytes(StandardCharsets.UTF_8))) {
+        Document.OutputSettings settings = new Document.OutputSettings();
+        settings.syntax(Document.OutputSettings.Syntax.xml);
+        settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
+        settings.charset("UTF-8");
+
+        Document doc = Jsoup.parse(tocBuilder.toString());
+        doc.outputSettings(settings);
+
+        try (InputStream inputStream = new ByteArrayInputStream(doc.html().getBytes(StandardCharsets.UTF_8))) {
             Resource resource = new Resource(inputStream, "table_of_contents.html");
             book.addSection("Table of Contents", resource);
         } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not add table of content to EPUB. "+e.getMessage(), e);
+            GrabberUtils.err(novel.window, "Could not add table of content to EPUB. " + e.getMessage(), e);
         }
     }
 
@@ -185,7 +198,16 @@ public class EPUB {
                 "<p>" + novelMetadata.getDescription() + "</p>" + NL +
                 "</div>" + NL +
                 htmlFoot;
-        try (InputStream inputStream = new ByteArrayInputStream(descString.getBytes(StandardCharsets.UTF_8))) {
+
+        Document.OutputSettings settings = new Document.OutputSettings();
+        settings.syntax(Document.OutputSettings.Syntax.xml);
+        settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
+        settings.charset("UTF-8");
+
+        Document doc = Jsoup.parse(descString);
+        doc.outputSettings(settings);
+
+        try (InputStream inputStream = new ByteArrayInputStream(doc.html().getBytes(StandardCharsets.UTF_8))) {
             Resource resource = new Resource(inputStream, "desc_Page.html");
             book.addSection("Description", resource);
         } catch (IOException e) {

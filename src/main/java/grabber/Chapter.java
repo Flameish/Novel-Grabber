@@ -122,7 +122,12 @@ public class Chapter implements Serializable {
      * Cleans HTML tags and adds chapter title optionally
      */
     private String cleanContent(Element chapterContainer, boolean displayChapterTitle) {
-        String chapterString = chapterContainer.toString();
+        String chapterString = "";
+
+        if(displayChapterTitle) {
+            chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>\n";
+        }
+        chapterString += chapterContainer.toString();
 
         Document.OutputSettings settings = new Document.OutputSettings();
         settings.syntax(Document.OutputSettings.Syntax.xml);
@@ -135,9 +140,7 @@ public class Chapter implements Serializable {
                 Whitelist.relaxed().preserveRelativeLinks(true),
                 settings);
 
-        if(displayChapterTitle) {
-            chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>\n" + chapterString;
-        }
+
         return chapterString;
     }
 
