@@ -320,7 +320,7 @@ public class GrabberUtils {
 
     public static void log(String msg) {
         String time = ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("log.txt", true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getCurrentPath() + "/log.txt", true))) {
             writer.write("[" + time + "] " + msg);
             writer.write("\n");
         } catch (IOException e) {
