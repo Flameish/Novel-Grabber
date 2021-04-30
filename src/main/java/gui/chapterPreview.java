@@ -4,8 +4,6 @@ import grabber.Chapter;
 import grabber.GrabberUtils;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -50,6 +48,7 @@ public class chapterPreview extends JDialog {
 
     private void createUIComponents() {
         chapterContentPane = new JEditorPane("text/html", chapter.chapterContent);
+        chapterContentPane.setCaretPosition(0);
         nameField = new JTextField(chapter.name);
         urlField = new JTextField(chapter.chapterURL);
     }
