@@ -35,10 +35,12 @@ public class Library {
     private List<LibraryNovel> starredNovels = new ArrayList<>();
 
     private Library() {
-        try {
-            emailClient = new EmailNotification();
-        } catch (Exception e) {
-            GrabberUtils.err("Could not establish connection to SMTP Server. Check email settings and restart.");
+        if (!config.getHost().isEmpty()) {
+            try {
+                emailClient = new EmailNotification();
+            } catch (Exception e) {
+                GrabberUtils.err("Could not establish connection to SMTP Server. Check email settings and restart.");
+            }
         }
     }
 
