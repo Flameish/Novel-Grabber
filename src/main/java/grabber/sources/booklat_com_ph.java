@@ -62,6 +62,8 @@ public class booklat_com_ph implements Source {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         } catch (IllegalArgumentException e) {
             GrabberUtils.err(novel.window, "Need to use login.", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
         return chapterList;
     }

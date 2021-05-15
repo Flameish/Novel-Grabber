@@ -93,8 +93,14 @@ public class sofanovel_com implements Source {
                 }
             }
 
-        } catch (IOException | ParseException e) {
-            GrabberUtils.err(e.getMessage(), e);
+        } catch (HttpStatusException httpEr) {
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
+        } catch (IOException e) {
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (ParseException e) {
+            GrabberUtils.err(novel.window, "JSON parse error!", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
         return chapterList;
     }

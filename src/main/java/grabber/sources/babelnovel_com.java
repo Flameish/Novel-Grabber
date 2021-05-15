@@ -103,6 +103,8 @@ public class babelnovel_com implements Source {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         } catch (ParseException e) {
             GrabberUtils.err(novel.window, "JSON parse error!", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
         return chapterList;
     }

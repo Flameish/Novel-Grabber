@@ -4,6 +4,7 @@ import grabber.Chapter;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -54,8 +55,12 @@ public class dreame_com implements Source {
             for (Element chapterLink : firstChapterPage.select(".chapter-list a")) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
+        } catch (HttpStatusException httpEr) {
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not connect to webpage. (" + e.getMessage() + ")", e);
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
         return chapterList;
     }

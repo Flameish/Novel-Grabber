@@ -55,8 +55,12 @@ public class wuxiaworld_co implements Source {
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
+        } catch (HttpStatusException httpEr) {
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            GrabberUtils.err(e.getMessage(), e);
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
         return chapterList;
     }

@@ -57,8 +57,12 @@ public class wuxiaworld_com implements Source {
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
+        } catch (HttpStatusException httpEr) {
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
-            GrabberUtils.err(e.getMessage(), e);
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
         return chapterList;
     }
@@ -105,10 +109,15 @@ public class wuxiaworld_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            metadata.setTitle(toc.select(".novel-body h2").first().text());
-            metadata.setAuthor(toc.select(".novel-body div:contains(Author) dd").first().text());
-            metadata.setDescription(toc.select(".fr-view:not(.pt-10)").first().text());
-            metadata.setBufferedCover(toc.select(".novel-left img").attr("abs:src"));
+            Element title = toc.selectFirst(".novel-body h2");
+            Element author = toc.selectFirst(".novel-body div:contains(Author) dd");
+            Element desc = toc.selectFirst(".fr-view:not(.pt-10)");
+            Element cover = toc.selectFirst(".novel-left img");
+
+            metadata.setTitle(title != null ? title.text() : "");
+            metadata.setAuthor(author != null ? author.text() : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(cover != null ? cover.attr("abs:src") : "");
 
             Elements tags = toc.select(".genres a");
             List<String> subjects = new ArrayList<>();

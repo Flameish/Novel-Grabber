@@ -58,6 +58,8 @@ public class wuxiaworld_online implements Source {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
         return chapterList;
     }

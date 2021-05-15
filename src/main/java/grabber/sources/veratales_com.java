@@ -53,12 +53,14 @@ public class veratales_com implements Source {
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
+            Collections.reverse(chapterList);
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
-        Collections.reverse(chapterList);
         return chapterList;
     }
 
