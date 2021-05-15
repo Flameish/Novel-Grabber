@@ -130,8 +130,7 @@ public class manualSource implements Source {
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         } catch (NullPointerException e) {
-            GrabberUtils.err(novel.window, "Could not detect chapter on: "
-                    + chapter.chapterURL + "(" + e.getMessage() + ")", e);
+            GrabberUtils.err(novel.window, "Could not detect chapter on: " + chapter.chapterURL);
         }
         return chapterBody;
     }
