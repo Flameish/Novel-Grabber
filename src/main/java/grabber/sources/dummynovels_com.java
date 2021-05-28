@@ -66,7 +66,7 @@ public class dummynovels_com implements Source {
         Element chapterBody = null;
         try {
             Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
-            chapterBody = doc.select("#wtr-content").first();
+            chapterBody = doc.selectFirst(".elementor-widget-theme-post-content");
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
@@ -74,14 +74,19 @@ public class dummynovels_com implements Source {
         }
         return chapterBody;
     }
-
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            metadata.setTitle(toc.selectFirst("h1.elementor-heading-title").text());
-            metadata.setDescription(toc.selectFirst(".novel-synopsis-content").text());
-            metadata.setBufferedCover(toc.select("meta[property=og:image]").attr("abs:content"));
+            Element title = toc.selectFirst("meta[property=og:title]");
+            Element author = toc.selectFirst(".elementor-text-editor:contains(Author:)");
+            Element desc = toc.selectFirst(".novel-synopsis-content");
+            Element cover = toc.selectFirst("meta[property=og:image]");
+
+            metadata.setTitle(title != null ? title.attr("content") : "");
+            metadata.setAuthor(author != null ? author.text().replace("Author: ", "") : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(cover != null ? cover.attr("abs:content") : "");
 
             Elements tags = toc.select(".novel-term a");
             List<String> subjects = new ArrayList<>();
