@@ -17,7 +17,7 @@ import java.util.List;
 public class wnmtl_org implements Source{
     private final String name = "wnmtl.org";
     private final String url = "https://wnmtl.org";
-    private final boolean canHeadless = true;
+    private final boolean canHeadless = false;
     private Novel novel;
     private Document toc;
 
