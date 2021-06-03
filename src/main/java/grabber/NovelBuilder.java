@@ -179,7 +179,7 @@ public class NovelBuilder {
         return this;
     }
 
-    public NovelBuilder setSource(String hostUrl) throws ClassNotFoundException, IOException,IllegalArgumentException {
+    public NovelBuilder setSource(String hostUrl) throws ClassNotFoundException, IOException {
         Source source;
         try {
             String sourcesFolder = GrabberUtils.getCurrentPath() + "/sources";
@@ -201,9 +201,6 @@ public class NovelBuilder {
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException |
                 MalformedURLException | IllegalAccessException e) {
             throw new IOException("Could not access or load source file(s)", e);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("You included a link directly to the first chapter of a AO3 novel\n" +
-                    "Remove the /chapters/*chapter id* and try again", e);
         }
         novel.source = source;
         return this;

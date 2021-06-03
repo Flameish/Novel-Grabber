@@ -5,6 +5,7 @@ import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
 
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -53,6 +54,8 @@ public class wnmtl_org implements Source{
             for (Element e : chaps) {
                 cList.add(new Chapter(e.text(), e.attr("abs:href")));
             }
+        }catch (HttpStatusException httpEr) {
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         } catch (NullPointerException e) {
@@ -70,6 +73,8 @@ public class wnmtl_org implements Source{
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             body = doc.selectFirst("div.text-left");
+        } catch (HttpStatusException httpEr) {
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         }
