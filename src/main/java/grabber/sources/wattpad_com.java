@@ -48,7 +48,7 @@ public class wattpad_com implements Source {
     }
 
     public List<Chapter> getChapterList() {
-        List<Chapter> chapterList = new ArrayList();
+        List<Chapter> chapterList = new ArrayList<>();
         try {
             toc = Jsoup.connect(novel.novelLink)
                     .cookies(novel.cookies)

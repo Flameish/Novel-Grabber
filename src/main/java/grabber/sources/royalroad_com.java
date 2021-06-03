@@ -45,7 +45,7 @@ public class royalroad_com implements Source {
     }
 
     public List<Chapter> getChapterList() {
-        List<Chapter> chapterList = new ArrayList();
+        List<Chapter> chapterList = new ArrayList<>();
         try {
             toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
             Elements chapterLinks = toc.select("td:not([class]) a");
