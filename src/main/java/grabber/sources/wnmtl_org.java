@@ -5,6 +5,7 @@ import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
 
+import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class wnmtl_org implements Source{
-    private final String name = "wnmtl.org";
+    private final String name = "WNMTL";
     private final String url = "https://wnmtl.org";
     private final boolean canHeadless = false;
     private Novel novel;
@@ -48,7 +49,6 @@ public class wnmtl_org implements Source{
         try {
             toc = Jsoup.connect(novel.novelLink)
                     .cookies(novel.cookies)
-                    .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             Elements chaps = toc.select("li.wp-manga-chapter > a");
             for (Element e : chaps) {
@@ -85,20 +85,21 @@ public class wnmtl_org implements Source{
     public NovelMetadata getMetadata() {
         NovelMetadata mdata = new NovelMetadata();
         if (toc != null) {
-            Element title = toc.selectFirst("div.post-title > h1");
-            Element author = toc.selectFirst("div.author-content > a");
-            Element description = toc.selectFirst("div.description-summary > div > p");
-            Element cimg = toc.selectFirst("img.img-responsive");
-            mdata.setTitle(title.text());
-            mdata.setAuthor(author.text());
-            mdata.setDescription(description.text());
-            mdata.setBufferedCover(cimg.attr("abs:src"));
-            Elements tags = toc.select("div.genres-content > a");
-            List<String> subjects = new ArrayList<>();
-            for (Element tag : tags) {
-                subjects.add(tag.text());
-            }
-            mdata.setSubjects(subjects);
+                Element title = toc.selectFirst("div.post-title > h1");
+                Element author = toc.selectFirst("div.author-content > a");
+                Element description = toc.selectFirst("div.description-summary > div > p");
+                Element cimg = toc.selectFirst("img.img-responsive");
+                mdata.setTitle(title != null ? title.text() : "");
+                mdata.setAuthor(author != null ? author.text() : "");
+                mdata.setDescription(description != null ? description.text() : "");
+                mdata.setBufferedCover(cimg != null ? cimg.attr("abs:src") : "");
+                Elements tags = toc.select("div.genres-content > a");
+                List<String> subjects = new ArrayList<>();
+                for (Element tag : tags) {
+                    subjects.add(tag.text());
+                }
+                mdata.setSubjects(subjects);
+
         }
         return mdata;
     }

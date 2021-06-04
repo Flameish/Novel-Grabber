@@ -4,6 +4,7 @@ import grabber.Chapter;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class n78zaotl_com implements Source {
-    private final String name = "78zaotl.com";
-    private final String url = "https://www.78zaotl.com/xk/";
+    private final String name = "78ZaoTL";
+    private final String url = "https://www.78zaotl.com/";
     private final boolean canHeadless = false;
     private Novel novel;
     private Document toc;
@@ -82,15 +83,15 @@ public class n78zaotl_com implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata novelMetadata = new NovelMetadata();
         if (toc != null) {
-            Element title = toc.selectFirst("div.container > h5");
-            //not possible to get description, everything is in one container div
-            //no cover image provided
-            //no author provided
-            novelMetadata.setTitle(title.text());
-            novelMetadata.setAuthor("");
-            novelMetadata.setDescription("");
-            //Site doesn't use genre tags
-        }
+                Element title = toc.selectFirst("div.container > h5");
+                Element desc = toc.selectFirst("div.container > p > span");
+                //no cover image provided
+                //no author provided
+                novelMetadata.setTitle(title != null ? title.text() : "");
+                novelMetadata.setAuthor("");
+                novelMetadata.setDescription(desc != null ? desc.text() : "");
+                //Site doesn't use genre tags
+            }
         return novelMetadata;
     }
 
