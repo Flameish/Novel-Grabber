@@ -88,11 +88,15 @@ public class daonovel_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            metadata.setTitle(toc.selectFirst(".post-title").text());
-            metadata.setAuthor(toc.select(".author-content").first().text());
+            Element title = toc.selectFirst(".post-title");
+            Element author = toc.selectFirst(".author-content");
+            Element desc = toc.selectFirst(".summary__content");
+            Element cover = toc.selectFirst("meta[property=og:image]");
 
-            metadata.setDescription(toc.select(".summary__content").first().text());
-            metadata.setBufferedCover(toc.selectFirst("meta[property=og:image]").attr("content"));
+            metadata.setTitle(title != null ? title.text() : "");
+            metadata.setAuthor(author != null ? author.text() : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(cover != null ? cover.attr("content") : "");
 
             Elements tags = toc.select(".genres-content a");
             List<String> subjects = new ArrayList<>();
