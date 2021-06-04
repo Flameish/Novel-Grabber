@@ -14,6 +14,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class wnmtl_org implements Source{
@@ -50,10 +51,17 @@ public class wnmtl_org implements Source{
             toc = Jsoup.connect(novel.novelLink)
                     .cookies(novel.cookies)
                     .get();
-            Elements chaps = toc.select("li.wp-manga-chapter > a");
+            Connection.Response res = Jsoup.connect("https://www.wnmtl.org/wp-admin/admin-ajax.php")
+                    .data("action","manga_get_chapters")
+                    .data("manga",toc.select("div.post-rating > input").attr("value"))
+                    .cookies(novel.cookies)
+                    .method(Connection.Method.POST)
+                    .execute();
+            Elements chaps = res.parse().select("div.listing-chapters_wrap show-more > ul > li > a");
             for (Element e : chaps) {
                 cList.add(new Chapter(e.text(), e.attr("abs:href")));
             }
+            Collections.reverse(chaps);
         }catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
