@@ -1,6 +1,6 @@
 package gui;
 
-import bots.Telegram;
+import bots.telegram.Bot;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
@@ -952,8 +952,8 @@ public class GUI extends JFrame {
         settingsTeleStartBtn.addActionListener(e -> {
             settingsTeleStartBtn.setEnabled(false);
             try {
-                init.telegramBot = Telegram.getInstance();
-                init.telegramBot.run();
+                init.telegramBot = new Bot();
+                init.telegramBot.start();
                 settingsTeleStatusLbl.setText("Status: Running");
                 settingsTeleStopBtn.setVisible(true);
                 settingsTeleStartBtn.setVisible(false);
@@ -2572,4 +2572,5 @@ public class GUI extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return rootPanel;
     }
+
 }

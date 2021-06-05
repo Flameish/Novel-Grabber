@@ -1,5 +1,6 @@
 package grabber;
 
+import bots.telegram.DownloadTask;
 import grabber.sources.Source;
 
 import java.io.File;
@@ -139,8 +140,8 @@ public class NovelBuilder {
         novel.waitTime = waitTime;
         return this;
     }
-    public NovelBuilder telegramChatId(long telegramChatId) {
-        novel.telegramChatId = telegramChatId;
+    public NovelBuilder downloadTask(DownloadTask downloadTask) {
+        novel.downloadTask = downloadTask;
         return this;
     }
 

@@ -1,5 +1,6 @@
 package grabber;
 
+import bots.telegram.DownloadTask;
 import grabber.formats.EPUB;
 import grabber.formats.PDF;
 import grabber.formats.Text;
@@ -22,6 +23,7 @@ public class Novel {
     public NovelMetadata metadata;
     public List<String> blacklistedTags;
     public HashMap<String, BufferedImage> images = new HashMap<>();
+    public DownloadTask downloadTask;
     public boolean killTask;
     public boolean reGrab = false;
     public boolean removeStyling = false;
@@ -119,8 +121,8 @@ public class Novel {
             if(init.gui != null) {
                 init.gui.updateProgress(window);
             }
-            if((telegramChatId) != 0 && (i % 10 == 0 || i == lastChapter-1)) {
-                init.telegramBot.updateProgress(telegramChatId, telegramProgressMsgId, i, lastChapter);
+            if (this.downloadTask != null) {
+                this.downloadTask.updateProgress(i, this.lastChapter);
             }
             GrabberUtils.sleep(waitTime);
         }
@@ -185,8 +187,8 @@ public class Novel {
             if(init.gui != null) {
                 init.gui.updateProgress(window);
             }
-            if((telegramChatId) != 0 && (i % 10 == 0 || i == failedChapters.size()-1)) {
-                init.telegramBot.updateProgress(telegramChatId, telegramProgressMsgId, i, failedChapters.size());
+            if (this.downloadTask != null) {
+                this.downloadTask.updateProgress(i, this.lastChapter);
             }
             // replace with actual interrupted
             if(killTask) {
@@ -247,10 +249,6 @@ public class Novel {
 
         for (Chapter chapter: failedChapters) {
             GrabberUtils.err(window, "Failed to download: " + chapter.name);
-        }
-
-        if((telegramChatId) != 0 && !failedChapters.isEmpty()) {
-            init.telegramBot.sendMsg(telegramChatId, "Failed to download " + failedChapters.size() + " chapters");
         }
 
         // Set driver to null. Closed() driver cant be reopened

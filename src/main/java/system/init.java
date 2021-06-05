@@ -1,12 +1,12 @@
 package system;
 
+import bots.telegram.Bot;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import grabber.*;
 import gui.GUI;
-import bots.Telegram;
 import library.Library;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class init {
     public static final Library library = Library.getInstance();;
     public static final Config config = Config.getInstance();
     public static GUI gui;
-    public static Telegram telegramBot;
+    public static Bot telegramBot;
 
     public static void main(String[] args) {
         final Map<String, List<String>> params = CLI.createParamsFromArgs(args);
@@ -57,8 +57,8 @@ public class init {
         }
         else if(params.containsKey("telegramBot")) {
             try {
-                telegramBot = Telegram.getInstance();
-                telegramBot.run();
+                telegramBot = new Bot();
+                telegramBot.start();
             } catch (InterruptedException e) {
                 GrabberUtils.err(e.getMessage());
                 e.printStackTrace();
