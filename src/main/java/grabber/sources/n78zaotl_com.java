@@ -84,7 +84,7 @@ public class n78zaotl_com implements Source {
         NovelMetadata novelMetadata = new NovelMetadata();
         if (toc != null) {
                 Element title = toc.selectFirst("div.container > h5");
-                Element desc = toc.selectFirst("div.container > p > span");
+                Elements desc = toc.select(".container > p");
                 //no cover image provided
                 //no author provided
                 novelMetadata.setTitle(title != null ? title.text() : "");
