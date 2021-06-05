@@ -131,7 +131,7 @@ public class wuxiaworld_com implements Source {
     }
 
     public List<String> getBlacklistedTags() {
-        List blacklistedTags = new ArrayList();
+        List<String> blacklistedTags = new ArrayList<>();
         blacklistedTags.add("a.chapter-nav");
         return blacklistedTags;
     }
