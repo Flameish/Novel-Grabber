@@ -45,14 +45,20 @@ public class EPUB {
         this.novelMetadata = novel.metadata;
         // Library novels try to update existing files
         if (novel.window.equals("checker")) {
-            book = tryReadOldFile();
+            try {
+                book = tryReadOldFile();
+            } catch (FileNotFoundException e) {
+                GrabberUtils.err("Could not find old book file: " + e.getMessage());
+            } catch (IOException e) {
+                GrabberUtils.err("Could not access old book file: " + e.getMessage());
+            }
         }
         if (book == null) {
             book = new Book();
             try {
                 book.getResources().add(new Resource(getClass().getResourceAsStream("/default.css"), "default.css"));
             } catch (IOException e) {
-                GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. " + e.getMessage(), e);
+                GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. " + e.getMessage());
             }
         }
     }
@@ -79,26 +85,17 @@ public class EPUB {
             novel.filename = epubFilename;
             GrabberUtils.info(novel.window, "Output: " + novel.saveLocation+"/"+ epubFilename);
         } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not write EPUB. "+e.getMessage(), e);
+            GrabberUtils.err(novel.window, "Could not write EPUB. " + e.getMessage(), e);
         }
     }
 
     /**
-     * Tries to read EPUB file from save location.
-     * @return old Book or null if not found
+     * Tries to read old EPUB file from save location.
      */
-    public Book tryReadOldFile() {
-        Book oldBook = null;
+    public Book tryReadOldFile() throws IOException {
         File epubFile = new File(novel.saveLocation + "/" + setFilename());
-        try {
-            InputStream inputStream = new FileInputStream(epubFile);
-            oldBook = new EpubReader().readEpub(inputStream, "UTF-8");
-        } catch (FileNotFoundException e) {
-            GrabberUtils.err("[LIBRARY]Could not find old book file: " + epubFile);
-        } catch (IOException e) {
-            GrabberUtils.err("[LIBRARY]Could not access old book file: " + e.getMessage());
-        }
-        return oldBook;
+        InputStream inputStream = new FileInputStream(epubFile);
+        return new EpubReader().readEpub(inputStream, "UTF-8");
     }
 
 
