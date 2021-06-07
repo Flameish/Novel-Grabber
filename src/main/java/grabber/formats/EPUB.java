@@ -6,7 +6,6 @@ import grabber.NovelMetadata;
 import nl.siegmann.epublib.epub.EpubReader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
 import system.Config;
 
 import nl.siegmann.epublib.domain.Author;
@@ -47,10 +46,11 @@ public class EPUB {
         // Library novels try to update existing files
         if (novel.window.equals("checker")) {
             try {
-                book = readOldFile();
+                book = tryReadOldFile();
+            } catch (FileNotFoundException e) {
+                GrabberUtils.err("Could not find old book file: " + e.getMessage());
             } catch (IOException e) {
-                GrabberUtils.err("Could not read old book file.");
-                GrabberUtils.info("Creating new file.");
+                GrabberUtils.err("Could not access old book file: " + e.getMessage());
             }
         }
         if (book == null) {
@@ -58,7 +58,7 @@ public class EPUB {
             try {
                 book.getResources().add(new Resource(getClass().getResourceAsStream("/default.css"), "default.css"));
             } catch (IOException e) {
-                GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. " + e.getMessage(), e);
+                GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. " + e.getMessage());
             }
         }
     }
@@ -85,15 +85,17 @@ public class EPUB {
             novel.filename = epubFilename;
             GrabberUtils.info(novel.window, "Output: " + novel.saveLocation+"/"+ epubFilename);
         } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not write EPUB. "+e.getMessage(), e);
+            GrabberUtils.err(novel.window, "Could not write EPUB. " + e.getMessage(), e);
         }
     }
 
-    public Book readOldFile() throws IOException {
+    /**
+     * Tries to read old EPUB file from save location.
+     */
+    public Book tryReadOldFile() throws IOException {
         File epubFile = new File(novel.saveLocation + "/" + setFilename());
         InputStream inputStream = new FileInputStream(epubFile);
-        Book oldBook = new EpubReader().readEpub(inputStream, "UTF-8");
-        return oldBook;
+        return new EpubReader().readEpub(inputStream, "UTF-8");
     }
 
 
