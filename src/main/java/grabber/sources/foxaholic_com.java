@@ -47,7 +47,7 @@ public class foxaholic_com implements Source {
     }
 
     public List<Chapter> getChapterList() {
-        List<Chapter> chapterList = new ArrayList();
+        List<Chapter> chapterList = new ArrayList<>();
         try {
             toc = Jsoup.connect(novel.novelLink).get();
             Connection.Response res = Jsoup.connect("https://foxaholic.com/wp-admin/admin-ajax.php")
@@ -112,7 +112,7 @@ public class foxaholic_com implements Source {
     }
 
     public List<String> getBlacklistedTags() {
-        List blacklistedTags = new ArrayList();
+        List<String> blacklistedTags = new ArrayList<>();
         blacklistedTags.add(".sharedaddy");
         blacklistedTags.add(".google-auto-placed");
         blacklistedTags.add("iframe");
