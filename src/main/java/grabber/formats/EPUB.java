@@ -6,7 +6,6 @@ import grabber.NovelMetadata;
 import nl.siegmann.epublib.epub.EpubReader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
 import system.Config;
 
 import nl.siegmann.epublib.domain.Author;
@@ -46,12 +45,7 @@ public class EPUB {
         this.novelMetadata = novel.metadata;
         // Library novels try to update existing files
         if (novel.window.equals("checker")) {
-            try {
-                book = readOldFile();
-            } catch (IOException e) {
-                GrabberUtils.err("Could not read old book file.");
-                GrabberUtils.info("Creating new file.");
-            }
+            book = tryReadOldFile();
         }
         if (book == null) {
             book = new Book();
@@ -89,10 +83,21 @@ public class EPUB {
         }
     }
 
-    public Book readOldFile() throws IOException {
+    /**
+     * Tries to read EPUB file from save location.
+     * @return old Book or null if not found
+     */
+    public Book tryReadOldFile() {
+        Book oldBook = null;
         File epubFile = new File(novel.saveLocation + "/" + setFilename());
-        InputStream inputStream = new FileInputStream(epubFile);
-        Book oldBook = new EpubReader().readEpub(inputStream, "UTF-8");
+        try {
+            InputStream inputStream = new FileInputStream(epubFile);
+            oldBook = new EpubReader().readEpub(inputStream, "UTF-8");
+        } catch (FileNotFoundException e) {
+            GrabberUtils.err("[LIBRARY]Could not find old book file: " + epubFile);
+        } catch (IOException e) {
+            GrabberUtils.err("[LIBRARY]Could not access old book file: " + e.getMessage());
+        }
         return oldBook;
     }
 

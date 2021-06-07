@@ -124,7 +124,7 @@ public class Library {
             try {
                 Files.move(Paths.get(epub.getPath()), Paths.get(libNovel.getSaveLocation() + novel.filename));
             } catch (IOException e) {
-                GrabberUtils.err("Could not move novel file. " + e.getMessage(), e);
+                GrabberUtils.err("[LIBRARY]Could not move novel file. " + e.getMessage(), e);
             }
         }
     }
