@@ -3,6 +3,7 @@ package grabber;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
+import system.Config;
 import system.init;
 import org.jsoup.nodes.Element;
 
@@ -43,7 +44,7 @@ public class Chapter implements Serializable {
             return;
         }
 
-        removeUnwantedTags(novel.removeStyling, novel.blacklistedTags);
+        removeUnwantedTags(novel.blacklistedTags);
 
         if (novel.getImages) {
             getImages(novel.window, novel.images);
@@ -58,7 +59,7 @@ public class Chapter implements Serializable {
             init.gui.updatePageCount(novel.window, novel.wordCount);
         }
 
-        chapterContent = cleanContent(chapterContainer, novel.displayChapterTitle);
+        chapterContent = cleanContent(chapterContainer, novel.displayChapterTitle, novel.removeStyling);
         chapterContainer = null;
         status = 1; // Chapter was successfully downloaded
     }
@@ -66,7 +67,7 @@ public class Chapter implements Serializable {
     /**
      * Removes general and specified blacklisted tags from chapter body.
      */
-    private void removeUnwantedTags(boolean removeStyling, List<String> blacklistedTags) {
+    private void removeUnwantedTags(List<String> blacklistedTags) {
         // Remove user set blacklisted tags
         for (String tag : blacklistedTags) {
             chapterContainer.select(tag).remove();
@@ -82,9 +83,6 @@ public class Chapter implements Serializable {
         String[] blacklistedWords = new String[] {"next","previous","table","index","back","chapter","home"};
         for(Element link: chapterContainer.select("a[href]")) {
             if(Arrays.stream(blacklistedWords).anyMatch(link.text().toLowerCase()::contains)) link.remove();
-        }
-        if (removeStyling) {
-            chapterContainer.select("[style]").removeAttr("style");
         }
     }
 
@@ -121,11 +119,22 @@ public class Chapter implements Serializable {
     /**
      * Cleans HTML tags and adds chapter title optionally
      */
-    private String cleanContent(Element chapterContainer, boolean displayChapterTitle) {
+    private String cleanContent(Element chapterContainer, boolean displayChapterTitle, boolean removeStyling) {
         String chapterString = "";
 
+        // Insert chapter title
         if(displayChapterTitle) {
-            chapterString = "<span style=\"font-weight: 700; text-decoration: underline;\">" + name + "</span>\n";
+            Config config = Config.getInstance();
+            switch (config.getChapterTitleFormat()) {
+                case 1:
+                    chapterString = "<h1>" + name + "</h1>\n";
+                    break;
+                case 2: // Custom
+                    chapterString = String.format(config.getChapterTitleTemplate() + "\n", name);
+                    break;
+                default:
+                    chapterString = "<span><b><u>" + name + "</u></b></span>\n";
+            }
         }
         chapterString += chapterContainer.toString();
 
@@ -134,12 +143,19 @@ public class Chapter implements Serializable {
         settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
         settings.charset("UTF-8");
 
-        chapterString = Jsoup.clean(
-                chapterString,
-                "http://"+GrabberUtils.getDomainName(chapterURL),
-                Whitelist.relaxed().preserveRelativeLinks(true),
-                settings);
-
+        if (removeStyling) {
+            chapterString = Jsoup.clean(
+                    chapterString,
+                    "http://"+GrabberUtils.getDomainName(chapterURL),
+                    Whitelist.simpleText().preserveRelativeLinks(true),
+                    settings);
+        } else {
+            chapterString = Jsoup.clean(
+                    chapterString,
+                    "http://"+GrabberUtils.getDomainName(chapterURL),
+                    Whitelist.relaxed().preserveRelativeLinks(true),
+                    settings);
+        }
 
         return chapterString;
     }

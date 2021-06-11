@@ -47,6 +47,7 @@ public class GUI extends JFrame {
     private static String[] epubFilenameFormats = {"<author> - <title>", "<title> - <author>", "<title>"};
     private static String[] epubFormats = {"EPUB", "txt", "PDF"};
     private static String[] sslList = {"SMTP","SMTPS","SMTP TLS"};
+    private static String[] chapterTitleFormatOptions = {"span","h1","custom"};
     private static String[] guiThemes = {"Flat IntelliJ", "Flat Light","Flat Dark","Flat Darcula"};
     private static MenuItem defaultItem0;
     private final String NL = System.getProperty("line.separator");
@@ -237,6 +238,11 @@ public class GUI extends JFrame {
     private JComboBox settingsGuiThemeComboBox;
     private JCheckBox settingsTeleImagesAllowedCheckBox;
     private JComboBox settingsGuiFontComboBox;
+    private JPanel settingsNovelPanel;
+    private JButton settingsNovelBtn;
+    private JComboBox settingsChapterTitleComboBox;
+    private JButton settingsNovelSaveBtn;
+    private JTextField settingsNovelCustomChapterTitleField;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -665,14 +671,7 @@ public class GUI extends JFrame {
         });
 
         settingsSaveBtn.addActionListener(actionEvent -> {
-            settings.setSaveLocation(settingsSavelocationField.getText());
-            settings.setUseStandardLocation(standardSaveLocationCheckBox.isSelected());
-            settings.setRemoveStyling(settingsAlwaysRemoveStylingCheckBox.isSelected());
-            settings.setAutoGetImages(settingsAlwaysGetImagesCheckBox.isSelected());
             settings.setBrowser(settingsBrowserComboBox.getSelectedItem().toString());
-            settings.setFilenameFormat(settingsNameOutputFormatComboBox.getSelectedIndex());
-            settings.setOutputFormat(settingsOutputFormatComboBox.getSelectedIndex());
-            settings.setSeparateChapters(settingsSeperateChaptersCheckBox.isSelected());
             settings.setShowNovelFinishedNotification(settingsNotificationWhenFinishedCheckBox.isSelected());
             settings.setGuiTheme(settingsGuiThemeComboBox.getSelectedIndex());
             settings.setFontName(settingsGuiFontComboBox.getSelectedItem().toString());
@@ -776,6 +775,7 @@ public class GUI extends JFrame {
             settingsLibraryPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
             settingsTelegramPanel.setVisible(false);
+            settingsNovelPanel.setVisible(false);
 
             settingsGeneralPanel.setVisible(true);
         });
@@ -784,6 +784,7 @@ public class GUI extends JFrame {
             settingsEmailPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
             settingsTelegramPanel.setVisible(false);
+            settingsNovelPanel.setVisible(false);
 
             settingsLibraryPanel.setVisible(true);
         });
@@ -792,6 +793,7 @@ public class GUI extends JFrame {
             settingsLibraryPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
             settingsTelegramPanel.setVisible(false);
+            settingsNovelPanel.setVisible(false);
 
             settingsEmailPanel.setVisible(true);
         });
@@ -800,6 +802,7 @@ public class GUI extends JFrame {
             settingsLibraryPanel.setVisible(false);
             settingsSourcesPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
+            settingsNovelPanel.setVisible(false);
 
             settingsTelegramPanel.setVisible(true);
         });
@@ -808,8 +811,18 @@ public class GUI extends JFrame {
             settingsLibraryPanel.setVisible(false);
             settingsEmailPanel.setVisible(false);
             settingsTelegramPanel.setVisible(false);
+            settingsNovelPanel.setVisible(false);
 
             settingsSourcesPanel.setVisible(true);
+        });
+        settingsNovelBtn.addActionListener(actionEvent -> {
+            settingsGeneralPanel.setVisible(false);
+            settingsLibraryPanel.setVisible(false);
+            settingsEmailPanel.setVisible(false);
+            settingsTelegramPanel.setVisible(false);
+            settingsSourcesPanel.setVisible(false);
+
+            settingsNovelPanel.setVisible(true);
         });
 
         // Sources Panels
@@ -996,6 +1009,35 @@ public class GUI extends JFrame {
         });
         libraryDoNotDisplayCoversCheckBox.addActionListener(e -> {
             settings.setLibraryNoCovers(libraryDoNotDisplayCoversCheckBox.isSelected());
+            settings.save();
+        });
+
+        settingsChapterTitleComboBox.addActionListener(e -> {
+            if (settingsChapterTitleComboBox.getSelectedIndex() == chapterTitleFormatOptions.length-1) {
+                settingsNovelCustomChapterTitleField.setVisible(true);
+            } else {
+                settingsNovelCustomChapterTitleField.setVisible(false);
+            }
+        });
+
+        settingsNovelSaveBtn.addActionListener(actionEvent -> {
+            settings.setSaveLocation(settingsSavelocationField.getText());
+            settings.setUseStandardLocation(standardSaveLocationCheckBox.isSelected());
+            settings.setRemoveStyling(settingsAlwaysRemoveStylingCheckBox.isSelected());
+            settings.setAutoGetImages(settingsAlwaysGetImagesCheckBox.isSelected());
+            settings.setFilenameFormat(settingsNameOutputFormatComboBox.getSelectedIndex());
+            settings.setOutputFormat(settingsOutputFormatComboBox.getSelectedIndex());
+            settings.setSeparateChapters(settingsSeperateChaptersCheckBox.isSelected());
+            settings.setChapterTitleFormat(settingsChapterTitleComboBox.getSelectedIndex());
+            if (settingsChapterTitleComboBox.getSelectedIndex() == chapterTitleFormatOptions.length-1
+                    && !settingsNovelCustomChapterTitleField.getText().contains("%s")) {
+                showPopup("Custom chapter title template does not contain %s to insert chapter name", "warning");
+                settingsNovelCustomChapterTitleField.setText("%s");
+                settings.setChapterTitleTemplate("%s");
+            } else {
+                settings.setChapterTitleTemplate(settingsNovelCustomChapterTitleField.getText());
+            }
+
             settings.save();
         });
     }
@@ -1668,12 +1710,21 @@ public class GUI extends JFrame {
         libraryOnlyShowNovelsWithCheckBox.setSelected(settings.isLibraryShowOnlyUpdatable());
 
         // Settings Tab
+
+        // General settings
         settingsGeneralBtn = new JButton("General", new ImageIcon(getClass().getResource("/images/settings_icon.png")));
         settingsGeneralBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
         settingsGeneralBtn.setHorizontalTextPosition(SwingConstants.CENTER);
         settingsGeneralBtn.setBorder(BorderFactory.createEmptyBorder());
         settingsGeneralBtn.setContentAreaFilled(false);
         settingsGeneralBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        settingsNovelBtn = new JButton("Novel", new ImageIcon(getClass().getResource("/images/settings_icon.png")));
+        settingsNovelBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsNovelBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsNovelBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsNovelBtn.setContentAreaFilled(false);
+        settingsNovelBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         settingsEmailBtn = new JButton("Email", new ImageIcon(getClass().getResource("/images/email_icon.png")));
         settingsEmailBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -1696,6 +1747,13 @@ public class GUI extends JFrame {
         settingsLibraryBtn.setContentAreaFilled(false);
         settingsLibraryBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        settingsSourcesBtn = new JButton("Sources", new ImageIcon(getClass().getResource("/images/webpage_icon.png")));
+        settingsSourcesBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
+        settingsSourcesBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+        settingsSourcesBtn.setBorder(BorderFactory.createEmptyBorder());
+        settingsSourcesBtn.setContentAreaFilled(false);
+        settingsSourcesBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         settingsContributeBtn = new JButton("Contribute", new ImageIcon(getClass().getResource("/images/heart_icon.png")));
         settingsContributeBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
         settingsContributeBtn.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -1703,14 +1761,6 @@ public class GUI extends JFrame {
         settingsContributeBtn.setContentAreaFilled(false);
         settingsContributeBtn.setToolTipText("Buy the dev a coffee");
         settingsContributeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        settingsSourcesBtn = new JButton("Contribute", new ImageIcon(getClass().getResource("/images/webpage_icon.png")));
-        settingsSourcesBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
-        settingsSourcesBtn.setHorizontalTextPosition(SwingConstants.CENTER);
-        settingsSourcesBtn.setBorder(BorderFactory.createEmptyBorder());
-        settingsSourcesBtn.setContentAreaFilled(false);
-        settingsSourcesBtn.setToolTipText("Buy the dev a coffee");
-        settingsSourcesBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         settingsBrowserComboBox = new JComboBox(Driver.browserList);
         if(settings.getBrowser().isEmpty()) {
@@ -1728,6 +1778,18 @@ public class GUI extends JFrame {
         }
         settingsBrowserComboBox.setSelectedItem(settings.getBrowser());
 
+        settingsNotificationWhenFinishedCheckBox = new JCheckBox();
+        settingsNotificationWhenFinishedCheckBox.setSelected(settings.isShowNovelFinishedNotification());
+
+        settingsGuiThemeComboBox = new JComboBox(guiThemes);
+        settingsGuiThemeComboBox.setSelectedIndex(settings.getGuiTheme());
+
+        String[] installedFontFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+        settingsGuiFontComboBox = new JComboBox(installedFontFamilies);
+        int selectedFontIndex = Arrays.asList(installedFontFamilies).indexOf(settings.getFontName());
+        settingsGuiFontComboBox.setSelectedIndex(selectedFontIndex);
+
+        // Novel settings
         settingsAlwaysGetImagesCheckBox = new JCheckBox();
         settingsAlwaysGetImagesCheckBox.setSelected(settings.isAutoGetImages());
 
@@ -1738,7 +1800,7 @@ public class GUI extends JFrame {
         settingsSavelocationField.setVisible(false);
         settingsSavelocationField.setText(settings.getSaveLocation());
 
-        settingsBrowseSaveLocationBtn = new JButton(new ImageIcon(getClass().getResource("/images/folder_icon.png")));
+        settingsBrowseSaveLocationBtn = new JButton(new ImageIcon(getClass().getResource("/images/edit.png")));
         settingsBrowseSaveLocationBtn.setVisible(false);
         settingsBrowseSaveLocationBtn.setBorder(BorderFactory.createEmptyBorder());
         settingsBrowseSaveLocationBtn.setContentAreaFilled(false);
@@ -1767,16 +1829,16 @@ public class GUI extends JFrame {
             settingsSeperateChaptersCheckBox.setSelected(settings.isSeparateChapters());
         }
 
-        settingsNotificationWhenFinishedCheckBox = new JCheckBox();
-        settingsNotificationWhenFinishedCheckBox.setSelected(settings.isShowNovelFinishedNotification());
+        settingsChapterTitleComboBox = new JComboBox(chapterTitleFormatOptions);
+        if (settings.getChapterTitleFormat() > chapterTitleFormatOptions.length) {
+            GrabberUtils.err("[CONFIG]chapterTitleFormat is outside available range.");
+            settings.setChapterTitleFormat(0);
+        }
+        settingsChapterTitleComboBox.setSelectedIndex(settings.getChapterTitleFormat());
 
-        settingsGuiThemeComboBox = new JComboBox(guiThemes);
-        settingsGuiThemeComboBox.setSelectedIndex(settings.getGuiTheme());
-
-        String[] installedFontFamilies = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-        settingsGuiFontComboBox = new JComboBox(installedFontFamilies);
-        int selectedFontIndex = Arrays.asList(installedFontFamilies).indexOf(settings.getFontName());
-        settingsGuiFontComboBox.setSelectedIndex(selectedFontIndex);
+        settingsNovelCustomChapterTitleField = new JTextField(settings.getChapterTitleTemplate());
+        boolean isCustomChapterTitle = settings.getChapterTitleFormat() == chapterTitleFormatOptions.length-1;
+        settingsNovelCustomChapterTitleField.setVisible(isCustomChapterTitle);
 
         // Telegram settings
         settingsTeleApiTknField = new JTextField(settings.getTelegramApiToken());
@@ -1810,19 +1872,19 @@ public class GUI extends JFrame {
         emailPortField = new JTextField(String.valueOf(settings.getPort()));
 
         emailSLLComboBox = new JComboBox(sslList);
-        int selectedIndex = 0;
+        int emailSslIndex = 0;
         switch(settings.getSsl()) {
             case "SMTP":
-                selectedIndex = 0;
+                emailSslIndex = 0;
                 break;
             case "SMTPS":
-                selectedIndex = 1;
+                emailSslIndex = 1;
                 break;
             case "SMTP_TLS":
-                selectedIndex = 2;
+                emailSslIndex = 2;
                 break;
         }
-        emailSLLComboBox.setSelectedIndex(selectedIndex);
+        emailSLLComboBox.setSelectedIndex(emailSslIndex);
 
         // Library settings
         enableCheckingCheckBox = new JCheckBox();

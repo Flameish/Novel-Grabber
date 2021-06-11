@@ -22,6 +22,7 @@ public class Config {
     private String ssl = "SMTP";
     private String telegramApiToken = "";
     private String fontName = "DejaVu Sans";
+    private String chapterTitleTemplate = "%s";
     private int telegramWait = 0;
     private int telegramNovelMaxChapter = -1;
     private int telegramMaxChapterPerDay = -1;
@@ -31,6 +32,7 @@ public class Config {
     private int frequency = 20;
     private int telegramDownloadLimit = 1;
     private int guiTheme = 0;
+    private int chapterTitleFormat = 0;
     private boolean autoGetImages = false;
     private boolean removeStyling = false;
     private boolean useStandardLocation = false;
@@ -62,6 +64,8 @@ public class Config {
             // General
             setGuiTheme(Integer.parseInt(prop.getProperty("guiTheme", String.valueOf(guiTheme))));
             setFontName(prop.getProperty("fontName", fontName));
+            setChapterTitleFormat(Integer.parseInt(prop.getProperty("chapterTitleFormat", String.valueOf(chapterTitleFormat))));
+            setChapterTitleTemplate(prop.getProperty("chapterTitleTemplate", chapterTitleTemplate));
             // Email
             setUsername(prop.getProperty("username", username));
             setPassword(prop.getProperty("password", password));
@@ -107,6 +111,8 @@ public class Config {
             // General
             prop.setProperty("guiTheme", String.valueOf(getGuiTheme()));
             prop.setProperty("fontName", getFontName());
+            prop.setProperty("chapterTitleFormat", String.valueOf(getChapterTitleFormat()));
+            prop.setProperty("chapterTitleTemplate", getChapterTitleTemplate());
             // Email
             prop.setProperty("username", getUsername());
             prop.setProperty("password", getPassword());
@@ -294,6 +300,25 @@ public class Config {
 
     public void setLibraryShowOnlyUpdatable(boolean libraryShowOnlyUpdatable) {
         this.libraryShowOnlyUpdatable = libraryShowOnlyUpdatable;
+    }
+
+    public String getChapterTitleTemplate() {
+        return chapterTitleTemplate;
+    }
+
+    public void setChapterTitleTemplate(String chapterTitleTemplate) {
+        if (chapterTitleTemplate.isEmpty()) chapterTitleTemplate = "%s";
+        if (!chapterTitleTemplate.contains("%s")) chapterTitleTemplate = "%s";
+        this.chapterTitleTemplate = chapterTitleTemplate;
+    }
+
+    public int getChapterTitleFormat() {
+        if (chapterTitleFormat < 0) chapterTitleFormat = 0;
+        return chapterTitleFormat;
+    }
+
+    public void setChapterTitleFormat(int chapterTitleFormat) {
+        this.chapterTitleFormat = chapterTitleFormat;
     }
 
     public boolean isShowNovelFinishedNotification() {
