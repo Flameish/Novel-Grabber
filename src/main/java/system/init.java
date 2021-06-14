@@ -131,8 +131,7 @@ public class init {
                 "  [-displayTitle]\t\t\t\tWrite the chapter title at the top of each chapter text.\n" +
                 "  [-invertOrder]\t\t\t\tInvert the chapter order.\n" +
                 "  [-noDesc]\t\t\t\t\tDon't create a description page.\n" +
-                "  [-autoGetImages]\t\t\t\t\tGrab images from chapter.\n" +
-                "  [-removeStyle]\t\t\t\tRemove css styling from chapter.\n" +
+                "  [-getImages]\t\t\t\t\tGrab images from chapter.\n" +
                 "  \n" +
                 "Examples:\n" +
                 "java -jar Novel-Grabber.jar -link https://myhost.com/novel/a-novel\n" +

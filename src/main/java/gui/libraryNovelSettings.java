@@ -44,7 +44,6 @@ public class libraryNovelSettings extends JDialog {
     private JTextField waitTimeField;
     private JCheckBox getImagesCheckBox;
     private JCheckBox displayChapterTitleCheckBox;
-    private JCheckBox removeStylingCheckBox;
 
     public libraryNovelSettings(LibraryNovel libraryNovel) {
         this.libraryNovel = libraryNovel;
@@ -147,7 +146,6 @@ public class libraryNovelSettings extends JDialog {
         libraryNovel.setWaitTime(Integer.valueOf(waitTimeField.getText()));
         libraryNovel.setGetImages(getImagesCheckBox.isSelected());
         libraryNovel.setDisplayChapterTitle(displayChapterTitleCheckBox.isSelected());
-        libraryNovel.setRemoveStyling(removeStylingCheckBox.isSelected());
         Library.getInstance().writeLibraryFile();
         dispose();
         init.gui.buildLibrary();
@@ -184,9 +182,6 @@ public class libraryNovelSettings extends JDialog {
 
         getImagesCheckBox = new JCheckBox();
         getImagesCheckBox.setSelected(libraryNovel.isGetImages());
-
-        removeStylingCheckBox = new JCheckBox();
-        removeStylingCheckBox.setSelected(libraryNovel.isRemoveStyling());
 
         displayChapterTitleCheckBox = new JCheckBox();
         displayChapterTitleCheckBox.setSelected(libraryNovel.isDisplayChapterTitle());
@@ -300,9 +295,6 @@ public class libraryNovelSettings extends JDialog {
         panel5.add(getImagesCheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         displayChapterTitleCheckBox.setText("Add chapter title");
         panel5.add(displayChapterTitleCheckBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        removeStylingCheckBox.setText("Remove styling");
-        removeStylingCheckBox.setToolTipText("Removes style attribute from all elements");
-        panel5.add(removeStylingCheckBox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         useLoginCheckBox.setText("Use account");
         panel5.add(useLoginCheckBox, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 1, false));
         final JPanel panel6 = new JPanel();

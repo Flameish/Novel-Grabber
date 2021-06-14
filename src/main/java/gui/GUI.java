@@ -141,8 +141,6 @@ public class GUI extends JFrame {
     public JTextField autoChapterToChapterNumberField;
     public JCheckBox manUseHeaderlessBrowser;
     public JComboBox manBrowserCombobox;
-    public JCheckBox autoRemoveStyling;
-    public JCheckBox manNoStyling;
     private JButton manAddChapterButton;
     private JList accountWebsiteList;
     private JTextField accountUsernameField;
@@ -157,7 +155,6 @@ public class GUI extends JFrame {
     private JComboBox settingsNameOutputFormatComboBox;
     private JPanel settingsGeneralPanel;
     private JCheckBox settingsAlwaysGetImagesCheckBox;
-    private JCheckBox settingsAlwaysRemoveStylingCheckBox;
     private JTextField settingsSavelocationField;
     private JButton settingsBrowseSaveLocationBtn;
     private JCheckBox standardSaveLocationCheckBox;
@@ -344,7 +341,6 @@ public class GUI extends JFrame {
                         .saveLocation(autoSaveLocation.getText())
                         .waitTime(Integer.parseInt(waitTime.getText()))
                         .displayChapterTitle(displayChapterTitleCheckBox.isSelected())
-                        .removeStyling(autoRemoveStyling.isSelected())
                         .getImages(autoGetImages.isSelected())
                         .browser(settings.getBrowser())
                         .useAccount(useAccountCheckBox.isSelected())
@@ -489,7 +485,6 @@ public class GUI extends JFrame {
                                 .window("manual")
                                 .useHeadless(manUseHeaderlessBrowser.isSelected())
                                 .browser(settings.getBrowser())
-                                .removeStyling(manNoStyling.isSelected())
                                 .displayChapterTitle(manDispalyChapterTitleCheckbox.isSelected())
                                 .waitTime(Integer.parseInt(manWaitTime.getText()))
                                 .getImages(manGetImages.isSelected())
@@ -543,7 +538,6 @@ public class GUI extends JFrame {
                         manNovel = Novel.modifier(manNovel)
                                 .useHeadless(manUseHeaderlessBrowser.isSelected())
                                 .browser(settings.getBrowser())
-                                .removeStyling(manNoStyling.isSelected())
                                 .displayChapterTitle(manDispalyChapterTitleCheckbox.isSelected())
                                 .waitTime(Integer.parseInt(manWaitTime.getText()))
                                 .getImages(manGetImages.isSelected())
@@ -1023,7 +1017,6 @@ public class GUI extends JFrame {
         settingsNovelSaveBtn.addActionListener(actionEvent -> {
             settings.setSaveLocation(settingsSavelocationField.getText());
             settings.setUseStandardLocation(standardSaveLocationCheckBox.isSelected());
-            settings.setRemoveStyling(settingsAlwaysRemoveStylingCheckBox.isSelected());
             settings.setAutoGetImages(settingsAlwaysGetImagesCheckBox.isSelected());
             settings.setFilenameFormat(settingsNameOutputFormatComboBox.getSelectedIndex());
             settings.setOutputFormat(settingsOutputFormatComboBox.getSelectedIndex());
@@ -1197,7 +1190,6 @@ public class GUI extends JFrame {
                                 .getImages(libNovel.isGetImages())
                                 .displayChapterTitle(libNovel.isDisplayChapterTitle())
                                 .waitTime(libNovel.getWaitTime())
-                                .removeStyling(libNovel.isRemoveStyling())
                                 .window("checker")
                                 .build();
                         novel.check();
@@ -1541,9 +1533,6 @@ public class GUI extends JFrame {
         autoGetImages = new JCheckBox();
         autoGetImages.setSelected(settings.isAutoGetImages());
 
-        autoRemoveStyling = new JCheckBox();
-        autoRemoveStyling.setSelected(settings.isRemoveStyling());
-
         autoSaveLocation = new JTextField();
 
         autoChapterToChapterNumberField = new JTextField("Number");
@@ -1793,9 +1782,6 @@ public class GUI extends JFrame {
         settingsAlwaysGetImagesCheckBox = new JCheckBox();
         settingsAlwaysGetImagesCheckBox.setSelected(settings.isAutoGetImages());
 
-        settingsAlwaysRemoveStylingCheckBox = new JCheckBox();
-        settingsAlwaysRemoveStylingCheckBox.setSelected(settings.isRemoveStyling());
-
         settingsSavelocationField = new JTextField();
         settingsSavelocationField.setVisible(false);
         settingsSavelocationField.setText(settings.getSaveLocation());
@@ -2011,9 +1997,6 @@ public class GUI extends JFrame {
         displayChapterTitleCheckBox = new JCheckBox();
         displayChapterTitleCheckBox.setText("Add chapter title");
         panel3.add(displayChapterTitleCheckBox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        autoRemoveStyling.setText("Remove styling");
-        autoRemoveStyling.setToolTipText("Removes style attribute from all elements");
-        panel3.add(autoRemoveStyling, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         useAccountCheckBox = new JCheckBox();
         useAccountCheckBox.setText("Use account");
         panel3.add(useAccountCheckBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -2246,10 +2229,6 @@ public class GUI extends JFrame {
         manDispalyChapterTitleCheckbox = new JCheckBox();
         manDispalyChapterTitleCheckbox.setText("Display chapter title");
         panel17.add(manDispalyChapterTitleCheckbox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        manNoStyling = new JCheckBox();
-        manNoStyling.setText("Remove styling");
-        manNoStyling.setToolTipText("Removes style attribute from all elements");
-        panel17.add(manNoStyling, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel18 = new JPanel();
         panel18.setLayout(new GridLayoutManager(2, 6, new Insets(0, 0, 0, 0), -1, -1));
         panel16.add(panel18, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -2418,9 +2397,6 @@ public class GUI extends JFrame {
         settingsAlwaysGetImagesCheckBox.setText("Always get images");
         settingsAlwaysGetImagesCheckBox.setToolTipText("Download potential images from a chapter");
         settingsGeneralPanel.add(settingsAlwaysGetImagesCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 28), null, 0, false));
-        settingsAlwaysRemoveStylingCheckBox.setText("Always remove styling");
-        settingsAlwaysRemoveStylingCheckBox.setToolTipText("Removes style attribute from all elements");
-        settingsGeneralPanel.add(settingsAlwaysRemoveStylingCheckBox, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 28), null, 0, false));
         final JPanel panel24 = new JPanel();
         panel24.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         settingsGeneralPanel.add(panel24, new GridConstraints(8, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));

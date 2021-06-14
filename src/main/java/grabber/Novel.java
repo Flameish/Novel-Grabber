@@ -26,7 +26,6 @@ public class Novel {
     public DownloadTask downloadTask;
     public boolean killTask;
     public boolean reGrab = false;
-    public boolean removeStyling = false;
     public boolean getImages = false;
     public boolean displayChapterTitle = false;
     public boolean noDescription = false;
@@ -46,8 +45,6 @@ public class Novel {
     public String nextChapterBtn = "NOT_SET";
     public String nextChapterURL;
     public String filename;
-    public long telegramChatId;
-    public int telegramProgressMsgId;
 
     /**
      * Main novel download handling object.

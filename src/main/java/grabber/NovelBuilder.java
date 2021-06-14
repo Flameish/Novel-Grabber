@@ -81,9 +81,6 @@ public class NovelBuilder {
         if(params.containsKey("window")) {
             novel.window =  params.get("window").get(0);
         }
-        if(params.containsKey("removeStyle")) {
-            novel.removeStyling =  true;
-        }
         if(params.containsKey("noDesc")) {
             novel.noDescription =  true;
         }
@@ -110,10 +107,6 @@ public class NovelBuilder {
     }
     public NovelBuilder browser(String browser) {
         novel.browser = browser;
-        return this;
-    }
-    public NovelBuilder removeStyling(boolean removeStyling) {
-        novel.removeStyling = removeStyling;
         return this;
     }
     public NovelBuilder getImages(boolean getImages) {

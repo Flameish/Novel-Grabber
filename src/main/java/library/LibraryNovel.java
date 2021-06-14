@@ -42,7 +42,6 @@ public class LibraryNovel extends Novel {
         useAccount = (boolean) libNovel.getOrDefault("useAccount", isUseAccount());
         getImages = (boolean) libNovel.getOrDefault("getImages", isGetImages());
         displayChapterTitle = (boolean) libNovel.getOrDefault("displayChapterTitle", isDisplayChapterTitle());
-        removeStyling = (boolean) libNovel.getOrDefault("removeStyling", isRemoveStyling());
         checkingActive = (boolean) libNovel.getOrDefault("checkingActive", isCheckingActive());
         waitTime = (((Long) libNovel.getOrDefault("threshold", 0)).intValue());
         lastChapterNumber = (((Long) libNovel.get("lastChapter")).intValue());
@@ -77,7 +76,6 @@ public class LibraryNovel extends Novel {
         libraryNovel.put("useAccount", isUseAccount());
         libraryNovel.put("getImages", isGetImages());
         libraryNovel.put("displayChapterTitle", isDisplayChapterTitle());
-        libraryNovel.put("removeStyling", isRemoveStyling());
         libraryNovel.put("waitTime", getWaitTime());
         return libraryNovel;
     }
@@ -219,14 +217,6 @@ public class LibraryNovel extends Novel {
 
     public void setGetImages(boolean getImages) {
         this.getImages = getImages;
-    }
-
-    public boolean isRemoveStyling() {
-        return removeStyling;
-    }
-
-    public void setRemoveStyling(boolean removeStyling) {
-        this.removeStyling = removeStyling;
     }
 
     public int getWaitTime() {

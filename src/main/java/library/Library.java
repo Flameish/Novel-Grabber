@@ -140,7 +140,6 @@ public class Library {
         libNovel.setUpdateLast(true);
         libNovel.setCheckingActive(true);
         libNovel.setUseAccount(novel.useAccount);
-        libNovel.setRemoveStyling(novel.removeStyling);
         libNovel.setDisplayChapterTitle(novel.displayChapterTitle);
         libNovel.setWaitTime(novel.waitTime);
         libNovel.setGetImages(novel.getImages);
@@ -194,7 +193,6 @@ public class Library {
                         .getImages(libNovel.isGetImages())
                         .displayChapterTitle(libNovel.isDisplayChapterTitle())
                         .waitTime(libNovel.getWaitTime())
-                        .removeStyling(libNovel.isRemoveStyling())
                         .window("checker")
                         .build();
             } catch (ClassNotFoundException e) {

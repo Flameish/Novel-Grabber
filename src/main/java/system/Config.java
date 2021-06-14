@@ -34,7 +34,6 @@ public class Config {
     private int guiTheme = 0;
     private int chapterTitleFormat = 0;
     private boolean autoGetImages = false;
-    private boolean removeStyling = false;
     private boolean useStandardLocation = false;
     private boolean pollingEnabled = true;
     private boolean separateChapters = false;
@@ -79,7 +78,6 @@ public class Config {
             setOutputFormat(Integer.parseInt(prop.getProperty("outputFormat", String.valueOf(outputFormat))));
             setAutoGetImages(Boolean.parseBoolean(prop.getProperty("autoGetImages", String.valueOf(autoGetImages))));
             setSaveLocation(prop.getProperty("saveLocation", saveLocation));
-            setRemoveStyling(Boolean.parseBoolean(prop.getProperty("removeStyling", String.valueOf(removeStyling))));
             setUseStandardLocation(Boolean.parseBoolean(prop.getProperty("useStandardLocation", String.valueOf(useStandardLocation))));
             setHeadlessList(new ArrayList<>(Arrays.asList(prop.getProperty("headlessList", "").split(","))));
             setSeparateChapters(Boolean.parseBoolean(prop.getProperty("separateChapters", String.valueOf(separateChapters))));
@@ -126,7 +124,6 @@ public class Config {
             prop.setProperty("outputFormat", String.valueOf(getOutputFormat()));
             prop.setProperty("autoGetImages", String.valueOf(isAutoGetImages()));
             prop.setProperty("saveLocation", getSaveLocation());
-            prop.setProperty("removeStyling", String.valueOf(isRemoveStyling()));
             prop.setProperty("useStandardLocation", String.valueOf(isUseStandardLocation()));
             prop.setProperty("headlessList", String.join(",", headlessList));
             prop.setProperty("separateChapters", String.valueOf(isSeparateChapters()));
@@ -172,9 +169,7 @@ public class Config {
     public boolean isAutoGetImages() {
         return autoGetImages;
     }
-    public boolean isRemoveStyling() {
-        return removeStyling;
-    }
+
     public boolean isUseStandardLocation() {
         return useStandardLocation;
     }
@@ -235,9 +230,7 @@ public class Config {
     public void setAutoGetImages(boolean autoGetImages) {
         this.autoGetImages = autoGetImages;
     }
-    public void setRemoveStyling(boolean removeStyling) {
-        this.removeStyling = removeStyling;
-    }
+
     public void setUseStandardLocation(boolean useStandardLocation) {
         this.useStandardLocation = useStandardLocation;
     }

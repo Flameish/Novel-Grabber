@@ -53,15 +53,18 @@ public class Chapter implements Serializable {
             chapterContainer.select("img").remove();
         }
 
+        if(novel.displayChapterTitle) addTitle();
+        cleanHTMLContent();
+        // Update word count on GUI
         novel.wordCount = novel.wordCount + GrabberUtils.getWordCount(chapterContainer.toString());
         GrabberUtils.info(novel.window,  "Saved chapter: "+ name);
         if(init.gui != null) {
             init.gui.updatePageCount(novel.window, novel.wordCount);
         }
 
-        chapterContent = cleanContent(chapterContainer, novel.displayChapterTitle, novel.removeStyling);
         chapterContainer = null;
         status = 1; // Chapter was successfully downloaded
+
     }
 
     /**
@@ -72,7 +75,6 @@ public class Chapter implements Serializable {
         for (String tag : blacklistedTags) {
             chapterContainer.select(tag).remove();
         }
-
         // Remove empty block elements
         for (Element element : chapterContainer.select("*:not(:has(img))")) {
             if (!element.hasText() && element.isBlock()) {
@@ -86,9 +88,8 @@ public class Chapter implements Serializable {
         }
     }
 
-
     /**
-     * Saves images with filenames in HashMap
+     * Saves images with filenames in HashMap and points img src to local file
      */
     private void getImages(String window, HashMap<String, BufferedImage> images) {
         for (Element image : chapterContainer.select("img")) {
@@ -117,47 +118,36 @@ public class Chapter implements Serializable {
     }
 
     /**
-     * Cleans HTML tags and adds chapter title optionally
+     * Cleans chapter HTML to
      */
-    private String cleanContent(Element chapterContainer, boolean displayChapterTitle, boolean removeStyling) {
-        String chapterString = "";
-
-        // Insert chapter title
-        if(displayChapterTitle) {
-            Config config = Config.getInstance();
-            switch (config.getChapterTitleFormat()) {
-                case 1:
-                    chapterString = "<h1>" + name + "</h1>\n";
-                    break;
-                case 2: // Custom
-                    chapterString = String.format(config.getChapterTitleTemplate() + "\n", name);
-                    break;
-                default:
-                    chapterString = "<span><b><u>" + name + "</u></b></span>\n";
-            }
-        }
-        chapterString += chapterContainer.toString();
-
+    private void cleanHTMLContent() {
         Document.OutputSettings settings = new Document.OutputSettings();
         settings.syntax(Document.OutputSettings.Syntax.xml);
         settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
         settings.charset("UTF-8");
+        chapterContent = Jsoup.clean(chapterContainer.toString(),
+                "http://"+GrabberUtils.getDomainName(chapterURL),
+                Whitelist.relaxed().preserveRelativeLinks(true),
+                settings);
+    }
 
-        if (removeStyling) {
-            chapterString = Jsoup.clean(
-                    chapterString,
-                    "http://"+GrabberUtils.getDomainName(chapterURL),
-                    Whitelist.simpleText().preserveRelativeLinks(true),
-                    settings);
-        } else {
-            chapterString = Jsoup.clean(
-                    chapterString,
-                    "http://"+GrabberUtils.getDomainName(chapterURL),
-                    Whitelist.relaxed().preserveRelativeLinks(true),
-                    settings);
+    /**
+     * Adds the chapter title on top of chapter body according to format setting
+     */
+    private void addTitle() {
+        Config config = Config.getInstance();
+        String chapterTitle;
+        switch (config.getChapterTitleFormat()) {
+            case 1:
+                chapterTitle = "<h1>" + name + "</h1>\n";
+                break;
+            case 2: // Custom
+                chapterTitle = String.format(config.getChapterTitleTemplate() + "\n", name);
+                break;
+            default:
+                chapterTitle = "<span><b><u>" + name + "</u></b></span>\n";
         }
-
-        return chapterString;
+        chapterContainer.child(0).before(chapterTitle);
     }
 
     @Override

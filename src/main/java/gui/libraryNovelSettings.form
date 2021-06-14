@@ -148,15 +148,6 @@
                       <text value="Add chapter title"/>
                     </properties>
                   </component>
-                  <component id="754d4" class="javax.swing.JCheckBox" binding="removeStylingCheckBox" custom-create="true">
-                    <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <text value="Remove styling"/>
-                      <toolTipText value="Removes style attribute from all elements"/>
-                    </properties>
-                  </component>
                   <component id="dbcf8" class="javax.swing.JCheckBox" binding="useLoginCheckBox" custom-create="true" default-binding="true">
                     <constraints>
                       <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
@@ -165,10 +156,10 @@
                       <text value="Use account"/>
                     </properties>
                   </component>
-                  <grid id="3539f" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="3539f" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
-                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties/>
                     <border type="none"/>
@@ -191,6 +182,11 @@
                           <toolTipText value="Wait time between each chapter call in milliseconds. Please use appropriate wait times to not flood the host server."/>
                         </properties>
                       </component>
+                      <hspacer id="8ca3e">
+                        <constraints>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </hspacer>
                     </children>
                   </grid>
                 </children>
