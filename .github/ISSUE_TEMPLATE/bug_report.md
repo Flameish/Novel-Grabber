@@ -8,20 +8,10 @@ assignees: ''
 ---
 
 <!--- General summary above as Title -->
+<!--- Please delete sections you are not going to use, this makes the issue look much cleaner -->
 
 **Describe the bug**
 <!--- A clear and concise description of what the bug is -->
-
-
-**Steps to reproduce**
-<!--- Steps to reproduce the behavior -->
-1. 
-2. 
-3. 
-4. 
-
-**Expected behavior**
-<!--- A clear and concise description of what you expected to happen -->
 
 
 **Screenshots**
@@ -33,8 +23,7 @@ assignees: ''
 
 
 **Logs**
-<!--- If you're using the desktop version, please start Novel-Grabber.jar (inside the bin folder) from a terminal and post the console log. 
-(Windows: Shift-right click somewhere inside the folder -> Open Power Shell here -> java -jar Novel-Grabber.jar)  -->
+<!--- please post the relevant log file/part of Novel-Grabber.jar (inside the bin folder)  -->
 
 
 **Additional context**

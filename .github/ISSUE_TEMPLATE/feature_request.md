@@ -7,7 +7,8 @@ assignees: ''
 
 ---
 
-<!--- General summary above as Title -->
+<!--- General summary above as title -->
+<!--- Please delete sections you are not going to use, this makes the issue look much cleaner -->
 
 **Is your feature request related to a problem? Please describe.**
 <!--- A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] -->
