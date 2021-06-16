@@ -72,7 +72,7 @@ public class secondlifetranslations_com implements Source {
                     .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
-            chapterBody = doc.selectFirst("#wtr-content");
+            chapterBody = doc.selectFirst(".entry-content");
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
@@ -107,6 +107,7 @@ public class secondlifetranslations_com implements Source {
     public List<String> getBlacklistedTags() {
         List blacklistedTags = new ArrayList();
         blacklistedTags.add(".code-block");
+        blacklistedTags.add(".sharedaddy");
         return blacklistedTags;
     }
 
