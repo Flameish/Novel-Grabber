@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class a_t_nu implements Source {
-    private final String name = "Very Active Fan Translations";
+    private final String name = "Active Translations";
     private final String url = "https://a-t.nu/";
     private final boolean canHeadless = false;
     private Novel novel;
