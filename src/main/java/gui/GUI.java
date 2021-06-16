@@ -1708,7 +1708,7 @@ public class GUI extends JFrame {
         settingsGeneralBtn.setContentAreaFilled(false);
         settingsGeneralBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        settingsNovelBtn = new JButton("Novel", new ImageIcon(getClass().getResource("/images/settings_icon.png")));
+        settingsNovelBtn = new JButton("Novel", new ImageIcon(getClass().getResource("/images/edit.png")));
         settingsNovelBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
         settingsNovelBtn.setHorizontalTextPosition(SwingConstants.CENTER);
         settingsNovelBtn.setBorder(BorderFactory.createEmptyBorder());
