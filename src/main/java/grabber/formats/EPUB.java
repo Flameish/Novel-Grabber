@@ -76,6 +76,7 @@ public class EPUB {
         addChapters();
 
         String epubFilename = setFilename();
+        epubFilename += ".epub";
         GrabberUtils.createDir(novel.saveLocation);
 
         try {
@@ -129,16 +130,24 @@ public class EPUB {
     }
 
     private String setFilename() {
-        String epubFilename = "Unknown.epub";
+        String epubFilename = "Unknown";
         switch (Config.getInstance().getFilenameFormat()) {
             case 0:
-                epubFilename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle() + ".epub";
+                epubFilename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle();
                 break;
             case 1:
-                epubFilename = novelMetadata.getTitle() + " - " + novelMetadata.getAuthor() + ".epub";
+                epubFilename = novelMetadata.getTitle() + " - " + novelMetadata.getAuthor();
                 break;
             case 2:
-                epubFilename = novelMetadata.getTitle() + ".epub";
+                epubFilename = novelMetadata.getTitle();
+                break;
+            case 3:
+                String template = Config.getInstance().getNovelFileNameTemplate();
+                epubFilename = template
+                        .replace("%t",novelMetadata.getTitle())
+                        .replace("%a", novelMetadata.getAuthor())
+                        .replace("%fc", String.valueOf(novel.firstChapter))
+                        .replace("%lc", String.valueOf(novel.lastChapter));
                 break;
         }
         return epubFilename.replaceAll("[\\\\/:*?\"<>|]", "");

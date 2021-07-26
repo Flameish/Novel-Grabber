@@ -44,7 +44,7 @@ public class GUI extends JFrame {
     private Driver guiDriver;
     public static TrayIcon trayIcon;
     public static Integer chapterToChapterNumber = 1;
-    private static String[] epubFilenameFormats = {"<author> - <title>", "<title> - <author>", "<title>"};
+    private static String[] epubFilenameFormats = {"<author> - <title>", "<title> - <author>", "<title>", "custom"};
     private static String[] epubFormats = {"EPUB", "txt", "PDF"};
     private static String[] sslList = {"SMTP","SMTPS","SMTP TLS"};
     private static String[] chapterTitleFormatOptions = {"span","h1","custom"};
@@ -240,6 +240,7 @@ public class GUI extends JFrame {
     private JComboBox settingsChapterTitleComboBox;
     private JButton settingsNovelSaveBtn;
     private JTextField settingsNovelCustomChapterTitleField;
+    private JTextField settingsNovelCustomFileNameField;
     private JButton manEditChapterOrder;
     public JTextArea autoBookDescArea;
     private JScrollPane autoBookDescScrollPane;
@@ -1014,6 +1015,14 @@ public class GUI extends JFrame {
             }
         });
 
+        settingsNameOutputFormatComboBox.addActionListener(e -> {
+            if (settingsNameOutputFormatComboBox.getSelectedIndex() == epubFilenameFormats.length-1) {
+                settingsNovelCustomFileNameField.setVisible(true);
+            } else {
+                settingsNovelCustomFileNameField.setVisible(false);
+            }
+        });
+
         settingsNovelSaveBtn.addActionListener(actionEvent -> {
             settings.setSaveLocation(settingsSavelocationField.getText());
             settings.setUseStandardLocation(standardSaveLocationCheckBox.isSelected());
@@ -1029,6 +1038,14 @@ public class GUI extends JFrame {
                 settings.setChapterTitleTemplate("%s");
             } else {
                 settings.setChapterTitleTemplate(settingsNovelCustomChapterTitleField.getText());
+            }
+            if (settingsNameOutputFormatComboBox.getSelectedIndex() == epubFilenameFormats.length-1
+                    && settingsNovelCustomFileNameField.getText().isEmpty()) {
+                showPopup("Custom file name template can't be empty!", "warning");
+                settingsNovelCustomFileNameField.setText("%a - %t");
+                settings.setNovelFileNameTemplate("%a - %t");
+            } else {
+                settings.setNovelFileNameTemplate(settingsNovelCustomFileNameField.getText());
             }
 
             settings.save();
@@ -1805,6 +1822,10 @@ public class GUI extends JFrame {
 
         settingsNameOutputFormatComboBox = new JComboBox(epubFilenameFormats);
         settingsNameOutputFormatComboBox.setSelectedIndex(settings.getFilenameFormat());
+
+        settingsNovelCustomFileNameField = new JTextField(settings.getNovelFileNameTemplate());
+        boolean isCustomNovelFile = settings.getFilenameFormat() == epubFilenameFormats.length-1;
+        settingsNovelCustomFileNameField.setVisible(isCustomNovelFile);
 
         settingsOutputFormatComboBox = new JComboBox(epubFormats);
         settingsOutputFormatComboBox.setSelectedIndex(settings.getOutputFormat());
@@ -2584,7 +2605,7 @@ public class GUI extends JFrame {
         settingsTeleImagesAllowedCheckBox.setText("Images allowed");
         settingsTelegramPanel.add(settingsTeleImagesAllowedCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         settingsNovelPanel = new JPanel();
-        settingsNovelPanel.setLayout(new GridLayoutManager(7, 6, new Insets(15, 15, 15, 15), -1, -1));
+        settingsNovelPanel.setLayout(new GridLayoutManager(7, 7, new Insets(15, 15, 15, 15), -1, -1));
         settingsNovelPanel.setVisible(false);
         panel22.add(settingsNovelPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         settingsNovelPanel.setBorder(BorderFactory.createTitledBorder(null, "Novel settings", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
@@ -2592,13 +2613,12 @@ public class GUI extends JFrame {
         label30.setText("Filename format");
         settingsNovelPanel.add(label30, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 28), null, 0, false));
         final Spacer spacer40 = new Spacer();
-        settingsNovelPanel.add(spacer40, new GridConstraints(0, 4, 5, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        settingsNovelPanel.add(spacer40, new GridConstraints(0, 5, 5, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer41 = new Spacer();
         settingsNovelPanel.add(spacer41, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        settingsNovelPanel.add(settingsNameOutputFormatComboBox, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         standardSaveLocationCheckBox.setText("Use default save location");
         settingsNovelPanel.add(standardSaveLocationCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 28), null, 0, false));
-        settingsNovelPanel.add(settingsSavelocationField, new GridConstraints(3, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(250, -1), null, 0, false));
+        settingsNovelPanel.add(settingsSavelocationField, new GridConstraints(3, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(250, -1), null, 0, false));
         settingsAlwaysGetImagesCheckBox.setText("Always get images");
         settingsAlwaysGetImagesCheckBox.setToolTipText("Download potential images from a chapter");
         settingsNovelPanel.add(settingsAlwaysGetImagesCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 28), null, 0, false));
@@ -2608,7 +2628,7 @@ public class GUI extends JFrame {
         settingsNovelPanel.add(label31, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel30 = new JPanel();
         panel30.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        settingsNovelPanel.add(panel30, new GridConstraints(5, 0, 1, 6, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        settingsNovelPanel.add(panel30, new GridConstraints(5, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         settingsNovelSaveBtn = new JButton();
         settingsNovelSaveBtn.setText("Save");
         panel30.add(settingsNovelSaveBtn, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -2620,17 +2640,23 @@ public class GUI extends JFrame {
         settingsNovelPanel.add(settingsOutputFormatComboBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel31 = new JPanel();
         panel31.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        settingsNovelPanel.add(panel31, new GridConstraints(2, 1, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        settingsNovelPanel.add(panel31, new GridConstraints(2, 1, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         settingsChapterTitleComboBox.setToolTipText("Change the format of chapter titles ");
         panel31.add(settingsChapterTitleComboBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         settingsNovelCustomChapterTitleField.setToolTipText("Enter HTML string with %s being the chapter title to replace");
         panel31.add(settingsNovelCustomChapterTitleField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         settingsBrowseSaveLocationBtn.setText("");
         settingsBrowseSaveLocationBtn.setToolTipText("Browse files");
-        settingsNovelPanel.add(settingsBrowseSaveLocationBtn, new GridConstraints(3, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, 1, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        settingsNovelPanel.add(settingsBrowseSaveLocationBtn, new GridConstraints(3, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, 1, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         settingsSeperateChaptersCheckBox.setText("Seperate chapters");
         settingsSeperateChaptersCheckBox.setVisible(false);
-        settingsNovelPanel.add(settingsSeperateChaptersCheckBox, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        settingsNovelPanel.add(settingsSeperateChaptersCheckBox, new GridConstraints(1, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel32 = new JPanel();
+        panel32.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        settingsNovelPanel.add(panel32, new GridConstraints(0, 1, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel32.add(settingsNameOutputFormatComboBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        settingsNovelCustomFileNameField.setToolTipText("Enter a filename template where %t stands for the title, %a for author and %fc %lc  for first chapter and last chapter numbers.");
+        panel32.add(settingsNovelCustomFileNameField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
     }
 
     /**

@@ -67,20 +67,25 @@ public class Text {
         switch (Config.getInstance().getFilenameFormat()) {
             case 0:
                 filename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle();
-                if(novel.window.equals("checker")) filename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+filename.replaceAll(" ","-");
                 break;
             case 1:
                 filename = novelMetadata.getTitle() + " - " + novelMetadata.getAuthor();
-                if(novel.window.equals("checker")) filename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+filename.replaceAll(" ","-");
                 break;
             case 2:
                 filename = novelMetadata.getTitle();
-                if(novel.window.equals("checker")) filename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+filename.replaceAll(" ","-");
+                break;
+            case 3:
+                String template = Config.getInstance().getNovelFileNameTemplate();
+                filename = template
+                        .replace("%t",novelMetadata.getTitle())
+                        .replace("%a", novelMetadata.getAuthor())
+                        .replace("%fc", String.valueOf(novel.firstChapter))
+                        .replace("%lc", String.valueOf(novel.lastChapter));
+
                 break;
         }
+        if(novel.window.equals("checker")) filename =
+                novel.firstChapter + "-"+ novel.lastChapter+"-"+filename.replaceAll(" ","-");
         return filename.replaceAll("[\\\\/:*?\"<>|]", "");
     }
 

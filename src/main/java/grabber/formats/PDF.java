@@ -49,6 +49,7 @@ public class PDF {
 
     public void write() {
         String filename = setFilename();
+        filename += ".pdf";
         try (OutputStream os = new FileOutputStream(novel.saveLocation + "/" + filename)) {
             GrabberUtils.info(novel.window,"Writing PDF...");
             PdfRendererBuilder builder = new PdfRendererBuilder();
@@ -69,24 +70,29 @@ public class PDF {
     }
 
     private String setFilename() {
-        String epubFilename = "Unknown.pdf";
+        String epubFilename = "Unknown";
         switch (Config.getInstance().getFilenameFormat()) {
             case 0:
-                epubFilename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle() + ".pdf";
-                if(novel.window.equals("checker")) epubFilename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
+                epubFilename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle();
                 break;
             case 1:
-                epubFilename = novelMetadata.getTitle() + " - " + novelMetadata.getAuthor() + ".pdf";
-                if(novel.window.equals("checker")) epubFilename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
+                epubFilename = novelMetadata.getTitle() + " - " + novelMetadata.getAuthor();
                 break;
             case 2:
-                epubFilename = novelMetadata.getTitle() + ".pdf";
-                if(novel.window.equals("checker")) epubFilename =
-                        novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
+                epubFilename = novelMetadata.getTitle();
+
+                break;
+            case 3:
+                String template = Config.getInstance().getNovelFileNameTemplate();
+                epubFilename = template
+                        .replace("%t",novelMetadata.getTitle())
+                        .replace("%a", novelMetadata.getAuthor())
+                        .replace("%fc", String.valueOf(novel.firstChapter))
+                        .replace("%lc", String.valueOf(novel.lastChapter));
                 break;
         }
+        if(novel.window.equals("checker")) epubFilename =
+                novel.firstChapter + "-"+ novel.lastChapter+"-"+epubFilename.replaceAll(" ","-");
         return epubFilename.replaceAll("[\\\\/:*?\"<>|]", "");
     }
 

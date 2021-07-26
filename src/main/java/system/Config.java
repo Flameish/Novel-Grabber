@@ -23,6 +23,7 @@ public class Config {
     private String telegramApiToken = "";
     private String fontName = "DejaVu Sans";
     private String chapterTitleTemplate = "%s";
+    private String novelFileNameTemplate = "%a - %t";
     private int telegramWait = 0;
     private int telegramNovelMaxChapter = -1;
     private int telegramMaxChapterPerDay = -1;
@@ -65,6 +66,7 @@ public class Config {
             setFontName(prop.getProperty("fontName", fontName));
             setChapterTitleFormat(Integer.parseInt(prop.getProperty("chapterTitleFormat", String.valueOf(chapterTitleFormat))));
             setChapterTitleTemplate(prop.getProperty("chapterTitleTemplate", chapterTitleTemplate));
+            setNovelFileNameTemplate(prop.getProperty("novelFileNameTemplate", novelFileNameTemplate));
             // Email
             setUsername(prop.getProperty("username", username));
             setPassword(prop.getProperty("password", password));
@@ -111,6 +113,7 @@ public class Config {
             prop.setProperty("fontName", getFontName());
             prop.setProperty("chapterTitleFormat", String.valueOf(getChapterTitleFormat()));
             prop.setProperty("chapterTitleTemplate", getChapterTitleTemplate());
+            prop.setProperty("novelFileNameTemplate", getNovelFileNameTemplate());
             // Email
             prop.setProperty("username", getUsername());
             prop.setProperty("password", getPassword());
@@ -168,6 +171,14 @@ public class Config {
     }
     public boolean isAutoGetImages() {
         return autoGetImages;
+    }
+
+    public String getNovelFileNameTemplate() {
+        return novelFileNameTemplate;
+    }
+
+    public void setNovelFileNameTemplate(String novelFileNameTemplate) {
+        this.novelFileNameTemplate = novelFileNameTemplate;
     }
 
     public boolean isUseStandardLocation() {
