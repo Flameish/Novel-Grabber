@@ -57,9 +57,9 @@ public class goodnovel_com implements Source {
                     .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
-            bookId = toc.selectFirst(".read-continue-box a").attr("href")
-                    .replace("/book/", "");
-            String requestString = "{\"bookId\":\"" + bookId + "\" }";
+            bookId = toc.selectFirst(".read-continue-box a").attr("href");
+            bookId =  bookId.substring(bookId.lastIndexOf("/")+1);
+            String requestString = String.format("{\"bookId\":\"%s\"}", bookId);
             String json = Jsoup.connect("https://www.goodnovel.com/hwyc/chapter/list")
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")

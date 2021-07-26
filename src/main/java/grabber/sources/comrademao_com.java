@@ -1,6 +1,7 @@
 package grabber.sources;
 
 import grabber.*;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,6 +10,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
+import java.io.IOException;
 import java.util.*;
 
 public class comrademao_com implements Source {
@@ -43,55 +45,61 @@ public class comrademao_com implements Source {
 
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
-
-        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window);
-        novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
-        novel.headlessDriver.driver.navigate().to(novel.novelLink);
-        novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tbody a")));
-        String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
-        toc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
-        Elements chapterLinks;
-        while (!toc.select(".next").isEmpty()) {
-            chapterLinks = toc.select("tbody a");
+        try {
+            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
+            Elements chapterLinks = toc.select(".table > tbody a");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
-            novel.headlessDriver.driver.navigate().to(toc.select(".next").attr("abs:href"));
-            novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("tbody a")));
-            baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
-            toc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
+            Element nextBtn = toc.selectFirst(".pagination-next");
+            while(nextBtn != null) {
+                GrabberUtils.sleep(500);
+                Document nextPage = Jsoup.connect(nextBtn.attr("href")).cookies(novel.cookies).get();
+                chapterLinks = nextPage.select(".table > tbody a");
+                for (Element chapterLink : chapterLinks) {
+                    chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                }
+                nextBtn = nextPage.selectFirst(".pagination-next");
+            }
+            Collections.reverse(chapterList);
+        } catch (HttpStatusException httpEr) {
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
+        } catch (IOException e) {
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (NullPointerException e) {
+            GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
         }
-        novel.headlessDriver.driver.close();
-        novel.headlessDriver = null;
-        chapterLinks = toc.select("tbody a");
-        for (Element chapterLink : chapterLinks) {
-            chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
-        }
-        Collections.reverse(chapterList);
         return chapterList;
     }
 
     public Element getChapterContent(Chapter chapter) {
-        if (novel.headlessDriver == null) novel.headlessDriver = new Driver(novel.window);
-        novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
-        novel.cookies.forEach((key, value) -> novel.headlessDriver.driver.manage().addCookie(new Cookie(key, value)));
-        novel.headlessDriver.driver.navigate().to(chapter.chapterURL);
-        novel.headlessDriver.wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("article")));
-        String baseUrl = novel.headlessDriver.driver.getCurrentUrl().substring(0, GrabberUtils.ordinalIndexOf(novel.headlessDriver.driver.getCurrentUrl(), "/", 3) + 1);
-        Document doc = Jsoup.parse(novel.headlessDriver.driver.getPageSource(), baseUrl);
-        return doc.selectFirst("article");
+        Element chapterBody = null;
+        try {
+            Document doc = Jsoup.connect(chapter.chapterURL).get();
+            chapterBody = doc.selectFirst("#content");
+        } catch (HttpStatusException httpEr) {
+            GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
+        } catch (IOException e) {
+            GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        }
+        return chapterBody;
     }
 
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            Element title = toc.selectFirst("title");
-            metadata.setTitle(title != null ? title.text().substring(0, title.text().indexOf("–") - 1) : "");
-            metadata.setDescription(toc.select("#Description").first().text());
-            metadata.setBufferedCover(toc.select("#thumbnail img").attr("abs:src"));
+            Element title = toc.selectFirst(".is-one-third > p:nth-child(1)");
+            //Element author = toc.selectFirst("");
+            Element desc = toc.selectFirst("div.columns:nth-child(1) > div:nth-child(2)");
+            Element cover = toc.selectFirst("#NovelInfo .is-one-third img");
 
-            Elements tags = toc.select("#Genre a");
+            metadata.setTitle(title != null ? title.text() : "");
+            //metadata.setAuthor(author != null ? author.text() : "");
+            metadata.setDescription(desc != null ? desc.text() : "");
+            metadata.setBufferedCover(cover != null ? cover.attr("abs:src") : "");
+
+            Elements tags = toc.select("#NovelInfo > p:nth-child(2) a");
             List<String> subjects = new ArrayList<>();
             for (Element tag : tags) {
                 subjects.add(tag.text());
