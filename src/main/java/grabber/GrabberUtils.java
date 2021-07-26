@@ -172,9 +172,12 @@ public class GrabberUtils {
         }
     }
     public static String getHTMLErrMsg(HttpStatusException httpEr) {
-        String errorMsg = "";
+        String errorMsg;
         int errorCode = httpEr.getStatusCode();
         switch (errorCode) {
+            case 400:
+                errorMsg = "Bad request! (400)";
+                break;
             case 403:
                 errorMsg = "Forbidden! (403)";
                 break;
@@ -191,7 +194,7 @@ public class GrabberUtils {
                 errorMsg = "Gateway Timeout! (504)";
                 break;
             default:
-                errorMsg = "Could not connect to webpage!";
+                errorMsg = String.format("%s (%s)", httpEr.getMessage(), httpEr.getStatusCode());
         }
         return errorMsg;
     }
