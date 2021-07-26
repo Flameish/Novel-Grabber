@@ -12,6 +12,10 @@ Novel-Grabber is a gui based web scrapper that can download and convert chapters
 - Telegram Bot: [@NovelGrabbyBot](http://t.me/NovelGrabbyBot)
 
 ## How to use
+<strong>Updating</strong>
+
+Starting NG-Launcher.jar will update and redownload missing files. Alternatively you can just start the main program via Novel-Grabber.jar inside the bin folder.
+
 <strong>Automatic:</strong>
 
 1. Download [Novel-Grabber.zip](https://github.com/Flameish/Novel-Grabber/releases/latest/download/Novel-Grabber.zip) and execute the launcher inside
