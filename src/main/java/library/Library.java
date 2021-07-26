@@ -206,6 +206,8 @@ public class Library {
             novel.check();
             if(novel.chapterList.isEmpty()) continue;
 
+            novel.metadata.setTitle(libNovel.metadata.getTitle());
+
             int newestChapterNumber = novel.chapterList.size();
             String newestChapterName = novel.chapterList.get(newestChapterNumber-1).name;
             libNovel.setNewestChapterNumber(newestChapterNumber);
