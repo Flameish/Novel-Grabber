@@ -1804,7 +1804,7 @@ public class GUI extends JFrame {
         settingsSavelocationField.setVisible(false);
         settingsSavelocationField.setText(settings.getSaveLocation());
 
-        settingsBrowseSaveLocationBtn = new JButton(new ImageIcon(getClass().getResource("/images/edit.png")));
+        settingsBrowseSaveLocationBtn = new JButton(new ImageIcon(getClass().getResource("/images/folder_icon.png")));
         settingsBrowseSaveLocationBtn.setVisible(false);
         settingsBrowseSaveLocationBtn.setBorder(BorderFactory.createEmptyBorder());
         settingsBrowseSaveLocationBtn.setContentAreaFilled(false);
