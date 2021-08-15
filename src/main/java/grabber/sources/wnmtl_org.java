@@ -4,6 +4,10 @@ import grabber.Chapter;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -21,7 +25,7 @@ public class wnmtl_org implements Source {
     private final String url = "https://www.wnmtl.org/";
     private final boolean canHeadless = false;
     private Novel novel;
-    private Document toc;
+    private String infoJson;
 
     public wnmtl_org(Novel novel) {
         this.novel = novel;
@@ -49,24 +53,40 @@ public class wnmtl_org implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).get();
-            Connection.Response res = Jsoup.connect("https://wnmtl.org/wp-admin/admin-ajax.php")
-                    .data("action", "manga_get_chapters")
-                    .data("manga", toc.select(".rating-post-id").attr("value"))
+            int a = novel.novelLink.indexOf("/book/");
+            int b = novel.novelLink.indexOf("-");
+            String bookId = novel.novelLink.substring(a+6, b);
+            infoJson = Jsoup.connect("https://api.mystorywave.com/story-wave-backend/api/v1/content/books/" + bookId)
+                    .header("site-domain", "wnmtl.org")
+                    .ignoreContentType(true)
                     .cookies(novel.cookies)
-                    .method(Connection.Method.POST)
-                    .execute();
-            Elements chapterLinks = res.parse().select(".listing-chapters_wrap a");
-            for (Element chapterLink : chapterLinks) {
-                chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
+                    .execute()
+                    .body();
+
+            String chapterListJson = Jsoup.connect("https://api.mystorywave.com/story-wave-backend/api/v1/content/chapters/page?sortDirection=ASC&bookId="+ bookId + "&pageNumber=1&pageSize=10000")
+                    .header("site-domain", "wnmtl.org")
+                    .ignoreContentType(true)
+                    .cookies(novel.cookies)
+                    .execute()
+                    .body();
+            JSONObject jsonObject = (JSONObject) new JSONParser().parse(chapterListJson);
+            JSONObject data = (JSONObject) jsonObject.get("data");
+            JSONArray jsonArray = (JSONArray) data.get("list");
+            for (Object obj : jsonArray) {
+                JSONObject chapterObj = (JSONObject) obj;
+                String name = (String) chapterObj.get("title");
+                String id = String.valueOf((long) chapterObj.get("id"));
+                String url = "https://api.mystorywave.com/story-wave-backend/api/v1/content/chapters/" + id;
+                chapterList.add(new Chapter(name, url));
             }
-            Collections.reverse(chapterList);
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
         } catch (NullPointerException e) {
             GrabberUtils.err(novel.window, "Could not find expected selectors. Correct novel link?", e);
+        } catch (ParseException e) {
+            GrabberUtils.err(novel.window, "JSON parse error", e);
         }
         return chapterList;
     }
@@ -74,12 +94,23 @@ public class wnmtl_org implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
-            Document doc = Jsoup.connect(chapter.chapterURL).cookies(novel.cookies).get();
-            chapterBody = doc.select(".text-left").first();
+            String chapterJson = Jsoup.connect(chapter.chapterURL)
+                    .header("site-domain", "wnmtl.org")
+                    .ignoreContentType(true)
+                    .cookies(novel.cookies)
+                    .execute()
+                    .body();
+            JSONObject jsonObject = (JSONObject) new JSONParser().parse(chapterJson);
+            JSONObject data = (JSONObject) jsonObject.get("data");
+            String chapterText = (String) data.get("content");
+            chapterText = chapterText.replaceAll("\\n\\n", "<br><br>");
+            chapterBody = Jsoup.parse(chapterText);
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
+        } catch (ParseException e) {
+            GrabberUtils.err(novel.window, "JSON parse error", e);
         }
         return chapterBody;
     }
@@ -87,23 +118,29 @@ public class wnmtl_org implements Source {
     public NovelMetadata getMetadata() {
         NovelMetadata metadata = new NovelMetadata();
 
-        if (toc != null) {
-            Element title = toc.selectFirst(".post-title");
-            Element author = toc.selectFirst(".author-content");
-            Element desc = toc.selectFirst(".summary__content");
-            Element cover = toc.selectFirst("meta[property=og:image]");
+        if (infoJson != null) {
+            try {
+                JSONObject jsonObject = (JSONObject) new JSONParser().parse(infoJson);
+                JSONObject data = (JSONObject) jsonObject.get("data");
+                String title = (String) data.get("title");
+                String author = (String) data.get("authorPseudonym");
+                String desc = (String) data.get("synopsis");
+                String cover = (String) data.get("coverImgUrl");
 
-            metadata.setTitle(title != null ? title.text() : "");
-            metadata.setAuthor(author != null ? author.text() : "");
-            metadata.setDescription(desc != null ? desc.text() : "");
-            metadata.setBufferedCover(cover != null ? cover.attr("content") : "");
+                metadata.setTitle(title != null ? title : "");
+                metadata.setAuthor(author != null ? author : "");
+                metadata.setDescription(desc != null ? desc : "");
+                metadata.setBufferedCover(cover != null ? cover : "");
 
-            Elements tags = toc.select(".genres-content a");
-            List<String> subjects = new ArrayList<>();
-            for (Element tag : tags) {
-                subjects.add(tag.text());
+                String genre = (String) data.get("genreName");
+
+                List<String> subjects = new ArrayList<>();
+                subjects.add(genre != null ? genre : "");
+                metadata.setSubjects(subjects);
+            } catch (ParseException e) {
+                GrabberUtils.err(novel.window, "JSON parse error", e);
             }
-            metadata.setSubjects(subjects);
+
         }
 
         return metadata;
