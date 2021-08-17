@@ -55,7 +55,7 @@ public class wattpad_com implements Source {
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             // Only get chapters which are not locked
-            Elements chapterLinks = toc.select(".table-of-contents a:not(:has(span.fa-lock))");
+            Elements chapterLinks = toc.select(".table-of-contents a:not(:has(title:contains(Locked)))");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }
@@ -72,12 +72,14 @@ public class wattpad_com implements Source {
     public Element getChapterContent(Chapter chapter) {
         Element chapterBody = null;
         try {
+            GrabberUtils.sleep(250);
             String wattpadChapterID = chapter.chapterURL.substring(24, chapter.chapterURL.indexOf("-"));
             String json = Jsoup.connect("https://www.wattpad.com/v4/parts/" + wattpadChapterID + "?fields=text_url")
                     .ignoreContentType(true)
                     .cookies(novel.cookies)
                     .execute()
                     .body();
+            GrabberUtils.sleep(250);
             JSONParser parser = new JSONParser();
             Object obj = parser.parse(json);
             JSONObject jsonObject = (JSONObject) obj;
@@ -85,7 +87,7 @@ public class wattpad_com implements Source {
             Document doc = Jsoup.connect(String.valueOf(results.get("text")))
                     .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
-                    .get();;
+                    .get();
             chapterBody = doc.select("body").first();
         } catch (IOException e) {
             GrabberUtils.err(novel.window, "Could not connect to webpage!", e);
