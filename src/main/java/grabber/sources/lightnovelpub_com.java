@@ -47,28 +47,32 @@ public class lightnovelpub_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink + "?tab=chapters")
+            toc = Jsoup.connect(novel.novelLink)
+                    .cookies(novel.cookies)
+                    .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
+                    .get();
+            Document chapterPage = Jsoup.connect(novel.novelLink + "/chapters")
                     .cookies(novel.cookies)
                     .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                     .get();
             // Add chapters from first page
-            Elements chapterLinks = toc.select(".chapter-list a");
+            Elements chapterLinks = chapterPage.select(".chapter-list a");
             for (Element chapterLink : chapterLinks) {
                 chapterList.add(new Chapter(chapterLink.attr("title"), chapterLink.attr("abs:href")));
             }
             // Go through pagination links and all chapters
-            Element nextPageBtn = toc.selectFirst("ul.pagination li.PagedList-skipToNext a");
+            Element nextPageBtn = chapterPage.selectFirst("ul.pagination li.PagedList-skipToNext a");
             while (nextPageBtn != null) {
-                toc = Jsoup.connect(nextPageBtn.attr("abs:href"))
+                chapterPage = Jsoup.connect(nextPageBtn.attr("abs:href"))
                         .cookies(novel.cookies)
                         .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0")
                         .get();
-                chapterLinks = toc.select(".chapter-list a");
+                chapterLinks = chapterPage.select(".chapter-list a");
                 for (Element chapterLink : chapterLinks) {
                     chapterList.add(new Chapter(chapterLink.attr("title"), chapterLink.attr("abs:href")));
                 }
                 // Select next page
-                nextPageBtn = toc.selectFirst("ul.pagination li.PagedList-skipToNext a");
+                nextPageBtn = chapterPage.selectFirst("ul.pagination li.PagedList-skipToNext a");
              }
         } catch (HttpStatusException httpEr) {
             GrabberUtils.err(novel.window, GrabberUtils.getHTMLErrMsg(httpEr));

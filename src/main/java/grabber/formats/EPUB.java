@@ -94,7 +94,7 @@ public class EPUB {
      * Tries to read old EPUB file from save location.
      */
     public Book tryReadOldFile() throws IOException {
-        File epubFile = new File(novel.saveLocation + "/" + setFilename());
+        File epubFile = new File(novel.saveLocation + "/" + setFilename() + ".epub");
         InputStream inputStream = new FileInputStream(epubFile);
         return new EpubReader().readEpub(inputStream, "UTF-8");
     }
