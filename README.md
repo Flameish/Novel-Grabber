@@ -8,7 +8,6 @@ Novel-Grabber is a GUI based web scrapper that can download and convert chapters
 - A library to keep track of new releases for your favorite novels
 - Login support via cookies
 - CLI
-- Telegram Bot: [NovelGrabbyBot](http://t.me/NovelGrabbyBot)
 
 ## How to use
 ### Running the program
