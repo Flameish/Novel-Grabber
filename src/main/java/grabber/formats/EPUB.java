@@ -1,228 +1,183 @@
 package grabber.formats;
-import grabber.Chapter;
-import grabber.GrabberUtils;
-import grabber.Novel;
-import grabber.NovelMetadata;
+import grabber.helper.Utils;
+import grabber.novel.Chapter;
+import grabber.novel.Chapter.Status;
+import grabber.novel.Novel;
+import grabber.novel.NovelMetadata;
+import nl.siegmann.epublib.domain.*;
 import nl.siegmann.epublib.epub.EpubReader;
+import nl.siegmann.epublib.service.MediatypeService;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import system.Config;
 
-import nl.siegmann.epublib.domain.Author;
-import nl.siegmann.epublib.domain.Book;
-import nl.siegmann.epublib.domain.Metadata;
-import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubWriter;
+import org.jsoup.parser.Parser;
+import system.Logger;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Handles the creation of the EPUB file.
  */
 public class EPUB {
-    static final String NL = System.getProperty("line.separator");
-    static final String htmlHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + NL+
-            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"" + NL +
-            "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">" + NL +
+    public static final String htmlHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n" +
             "\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + NL +
-            "<head>" + NL +
-            "<title></title>" + NL +
-            "</head>" + NL +
-            "<body>" + NL;
-    static final String htmlFoot = "</body>" + NL + "</html>";
-    private Novel novel;
-    private final NovelMetadata novelMetadata;
-    private Book book;
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+            "<head>\n" +
+            "<title></title>\n" +
+            "</head>\n" +
+            "<body>\n";
+    public static final String htmlFoot = "</body>\n</html>";
 
-    public EPUB(Novel novel) {
-        this.novel = novel;
-        this.novelMetadata = novel.metadata;
-        // Library novels try to update existing files
-        if (novel.window.equals("checker")) {
-            try {
-                book = tryReadOldFile();
-            } catch (FileNotFoundException e) {
-                GrabberUtils.err("Could not find old book file: " + e.getMessage());
-            } catch (IOException e) {
-                GrabberUtils.err("Could not access old book file: " + e.getMessage());
-            }
+    public static String write(Novel novel, String savelocation) throws IOException {
+        Logger.verbose("Building EPUB...");
+
+        Book epub = new Book();
+        addMetadataToEpub(novel.getMetadata(), epub);
+        if (novel.getOptions().isCreateToc()) createDescPage(novel.getMetadata().getDescription(), epub);
+        if (novel.getOptions().isCreateToc()) createTocPage(novel.getChapters(), epub);
+        if (novel.getOptions().isGetImages()) addImagesToEpub(novel.getImages(), epub);
+        addChaptersToEpub(novel.getChapters(), epub);
+
+        String epubFilename = novel.getOptions().getNovelFilenameTemplate()
+                .replace("%t", novel.getMetadata().getTitle())
+                .replace("%a", novel.getMetadata().getAuthor())
+                .replace("%fc", String.valueOf(novel.getOptions().getFirstChapter()))
+                .replace("%lc", String.valueOf(novel.getOptions().getLastChapter()))
+                .replaceAll("[\\\\/:*?\"<>|]", "")
+                + ".epub";
+        Utils.createDir(savelocation);
+        Logger.info("Writing EPUB " + savelocation + "/" + epubFilename);
+        EpubWriter epubWriter = new EpubWriter();
+        epubWriter.write(epub, new FileOutputStream(savelocation + "/" + epubFilename));
+        return epubFilename;
+    }
+
+    private static void createDescPage(String desc, Book epub) {
+        String descString = String.format("%s<div><h1>Description</h1>\n<p>%s</p>\n</div>\n%s", htmlHead, desc, htmlFoot);
+        Resource resource = new Resource(
+                "descPage",
+                Utils.cleanHTMLString(descString).getBytes(StandardCharsets.UTF_8),
+                "desc_page.html",
+                MediatypeService.determineMediaType("desc_page.html"));
+        epub.addSection("Description", resource);
+    }
+
+    private static void createTocPage(List<Chapter> chapterList, Book epub) {
+        StringBuilder tocBuilder = new StringBuilder(htmlHead +
+                "<h1>Table of Contents</h1>\n" +
+                "<ol>\n");
+        int chapterCounter = 1;
+        for(Chapter chapter: chapterList) {
+            if(chapter.getDownloadStatus() != Status.SUCCESS) continue;
+
+            String sanitizedChapterName = chapter.getName().replaceAll("[^\\w]+", "-");
+            String chapterFilename = String.format("%05d-%s.html", chapterCounter++, sanitizedChapterName);
+            tocBuilder.append(String.format("<li><a href=\"%s\">%s</a></li>\n", chapterFilename, chapter.getName()));
+
         }
-        if (book == null) {
-            book = new Book();
-            try {
-                book.getResources().add(new Resource(getClass().getResourceAsStream("/default.css"), "default.css"));
-            } catch (IOException e) {
-                GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. " + e.getMessage());
-            }
+        tocBuilder.append("</ol>\n").append(htmlFoot);
+
+        Resource resource = new Resource(
+                "tocPage",
+                Utils.cleanHTMLString(tocBuilder.toString()).getBytes(StandardCharsets.UTF_8),
+                "table_of_contents.html",
+                MediatypeService.determineMediaType("table_of_contents.html"));
+        epub.addSection("Table of Contents", resource);
+    }
+
+    private static void addMetadataToEpub(NovelMetadata novelMetadata, Book epub) {
+        Metadata epubMetadata = epub.getMetadata();
+        epubMetadata.addTitle(novelMetadata.getTitle());
+        epubMetadata.addAuthor(new Author(novelMetadata.getAuthor()));
+        epubMetadata.setSubjects(novelMetadata.getSubjects());
+        if (!novelMetadata.getDescription().isEmpty()) {
+            epubMetadata.setDescriptions(Collections.singletonList(novelMetadata.getDescription()));
+        }
+        if (novelMetadata.getCoverName() != null && novelMetadata.getCoverImage() != null) {
+            Resource resource = new Resource(
+                    "coverImage",
+                    novelMetadata.getCoverImage(),
+                    novelMetadata.getCoverName(),
+                    MediatypeService.determineMediaType(novelMetadata.getCoverName()));
+            epub.getResources().add(resource);
+            epub.setCoverImage(resource);
         }
     }
 
-    public void write() {
-        // Order is important
-        addMetadata();
-        addCover();
-        // Not re-adding for existing epubs
-        if (!novel.window.equals("checker")) {
-            addToc();
-            if(!novel.noDescription && !novelMetadata.getDescription().isEmpty()) addDesc();
-        }
-        if (novel.getImages) addImages();
-        addChapters();
-
-        String epubFilename = setFilename();
-        epubFilename += ".epub";
-        GrabberUtils.createDir(novel.saveLocation);
-
-        try {
-            GrabberUtils.info(novel.window,"Writing EPUB...");
-            EpubWriter epubWriter = new EpubWriter();
-            epubWriter.write(book, new FileOutputStream(novel.saveLocation + "/" + epubFilename));
-            novel.filename = epubFilename;
-            GrabberUtils.info(novel.window, "Output: " + novel.saveLocation+"/"+ epubFilename);
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not write EPUB. " + e.getMessage(), e);
+    private static void addImagesToEpub(Map<String, byte[]> images, Book epub) {
+        for (Map.Entry<String, byte[]> entry : images.entrySet()) {
+            byte[] image = entry.getValue();
+            String imageFilename = entry.getKey();
+            Resource resource = new Resource(
+                    imageFilename,
+                    image,
+                    imageFilename,
+                    MediatypeService.determineMediaType(imageFilename));
+            epub.getResources().add(resource);
         }
     }
 
-    /**
-     * Tries to read old EPUB file from save location.
-     */
-    public Book tryReadOldFile() throws IOException {
-        File epubFile = new File(novel.saveLocation + "/" + setFilename() + ".epub");
-        InputStream inputStream = new FileInputStream(epubFile);
-        return new EpubReader().readEpub(inputStream, "UTF-8");
-    }
+    private static void addChaptersToEpub(List<Chapter> chapterList, Book epub) {
+        int chapterCounter = 1;
+        for(Chapter chapter: chapterList) {
+            if(chapter.getDownloadStatus() != Status.SUCCESS) continue;
 
-
-    private void addImages() {
-        for (Map.Entry<String, BufferedImage> entry : novel.images.entrySet()) {
-            try {
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                ImageIO.write(entry.getValue(), GrabberUtils.getFileExtension(entry.getKey()), os);
-                InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
-                Resource resource = new Resource(inputStream, entry.getKey());
-                book.getResources().add(resource);
-                inputStream.close();
-            } catch (IOException e) {
-                GrabberUtils.err(novel.window, "Could not add "+entry.getValue()+" to EPUB. "+e.getMessage(), e);
-            }
+            String sanitizedChapterName = chapter.getName().replaceAll("[^\\w]+", "-");
+            String chapterFilename = String.format("%05d-%s.html", chapterCounter++, sanitizedChapterName);
+            String chapterString = htmlHead + Utils.cleanHTMLString(chapter.getChapterBody().toString()) + htmlFoot;
+            Resource resource = new Resource(
+                    chapter.getUrl(),
+                    chapterString.getBytes(StandardCharsets.UTF_8),
+                    chapterFilename,
+                    MediatypeService.determineMediaType(chapterFilename));
+            resource.setTitle(sanitizedChapterName);
+            epub.addSection(chapter.getName(), resource);
         }
     }
 
-    private void addChapters() {
-        for(Chapter chapter: novel.chapterList) {
-            if(chapter.status == 1) {
-                String chapterString = htmlHead + chapter.chapterContent + htmlFoot;
-                try(InputStream inputStream = new ByteArrayInputStream(chapterString.getBytes(StandardCharsets.UTF_8))) {
-                    Resource resource = new Resource(inputStream, chapter.fileName + ".html");
-                    book.addSection(chapter.name, resource);
-                } catch (IOException e) {
-                    GrabberUtils.err(novel.window, "Could not add "+chapter.name+" to EPUB. "+e.getMessage(), e);
+    public static Novel read(String path) throws IOException {
+        File epubFile = new File(path);
+        Logger.verbose("Reading " + path);
+        try(InputStream fileInputStream = new FileInputStream(epubFile)) {
+            Book book = new EpubReader().readEpub(fileInputStream, "UTF-8");
+            Logger.verbose("Loading metadata...");
+            Metadata bookMetadata = book.getMetadata();
+            NovelMetadata novelMetadata = new NovelMetadata();
+            novelMetadata.setTitle(bookMetadata.getTitles().get(0));
+            novelMetadata.setAuthor(bookMetadata.getAuthors().get(0).toString());
+            novelMetadata.setSubjects(bookMetadata.getSubjects());
+            novelMetadata.setDescription(bookMetadata.getDescriptions().get(0));
+            novelMetadata.setCoverImage(book.getCoverImage().getData());
+            novelMetadata.setCoverName(book.getCoverImage().getHref());
+
+            Novel novel = new Novel(novelMetadata);
+            Logger.verbose("Loading chapters...");
+            for (TOCReference tocReference : book.getTableOfContents().getTocReferences()) {
+                Resource resource = tocReference.getResource();
+                if (!resource.getHref().equals("desc_page.html") && !resource.getHref().equals("table_of_contents.html")) {
+                    Chapter chapter = new Chapter(tocReference.getTitle(), resource.getId());
+                    chapter.setChapterBody(
+                            Jsoup.parse(new String(resource.getData(), StandardCharsets.UTF_8),
+                                    resource.getId(),
+                                    Parser.htmlParser()));
+                    chapter.setDownloadStatus(Status.SUCCESS);
+                    novel.getChapters().add(chapter);
                 }
             }
-        }
-    }
 
-    private String setFilename() {
-        String epubFilename = "Unknown";
-        switch (Config.getInstance().getFilenameFormat()) {
-            case 0:
-                epubFilename = novelMetadata.getAuthor() + " - " + novelMetadata.getTitle();
-                break;
-            case 1:
-                epubFilename = novelMetadata.getTitle() + " - " + novelMetadata.getAuthor();
-                break;
-            case 2:
-                epubFilename = novelMetadata.getTitle();
-                break;
-            case 3:
-                String template = Config.getInstance().getNovelFileNameTemplate();
-                epubFilename = template
-                        .replace("%t",novelMetadata.getTitle())
-                        .replace("%a", novelMetadata.getAuthor())
-                        .replace("%fc", String.valueOf(novel.firstChapter))
-                        .replace("%lc", String.valueOf(novel.lastChapter));
-                break;
-        }
-        return epubFilename.replaceAll("[\\\\/:*?\"<>|]", "");
-    }
+            Logger.verbose("Loading images...");
+            for (Resource resource : book.getResources().getAll()) {
+                if (resource.getMediaType().getName().startsWith("image/") && !resource.getId().startsWith("coverImage")) {
+                    novel.getImages().put(resource.getHref(), resource.getData());
+                }
+            }
 
-    private void addMetadata() {
-        Metadata metadata = book.getMetadata(); // EPUB metadata
-        metadata.addTitle(novelMetadata.getTitle());
-        metadata.addAuthor(new Author(novelMetadata.getAuthor()));
-        metadata.setSubjects(novelMetadata.getSubjects());
-        if (!novelMetadata.getDescription().isEmpty() && !novel.noDescription) {
-            metadata.setDescriptions(Collections.singletonList(novelMetadata.getDescription()));
-        }
-    }
-
-    public void addCover() {
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            ImageIO.write(novelMetadata.getBufferedCover(), novelMetadata.getCoverFormat(), os);
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
-            Resource resource = new Resource(inputStream, "cover." + novelMetadata.getCoverFormat());
-            book.getResources().add(resource);
-            book.setCoverImage(resource);
-            inputStream.close();
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not add cover to EPUB. " + e.getMessage(), e);
-        }
-    }
-
-    public void addToc() {
-        StringBuilder tocBuilder = new StringBuilder(htmlHead + NL +
-                "<b>Table of Contents</b>" + NL +
-                "<p style=\"text-indent:0pt\">" + NL);
-        for (Chapter chapter: novel.chapterList) {
-            if(chapter.status == 1)
-                tocBuilder.append("<a href=\"").append(chapter.fileName).append(".html\">").append(chapter.name).append("</a><br/>").append(NL);
-        }
-        tocBuilder.append("</p>").append(NL).append(htmlFoot);
-
-        Document.OutputSettings settings = new Document.OutputSettings();
-        settings.syntax(Document.OutputSettings.Syntax.xml);
-        settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
-        settings.charset("UTF-8");
-
-        Document doc = Jsoup.parse(tocBuilder.toString());
-        doc.outputSettings(settings);
-
-        try (InputStream inputStream = new ByteArrayInputStream(doc.html().getBytes(StandardCharsets.UTF_8))) {
-            Resource resource = new Resource(inputStream, "table_of_contents.html");
-            book.addSection("Table of Contents", resource);
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not add table of content to EPUB. " + e.getMessage(), e);
-        }
-    }
-
-    public void addDesc() {
-        String descString = htmlHead + NL+
-                "<div><b>Description</b>" + NL +
-                "<p>" + novelMetadata.getDescription() + "</p>" + NL +
-                "</div>" + NL +
-                htmlFoot;
-
-        Document.OutputSettings settings = new Document.OutputSettings();
-        settings.syntax(Document.OutputSettings.Syntax.xml);
-        settings.escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
-        settings.charset("UTF-8");
-
-        Document doc = Jsoup.parse(descString);
-        doc.outputSettings(settings);
-
-        try (InputStream inputStream = new ByteArrayInputStream(doc.html().getBytes(StandardCharsets.UTF_8))) {
-            Resource resource = new Resource(inputStream, "desc_Page.html");
-            book.addSection("Description", resource);
-        } catch (IOException e) {
-            GrabberUtils.err(novel.window, "Could not add description to EPUB. "+e.getMessage(), e);
+            return novel;
         }
     }
 }
