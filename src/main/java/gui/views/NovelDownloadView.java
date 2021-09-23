@@ -1,42 +1,78 @@
 package gui.views;
 
+import grabber.Grabber;
+import grabber.GrabberOptions;
 import grabber.novel.Novel;
 import grabber.novel.NovelMetadata;
 import grabber.novel.NovelOptions;
+import grabber.sources.SourceException;
 import gui.components.BoundsPopupMenuListener;
 import gui.components.RoundedPanel;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
-import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.concurrent.Executors;
 
 public class NovelDownloadView extends JDialog {
+
+    private final JButton downloadStartBtn;
+    private final JButton downloadStopBtn;
+    private final JButton downloadContinueBtn;
+    private final NovelMetadata metadata;
+    private final JSlider waitTimeSlider;
+    private final JLabel pagesLbl;
+    private final JLabel pagesCountLbl;
+    private final JCheckBox createChapterHeadlineCB;
+    private final JCheckBox createTocCB;
+    private final JCheckBox createDescCB;
+    private final JCheckBox downloadImagesCB;
+    private final JComboBox startingChapterCB;
+    private final JComboBox endingChapterCB;
+    private final JProgressBar downloadProgressBar;
+    private final JButton downloadCancelBtn;
+    private final JLabel errorLbl;
+    private final JTextField titleEditTextField;
+    private final JTextArea descriptionTextArea;
+    private final JLabel imageLbl;
+    private final JTextArea titleTextArea;
+    private final JTextField authorEditTextField;
+    private final JLabel authorNameLbl;
+    private final JLabel chapterCountLbl;
+    private final JTextArea tagsTextArea;
+    private final JList<String> tagsEditList;
+    private final JButton metadataSaveBtn;
+    private final JButton metadataEditBtn;
+    private int pageCounter;
+    private Grabber grabber;
+    private Novel novel;
 
     public NovelDownloadView(NovelMetadata metadata) {
         super();
         setLayout(new GridBagLayout());
         getContentPane().setBackground(Color.decode("#3b4252"));
 
+        this.metadata = metadata;
+
         GridBagConstraints c;
 
-        ImageIcon imageIcon;
+        ImageIcon coverImageIcon;
         if(metadata.getCoverImage() == null) {
-            imageIcon = new ImageIcon(getClass().getResource("/images/default_cover.png"));
+            coverImageIcon = new ImageIcon(getClass().getResource("/images/default_cover.png"));
         } else {
-            imageIcon = new ImageIcon(metadata.getCoverImage());
+            coverImageIcon = new ImageIcon(metadata.getCoverImage());
         }
-        Image image = imageIcon.getImage();
+        Image image = coverImageIcon.getImage();
         Image newimg = image.getScaledInstance(150, 200,  Image.SCALE_SMOOTH);
-        imageIcon = new ImageIcon(newimg);
+        coverImageIcon = new ImageIcon(newimg);
 
-        JLabel imageLbl = new JLabel(imageIcon);
+        imageLbl = new JLabel(coverImageIcon);
         imageLbl.setPreferredSize(new Dimension(150, 200));
         c = new GridBagConstraints();
         c.gridx = 0;
@@ -46,7 +82,10 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(10, 15, 5, 5);
         add(imageLbl, c);
 
-        JTextArea titleTextArea = new JTextArea(metadata.getTitle());
+        JPanel titlePanel = new JPanel(new GridBagLayout());
+        titlePanel.setBackground(Color.decode("#3b4252"));
+
+        titleTextArea = new JTextArea(metadata.getTitle());
         titleTextArea.setFont(titleTextArea.getFont().deriveFont(17.0f));
         titleTextArea.setForeground(Color.decode("#8fbcbb"));
         titleTextArea.setOpaque(true);
@@ -57,13 +96,62 @@ public class NovelDownloadView extends JDialog {
         titleTextArea.setLineWrap(true);
         titleTextArea.setWrapStyleWord(true);
         c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        titlePanel.add(titleTextArea, c);
+
+        titleEditTextField = new JTextField(metadata.getTitle());
+        titleEditTextField.setForeground(Color.decode("#eceff4"));
+        titleEditTextField.setBackground(Color.decode("#4c566a"));
+        titleEditTextField.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        titlePanel.add(titleEditTextField, c);
+
+        metadataEditBtn = new JButton();
+        metadataEditBtn.setIcon(new ImageIcon(getClass().getResource("/images/edit_icon.png")));
+        metadataEditBtn.setBorder(BorderFactory.createEmptyBorder());
+        metadataEditBtn.setContentAreaFilled(false);
+        metadataEditBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        metadataEditBtn.setToolTipText("Edit metadata");
+        metadataEditBtn.addActionListener(e -> editMetadata());
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.EAST;
+        c.insets = new Insets(0, 10, 0, 5);
+        titlePanel.add(metadataEditBtn, c);
+
+        metadataSaveBtn = new JButton();
+        metadataSaveBtn.setIcon(new ImageIcon(getClass().getResource("/images/save_icon.png")));
+        metadataSaveBtn.setBorder(BorderFactory.createEmptyBorder());
+        metadataSaveBtn.setContentAreaFilled(false);
+        metadataSaveBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        metadataSaveBtn.setToolTipText("Save metadata");
+        metadataSaveBtn.addActionListener(e -> saveMetadate());
+        metadataSaveBtn.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.EAST;
+        c.insets = new Insets(0, 10, 0, 5);
+        titlePanel.add(metadataSaveBtn, c);
+
+        c = new GridBagConstraints();
         c.gridx = 1;
         c.gridy = 0;
         c.weightx = 1.0f;
-        c.anchor = GridBagConstraints.NORTHWEST;
+        c.gridwidth = 2;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(10, 10, 0, 13);
-        add(titleTextArea, c);
+        add(titlePanel, c);
 
         RoundedPanel detailsPanel = new RoundedPanel(new GridBagLayout(), 15, Color.decode("#434c5e"));
         detailsPanel.setForeground(Color.decode("#434c5e"));
@@ -85,7 +173,7 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(5, 0, 0, 10);
         detailsPanel.add(authorLbl, c);
 
-        JLabel authorNameLbl = new JLabel(metadata.getAuthor());
+        authorNameLbl = new JLabel(metadata.getAuthor());
         authorNameLbl.setForeground(Color.decode("#88c0d0"));
         c = new GridBagConstraints();
         c.gridx = 1;
@@ -94,6 +182,18 @@ public class NovelDownloadView extends JDialog {
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(5, 0, 0, 0);
         detailsPanel.add(authorNameLbl, c);
+
+        authorEditTextField = new JTextField(metadata.getAuthor());
+        authorEditTextField.setForeground(Color.decode("#eceff4"));
+        authorEditTextField.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 0;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(5, 0, 0, 0);
+        detailsPanel.add(authorEditTextField, c);
 
         JLabel chapterLbl = new JLabel("Chapters:");
         chapterLbl.setForeground(Color.decode("#eceff4"));
@@ -104,8 +204,7 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(0, 0, 0, 10);
         detailsPanel.add(chapterLbl, c);
 
-        JLabel chapterCountLbl = new JLabel();
-        chapterCountLbl.setText(String.valueOf(metadata.getChapterList().size()));
+        chapterCountLbl = new JLabel(String.valueOf(metadata.getChapterList().size()));
         chapterCountLbl.setForeground(Color.decode("#88c0d0"));
         c = new GridBagConstraints();
         c.gridx = 1;
@@ -125,7 +224,7 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(0, 0, 0, 10);
         detailsPanel.add(tagsLbl, c);
 
-        JTextArea tagsTextArea = new JTextArea();
+        tagsTextArea = new JTextArea();
         tagsTextArea.setText(String.join(", ", metadata.getSubjects()));
         tagsTextArea.setForeground(Color.decode("#88c0d0"));
         tagsTextArea.setBorder(null);
@@ -143,6 +242,39 @@ public class NovelDownloadView extends JDialog {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         detailsPanel.add(tagsTextArea, c);
+
+        tagsEditList = new JList<>(metadata.getSubjects().toArray(new String[0]));
+
+        JScrollPane tagsEditScrollPane = new JScrollPane(tagsEditList);
+        tagsEditScrollPane.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 2;
+        c.weightx = 1.0f;
+        c.weighty = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.BOTH;
+        detailsPanel.add(tagsEditScrollPane, c);
+
+        pagesLbl = new JLabel("Pages:");
+        pagesLbl.setForeground(Color.decode("#eceff4"));
+        pagesLbl.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 3;
+        c.anchor = GridBagConstraints.EAST;
+        c.insets = new Insets(0, 0, 0, 10);
+        detailsPanel.add(pagesLbl, c);
+
+        pagesCountLbl = new JLabel();
+        pagesCountLbl.setForeground(Color.decode("#88c0d0"));
+        pagesCountLbl.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 3;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.WEST;
+        detailsPanel.add(pagesCountLbl, c);
 
         c = new GridBagConstraints();
         c.gridx = 1;
@@ -163,7 +295,7 @@ public class NovelDownloadView extends JDialog {
         descriptionPanelBorder.setTitleColor(Color.decode("#88c0d0"));
         descriptionPanel.setBorder(descriptionPanelBorder);
 
-        JTextArea descriptionTextArea = new JTextArea();
+        descriptionTextArea = new JTextArea();
         descriptionTextArea.setText(metadata.getDescription());
         descriptionTextArea.setForeground(Color.decode("#eceff4"));
         descriptionTextArea.setBackground(Color.decode("#434c5e"));
@@ -207,7 +339,7 @@ public class NovelDownloadView extends JDialog {
         novelOptionsPanelBorder.setTitleColor(Color.decode("#88c0d0"));
         novelOptionsPanel.setBorder(novelOptionsPanelBorder);
 
-        JCheckBox createChapterHeadlineCB = new JCheckBox("Create chapter headlines");
+        createChapterHeadlineCB = new JCheckBox("Create chapter headlines");
         createChapterHeadlineCB.setForeground(Color.decode("#eceff4"));
         c = new GridBagConstraints();
         c.gridx = 0;
@@ -217,7 +349,7 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(5, 0, 0, 5);
         novelOptionsPanel.add(createChapterHeadlineCB, c);
 
-        JCheckBox createTocCB = new JCheckBox("Create table of contents page");
+        createTocCB = new JCheckBox("Create table of contents page");
         createTocCB.setForeground(Color.decode("#eceff4"));
         c = new GridBagConstraints();
         c.gridx = 0;
@@ -226,7 +358,7 @@ public class NovelDownloadView extends JDialog {
         c.anchor = GridBagConstraints.WEST;
         novelOptionsPanel.add(createTocCB, c);
 
-        JCheckBox createDescCB = new JCheckBox("Create description page");
+        createDescCB = new JCheckBox("Create description page");
         createDescCB.setForeground(Color.decode("#eceff4"));
         c = new GridBagConstraints();
         c.gridx = 0;
@@ -235,7 +367,7 @@ public class NovelDownloadView extends JDialog {
         c.anchor = GridBagConstraints.WEST;
         novelOptionsPanel.add(createDescCB, c);
 
-        JCheckBox downloadImagesCB = new JCheckBox("Download images");
+        downloadImagesCB = new JCheckBox("Download images");
         downloadImagesCB.setForeground(Color.decode("#eceff4"));
         c = new GridBagConstraints();
         c.gridx = 0;
@@ -264,17 +396,17 @@ public class NovelDownloadView extends JDialog {
         chapterRangePanelBorder.setTitleColor(Color.decode("#88c0d0"));
         chapterRangePanel.setBorder(chapterRangePanelBorder);
 
-        JComboBox firstChapterCB = new JComboBox(metadata.getChapterList().toArray());
+        startingChapterCB = new JComboBox(metadata.getChapterList().toArray());
         BoundsPopupMenuListener firstChapterPopupListener = new BoundsPopupMenuListener(true, false);
-        firstChapterCB.addPopupMenuListener(firstChapterPopupListener);
-        firstChapterCB.setPrototypeDisplayValue("Chapter 1: Novel Grabber");
+        startingChapterCB.addPopupMenuListener(firstChapterPopupListener);
+        startingChapterCB.setPrototypeDisplayValue("Chapter 1: Novel Grabber");
         c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0f;
         c.anchor = GridBagConstraints.CENTER;
         c.insets = new Insets(5, 0, 0, 0);
-        chapterRangePanel.add(firstChapterCB, c);
+        chapterRangePanel.add(startingChapterCB, c);
 
         JLabel rangeLbl = new JLabel("— to —");
         rangeLbl.setForeground(Color.decode("#eceff4"));
@@ -286,17 +418,17 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(5, 0, 5, 0);
         chapterRangePanel.add(rangeLbl, c);
 
-        JComboBox lastChapterCB = new JComboBox(metadata.getChapterList().toArray());
-        lastChapterCB.setSelectedIndex(lastChapterCB.getModel().getSize()-1);
+        endingChapterCB = new JComboBox(metadata.getChapterList().toArray());
+        endingChapterCB.setSelectedIndex(endingChapterCB.getModel().getSize()-1);
         BoundsPopupMenuListener lastChapterPopupListener = new BoundsPopupMenuListener(true, false);
-        lastChapterCB.addPopupMenuListener(lastChapterPopupListener);
-        lastChapterCB.setPrototypeDisplayValue("Chapter 1: Novel Grabber");
+        endingChapterCB.addPopupMenuListener(lastChapterPopupListener);
+        endingChapterCB.setPrototypeDisplayValue("Chapter 1: Novel Grabber");
         c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 2;
         c.weightx = 1.0f;
         c.anchor = GridBagConstraints.CENTER;
-        chapterRangePanel.add(lastChapterCB, c);
+        chapterRangePanel.add(endingChapterCB, c);
 
         c = new GridBagConstraints();
         c.gridx = 0;
@@ -317,6 +449,9 @@ public class NovelDownloadView extends JDialog {
         downloadOptionsPanelBorder.setTitlePosition(TitledBorder.BELOW_TOP);
         downloadOptionsPanelBorder.setTitleColor(Color.decode("#88c0d0"));
         downloadOptionsPanel.setBorder(downloadOptionsPanelBorder);
+
+        JPanel saveLocationPanel = new JPanel(new GridBagLayout());
+        saveLocationPanel.setBackground(Color.decode("#434c5e"));
 
         JTextField downloadLocationField = new JTextField("Save to");
         downloadLocationField.setForeground(Color.decode("#4c566a"));
@@ -342,14 +477,14 @@ public class NovelDownloadView extends JDialog {
         c.weightx = 1.0f;
         c.anchor = GridBagConstraints.WEST;
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(5, 0, 0, 0);
-        downloadOptionsPanel.add(downloadLocationField, c);
+        saveLocationPanel.add(downloadLocationField, c);
 
         JButton downloadSaveLocationBtn = new JButton();
         downloadSaveLocationBtn.setIcon(new ImageIcon(getClass().getResource("/images/folder_icon.png")));
         downloadSaveLocationBtn.setBorder(BorderFactory.createEmptyBorder());
         downloadSaveLocationBtn.setContentAreaFilled(false);
         downloadSaveLocationBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        downloadSaveLocationBtn.setToolTipText("Browse locations");
         downloadSaveLocationBtn.addActionListener(arg0 -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -365,8 +500,131 @@ public class NovelDownloadView extends JDialog {
         c.gridx = 1;
         c.gridy = 0;
         c.anchor = GridBagConstraints.WEST;
-        c.insets = new Insets(5, 5, 0, 0);
-        downloadOptionsPanel.add(downloadSaveLocationBtn, c);
+        c.insets = new Insets(0, 5, 0, 0);
+        saveLocationPanel.add(downloadSaveLocationBtn, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 2;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(5, 0, 0, 0);
+        downloadOptionsPanel.add(saveLocationPanel, c);
+
+        waitTimeSlider = new JSlider(JSlider.HORIZONTAL,0,10,0);
+        waitTimeSlider.setSnapToTicks(true);
+        waitTimeSlider.setPaintTicks(true);
+        waitTimeSlider.setPaintLabels(true);
+        waitTimeSlider.setMinorTickSpacing(1);
+        waitTimeSlider.setMajorTickSpacing(5);
+        Hashtable<Integer, JLabel> labels = new Hashtable<>();
+        labels.put(0, new JLabel("0"));
+        labels.put(5, new JLabel("Wait Time (0 s)"));
+        labels.put(10, new JLabel("10"));
+        waitTimeSlider.setLabelTable(labels);
+        waitTimeSlider.addChangeListener(e -> {
+            JLabel middleLbl = (JLabel) waitTimeSlider.getLabelTable().get(5);
+            middleLbl.setText(String.format("Wait Time (%d s)", waitTimeSlider.getValue()));
+        });
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 1;
+        c.gridwidth = 2;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(10, 0, 0, 0);
+        downloadOptionsPanel.add(waitTimeSlider, c);
+
+        JSeparator downloadSeparator = new JSeparator();
+        c.gridx = 0;
+        c.gridy = 2;
+        c.gridwidth = 2;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(10, 0, 0, 0);
+        downloadOptionsPanel.add(downloadSeparator, c);
+
+        downloadStartBtn = new JButton("Start Download");
+        downloadStartBtn.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::startDownload));
+        downloadStartBtn.setBackground(Color.decode("#8fbcbb"));
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 3;
+        c.gridwidth = 2;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(10, 0, 0, 0);
+        downloadOptionsPanel.add(downloadStartBtn, c);
+
+        downloadStopBtn = new JButton("Stop");
+        downloadStopBtn.addActionListener(e -> stopDownload());
+        downloadStopBtn.setBackground(Color.decode("#bf616a"));
+        downloadStopBtn.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 3;
+        c.gridwidth = 2;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(10, 0, 0, 0);
+        downloadOptionsPanel.add(downloadStopBtn, c);
+
+        downloadContinueBtn = new JButton("Continue");
+        downloadContinueBtn.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::continueDownload));
+        downloadContinueBtn.setBackground(Color.decode("#8fbcbb"));
+        downloadContinueBtn.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 3;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(10, 0, 0, 0);
+        downloadOptionsPanel.add(downloadContinueBtn, c);
+
+        downloadCancelBtn = new JButton("Cancel");
+        downloadCancelBtn.addActionListener(e -> Executors.newSingleThreadExecutor().execute(this::cancelDownload));
+        downloadCancelBtn.setBackground(Color.decode("#bf616a"));
+        downloadCancelBtn.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 3;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(10, 5, 0, 0);
+        downloadOptionsPanel.add(downloadCancelBtn, c);
+
+        downloadProgressBar = new JProgressBar();
+        downloadProgressBar.setVisible(false);
+        downloadProgressBar.setStringPainted(true);
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 4;
+        c.gridwidth = 2;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(10, 0, 0, 0);
+        downloadOptionsPanel.add(downloadProgressBar, c);
+
+        errorLbl = new JLabel();
+        errorLbl.setForeground(Color.red);
+        errorLbl.setVisible(false);
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 4;
+        c.gridwidth = 2;
+        c.weightx = 1.0f;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(10, 0, 0, 0);
+        downloadOptionsPanel.add(errorLbl, c);
 
         c = new GridBagConstraints();
         c.gridx = 0;
@@ -388,9 +646,145 @@ public class NovelDownloadView extends JDialog {
 
 
         setTitle(metadata.getTitle());
-        setSize(new Dimension(750, 550));
+        setSize(new Dimension(850, 600));
         setModal(true);
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    public void startDownload() {
+        downloadStartBtn.setVisible(false);
+        downloadStopBtn.setVisible(true);
+        pagesLbl.setVisible(true);
+        pagesCountLbl.setVisible(true);
+        pageCounter = 0;
+
+        int startingChapterIndex = startingChapterCB.getSelectedIndex();
+        int endingChapterIndex = endingChapterCB.getSelectedIndex();
+        // Reverse the chapter list if the starting chapter is higher than the ending chapter
+        // and switch starting / ending index
+        if (startingChapterIndex > endingChapterIndex) {
+            Collections.reverse(metadata.getChapterList());
+            int size = metadata.getChapterList().size();
+            endingChapterIndex  = size - startingChapterCB.getSelectedIndex() -1;
+            startingChapterIndex = size - endingChapterCB.getSelectedIndex() -1;
+        }
+
+        NovelOptions novelOptions = NovelOptions.builder()
+                .startingChapterIndex(startingChapterIndex)
+                .endingChapterIndex(endingChapterIndex)
+                .displayNovelToc(createTocCB.isSelected())
+                .displayNovelDesc(createDescCB.isSelected())
+                .displayChapterTitle(createChapterHeadlineCB.isSelected())
+                .getImages(downloadImagesCB.isSelected())
+                .build();
+        novel = new Novel(metadata);
+        novel.setOptions(novelOptions);
+
+        downloadProgressBar.setVisible(true);
+        downloadProgressBar.setMinimum(0);
+        downloadProgressBar.setMaximum(novel.getChaptersToDownloadCount());
+        downloadProgressBar.setValue(0);
+
+        GrabberOptions grabberOptions = GrabberOptions.builder()
+                .waitTime(waitTimeSlider.getValue())
+                .build();
+        grabber = new Grabber(grabberOptions);
+        grabber.addCPListener(obj -> {
+            updatePageCounter(obj.getChapter().getWordCount());
+            downloadProgressBar.setValue(downloadProgressBar.getValue() + 1);
+        });
+        try {
+            grabber.downloadNovel(novel);
+        } catch (SourceException e) {
+            e.printStackTrace();
+            errorLbl.setText("<html><p style='text-align:center; width:150px'>" + e.getMessage() + "</p></html>");
+            errorLbl.setVisible(true);
+            downloadProgressBar.setVisible(false);
+        }
+        // Reverse chapter order back
+        if (startingChapterCB.getSelectedIndex() > endingChapterCB.getSelectedIndex()) {
+            Collections.reverse(metadata.getChapterList());
+        }
+    }
+
+    public void stopDownload() {
+        grabber.stopDownload();
+        downloadStopBtn.setVisible(false);
+        downloadContinueBtn.setVisible(true);
+        downloadCancelBtn.setVisible(true);
+    }
+
+    public void continueDownload() {
+        downloadContinueBtn.setVisible(false);
+        downloadCancelBtn.setVisible(false);
+        downloadStopBtn.setVisible(true);
+        try {
+            grabber.downloadNovel(novel);
+        } catch (SourceException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cancelDownload() {
+        downloadContinueBtn.setVisible(false);
+        downloadCancelBtn.setVisible(false);
+        downloadStartBtn.setVisible(true);
+        pagesLbl.setVisible(false);
+        pagesCountLbl.setVisible(false);
+        downloadProgressBar.setVisible(false);
+        pageCounter = 0;
+        pagesCountLbl.setText("");
+        metadata.resetAllChapterStatus();
+    }
+
+    public void updatePageCounter(int pages) {
+        pageCounter += pages;
+        pagesCountLbl.setText(String.valueOf(pageCounter / 300));
+    }
+
+    public void editMetadata() {
+        metadataEditBtn.setVisible(false);
+        metadataSaveBtn.setVisible(true);
+        // Cover image
+        imageLbl.setBorder(new LineBorder(Color.decode("#88c0d0"), 1, true));
+        imageLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        // Title
+        titleTextArea.setVisible(false);
+        titleEditTextField.setVisible(true);
+        // Author
+        authorNameLbl.setVisible(false);
+        authorEditTextField.setVisible(true);
+        // Tags
+        tagsTextArea.setVisible(false);
+        tagsEditList.setVisible(true);
+        // Description
+        descriptionTextArea.setEditable(true);
+        descriptionTextArea.setFocusable(true);
+        descriptionTextArea.setBackground(Color.decode("#3b4252"));
+    }
+
+    private void saveMetadate() {
+        metadataEditBtn.setVisible(true);
+        metadataSaveBtn.setVisible(false);
+        // Cover image
+        imageLbl.setBorder(null);
+        imageLbl.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        // Title
+        titleTextArea.setText(titleEditTextField.getText());
+        titleTextArea.setVisible(true);
+        titleEditTextField.setVisible(false);
+        // Author
+        authorNameLbl.setText(authorEditTextField.getText());
+        authorNameLbl.setVisible(true);
+        authorEditTextField.setVisible(false);
+        // Tags
+        tagsTextArea.setText(String.join(", ", tagsEditList.getSelectedValuesList()));
+        tagsTextArea.setVisible(true);
+        tagsEditList.setVisible(false);
+        // Description
+        descriptionTextArea.setEditable(false);
+        descriptionTextArea.setFocusable(false);
+        descriptionTextArea.setBackground(Color.decode("#434c5e"));
     }
 }

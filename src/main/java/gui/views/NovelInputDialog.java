@@ -75,6 +75,7 @@ public class NovelInputDialog extends JDialog {
                 errorLbl.setVisible(false);
                 Grabber grabber = new Grabber();
                 NovelMetadata metadata = grabber.fetchNovelDetails(novelUrlField.getText());
+                //NovelMetadata metadata = new NovelMetadata();
                 dispose();
                 new NovelDownloadView(metadata);
             } catch (SourceException e) {

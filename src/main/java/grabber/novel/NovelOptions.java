@@ -109,12 +109,12 @@ public class NovelOptions {
             return this;
         }
 
-        public Builder firstChapter(int firstChapter) {
+        public Builder startingChapterIndex(int firstChapter) {
             options.firstChapter = firstChapter;
             return this;
         }
 
-        public Builder lastChapter(int lastChapter) {
+        public Builder endingChapterIndex(int lastChapter) {
             options.lastChapter = lastChapter;
             return this;
         }

@@ -107,4 +107,10 @@ public class NovelMetadata {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    public void resetAllChapterStatus() {
+        for (Chapter chapter : chapterList) {
+            chapter.setDownloadStatus(Chapter.Status.NOT_DOWNLOADED);
+        }
+    }
 }

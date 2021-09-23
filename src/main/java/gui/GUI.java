@@ -28,10 +28,15 @@ public class GUI extends JFrame {
 
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(850, 650);
+        setSize(1024, 720);
         setLocationRelativeTo(null);
     }
 
+
+
+    public void addAutoDownload() {
+
+    }
 
     // Set font for each swing element
     public static void setUIFont(javax.swing.plaf.FontUIResource f){

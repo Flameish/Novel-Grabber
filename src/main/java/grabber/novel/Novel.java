@@ -1,5 +1,7 @@
 package grabber.novel;
 
+import system.Logger;
+
 import java.util.*;
 
 public class Novel {
@@ -46,7 +48,7 @@ public class Novel {
         if (options.getLastChapter() == -1) {
             int actualLastChapter = metadata.getChapterList().size();
             NovelOptions.modifier(options)
-                    .lastChapter(actualLastChapter)
+                    .endingChapterIndex(actualLastChapter)
                     .build();
         }
     }
@@ -60,11 +62,20 @@ public class Novel {
     }
 
     public List<Chapter> getToDownloadChapters() {
-        return metadata.getChapterList().subList(options.getFirstChapter()-1, options.getLastChapter());
+        int fromIndex = options.getFirstChapter();
+        int toIndex = options.getLastChapter();
+        Logger.info(String.format("Start %d, End %d, Size %d", fromIndex, toIndex, metadata.getChapterList().size()));
+        if (fromIndex > toIndex) {
+            fromIndex = options.getLastChapter();
+            toIndex = options.getFirstChapter();
+        }
+        Logger.info(String.format("Start %d, End %d", fromIndex, toIndex));
+        // subList toIndex is exclusive
+        return metadata.getChapterList().subList(fromIndex, toIndex+1);
     }
 
-    public int chaptersToDownloadCount() {
-        return options.getLastChapter()+1 - options.getFirstChapter();
+    public int getChaptersToDownloadCount() {
+        return getToDownloadChapters().size();
     }
 
     public void reverseChapterOrder() {

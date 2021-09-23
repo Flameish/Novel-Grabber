@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class Grabber {
     public GrabberOptions grabberOptions = new GrabberOptions();
     public List<ChapterProgressListener> cpListeners = new ArrayList<>();
-
+    private boolean isStop = false;
 
     public Grabber() {}
 
@@ -71,13 +71,24 @@ public class Grabber {
     }
 
     public void downloadNovel(Novel novel) throws IllegalArgumentException, SourceException {
-        if (novel.chaptersToDownloadCount() < 1) throw new IllegalArgumentException("Chapter range is less than 1!");
+        Logger.info(String.valueOf(novel.getChaptersToDownloadCount()));
+        if (novel.getChaptersToDownloadCount() < 1) throw new IllegalArgumentException("Chapter range is less than 1!");
+
         NovelOptions novelOptions = novel.getOptions();
         Source source = Sources.getSourceByUrl(novel.getMetadata().getUrl());
+        isStop = false;
 
-        Logger.info(String.format("Downloading %d chapter(s)", novel.chaptersToDownloadCount()));
+        Logger.info(String.format("%s: Downloading %d chapter(s)",
+                novel.getMetadata().getTitle(),
+                novel.getChaptersToDownloadCount()
+        ));
         for (Chapter chapter : novel.getToDownloadChapters()) {
-            if (chapter.getDownloadStatus() == Status.SUCCESS) continue;
+            if (isStop) break;
+            if (chapter.getDownloadStatus() == Status.SUCCESS) {
+                Logger.info(chapter.getName() + " already downloaded.");
+                continue;
+            }
+
             downloadChapter(source, chapter, novelOptions);
 
             if (chapter.getDownloadStatus() == Status.SUCCESS) {
@@ -86,8 +97,9 @@ public class Grabber {
 
                 novel.addWordCount(chapter.getWordCount());
             }
-            cpListeners.forEach(listener -> listener.update(new ChapterProgress(chapter)));
 
+            cpListeners.forEach(listener -> listener.update(new ChapterProgress(chapter)));
+            Logger.info(String.format("%s [%s]", chapter.getName(), chapter.getDownloadStatus()));
             try {
                 TimeUnit.SECONDS.sleep(grabberOptions.getWaitTime());
             } catch (InterruptedException e) {
@@ -115,7 +127,6 @@ public class Grabber {
                 }
 
                 cpListeners.forEach(listener -> listener.update(new ChapterProgress(chapter)));
-
                 try {
                     TimeUnit.SECONDS.sleep(grabberOptions.getWaitTime());
                 } catch (InterruptedException e) {
@@ -128,7 +139,7 @@ public class Grabber {
     }
 
     public void stopDownload() {
-
+        isStop = true;
     }
 
     public void downloadChapter(Source source, Chapter chapter, NovelOptions novelOptions) {

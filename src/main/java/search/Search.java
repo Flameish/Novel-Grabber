@@ -63,10 +63,10 @@ public class Search {
         }
     }
 
-
     public Map<String, SearchResult[]> getResults() {
         return searchResultsBySourceName;
     }
+
 
     public SearchResult[] getResultsForSource(String name) {
         return searchResultsBySourceName.get(name);
