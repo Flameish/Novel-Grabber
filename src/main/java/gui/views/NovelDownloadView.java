@@ -2,6 +2,8 @@ package gui.views;
 
 import grabber.Grabber;
 import grabber.GrabberOptions;
+import grabber.helper.Utils;
+import grabber.novel.Chapter;
 import grabber.novel.Novel;
 import grabber.novel.NovelMetadata;
 import grabber.novel.NovelOptions;
@@ -12,43 +14,41 @@ import gui.components.RoundedPanel;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.io.File;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.*;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.concurrent.Executors;
 
 public class NovelDownloadView extends JDialog {
 
-    private final JButton downloadStartBtn;
-    private final JButton downloadStopBtn;
-    private final JButton downloadContinueBtn;
-    private final NovelMetadata metadata;
-    private final JSlider waitTimeSlider;
-    private final JLabel pagesLbl;
-    private final JLabel pagesCountLbl;
-    private final JCheckBox createChapterHeadlineCB;
-    private final JCheckBox createTocCB;
-    private final JCheckBox createDescCB;
-    private final JCheckBox downloadImagesCB;
-    private final JComboBox startingChapterCB;
-    private final JComboBox endingChapterCB;
-    private final JProgressBar downloadProgressBar;
-    private final JButton downloadCancelBtn;
-    private final JLabel errorLbl;
-    private final JTextField titleEditTextField;
-    private final JTextArea descriptionTextArea;
-    private final JLabel imageLbl;
-    private final JTextArea titleTextArea;
-    private final JTextField authorEditTextField;
-    private final JLabel authorNameLbl;
-    private final JLabel chapterCountLbl;
-    private final JTextArea tagsTextArea;
-    private final JList<String> tagsEditList;
-    private final JButton metadataSaveBtn;
-    private final JButton metadataEditBtn;
+    private JButton downloadStartBtn;
+    private JButton downloadStopBtn;
+    private JButton downloadContinueBtn;
+    private NovelMetadata metadata;
+    private JSlider waitTimeSlider;
+    private JLabel pagesLbl;
+    private JLabel pagesCountLbl;
+    private JCheckBox createChapterHeadlineCB;
+    private JCheckBox createTocCB;
+    private JCheckBox createDescCB;
+    private JCheckBox downloadImagesCB;
+    private JComboBox startingChapterCB;
+    private JComboBox endingChapterCB;
+    private JProgressBar downloadProgressBar;
+    private JButton downloadCancelBtn;
+    private JLabel errorLbl;
+    private JTextArea descriptionTextArea;
+    private JButton imageLbl;
+    private JButton titleTextArea;
+    private JButton authorNameLbl;
+    private JLabel chapterCountLbl;
+    private JTextArea tagsTextArea;
     private int pageCounter;
     private Grabber grabber;
     private Novel novel;
@@ -62,18 +62,37 @@ public class NovelDownloadView extends JDialog {
 
         GridBagConstraints c;
 
-        ImageIcon coverImageIcon;
-        if(metadata.getCoverImage() == null) {
-            coverImageIcon = new ImageIcon(getClass().getResource("/images/default_cover.png"));
-        } else {
-            coverImageIcon = new ImageIcon(metadata.getCoverImage());
-        }
-        Image image = coverImageIcon.getImage();
-        Image newimg = image.getScaledInstance(150, 200,  Image.SCALE_SMOOTH);
-        coverImageIcon = new ImageIcon(newimg);
-
-        imageLbl = new JLabel(coverImageIcon);
+        // Cover
+        imageLbl = new JButton();
+        setCoverImage(metadata.getCoverImage());
         imageLbl.setPreferredSize(new Dimension(150, 200));
+        imageLbl.setToolTipText("Change Cover");
+        imageLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        imageLbl.setBorder(BorderFactory.createEmptyBorder());
+        imageLbl.setContentAreaFilled(false);
+        // Edit cover
+        imageLbl.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Change Cover");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            FileNameExtensionFilter filter = new FileNameExtensionFilter(".jpg .png .gif", "png", "jpg", "gif", "jpeg");
+            chooser.setFileFilter(filter);
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                try (InputStream inputStream = new FileInputStream(chooser.getSelectedFile())) {
+                    byte[] newCoverImage = Utils.getBytesFromInputStream(inputStream);
+                    String coverName = chooser.getSelectedFile().toString();
+                    setCoverImage(newCoverImage);
+                    metadata.setCoverImage(coverName, newCoverImage);
+                } catch (IOException ioException) {
+                    JOptionPane.showConfirmDialog(
+                            null,
+                            "Could not load new cover image: " + ioException.getMessage(),
+                            "Error",
+                            JOptionPane.CANCEL_OPTION);
+                }
+            }
+        });
         c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
@@ -82,76 +101,44 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(10, 15, 5, 5);
         add(imageLbl, c);
 
-        JPanel titlePanel = new JPanel(new GridBagLayout());
-        titlePanel.setBackground(Color.decode("#3b4252"));
-
-        titleTextArea = new JTextArea(metadata.getTitle());
+        // Title
+        titleTextArea = new JButton(metadata.getTitle());
         titleTextArea.setFont(titleTextArea.getFont().deriveFont(17.0f));
         titleTextArea.setForeground(Color.decode("#8fbcbb"));
-        titleTextArea.setOpaque(true);
-        titleTextArea.setBorder(null);
-        titleTextArea.setEditable(false);
-        titleTextArea.setCursor(null);
-        titleTextArea.setFocusable(false);
-        titleTextArea.setLineWrap(true);
-        titleTextArea.setWrapStyleWord(true);
-        c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0f;
-        c.anchor = GridBagConstraints.WEST;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        titlePanel.add(titleTextArea, c);
-
-        titleEditTextField = new JTextField(metadata.getTitle());
-        titleEditTextField.setForeground(Color.decode("#eceff4"));
-        titleEditTextField.setBackground(Color.decode("#4c566a"));
-        titleEditTextField.setVisible(false);
-        c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0f;
-        c.anchor = GridBagConstraints.WEST;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        titlePanel.add(titleEditTextField, c);
-
-        metadataEditBtn = new JButton();
-        metadataEditBtn.setIcon(new ImageIcon(getClass().getResource("/images/edit_icon.png")));
-        metadataEditBtn.setBorder(BorderFactory.createEmptyBorder());
-        metadataEditBtn.setContentAreaFilled(false);
-        metadataEditBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        metadataEditBtn.setToolTipText("Edit metadata");
-        metadataEditBtn.addActionListener(e -> editMetadata());
-        c = new GridBagConstraints();
-        c.gridx = 1;
-        c.gridy = 0;
-        c.anchor = GridBagConstraints.EAST;
-        c.insets = new Insets(0, 10, 0, 5);
-        titlePanel.add(metadataEditBtn, c);
-
-        metadataSaveBtn = new JButton();
-        metadataSaveBtn.setIcon(new ImageIcon(getClass().getResource("/images/save_icon.png")));
-        metadataSaveBtn.setBorder(BorderFactory.createEmptyBorder());
-        metadataSaveBtn.setContentAreaFilled(false);
-        metadataSaveBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        metadataSaveBtn.setToolTipText("Save metadata");
-        metadataSaveBtn.addActionListener(e -> saveMetadate());
-        metadataSaveBtn.setVisible(false);
-        c = new GridBagConstraints();
-        c.gridx = 1;
-        c.gridy = 0;
-        c.anchor = GridBagConstraints.EAST;
-        c.insets = new Insets(0, 10, 0, 5);
-        titlePanel.add(metadataSaveBtn, c);
-
+        titleTextArea.setToolTipText("Edit Title");
+        titleTextArea.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        titleTextArea.setBorder(BorderFactory.createEmptyBorder());
+        titleTextArea.setContentAreaFilled(false);
+        // Edit popup
+        titleTextArea.addActionListener(e -> {
+            JLabel infoLabel = new JLabel("Title");
+            infoLabel.setForeground(Color.decode("#88c0d0"));
+            JTextField inputField = new JTextField(metadata.getTitle());
+            Object[] message = {
+                    infoLabel,
+                    inputField
+            };
+            int result = JOptionPane.showConfirmDialog(
+                    null,
+                    message,
+                    "Edit Title",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE);
+            // Update Title
+            if (result == 0 && !inputField.getText().isEmpty()) {
+                String newTitle = inputField.getText();
+                metadata.setTitle(newTitle);
+                titleTextArea.setText(newTitle);
+            }
+        });
         c = new GridBagConstraints();
         c.gridx = 1;
         c.gridy = 0;
         c.weightx = 1.0f;
         c.gridwidth = 2;
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(10, 10, 0, 13);
-        add(titlePanel, c);
+        add(titleTextArea, c);
 
         RoundedPanel detailsPanel = new RoundedPanel(new GridBagLayout(), 15, Color.decode("#434c5e"));
         detailsPanel.setForeground(Color.decode("#434c5e"));
@@ -173,8 +160,32 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(5, 0, 0, 10);
         detailsPanel.add(authorLbl, c);
 
-        authorNameLbl = new JLabel(metadata.getAuthor());
+        authorNameLbl = new JButton(metadata.getAuthor());
         authorNameLbl.setForeground(Color.decode("#88c0d0"));
+        authorNameLbl.setToolTipText("Edit Author");
+        authorNameLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        authorNameLbl.setBorder(BorderFactory.createEmptyBorder());
+        authorNameLbl.setContentAreaFilled(false);
+        authorNameLbl.addActionListener(e -> {
+            JLabel infoLabel = new JLabel("Author");
+            infoLabel.setForeground(Color.decode("#88c0d0"));
+            JTextField inputField = new JTextField(metadata.getAuthor());
+            Object[] message = {
+                    infoLabel,
+                    inputField
+            };
+            int result = JOptionPane.showConfirmDialog(
+                    null,
+                    message,
+                    "Edit Author",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE);
+            if (result == 0 && !inputField.getText().isEmpty()) {
+                String newAuthor = inputField.getText();
+                metadata.setAuthor(newAuthor);
+                authorNameLbl.setText(newAuthor);
+            }
+        });
         c = new GridBagConstraints();
         c.gridx = 1;
         c.gridy = 0;
@@ -182,18 +193,6 @@ public class NovelDownloadView extends JDialog {
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(5, 0, 0, 0);
         detailsPanel.add(authorNameLbl, c);
-
-        authorEditTextField = new JTextField(metadata.getAuthor());
-        authorEditTextField.setForeground(Color.decode("#eceff4"));
-        authorEditTextField.setVisible(false);
-        c = new GridBagConstraints();
-        c.gridx = 1;
-        c.gridy = 0;
-        c.weightx = 1.0f;
-        c.anchor = GridBagConstraints.WEST;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(5, 0, 0, 0);
-        detailsPanel.add(authorEditTextField, c);
 
         JLabel chapterLbl = new JLabel("Chapters:");
         chapterLbl.setForeground(Color.decode("#eceff4"));
@@ -234,6 +233,65 @@ public class NovelDownloadView extends JDialog {
         tagsTextArea.setFocusable(false);
         tagsTextArea.setLineWrap(true);
         tagsTextArea.setWrapStyleWord(true);
+        tagsTextArea.setToolTipText("Edit Tags");
+        tagsTextArea.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        tagsTextArea.setBorder(BorderFactory.createEmptyBorder());
+        tagsTextArea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JLabel infoLabel = new JLabel("Tags");
+                infoLabel.setForeground(Color.decode("#88c0d0"));
+
+                DefaultListModel<String> tagListModel = new DefaultListModel<>();
+                metadata.getSubjects().forEach(tagListModel::addElement);
+                JList<String> tagList = new JList<>(tagListModel);
+                JScrollPane tagScrollPane = new JScrollPane(tagList);
+                tagScrollPane.setPreferredSize(new Dimension(300, 300));
+
+                JPanel addPanel = new JPanel(new GridBagLayout());
+
+                JTextField addField = new JTextField();
+                GridBagConstraints c = new GridBagConstraints();
+                c.weightx = 1.0f;
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.insets = new Insets(0,0,0,0);
+                addPanel.add(addField, c);
+
+                JButton addBtn = new JButton("Add tag");
+                addBtn.addActionListener(al -> {
+                    String newTag = addField.getText();
+                    if (newTag != null) {
+                        tagListModel.addElement(newTag);
+                    }
+                });
+                c = new GridBagConstraints();
+                c.insets = new Insets(0,5,0,0);
+                addPanel.add(addBtn, c);
+
+                JButton removeBtn = new JButton("Remove selected");
+                removeBtn.addActionListener(al -> {
+                    for (String tag: tagList.getSelectedValuesList()) {
+                        tagListModel.removeElement(tag);
+                    }
+                });
+                Object[] message = {
+                        infoLabel,
+                        addPanel,
+                        tagScrollPane,
+                        removeBtn
+                };
+                int result = JOptionPane.showConfirmDialog(
+                        null,
+                        message,
+                        "Edit Tags",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.PLAIN_MESSAGE);
+                if (result == 0) {
+                    metadata.setSubjects(Collections.list(tagListModel.elements()));
+                    tagsTextArea.setText(String.join(", ", metadata.getSubjects()));
+                }
+            }
+        });
         c = new GridBagConstraints();
         c.gridx = 1;
         c.gridy = 2;
@@ -242,19 +300,6 @@ public class NovelDownloadView extends JDialog {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         detailsPanel.add(tagsTextArea, c);
-
-        tagsEditList = new JList<>(metadata.getSubjects().toArray(new String[0]));
-
-        JScrollPane tagsEditScrollPane = new JScrollPane(tagsEditList);
-        tagsEditScrollPane.setVisible(false);
-        c = new GridBagConstraints();
-        c.gridx = 1;
-        c.gridy = 2;
-        c.weightx = 1.0f;
-        c.weighty = 1.0f;
-        c.anchor = GridBagConstraints.CENTER;
-        c.fill = GridBagConstraints.BOTH;
-        detailsPanel.add(tagsEditScrollPane, c);
 
         pagesLbl = new JLabel("Pages:");
         pagesLbl.setForeground(Color.decode("#eceff4"));
@@ -304,6 +349,32 @@ public class NovelDownloadView extends JDialog {
         descriptionTextArea.setFocusable(false);
         descriptionTextArea.setLineWrap(true);
         descriptionTextArea.setWrapStyleWord(true);
+        descriptionTextArea.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        descriptionTextArea.setBorder(BorderFactory.createEmptyBorder());
+        descriptionTextArea.setToolTipText("Edit Description");
+        descriptionTextArea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JLabel infoLabel = new JLabel("Description");
+                infoLabel.setForeground(Color.decode("#88c0d0"));
+                JTextField inputField = new JTextField(metadata.getAuthor());
+                Object[] message = {
+                        infoLabel,
+                        inputField
+                };
+                int result = JOptionPane.showConfirmDialog(
+                        null,
+                        message,
+                        "Edit Author",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.PLAIN_MESSAGE);
+                if (result == 0 && !inputField.getText().isEmpty()) {
+                    String newAuthor = inputField.getText();
+                    metadata.setAuthor(newAuthor);
+                    authorNameLbl.setText(newAuthor);
+                }
+            }
+        });
 
         JScrollPane resultScrollPane = new JScrollPane(descriptionTextArea);
         resultScrollPane.setBorder(null);
@@ -396,7 +467,7 @@ public class NovelDownloadView extends JDialog {
         chapterRangePanelBorder.setTitleColor(Color.decode("#88c0d0"));
         chapterRangePanel.setBorder(chapterRangePanelBorder);
 
-        startingChapterCB = new JComboBox(metadata.getChapterList().toArray());
+        startingChapterCB = new JComboBox<>(metadata.getChapterList().toArray());
         BoundsPopupMenuListener firstChapterPopupListener = new BoundsPopupMenuListener(true, false);
         startingChapterCB.addPopupMenuListener(firstChapterPopupListener);
         startingChapterCB.setPrototypeDisplayValue("Chapter 1: Novel Grabber");
@@ -418,7 +489,7 @@ public class NovelDownloadView extends JDialog {
         c.insets = new Insets(5, 0, 5, 0);
         chapterRangePanel.add(rangeLbl, c);
 
-        endingChapterCB = new JComboBox(metadata.getChapterList().toArray());
+        endingChapterCB = new JComboBox<>(metadata.getChapterList().toArray());
         endingChapterCB.setSelectedIndex(endingChapterCB.getModel().getSize()-1);
         BoundsPopupMenuListener lastChapterPopupListener = new BoundsPopupMenuListener(true, false);
         endingChapterCB.addPopupMenuListener(lastChapterPopupListener);
@@ -652,6 +723,18 @@ public class NovelDownloadView extends JDialog {
         setVisible(true);
     }
 
+    private void setCoverImage(byte[] imageBytes) {
+        ImageIcon coverImageIcon;
+        if(imageBytes == null) {
+            coverImageIcon = new ImageIcon(getClass().getResource("/images/default_cover.png"));
+        } else {
+            coverImageIcon = new ImageIcon(imageBytes);
+        }
+        Image image = coverImageIcon.getImage();
+        Image scaledImage = image.getScaledInstance(150, 200,  Image.SCALE_SMOOTH);
+        imageLbl.setIcon(new ImageIcon(scaledImage));
+    }
+
     public void startDownload() {
         downloadStartBtn.setVisible(false);
         downloadStopBtn.setVisible(true);
@@ -743,48 +826,4 @@ public class NovelDownloadView extends JDialog {
         pagesCountLbl.setText(String.valueOf(pageCounter / 300));
     }
 
-    public void editMetadata() {
-        metadataEditBtn.setVisible(false);
-        metadataSaveBtn.setVisible(true);
-        // Cover image
-        imageLbl.setBorder(new LineBorder(Color.decode("#88c0d0"), 1, true));
-        imageLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        // Title
-        titleTextArea.setVisible(false);
-        titleEditTextField.setVisible(true);
-        // Author
-        authorNameLbl.setVisible(false);
-        authorEditTextField.setVisible(true);
-        // Tags
-        tagsTextArea.setVisible(false);
-        tagsEditList.setVisible(true);
-        // Description
-        descriptionTextArea.setEditable(true);
-        descriptionTextArea.setFocusable(true);
-        descriptionTextArea.setBackground(Color.decode("#3b4252"));
-    }
-
-    private void saveMetadate() {
-        metadataEditBtn.setVisible(true);
-        metadataSaveBtn.setVisible(false);
-        // Cover image
-        imageLbl.setBorder(null);
-        imageLbl.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-        // Title
-        titleTextArea.setText(titleEditTextField.getText());
-        titleTextArea.setVisible(true);
-        titleEditTextField.setVisible(false);
-        // Author
-        authorNameLbl.setText(authorEditTextField.getText());
-        authorNameLbl.setVisible(true);
-        authorEditTextField.setVisible(false);
-        // Tags
-        tagsTextArea.setText(String.join(", ", tagsEditList.getSelectedValuesList()));
-        tagsTextArea.setVisible(true);
-        tagsEditList.setVisible(false);
-        // Description
-        descriptionTextArea.setEditable(false);
-        descriptionTextArea.setFocusable(false);
-        descriptionTextArea.setBackground(Color.decode("#434c5e"));
-    }
 }

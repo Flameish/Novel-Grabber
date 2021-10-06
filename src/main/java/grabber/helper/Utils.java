@@ -24,21 +24,25 @@ public class Utils {
         conn.setReadTimeout(5000);
 
         try(InputStream inputStream = conn.getInputStream()) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream() {
-                // toByteArray() normally creates a copy
-                @Override
-                public synchronized byte[] toByteArray() {
-                    return this.buf;
-                }
-            };
-            byte[] byteChunk = new byte[4096];
-            int n;
-
-            while ( (n = inputStream.read(byteChunk)) > 0 ) {
-                baos.write(byteChunk, 0, n);
-            }
-            return baos.toByteArray();
+            return getBytesFromInputStream(inputStream);
         }
+    }
+
+    public static byte[] getBytesFromInputStream(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream() {
+            // toByteArray() normally creates a copy
+            @Override
+            public synchronized byte[] toByteArray() {
+                return this.buf;
+            }
+        };
+        byte[] byteChunk = new byte[4096];
+        int n;
+
+        while ( (n = inputStream.read(byteChunk)) > 0 ) {
+            baos.write(byteChunk, 0, n);
+        }
+        return baos.toByteArray();
     }
 
     /**
