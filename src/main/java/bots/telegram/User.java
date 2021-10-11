@@ -15,9 +15,11 @@ public class User {
     private ConcurrentHashMap<UUID, DownloadTask> downloadTasks = new ConcurrentHashMap();
     private Config config = Config.getInstance();
     private int totalChaptersDownloadedTd = 0;
+    private com.pengrad.telegrambot.model.User telegramUser;
     private boolean isVip;
 
-    public User(boolean isVip) {
+    public User(com.pengrad.telegrambot.model.User telegramUser, boolean isVip) {
+        this.telegramUser = telegramUser;
         this.isVip = isVip;
     }
 
@@ -75,5 +77,9 @@ public class User {
 
     public int getTasksAmount() {
         return this.downloadTasks.size();
+    }
+
+    public com.pengrad.telegrambot.model.User getTelegramUser() {
+        return telegramUser;
     }
 }

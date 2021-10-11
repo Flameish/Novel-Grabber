@@ -98,7 +98,6 @@ public class Bot {
         } else {
             this.bot.execute((new EditMessageText(chatId, msgId, "Could not find download to stop")).replyMarkup(new InlineKeyboardMarkup()));
         }
-
     }
 
     public void stop() {
@@ -115,7 +114,7 @@ public class Bot {
                 this.bot.execute(new SendMessage(chatId, "You are blocked."));
                 return;
             }
-            this.users.putIfAbsent(userId, new User(this.vipList.contains(String.valueOf(userId))));
+            this.users.putIfAbsent(userId, new User(message.from(), this.vipList.contains(String.valueOf(userId))));
             User user = (User)this.users.get(userId);
             GrabberUtils.info(messageTxt);
             if (!messageTxt.startsWith("/info") && !messageTxt.startsWith("/start")) {
@@ -164,7 +163,7 @@ public class Bot {
             if (user.getTasksAmount() >= allowedDownloads && !user.isVip()) {
                 this.bot.execute(new SendMessage(chatId, String.format("Only %d download(s) at a time allowed", allowedDownloads)));
             } else {
-                DownloadTask newTask = new DownloadTask(messageTxt, user.isVip(), chatId);
+                DownloadTask newTask = new DownloadTask(messageTxt, chatId, user);
 
                 try {
                     log(String.format("[%s] %s", chatId, messageTxt));
