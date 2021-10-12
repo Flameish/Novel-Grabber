@@ -166,7 +166,7 @@ public class Bot {
                 DownloadTask newTask = new DownloadTask(messageTxt, chatId, user);
 
                 try {
-                    log(String.format("[%s] %s", chatId, messageTxt));
+                    log(String.format("[NEW REQUEST BY %s IN %s] %s", user.getTelegramUser().id(), chatId, messageTxt));
                     user.startDownloadTask(newTask);
                 } catch (ClassNotFoundException | InterruptedException | IllegalStateException | IOException var8) {
                     this.bot.execute(new SendMessage(chatId, var8.getMessage()));

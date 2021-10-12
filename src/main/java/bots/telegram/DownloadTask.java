@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import system.Config;
 import system.init;
 
@@ -25,6 +27,7 @@ public class DownloadTask {
     private String messageTxt;
     private int chaptersDownloaded;
     private User user;
+    private UUID uuid = UUID.randomUUID();
 
     public DownloadTask(String messageTxt, long chatId, User user) {
         this.bot = init.telegramBot.getBot();
@@ -125,6 +128,7 @@ public class DownloadTask {
         File epub = new File(this.novel.saveLocation + "/" + this.novel.filename);
         if (epub.exists()) {
             this.bot.execute(new SendDocument(this.chatId, epub));
+            Bot.log(String.format("[FINISHED REQUEST BY %s IN %s][%s] %s", user.getTelegramUser().id(), chatId, uuid, messageTxt));
             GrabberUtils.info("EPUB sent: " + this.novel.filename);
             this.chaptersDownloaded = this.novel.successfulChapters.size();
         } else {
@@ -167,5 +171,9 @@ public class DownloadTask {
 
     public User getUser() {
         return user;
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 }

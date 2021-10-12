@@ -80,6 +80,7 @@ public class EPUB {
                     telegramUser.lastName(),
                     telegramUser.id());
             builder.append("<meta name=\"generator-user\" content=\"" + content + "\"></meta>\n");
+            builder.append("<meta name=\"generator-file-id\" content=\"" + novel.downloadTask.getUuid() + "\"></meta>\n");
         }
         builder.append("</head>\n");
         builder.append("<body>\n");
