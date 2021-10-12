@@ -5,7 +5,9 @@ import grabber.novel.NovelMetadata;
 import grabber.sources.Source;
 import grabber.sources.SourceException;
 import grabber.sources.domains.royalroad_com;
+import gui.GUI;
 import org.jsoup.HttpStatusException;
+import system.App;
 
 import javax.swing.*;
 import java.awt.*;
@@ -77,6 +79,7 @@ public class NovelInputDialog extends JDialog {
                 NovelMetadata metadata = grabber.fetchNovelDetails(novelUrlField.getText());
                 //NovelMetadata metadata = new NovelMetadata();
                 dispose();
+                App.gui.addAutoDownload(new NovelDownloadView(metadata));
                 new NovelDownloadView(metadata);
             } catch (SourceException e) {
                 if (e.getCause() instanceof HttpStatusException) {

@@ -9,8 +9,9 @@ import java.io.File;
 import java.net.URISyntaxException;
 
 public class App {
-    private static String HOME_PATH;
-    private static String CACHE_PATH;
+    public static GUI gui;
+    public static String HOME_PATH;
+    public static String CACHE_PATH;
 
     public static void main(String[] args) {
 
@@ -25,7 +26,7 @@ public class App {
                 System.setProperty("swing.aatext", "true");
                 UIManager.setLookAndFeel(new FlatNordIJTheme());
                 GUI.setUIFont(new javax.swing.plaf.FontUIResource("DejaVu Sans", Font.PLAIN,13));
-                GUI gui = new GUI();
+                gui = new GUI();
                 gui.setVisible(true);
             } catch (UnsupportedLookAndFeelException e) {
                 e.printStackTrace();

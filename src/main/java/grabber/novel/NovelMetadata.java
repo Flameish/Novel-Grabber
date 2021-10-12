@@ -1,6 +1,7 @@
 package grabber.novel;
 
 import grabber.helper.Utils;
+import grabber.sources.Source;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -16,6 +17,7 @@ public class NovelMetadata {
     private List<Chapter> chapterList = new ArrayList<>();
     private byte[] coverImage;
     private String coverName;
+    private Source source;
 
     public NovelMetadata() {}
 
@@ -112,5 +114,13 @@ public class NovelMetadata {
         for (Chapter chapter : chapterList) {
             chapter.setDownloadStatus(Chapter.Status.NOT_DOWNLOADED);
         }
+    }
+
+    public Source getSource() {
+        return source;
+    }
+
+    public void setSource(Source source) {
+        this.source = source;
     }
 }

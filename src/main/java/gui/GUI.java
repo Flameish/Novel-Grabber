@@ -2,12 +2,16 @@ package gui;
 
 
 import gui.views.AutomaticView;
+import gui.views.NovelDownloadView;
 import gui.views.SearchView;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class GUI extends JFrame {
+
+    private final AutomaticView automaticView;
+    private final SearchView searchView;
 
     public GUI() {
         super("Novel Grabber 3.0");
@@ -16,8 +20,10 @@ public class GUI extends JFrame {
         GridBagConstraints c;
 
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.add("Automatic", new AutomaticView());
-        tabbedPane.add("Search", new SearchView());
+        automaticView = new AutomaticView();
+        searchView = new SearchView();
+        tabbedPane.add("Automatic", automaticView);
+        tabbedPane.add("Search", searchView);
         c = new GridBagConstraints();
         c.weightx = 1.0f;
         c.weighty = 1.0f;
@@ -32,10 +38,8 @@ public class GUI extends JFrame {
         setLocationRelativeTo(null);
     }
 
-
-
-    public void addAutoDownload() {
-
+    public void addAutoDownload(NovelDownloadView downloadView) {
+        automaticView.addDownloadTile(downloadView);
     }
 
     // Set font for each swing element

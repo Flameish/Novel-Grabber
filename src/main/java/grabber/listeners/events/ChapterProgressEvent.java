@@ -2,10 +2,10 @@ package grabber.listeners.events;
 
 import grabber.novel.Chapter;
 
-public class ChapterProgress {
+public class ChapterProgressEvent {
     private Chapter chapter;
 
-    public ChapterProgress(Chapter chapter) {
+    public ChapterProgressEvent(Chapter chapter) {
         this.chapter = chapter;
     }
 

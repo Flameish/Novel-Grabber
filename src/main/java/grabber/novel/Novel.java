@@ -64,15 +64,14 @@ public class Novel {
     public List<Chapter> getToDownloadChapters() {
         int fromIndex = options.getFirstChapter();
         int toIndex = options.getLastChapter();
-        Logger.info(String.format("Start %d, End %d, Size %d", fromIndex, toIndex, metadata.getChapterList().size()));
         if (fromIndex > toIndex) {
             fromIndex = options.getLastChapter();
             toIndex = options.getFirstChapter();
         }
-        Logger.info(String.format("Start %d, End %d", fromIndex, toIndex));
         // subList toIndex is exclusive
         return metadata.getChapterList().subList(fromIndex, toIndex+1);
     }
+
 
     public int getChaptersToDownloadCount() {
         return getToDownloadChapters().size();
@@ -81,4 +80,5 @@ public class Novel {
     public void reverseChapterOrder() {
         Collections.reverse(metadata.getChapterList());
     }
+
 }

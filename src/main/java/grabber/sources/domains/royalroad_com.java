@@ -60,6 +60,7 @@ public class royalroad_com implements Source {
             subjects.add(tag.text());
         }
         metadata.setSubjects(subjects);
+        metadata.setSource(this);
 
         return metadata;
     }

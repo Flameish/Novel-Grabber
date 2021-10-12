@@ -1,8 +1,8 @@
 package grabber.listeners;
 
-import grabber.listeners.events.ChapterProgress;
+import grabber.listeners.events.ChapterProgressEvent;
 
 public interface ChapterProgressListener {
 
-    void update(ChapterProgress obj);
+    void update(ChapterProgressEvent e);
 }
