@@ -14,18 +14,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class boxnovel_org implements Source {
-    private final String name = "BoxNovel.org";
-    private final String url = "https://boxnovel.org/";
+public class novelpoki_com implements Source {
+    private final String name = "NovelPoki.com";
+    private final String url = "http://novelpoki.com/";
     private final boolean canHeadless = false;
     private Novel novel;
     private Document toc;
 
-    public boxnovel_org(Novel novel) {
+    public novelpoki_com(Novel novel) {
         this.novel = novel;
     }
 
-    public boxnovel_org() {
+    public novelpoki_com() {
     }
 
     public String getName() {
