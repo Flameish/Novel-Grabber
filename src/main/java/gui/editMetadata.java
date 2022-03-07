@@ -6,11 +6,13 @@ import com.intellij.uiDesigner.core.Spacer;
 import grabber.GrabberUtils;
 import grabber.NovelMetadata;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class editMetadata extends JDialog {
@@ -24,12 +26,12 @@ public class editMetadata extends JDialog {
     private JScrollPane descScrollPane;
     private JTextArea descArea;
     private NovelMetadata metadata;
-    private String imageFormat;
+    private String newImageFormat;
+    private BufferedImage newCoverImage;
 
     public editMetadata(NovelMetadata metadata) {
         this.metadata = metadata;
         $$$setupUI$$$();
-        imageFormat = metadata.getCoverFormat();
         setContentPane(contentPane);
         setModal(true);
         setTitle("Edit EPUB metadata");
@@ -58,8 +60,13 @@ public class editMetadata extends JDialog {
             chooser.setFileFilter(filter);
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 String imageFileName = chooser.getSelectedFile().toString();
-                imageFormat = GrabberUtils.getFileExtension(imageFileName);
-                coverBtn.setIcon(new ImageIcon(new ImageIcon(chooser.getSelectedFile().toString()).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
+                try {
+                    newCoverImage = ImageIO.read(chooser.getSelectedFile());
+                    newImageFormat = GrabberUtils.getFileExtension(imageFileName);
+                    coverBtn.setIcon(new ImageIcon(new ImageIcon(newCoverImage).getImage().getScaledInstance(100, 133, Image.SCALE_DEFAULT)));
+                } catch (IOException e) {
+                    JOptionPane.showConfirmDialog(null, "Could not load new cover image: " + e.getMessage(), "Error", JOptionPane.CANCEL_OPTION);
+                }
             }
         });
 
@@ -77,16 +84,9 @@ public class editMetadata extends JDialog {
         metadata.setAuthor(authorField.getText());
         metadata.setDescription(descArea.getText());
         metadata.setSubjects(Arrays.asList(subjectsField.getText().split(",")));
-        Icon icon = coverBtn.getIcon();
-        BufferedImage bufferedImage = new BufferedImage(
-                icon.getIconWidth(),
-                icon.getIconHeight(),
-                BufferedImage.TYPE_INT_RGB);
-        Graphics g = bufferedImage.createGraphics();
-        // paint the Icon to the BufferedImage.
-        icon.paintIcon(null, g, 0, 0);
-        g.dispose();
-        metadata.setBufferedCover(bufferedImage, imageFormat);
+        if (newCoverImage != null && newImageFormat != null) {
+            metadata.setBufferedCover(newCoverImage, newImageFormat);
+        }
         dispose();
     }
 

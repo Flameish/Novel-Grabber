@@ -75,7 +75,7 @@ public class NovelBuilder {
         if(params.containsKey("wait")) {
             novel.waitTime =  Integer.parseInt(params.get("wait").get(0));
         }
-        if(params.containsKey("autoGetImages")) {
+        if(params.containsKey("getImages")) {
             novel.getImages =  true;
         }
         if(params.containsKey("window")) {

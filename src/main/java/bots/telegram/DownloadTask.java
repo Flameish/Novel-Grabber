@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import system.Config;
 import system.init;
 
@@ -23,16 +25,17 @@ public class DownloadTask {
     private long chatId;
     private int progressMsgId;
     private String messageTxt;
-    private boolean ignoreLimits;
     private int chaptersDownloaded;
+    private User user;
+    private UUID uuid = UUID.randomUUID();
 
-    public DownloadTask(String messageTxt, boolean ignoreLimits, long chatId) {
+    public DownloadTask(String messageTxt, long chatId, User user) {
         this.bot = init.telegramBot.getBot();
         this.config = Config.getInstance();
         this.chaptersDownloaded = 0;
         this.messageTxt = messageTxt;
-        this.ignoreLimits = ignoreLimits;
         this.chatId = chatId;
+        this.user = user;
     }
 
     public void create() throws IOException, ClassNotFoundException, IllegalStateException {
@@ -45,7 +48,7 @@ public class DownloadTask {
     }
 
     private void createDefault() throws IOException, ClassNotFoundException, IllegalStateException {
-        this.novel = Novel.builder().novelLink(this.messageTxt).window("telegram").saveLocation("./telegram/requests/" + this.chatId).getImages(this.config.isTelegramImagesAllowed() || this.ignoreLimits).downloadTask(this).setSource(this.messageTxt).waitTime(this.ignoreLimits ? 0 : this.config.getTelegramWait()).build();
+        this.novel = Novel.builder().novelLink(this.messageTxt).window("telegram").saveLocation("./telegram/requests/" + this.chatId).getImages(this.config.isTelegramImagesAllowed() || this.user.isVip()).downloadTask(this).setSource(this.messageTxt).waitTime(this.user.isVip() ? 0 : this.config.getTelegramWait()).build();
         this.novel.check();
         if (this.novel.chapterList.isEmpty()) {
             throw new IllegalStateException("Chapter list empty.");
@@ -61,7 +64,7 @@ public class DownloadTask {
         int waitTime;
         try {
             waitTime = Integer.parseInt((String)((List)params.get("wait")).get(0));
-            if (waitTime < this.config.getTelegramWait() && !this.ignoreLimits) {
+            if (waitTime < this.config.getTelegramWait() && !this.user.isVip()) {
                 waitTime = this.config.getTelegramWait();
             }
 
@@ -72,7 +75,7 @@ public class DownloadTask {
             waitTime = this.config.getTelegramWait();
         }
 
-        this.novel = Novel.builder().fromCLI(params).window("telegram").useHeadless(false).useAccount(false).getImages(this.config.isTelegramImagesAllowed() && params.containsKey("getImages") || this.ignoreLimits).downloadTask(this).saveLocation("./telegram/requests/" + this.chatId).waitTime(waitTime).build();
+        this.novel = Novel.builder().fromCLI(params).window("telegram").useHeadless(false).useAccount(false).getImages(this.config.isTelegramImagesAllowed() && params.containsKey("getImages") || this.user.isVip()).downloadTask(this).saveLocation("./telegram/requests/" + this.chatId).waitTime(waitTime).build();
         this.novel.check();
         if (this.novel.chapterList.isEmpty()) {
             throw new IllegalStateException("Chapter list empty.");
@@ -99,10 +102,10 @@ public class DownloadTask {
 
     public boolean isInBudget(int chaptersDownloaded) {
         int chaptersToDownload = this.novel.lastChapter - this.novel.firstChapter + 1;
-        if (chaptersToDownload > this.config.getTelegramNovelMaxChapter() && !this.ignoreLimits && this.config.getTelegramNovelMaxChapter() != -1) {
+        if (chaptersToDownload > this.config.getTelegramNovelMaxChapter() && !this.user.isVip() && this.config.getTelegramNovelMaxChapter() != -1) {
             this.bot.execute(new SendMessage(this.chatId, "Above chapter limit! (max. chapter per novel: " + this.config.getTelegramNovelMaxChapter() + ")"));
             return false;
-        } else if (chaptersDownloaded + chaptersToDownload > this.config.getTelegramMaxChapterPerDay() && !this.ignoreLimits && this.config.getTelegramMaxChapterPerDay() != -1) {
+        } else if (chaptersDownloaded + chaptersToDownload > this.config.getTelegramMaxChapterPerDay() && !this.user.isVip() && this.config.getTelegramMaxChapterPerDay() != -1) {
             this.bot.execute(new SendMessage(this.chatId, String.format("Above chapter quota! (%d chapters left today)", this.config.getTelegramMaxChapterPerDay() - chaptersDownloaded)));
             return false;
         } else {
@@ -125,6 +128,7 @@ public class DownloadTask {
         File epub = new File(this.novel.saveLocation + "/" + this.novel.filename);
         if (epub.exists()) {
             this.bot.execute(new SendDocument(this.chatId, epub));
+            Bot.log(String.format("[FINISHED REQUEST BY %s IN %s][%s] %s", user.getTelegramUser().id(), chatId, uuid, messageTxt));
             GrabberUtils.info("EPUB sent: " + this.novel.filename);
             this.chaptersDownloaded = this.novel.successfulChapters.size();
         } else {
@@ -163,5 +167,13 @@ public class DownloadTask {
 
     public Novel getNovel() {
         return this.novel;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 }

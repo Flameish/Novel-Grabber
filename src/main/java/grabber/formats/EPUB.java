@@ -1,18 +1,17 @@
 package grabber.formats;
+import com.pengrad.telegrambot.model.User;
 import grabber.Chapter;
 import grabber.GrabberUtils;
 import grabber.Novel;
 import grabber.NovelMetadata;
+import nl.siegmann.epublib.domain.*;
 import nl.siegmann.epublib.epub.EpubReader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import system.Config;
 
-import nl.siegmann.epublib.domain.Author;
-import nl.siegmann.epublib.domain.Book;
-import nl.siegmann.epublib.domain.Metadata;
-import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.epub.EpubWriter;
+import system.init;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -26,15 +25,7 @@ import java.util.Map;
  */
 public class EPUB {
     static final String NL = System.getProperty("line.separator");
-    static final String htmlHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + NL+
-            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"" + NL +
-            "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">" + NL +
-            "\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + NL +
-            "<head>" + NL +
-            "<title></title>" + NL +
-            "</head>" + NL +
-            "<body>" + NL;
+    private String htmlHead;
     static final String htmlFoot = "</body>" + NL + "</html>";
     private Novel novel;
     private final NovelMetadata novelMetadata;
@@ -43,6 +34,7 @@ public class EPUB {
     public EPUB(Novel novel) {
         this.novel = novel;
         this.novelMetadata = novel.metadata;
+        createHTMLHead();
         // Library novels try to update existing files
         if (novel.window.equals("checker")) {
             try {
@@ -61,6 +53,38 @@ public class EPUB {
                 GrabberUtils.err(novel.window, "Could not add default.css file to EPUB. " + e.getMessage());
             }
         }
+    }
+
+    private void createHTMLHead() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+        builder.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n");
+        builder.append("  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n");
+        builder.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
+        builder.append("<head>\n");
+        if (!novelMetadata.getTitle().isEmpty())
+            builder.append("<title>" + novelMetadata.getTitle() + "</title>\n");
+        if (!novelMetadata.getAuthor().isEmpty())
+            builder.append("<meta name=\"author\" content=\"" + novelMetadata.getAuthor() + "\"></meta>\n");
+        if (!novelMetadata.getDescription().isEmpty())
+            builder.append("<meta name=\"description\" content=\"" + novelMetadata.getDescription() + "\"></meta>\n");
+        builder.append("<meta name=\"url\" content=\"" + novel.novelLink + "\"></meta>\n");
+        builder.append("<meta name=\"copyright\" content=\"This EPUB is for private use only.\"></meta>\n");
+        builder.append("<meta name=\"generator\" content=\"Novel-Grabber " + init.versionNumber + "\"></meta>\n");
+        if (novel.downloadTask != null
+                && novel.downloadTask.getUser().getTelegramUser().firstName() != null
+                && novel.downloadTask.getUser().getTelegramUser().lastName() != null) {
+            User telegramUser = novel.downloadTask.getUser().getTelegramUser();
+            String content = String.format("Generated for %s %s (%d)",
+                    telegramUser.firstName(),
+                    telegramUser.lastName(),
+                    telegramUser.id());
+            builder.append("<meta name=\"generator-user\" content=\"" + content + "\"></meta>\n");
+            builder.append("<meta name=\"generator-file-id\" content=\"" + novel.downloadTask.getUuid() + "\"></meta>\n");
+        }
+        builder.append("</head>\n");
+        builder.append("<body>\n");
+        htmlHead = builder.toString();
     }
 
     public void write() {

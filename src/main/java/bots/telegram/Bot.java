@@ -43,6 +43,7 @@ public class Bot {
     private Config config = Config.getInstance();
     private LocalDate yesterday = LocalDate.now(ZoneId.systemDefault());
     private List<String> vipList = new ArrayList();
+    private List<String> blockList = new ArrayList();
     private ConcurrentHashMap<Integer, User> users = new ConcurrentHashMap();
     private static final String infoFile = "info.txt";
     private static final String vipFile = "vip.txt";
@@ -55,6 +56,7 @@ public class Bot {
             GrabberUtils.info("[BOT]Connecting...");
             this.bot = new TelegramBot(this.config.getTelegramApiToken());
             this.readVipFile();
+            this.readBlockFile();
         } else {
             throw new InterruptedException("API Token empty.");
         }
@@ -96,7 +98,6 @@ public class Bot {
         } else {
             this.bot.execute((new EditMessageText(chatId, msgId, "Could not find download to stop")).replyMarkup(new InlineKeyboardMarkup()));
         }
-
     }
 
     public void stop() {
@@ -109,7 +110,11 @@ public class Bot {
         if (messageTxt != null) {
             int userId = message.from().id();
             long chatId = message.chat().id();
-            this.users.putIfAbsent(userId, new User(this.vipList.contains(String.valueOf(userId))));
+            if (blockList.contains(String.valueOf(userId))) {
+                this.bot.execute(new SendMessage(chatId, "You are blocked."));
+                return;
+            }
+            this.users.putIfAbsent(userId, new User(message.from(), this.vipList.contains(String.valueOf(userId))));
             User user = (User)this.users.get(userId);
             GrabberUtils.info(messageTxt);
             if (!messageTxt.startsWith("/info") && !messageTxt.startsWith("/start")) {
@@ -125,7 +130,14 @@ public class Bot {
                         this.updateVips();
                         this.bot.execute(new SendMessage(chatId, String.format("Updated. (%d vips total)", this.vipList.size())));
                     }
-                } else if (messageTxt.startsWith("/stop")) {
+                }
+                else if (messageTxt.startsWith("/updateBlocks")) {
+                    if (this.config.getTelegramAdminIds().contains(String.valueOf(userId))) {
+                        this.readBlockFile();
+                        this.bot.execute(new SendMessage(chatId, String.format("Updated. (%d blocks total)", this.blockList.size())));
+                    }
+                }
+                else if (messageTxt.startsWith("/stop")) {
                     this.sendCancelList(chatId, user);
                 } else {
                     Executors.newSingleThreadExecutor().execute(() -> {
@@ -151,10 +163,10 @@ public class Bot {
             if (user.getTasksAmount() >= allowedDownloads && !user.isVip()) {
                 this.bot.execute(new SendMessage(chatId, String.format("Only %d download(s) at a time allowed", allowedDownloads)));
             } else {
-                DownloadTask newTask = new DownloadTask(messageTxt, user.isVip(), chatId);
+                DownloadTask newTask = new DownloadTask(messageTxt, chatId, user);
 
                 try {
-                    log(String.format("[%s] %s", chatId, messageTxt));
+                    log(String.format("[NEW REQUEST BY %s IN %s] %s", user.getTelegramUser().id(), chatId, messageTxt));
                     user.startDownloadTask(newTask);
                 } catch (ClassNotFoundException | InterruptedException | IllegalStateException | IOException var8) {
                     this.bot.execute(new SendMessage(chatId, var8.getMessage()));
@@ -211,33 +223,18 @@ public class Bot {
     }
 
     private void readVipFile() {
-        try {
-            Stream<String> lines = Files.lines(Paths.get("./telegram/vip.txt"));
-            Throwable var2 = null;
-
-            try {
-                this.vipList = (List)lines.collect(Collectors.toList());
-            } catch (Throwable var12) {
-                var2 = var12;
-                throw var12;
-            } finally {
-                if (lines != null) {
-                    if (var2 != null) {
-                        try {
-                            lines.close();
-                        } catch (Throwable var11) {
-                            var2.addSuppressed(var11);
-                        }
-                    } else {
-                        lines.close();
-                    }
-                }
-
-            }
-        } catch (IOException var14) {
+        try (Stream<String> lines = Files.lines(Paths.get("./telegram/vip.txt"))) {
+            this.vipList = lines.collect(Collectors.toList());
+        } catch (IOException e) {
             GrabberUtils.err("VIP file not found!");
         }
-
+    }
+    private void readBlockFile() {
+        try (Stream<String> lines = Files.lines(Paths.get("./telegram/blocks.txt"))) {
+            this.blockList = lines.collect(Collectors.toList());
+        } catch (IOException e) {
+            GrabberUtils.err("Block file not found!");
+        }
     }
 
     public TelegramBot getBot() {
