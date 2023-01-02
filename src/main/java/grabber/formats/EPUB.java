@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 /**
  * Handles the creation of the EPUB file.
  */
@@ -66,8 +68,11 @@ public class EPUB {
             builder.append("<title>" + novelMetadata.getTitle() + "</title>\n");
         if (!novelMetadata.getAuthor().isEmpty())
             builder.append("<meta name=\"author\" content=\"" + novelMetadata.getAuthor() + "\"></meta>\n");
-        if (!novelMetadata.getDescription().isEmpty())
-            builder.append("<meta name=\"description\" content=\"" + novelMetadata.getDescription() + "\"></meta>\n");
+        if (!novelMetadata.getDescription().isEmpty()) {
+            String escaped_meta_desc = 
+		StringEscapeUtils.escapeHtml4(novelMetadata.getDescription());
+            builder.append("<meta name=\"description\" content=\"" + escaped_meta_desc + "\"></meta>\n");
+        }
         builder.append("<meta name=\"url\" content=\"" + novel.novelLink + "\"></meta>\n");
         builder.append("<meta name=\"copyright\" content=\"This EPUB is for private use only.\"></meta>\n");
         builder.append("<meta name=\"generator\" content=\"Novel-Grabber " + init.versionNumber + "\"></meta>\n");
