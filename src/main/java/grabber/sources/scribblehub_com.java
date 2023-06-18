@@ -48,7 +48,7 @@ public class scribblehub_com implements Source {
     public List<Chapter> getChapterList() {
         List<Chapter> chapterList = new ArrayList();
         try {
-            toc = Jsoup.connect(novel.novelLink).cookies(novel.cookies).cookie("toc_show", "9999").timeout(30 * 1000).get();
+            toc = Jsoup.connect(novel.novelLink).userAgent("Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0").cookies(novel.cookies).cookie("toc_show", "9999").timeout(30 * 1000).get();
             for (Element chapterLink : toc.select("a.toc_a")) {
                 chapterList.add(new Chapter(chapterLink.text(), chapterLink.attr("abs:href")));
             }

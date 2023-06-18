@@ -79,8 +79,8 @@ public class royalroad_com implements Source {
         NovelMetadata metadata = new NovelMetadata();
 
         if (toc != null) {
-            Element title = toc.selectFirst("h1[property=name]");
-            Element author = toc.selectFirst("h4 span[property=name] a");
+            Element title = toc.selectFirst("h1");
+            Element author = toc.selectFirst("h4 span a");
             Element desc = toc.selectFirst(".description");
 
             metadata.setTitle(title != null ? title.text() : "");

@@ -44,7 +44,7 @@ public class Bot {
     private LocalDate yesterday = LocalDate.now(ZoneId.systemDefault());
     private List<String> vipList = new ArrayList();
     private List<String> blockList = new ArrayList();
-    private ConcurrentHashMap<Integer, User> users = new ConcurrentHashMap();
+    private ConcurrentHashMap<Long, User> users = new ConcurrentHashMap();
     private static final String infoFile = "info.txt";
     private static final String vipFile = "vip.txt";
     private static final String telegramDir = "./telegram";
@@ -108,7 +108,7 @@ public class Bot {
     private void processMessage(Message message) {
         String messageTxt = message.text();
         if (messageTxt != null) {
-            int userId = message.from().id();
+            long userId = message.from().id();
             long chatId = message.chat().id();
             if (blockList.contains(String.valueOf(userId))) {
                 this.bot.execute(new SendMessage(chatId, "You are blocked."));

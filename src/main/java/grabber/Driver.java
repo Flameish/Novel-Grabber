@@ -10,10 +10,10 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import system.Config;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.logging.Level;
 
@@ -21,13 +21,13 @@ import java.util.logging.Level;
  * Selenium driver handler
  */
 public class Driver {
-    public static String[] browserList = {"Chrome", "Firefox", "Edge", "Opera", "IE", "Headless"};
+    public static String[] browserList = {"Chrome", "Firefox", "Edge", "IE", "Headless"};
     public WebDriver driver;
     public WebDriverWait wait;
 
     public Driver(String window) {
         driverSetup(window);
-        wait = new WebDriverWait(driver, 30);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(30));
     }
 
     /**
@@ -50,10 +50,6 @@ public class Driver {
                 firefoxOptions.addPreference("general.useragent.override", userAgent);
                 firefoxOptions.addPreference("permissions.default.image", 2);
                 driver = new FirefoxDriver();
-                break;
-            case "Opera":
-                WebDriverManager.operadriver().setup();
-                driver = new OperaDriver();
                 break;
             case "Edge":
                 WebDriverManager.edgedriver().setup();

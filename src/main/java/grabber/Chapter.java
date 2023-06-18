@@ -2,7 +2,7 @@ package grabber;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import system.Config;
 import system.init;
 import org.jsoup.nodes.Element;
@@ -127,7 +127,7 @@ public class Chapter implements Serializable {
         settings.charset("UTF-8");
         chapterContent = Jsoup.clean(chapterContainer.toString(),
                 "http://"+GrabberUtils.getDomainName(chapterURL),
-                Whitelist.relaxed().preserveRelativeLinks(true),
+                Safelist.relaxed().preserveRelativeLinks(true),
                 settings);
     }
 

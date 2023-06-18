@@ -4,7 +4,7 @@
      
 	<groupId>com.github.flameish</groupId>
 	<artifactId>novel-grabber</artifactId>
-	<version>3.10.2</version>
+	<version>3.10.3</version>
 	  
 	<properties>
 	  	<maven.compiler.target>1.8</maven.compiler.target>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
-			<version>4.9.0</version>
+			<version>5.0.0-alpha.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
@@ -38,42 +38,42 @@
 		<dependency>
 			<groupId>com.formdev</groupId>
 			<artifactId>flatlaf</artifactId>
-			<version>1.1.2</version>
+			<version>3.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.pengrad</groupId>
 			<artifactId>java-telegram-bot-api</artifactId>
-			<version>5.1.0</version>
+			<version>6.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.14.2</version>
+			<version>1.16.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.bonigarcia</groupId>
 			<artifactId>webdrivermanager</artifactId>
-			<version>4.4.1</version>
+			<version>5.3.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>3.141.59</version>
+			<version>4.10.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>htmlunit-driver</artifactId>
-			<version>2.49.1</version>
+			<version>4.10.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.simplejavamail</groupId>
 			<artifactId>simple-java-mail</artifactId>
-			<version>6.5.2</version>
+			<version>8.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.dankito.readability4j</groupId>
 			<artifactId>readability4j</artifactId>
-			<version>1.0.3</version>
+			<version>1.0.8</version>
 		</dependency>
 		<dependency>
 			<groupId>com.dorkbox</groupId>
