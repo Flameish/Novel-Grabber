@@ -1,3 +1,5 @@
+# This project is not being actively developed.
+
 # ![alt text](https://i.imgur.com/LrV2tLe.png) Novel-Grabber
 Novel-Grabber is a GUI based web scrapper that can download and convert chapters into EPUB from various supported web novel sites or from any other site manually.
 
