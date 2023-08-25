@@ -16,7 +16,7 @@ import java.util.List;
 
 public class fastnovel_net implements Source {
     private final String name = "FastNovel";
-    private final String url = "https://fastnovel.net/";
+    private final String url = "https://fastnovel.org/";
     private final boolean canHeadless = false;
     private Novel novel;
     private Document toc;
