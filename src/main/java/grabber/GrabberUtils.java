@@ -98,6 +98,13 @@ public class GrabberUtils {
             return fileName.substring(fileName.lastIndexOf(".")+1);
         else return null;
     }
+    
+    public static String getFileBasename(String filename) {
+        String fileName = new File(filename).getName();
+        if(fileName.lastIndexOf(".") != -1)
+            return fileName.substring(0, fileName.lastIndexOf("."));
+        else return filename;
+    }
 
     static String getFileName(String imageName) {
         if (imageName != null && imageName.contains("/"))
