@@ -533,6 +533,7 @@ public class GUI extends JFrame {
                     manDownloadInProgress(true);
                     try {
                         manNovel.chapterList = new ArrayList<>();
+                        manNovel.images = new HashMap<>();
                         for (int i = 0; i < manLinkListModel.size(); i++) {
                             manNovel.chapterList.add(manLinkListModel.get(i));
                         }
