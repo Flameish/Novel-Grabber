@@ -95,6 +95,7 @@ public class Chapter implements Serializable {
         for (Element image : chapterContainer.select("img")) {
             String imageURL = image.absUrl("src");
             String imageFilename = GrabberUtils.getFilenameFromUrl(imageURL);
+            String imageFileBasename = GrabberUtils.getFileBasename(imageFilename);
             BufferedImage bufferedImage = GrabberUtils.getImage(imageURL);
 
             if(bufferedImage != null) {
@@ -104,6 +105,9 @@ public class Chapter implements Serializable {
                 }
                 // Check if image has file extension. If not set as png.
                 if(GrabberUtils.getFileExtension(imageFilename) == null) imageFilename += ".png";
+                // If image already exists, rename it
+                while (images.containsKey(imageFilename))
+                    imageFilename = imageFileBasename + "_" + UUID.randomUUID().toString() + "." + GrabberUtils.getFileExtension(imageFilename);
                 // Modify href of image src to downloaded image
                 image.attr("src", imageFilename);
 

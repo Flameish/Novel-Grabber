@@ -143,6 +143,7 @@ public class Novel {
         // Reset chapter numbering
         Chapter.chapterCounter = 0;
         chapterList = new ArrayList<>();
+        images = new HashMap<>();
         while (true) {
             // replace with actual interrupted
             if(killTask) {
