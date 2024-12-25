@@ -15,18 +15,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class mtlnovel_com implements Source {
-    private final String name = "MTLNovel";
-    private final String url = "https://mtlnovel.com";
+public class mtlnovels_com implements Source {
+    private final String name = "MTLNovels";
+    private final String url = "https://www.mtlnovels.com/";
     private final boolean canHeadless = false;
     private Novel novel;
     private Document toc;
 
-    public mtlnovel_com(Novel novel) {
+    public mtlnovels_com(Novel novel) {
         this.novel = novel;
     }
 
-    public mtlnovel_com() {
+    public mtlnovels_com() {
     }
 
     public String getName() {
