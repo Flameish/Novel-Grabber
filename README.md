@@ -41,8 +41,8 @@ Or you can [specify a CSS selector manually](https://github.com/Flameish/Novel-G
 ### CLI
 **Use these arguments with the main `Novel-Grabber.jar` from inside the `bin` folder!**
 
-[] = optional paramaters 
-{} = arguments for paramater
+[] = optional parameters 
+{} = arguments for parameter
 
 | Parameter | Arguments | Description |
 | :--- | :---: | :---|
