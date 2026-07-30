@@ -119,7 +119,7 @@ public class init {
                 "or from any other site manually.\n" +
                 "\n" +
                 "Usage:\n" +
-                "[] = optional paramaters {} = arguments for paramater\n" +
+                "[] = optional parameters {} = arguments for parameter\n" +
                 "  -gui\t\t\t\t\t\tStarts the Graphical User Interface.\n" +
                 "  -link {novel URL}\t\t\t\tURL to the novel's table of contents page.\n" +
                 "  [-wait] {miliseconds}\t\t\t\tTime between each chapter grab.\n" +
